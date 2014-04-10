@@ -21,7 +21,7 @@
 
 // Table name SQL tokens
 // (to search for quotes around table names)
-// CREATE 
+// CREATE
 // UPDATE
 // INSERT
 // JOIN
@@ -468,7 +468,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	//
 	// The reason is that the data structures are so intricately nested,
 	// and the heap so fragmented, that it literally requires 20 full minutes on one of the world's most
-	// powerful CPU's to clean up the memory and exit the K-ad routine after NewGene completes writing 
+	// powerful CPU's to clean up the memory and exit the K-ad routine after NewGene completes writing
 	// the output to file (during which time NewGene can't be used) for a reasonably complex run.
 	//
 	// We don't need to call any of those destructors, because they have no desired side effects,
@@ -493,7 +493,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	} BOOST_SCOPE_EXIT_END
 
 	create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
-	Prepare(allWeightings); 
+	Prepare(allWeightings);
 
 	if (failed || CheckCancelled())
 	{
@@ -521,16 +521,19 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	{
 
 		std::string sdata;
-		
+
 		K = 0;
 		random_sampling_schema = RandomSamplingBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
-		if (failed || CheckCancelled()) return;
+
+		if (failed || CheckCancelled()) { return; }
 
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
 
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
-		if (failed || CheckCancelled()) return;
+
+		if (failed || CheckCancelled()) { return; }
+
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		primary_group_column_sets.push_back(selected_raw_data_table_schema);
@@ -541,7 +544,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		std::vector<std::string> errorMessages;
 		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
-		if (failed || CheckCancelled()) return;
+
+		if (failed || CheckCancelled()) { return; }
 
 		// *************************************************** //
 		// Build leaf cache and empty child leaf mapping to output row caches.
@@ -550,15 +554,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText(myReset.str(), this);
 
 		allWeightings.ResetBranchCaches();
-		if (failed || CheckCancelled()) return;
+
+		if (failed || CheckCancelled()) { return; }
 
 		boost::format myWeights("Calculating weights...");
-		messager.AppendKadStatusText(myWeights.str(), this);  
+		messager.AppendKadStatusText(myWeights.str(), this);
 
 		// Calculate weightings even for full sampling,
 		// for use with progress bar
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
-		if (failed || CheckCancelled()) return;
+
+		if (failed || CheckCancelled()) { return; }
 
 		boost::format msg("Total number of unconsolidated rows for this choice of K-ad: %1%");
 		msg % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str();
@@ -574,10 +580,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText(myGenerateRandomSamples.str(), this);
 
 			allWeightings.PrepareRandomNumbers(samples);
-			if (failed || CheckCancelled()) return; 
+
+			if (failed || CheckCancelled()) { return; }
 
 			// The following prepares all randomly-generated output rows
-			boost::format myPrepareRandomSamples("Done generating random numbers.  Pre-populating %1% randomly selected rows of primary variable group data into RAM (out of %2% total rows) ...");
+			boost::format
+			myPrepareRandomSamples("Done generating random numbers.  Pre-populating %1% randomly selected rows of primary variable group data into RAM (out of %2% total rows) ...");
 			myPrepareRandomSamples % boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str();
 			messager.AppendKadStatusText(myPrepareRandomSamples.str(), this);
 
@@ -590,7 +598,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			boost::format mytxtA("Completed pre-populating randomly selected rows.");
 			//mytxtA % sdata.c_str();
 			messager.AppendKadStatusText(mytxtA.str(), this);
-		}   
+		}
 		else
 		{
 			boost::format myPrepareFullSamples("Pre-populating the complete set of %1% rows of primary variable group data into RAM...");
@@ -606,7 +614,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText(mytxtB.str(), this);
 		}
 
-		if (failed || CheckCancelled()) return;
+		if (failed || CheckCancelled()) { return; }
 
 		if (false)
 		{
@@ -615,24 +623,26 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// or further sorting/ordering/processing
 
 			RandomSamplingCreateOutputTable();
-			if (failed || CheckCancelled()) return;
-			  
-		}  
-		  
+
+			if (failed || CheckCancelled()) { return; }
+
+		}
+
 		final_result = random_sampling_schema;
 
-		//std::vector<std::string> spitsizes; 
-		//SpitAllWeightings(spitsizes, allWeightings, true, "prior_to_child_cache"); 
+		//std::vector<std::string> spitsizes;
+		//SpitAllWeightings(spitsizes, allWeightings, true, "prior_to_child_cache");
 
 		// ********************************************************************************* //
 		// The following function populates (merges)
 		// *BOTH* child variable groups *AND*
 		// non-primary top-level variable groups
-		// ********************************************************************************* // 
+		// ********************************************************************************* //
 		boost::format myFillChildren("Merging in secondary variable group data...");
 		messager.AppendKadStatusText(myFillChildren.str(), this);
 		RandomSamplerFillDataForChildGroups(allWeightings);
-		if (failed || CheckCancelled()) return; 
+
+		if (failed || CheckCancelled()) { return; }
 
 		//spitsizes.clear();
 		//SpitAllWeightings(spitsizes, allWeightings, true, "child_cache_complete");
@@ -662,7 +672,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		boost::format myResetCaches("Building caches to map secondary columns to final output rows...");
 		messager.AppendKadStatusText(myResetCaches.str(), this);
 		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
-		if (failed || CheckCancelled()) return;
+
+		if (failed || CheckCancelled()) { return; }
 
 		//sdata.clear();
 		//allWeightings.getMySize();
@@ -700,7 +711,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			boost::format myConsolidateRows("Consolidating adjacent rows...");
 			messager.AppendKadStatusText(myConsolidateRows.str(), this);
 			ConsolidateData(random_sampling, allWeightings);
-			if (failed || CheckCancelled()) return;
+
+			if (failed || CheckCancelled()) { return; }
 
 			//sdata.clear();
 			//allWeightings.getMySize();
@@ -2245,12 +2257,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 			if (column_count < first_full_table_column_count)
 			{
-				sql_select_left  += "\"t1\".";
+				sql_select_left += "\"t1\".";
 				sql_select_right += "\"t2\".";
 			}
 			else
 			{
-				sql_select_left  += "\"t2\".";
+				sql_select_left += "\"t2\".";
 				sql_select_right += "\"t1\".";
 			}
 
@@ -2451,9 +2463,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	{
 		if (and_)
 		{
-			sql_join_on_left  += " AND ";
+			sql_join_on_left += " AND ";
 			sql_join_on_right += " AND ";
-			sql_null_clause   += " AND ";
+			sql_null_clause += " AND ";
 		}
 
 		and_ = true;
@@ -3184,12 +3196,13 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	number_of_multiplicities = 0;
 }
 
-void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index)
+void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema,
+		int const child_variable_group_index)
 {
 
 	int internal_leaf_dmu_count = 0;
 	std::for_each(column_schema.columns_in_view.cbegin(),
-		column_schema.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & one_column)
+				  column_schema.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & one_column)
 	{
 
 		if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
@@ -3208,7 +3221,7 @@ void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGr
 }
 
 void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & column_schema, sqlite3_stmt * stmt_result,
-	XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid)
+		XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid)
 {
 
 	Clear();
@@ -6158,7 +6171,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 
 						case SQLExecutor::STRING:
 							{
-													data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors].c_str();
+								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors].c_str();
 
 								if (data_float_current != boost::lexical_cast<long double>(data_string_previous))
 								{
@@ -6896,7 +6909,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			int previous_excess_count = 0;
 			std::for_each(saved_ints_previous__map_from_inner_primary_key_group__to__count.cbegin(),
 						  saved_ints_previous__map_from_inner_primary_key_group__to__count.cend(), [&previous_excess_count, &an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current, &primary_key_group_in_previous__does_not_exist_in_current, &saved_ints_current__map_from_inner_primary_key_group__to__count](
-						  std::pair<std::vector<std::int64_t> const, int> const & inner_table_primary_key_group_info)
+							  std::pair<std::vector<std::int64_t> const, int> const & inner_table_primary_key_group_info)
 			{
 				if (saved_ints_current__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) ==
 					saved_ints_current__map_from_inner_primary_key_group__to__count.cend())
@@ -6954,7 +6967,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			int current_excess_count = 0;
 			std::for_each(saved_floats_current__map_from_inner_primary_key_group__to__count.cbegin(),
 						  saved_floats_current__map_from_inner_primary_key_group__to__count.cend(), [&current_excess_count, &an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous, &primary_key_group_in_current__does_not_exist_in_previous, &saved_floats_previous__map_from_inner_primary_key_group__to__count](
-						  std::pair<std::vector<long double> const, int> const & inner_table_primary_key_group_info)
+							  std::pair<std::vector<long double> const, int> const & inner_table_primary_key_group_info)
 			{
 				if (saved_floats_previous__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) ==
 					saved_floats_previous__map_from_inner_primary_key_group__to__count.cend())
@@ -6979,7 +6992,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			int previous_excess_count = 0;
 			std::for_each(saved_floats_previous__map_from_inner_primary_key_group__to__count.cbegin(),
 						  saved_floats_previous__map_from_inner_primary_key_group__to__count.cend(), [&previous_excess_count, &an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current, &primary_key_group_in_previous__does_not_exist_in_current, &saved_floats_current__map_from_inner_primary_key_group__to__count](
-						  std::pair<std::vector<long double> const, int> const & inner_table_primary_key_group_info)
+							  std::pair<std::vector<long double> const, int> const & inner_table_primary_key_group_info)
 			{
 				if (saved_floats_current__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) ==
 					saved_floats_current__map_from_inner_primary_key_group__to__count.cend())
@@ -8106,7 +8119,8 @@ bool OutputModel::OutputGenerator::SQLExecutor::Step()
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns,
+		int const group_number)
 {
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
@@ -8117,21 +8131,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// and REFILLED below!
 	result_columns = variable_group_raw_data_columns;
 
-	result_columns.view_number = 1; // which set of secondary keys is this table - from 1 to K where K is the multiplicity.  This is the first, so set to 1.  (Regardless of which top-level primary variable group this is (currently multiple top-level primary variable groups is not supported).)
-	result_columns.has_no_datetime_columns = false; // Only the actual permanent data table in the database can have this be set to true.  Here, we are doing a SELECT of the permanent data for the first time into a temporary table.
+	result_columns.view_number =
+		1; // which set of secondary keys is this table - from 1 to K where K is the multiplicity.  This is the first, so set to 1.  (Regardless of which top-level primary variable group this is (currently multiple top-level primary variable groups is not supported).)
+	result_columns.has_no_datetime_columns =
+		false; // Only the actual permanent data table in the database can have this be set to true.  Here, we are doing a SELECT of the permanent data for the first time into a temporary table.
 	std::string view_name;
+
 	switch (variable_group_raw_data_columns.schema_type)
 	{
 		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
 			view_name = "NGTEMP__RAW__SELECTED_VARIABLES_PRIMARY";
 			break;
+
 		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
 			view_name = "NGTEMP__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY";
 			break;
+
 		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
 			view_name = "NGTEMP__RAW__SELECTED_VARIABLES_CHILD";
 			break;
 	}
+
 	view_name += "_";
 	view_name += boost::lexical_cast<std::string>(group_number);
 	result_columns.view_name_no_uuid = view_name;
@@ -8147,7 +8167,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Create the schema columns from the raw data table into the temporary table.
 	// Start with the primary key columns.
 	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
-		variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
+				  variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 			|| column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
@@ -8170,18 +8190,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	switch (variable_group_raw_data_columns.schema_type)
 	{
-	case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
-	case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
-		top_level_number_secondary_columns[group_number] = 0;
-		break;
-	case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
-		child_number_secondary_columns[group_number] = 0;
-		break;
+		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
+		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
+			top_level_number_secondary_columns[group_number] = 0;
+			break;
+
+		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
+			child_number_secondary_columns[group_number] = 0;
+			break;
 	}
 
 	// Proceed to the secondary key columns.
 	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
-		variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & column_in_view)
+				  variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		bool make_secondary_datetime_column = false;
 
@@ -8213,16 +8234,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (match)
 		{
-			
+
 			switch (variable_group_raw_data_columns.schema_type)
 			{
-			case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
-			case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
-				++top_level_number_secondary_columns[group_number];
-				break;
-			case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
-				++child_number_secondary_columns[group_number];
-				break;
+				case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
+				case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
+					++top_level_number_secondary_columns[group_number];
+					break;
+
+				case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
+					++child_number_secondary_columns[group_number];
+					break;
 			}
 
 
@@ -8238,7 +8260,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// Proceed, finally, to the datetime columns, if they exist.  (If they don't, they will be added via ALTER TABLE to the temporary table under construction.)
 	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
-		variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+				  variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		// Now do the datetime_start column
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART)
@@ -8247,7 +8269,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
-		variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+				  variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		// Now do the datetime_end column
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
@@ -8263,7 +8285,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Also, set the primary UOA flag.
 	bool first = true;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first, &variable_group_saved, &uoa_saved](
-		ColumnsInTempView::ColumnInTempView & new_column)
+					  ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 		new_column.column_name_in_temporary_table += "_";
@@ -8357,7 +8379,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 
 		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL,
-			ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL);
+				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL);
 
 		std::string datetime_start_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
 		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
@@ -8435,7 +8457,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	else
 	{
 		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART,
-			ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND);
+				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND);
 		at_least_one_variable_group_has_timerange = true;
 	}
 
@@ -12014,7 +12036,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					});
 				}
 			}
-		
+
 		});
 	});
 
@@ -13383,15 +13405,18 @@ void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 	PopulateVariableGroups();
 
 	top_level_vg_index = 0;
+
 	if (primary_variable_groups_vector.size() > 1)
 	{
 		std::vector<WidgetInstanceIdentifier> variableGroupOptions;
-		std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
+		std::for_each(primary_variable_groups_vector.cbegin(),
+					  primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
 		{
 			variableGroupOptions.push_back(vg_to_selected.first);
 		});
 		boost::format msgTitle("Select top-level variable group");
-		boost::format msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.  Please select one to use as the primary variable group for this run:");
+		boost::format
+		msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.  Please select one to use as the primary variable group for this run:");
 
 		// 0-based
 		top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
@@ -13424,7 +13449,8 @@ void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 	// ************************************************************ //
 	if (!consolidate_rows && allWeightings.time_granularity == TIME_GRANULARITY__NONE)
 	{
-		boost::format msg("\"Granulated output\" mode (i.e., consolidate output rows is UNCHECKED) is not possible for the primary variable group you have selected because the primary variable group has no time granularity associated with it.  NewGene would not know how to separate the output rows into time slices.");
+		boost::format
+		msg("\"Granulated output\" mode (i.e., consolidate output rows is UNCHECKED) is not possible for the primary variable group you have selected because the primary variable group has no time granularity associated with it.  NewGene would not know how to separate the output rows into time slices.");
 		SetFailureMessage(msg.str());
 		failed = true;
 	}
@@ -13469,7 +13495,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(AllWeightings 
 }
 
 void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group, int view_count,
-	std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index)
+		std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index)
 {
 
 	// ************************************************************************************************ //
@@ -13479,7 +13505,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 	// of the pair, that nonetheless in this function we bypass this data structure
 	// and retrieve the *full* set of columns from the vg_set_member table
 	// via the VG identifier.
-	// 
+	//
 	// Truly! The purpose of this function is to populate the THIRD incoming argument
 	// with ALL of the fields in the table, not just those selected by the user.
 	// ************************************************************************************************ //
@@ -13549,8 +13575,9 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 		// ... which always appear first in the output
 		for (auto const & variable_group_set_member : variables_in_group)
 		{
-				
+
 			int count_of_this_raw_variable_column_in_final_output = 0;
+
 			for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 			{
 				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
@@ -13563,9 +13590,11 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 			{
 
 				int main_sequence_test = 0;
+
 				for (auto & primary_key_entry__output__including_multiplicities : sequence.primary_key_sequence_info)
 				{
-					if (*variable_group_set_member.code == primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+					if (*variable_group_set_member.code ==
+						primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
 					{
 						primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = primary_vg_output_column_sequence;
 						++primary_vg_output_column_sequence;
@@ -13575,14 +13604,16 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 			}
 
 		}
-	
+
 		// Next, the keys of multiplicity > 1
 		// ... which always appear later in the output
 		int multiplicity_count_test = 0;
+
 		for (auto const & variable_group_set_member : variables_in_group)
 		{
 
 			int count_of_this_raw_variable_column_in_final_output = 0;
+
 			for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 			{
 				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
@@ -13601,6 +13632,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 				}
+
 				multiplicity_count_test = count_of_this_raw_variable_column_in_final_output;
 			}
 
@@ -13613,6 +13645,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 			{
 
 				int count_of_this_raw_variable_column_in_final_output = 0;
+
 				for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 				{
 					if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
@@ -13620,20 +13653,24 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 						++count_of_this_raw_variable_column_in_final_output;
 					}
 				}
+
 				bool has_multiplicity_greater_than_1 = count_of_this_raw_variable_column_in_final_output > 1;
 
 				if (has_multiplicity_greater_than_1)
 				{
 					int test_multiplicity = 0;
+
 					for (auto & primary_key_entry__output__including_multiplicities : sequence.primary_key_sequence_info)
 					{
-						if (*variable_group_set_member.code == primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+						if (*variable_group_set_member.code ==
+							primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
 						{
 							if (test_multiplicity == current_multiplicity)
 							{
 								primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = primary_vg_output_column_sequence;
 								++primary_vg_output_column_sequence;
 							}
+
 							++test_multiplicity;
 						}
 					}
@@ -14184,7 +14221,8 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			return;
 		}
 
-		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.push_back(multiplicity);
+		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.push_back(
+			multiplicity);
 
 		if (multiplicity > highest_multiplicity_primary_uoa)
 		{
@@ -14204,7 +14242,10 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	which_primary_index_has_multiplicity_greater_than_1 = -1;
 
 	int current_index = 0;
-	std::for_each(outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cbegin(), outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cend(), [this, &current_index](int const & test_multiplicity)
+	std::for_each(
+		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cbegin(),
+		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cend(), [this, &current_index](
+			int const & test_multiplicity)
 	{
 		if (failed || CheckCancelled())
 		{
@@ -14587,13 +14628,16 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 
 			sequence.primary_key_sequence_info.push_back(PrimaryKeySequence::PrimaryKeySequenceEntry());
 			PrimaryKeySequence::PrimaryKeySequenceEntry & current_primary_key_sequence = sequence.primary_key_sequence_info.back();
-			std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> & variable_group_info_for_primary_keys = current_primary_key_sequence.variable_group_info_for_primary_keys__top_level_and_child;
+			std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> & variable_group_info_for_primary_keys =
+				current_primary_key_sequence.variable_group_info_for_primary_keys__top_level_and_child;
 
 			current_primary_key_sequence.dmu_category = the_dmu_category;
 			current_primary_key_sequence.sequence_number_within_dmu_category_spin_control = k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category;
 			current_primary_key_sequence.sequence_number_within_dmu_category_primary_uoa = k_sequence_number_count_for_given_dmu_category_out_of_k_count_for_primary_uoa_for_that_dmu_category;
-			current_primary_key_sequence.sequence_number_in_all_primary_keys__of__global_primary_key_sequence_metadata__NOT__of_order_columns_appear_in_top_level_vg = overall_primary_key_sequence_number;
-			current_primary_key_sequence.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = -1; // We do not know this yet.  We will fill this in when we populate the schema for the primary top-level variable group.
+			current_primary_key_sequence.sequence_number_in_all_primary_keys__of__global_primary_key_sequence_metadata__NOT__of_order_columns_appear_in_top_level_vg =
+				overall_primary_key_sequence_number;
+			current_primary_key_sequence.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg =
+				-1; // We do not know this yet.  We will fill this in when we populate the schema for the primary top-level variable group.
 			current_primary_key_sequence.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category = k_count_for_primary_uoa_for_given_dmu_category;
 			current_primary_key_sequence.total_kad_spin_count_for_this_dmu_category = total_spin_control_k_count_for_given_dmu_category;
 
@@ -16263,7 +16307,8 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::STRING:
 								{
 
-									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first].c_str();
+									std::string data_string_rhs =
+										rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first].c_str();
 									std::int64_t data_rhs_converted = boost::lexical_cast<std::int64_t>(data_string_rhs);
 
 									if (data_int64 < data_rhs_converted)
@@ -16338,7 +16383,8 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::STRING:
 								{
 
-									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first].c_str();
+									std::string data_string_rhs =
+										rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first].c_str();
 									long double data_rhs_converted = boost::lexical_cast<long double>(data_string_rhs);
 
 									if (data_float < data_rhs_converted)
@@ -16414,7 +16460,8 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::STRING:
 								{
 
-									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first].c_str();
+									std::string data_string_rhs =
+										rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first].c_str();
 
 									if (data_string < data_string_rhs)
 									{
@@ -18693,7 +18740,7 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 		std::vector<std::int64_t> const & new_ints,
 		std::vector<long double> const & new_floats,
 		std::vector < std::pair < SQLExecutor::WHICH_BINDING,
-		std::pair<int, int >>> & new_indices,
+		std::pair<int, int >> > & new_indices,
 		bool enforce_all_datetimes,
 		std::int64_t const startdate_current,
 		std::int64_t const enddate_current,
@@ -20474,7 +20521,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 }
 
 void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
-	AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
+		AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
 {
 
 	{
@@ -20539,7 +20586,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 				DMUInstanceDataVector dmus_leaf;
 				bool bad = false;
 				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(),
-					sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+							  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 				{
 
 					if (bad)
@@ -20590,7 +20637,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 				// Construct Branch
 				DMUInstanceDataVector dmus_branch;
 				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cbegin(),
-					sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+							  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 				{
 
 					if (bad)
@@ -20697,128 +20744,143 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 					//try
 					{
-						
+
 						TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
 
 						switch (merge_mode)
 						{
 
 							case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
-							{
-
-								Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid));
-								Branch branch(dmus_branch);
-
-								bool call_again = false;
-								bool added = false;
-								bool first = true;
-								TimeSlices::iterator mapIterator;
-								auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
-								while (first || call_again)
 								{
-									first = false;
-									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
-									bool added_recurse = std::get<0>(ret);
-									if (added_recurse)
+
+									Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid));
+									Branch branch(dmus_branch);
+
+									bool call_again = false;
+									bool added = false;
+									bool first = true;
+									TimeSlices::iterator mapIterator;
+									auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
+
+									while (first || call_again)
 									{
-										added = true;
-									}
-									call_again = std::get<1>(ret);
-									mapIterator = std::get<2>(ret);
-								}
-								if (added)
-								{
-									// Add the secondary data for this primary variable group to the cache
-									allWeightings.dataCache[static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
-								}
+										first = false;
+										std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
+												AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+										bool added_recurse = std::get<0>(ret);
 
-							}
-							break;
+										if (added_recurse)
+										{
+											added = true;
+										}
+
+										call_again = std::get<1>(ret);
+										mapIterator = std::get<2>(ret);
+									}
+
+									if (added)
+									{
+										// Add the secondary data for this primary variable group to the cache
+										allWeightings.dataCache[static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
+									}
+
+								}
+								break;
 
 							case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
-							{
-
-								Leaf leaf(dmus_leaf);
-								Branch branch(dmus_branch);
-
-								// Set the secondary data index into the above cache for this non-primary top-level variable group
-								// so that it can be set in the corresponding leaf already present for the branch
-								leaf.other_top_level_indices_into_raw_data[static_cast<std::int16_t>(variable_group_number)] = static_cast<std::int32_t>(sorting_row_of_data.rowid);
-
-								bool call_again = false;
-								bool added = false;
-								bool first = true;
-								TimeSlices::iterator mapIterator;
-								auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
-								while (first || call_again)
 								{
-									first = false;
-									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
-									bool added_recurse = std::get<0>(ret);
-									if (added_recurse)
+
+									Leaf leaf(dmus_leaf);
+									Branch branch(dmus_branch);
+
+									// Set the secondary data index into the above cache for this non-primary top-level variable group
+									// so that it can be set in the corresponding leaf already present for the branch
+									leaf.other_top_level_indices_into_raw_data[static_cast<std::int16_t>(variable_group_number)] = static_cast<std::int32_t>(sorting_row_of_data.rowid);
+
+									bool call_again = false;
+									bool added = false;
+									bool first = true;
+									TimeSlices::iterator mapIterator;
+									auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
+
+									while (first || call_again)
 									{
-										added = true;
-									}
-									call_again = std::get<1>(ret);
-									mapIterator = std::get<2>(ret);
-								}
-								if (added)
-								{
-									// Add the secondary data for this non-primary top-level variable group to the cache
-									allWeightings.otherTopLevelCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
-								}
+										first = false;
+										std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
+												AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+										bool added_recurse = std::get<0>(ret);
 
-							}
-							break;
+										if (added_recurse)
+										{
+											added = true;
+										}
+
+										call_again = std::get<1>(ret);
+										mapIterator = std::get<2>(ret);
+									}
+
+									if (added)
+									{
+										// Add the secondary data for this non-primary top-level variable group to the cache
+										allWeightings.otherTopLevelCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
+									}
+
+								}
+								break;
 
 							case VARIABLE_GROUP_MERGE_MODE__CHILD:
-							{
-
-								// pack the child data index into the main leaf for use in the function called below - because this leaf is TEMPORARY
-								// (this data will be unpacked from the temporary leaf and put into the proper place in the function called below)
-								Leaf leaf(dmus_leaf, static_cast<std::int16_t>(sorting_row_of_data.rowid));
-								Branch branch(dmus_branch);
-
-								// ************************************************************************************************** //
-								// Important!
-								// This is a *CHILD* merge,
-								// so all LEAVES in the primary variable group have already been added to all branches.
-								// No new leaves will be added to any branches here.
-								// Therefore, even though 'HandleBranchAndLeaf()' is called,
-								// which might slice the time slices, each such slice will not add any new primary leaves
-								// and the previous set of cached leaves will be persisted in the time slice copies.
-								// ************************************************************************************************** //
-								bool call_again = false;
-								bool added = false;
-								bool first = true;
-								TimeSlices::iterator mapIterator;
-								auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
-								while (first || call_again)
 								{
-									first = false;
-									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
-									bool added_recurse = std::get<0>(ret);
-									if (added_recurse)
+
+									// pack the child data index into the main leaf for use in the function called below - because this leaf is TEMPORARY
+									// (this data will be unpacked from the temporary leaf and put into the proper place in the function called below)
+									Leaf leaf(dmus_leaf, static_cast<std::int16_t>(sorting_row_of_data.rowid));
+									Branch branch(dmus_branch);
+
+									// ************************************************************************************************** //
+									// Important!
+									// This is a *CHILD* merge,
+									// so all LEAVES in the primary variable group have already been added to all branches.
+									// No new leaves will be added to any branches here.
+									// Therefore, even though 'HandleBranchAndLeaf()' is called,
+									// which might slice the time slices, each such slice will not add any new primary leaves
+									// and the previous set of cached leaves will be persisted in the time slice copies.
+									// ************************************************************************************************** //
+									bool call_again = false;
+									bool added = false;
+									bool first = true;
+									TimeSlices::iterator mapIterator;
+									auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
+
+									while (first || call_again)
 									{
-										added = true;
-									}
-									call_again = std::get<1>(ret);
-									mapIterator = std::get<2>(ret);
-								}
-								if (added)
-								{
-									// Add the secondary data for this child variable group to the cache
-									allWeightings.childCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
-								}
+										first = false;
+										std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
+												AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+										bool added_recurse = std::get<0>(ret);
 
-							}
-							break;
+										if (added_recurse)
+										{
+											added = true;
+										}
+
+										call_again = std::get<1>(ret);
+										mapIterator = std::get<2>(ret);
+									}
+
+									if (added)
+									{
+										// Add the secondary data for this child variable group to the cache
+										allWeightings.childCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
+									}
+
+								}
+								break;
 
 							default:
-							{
+								{
 
-							}
-							break;
+								}
+								break;
 
 						}
 
@@ -20860,7 +20922,8 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildOutputSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildOutputSchema(std::vector<ColumnsInTempView> const &
+		primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info)
 {
 
 
@@ -20908,8 +20971,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	// **************************************************************************************** //
 
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
-		ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
+					  ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 	{
 
 		if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
@@ -20954,8 +21017,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	{
 
 		std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-			primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
-			ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+					  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
+						  ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 		{
 			if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 				|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
@@ -21015,7 +21078,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 		{
 
 			std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-				primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+						  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 			{
 
 				bool make_secondary_datetime_column = false;
@@ -21074,7 +21137,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	// **************************************************************************************** //
 
 	int primary_group_number = 0;
-	std::for_each(primary_variable_groups_raw_data_columns.cbegin(), primary_variable_groups_raw_data_columns.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	std::for_each(primary_variable_groups_raw_data_columns.cbegin(),
+				  primary_variable_groups_raw_data_columns.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
 
 		if (primary_group_number == top_level_vg_index)
@@ -21090,7 +21154,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 		{
 
 			std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-				primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+						  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 			{
 
 				bool make_secondary_datetime_column = false;
@@ -21151,7 +21215,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	// **************************************************************************************** //
 
 	std::for_each(secondary_variable_groups_column_info.cbegin(),
-		secondary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & child_variable_group_raw_data_columns)
+				  secondary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 
 		if (failed || CheckCancelled())
@@ -21168,7 +21232,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 				(*the_map)[*child_variable_group_raw_data_columns.variable_groups[0].identifier_parent][child_variable_group_raw_data_columns.variable_groups[0]];
 
 			std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(),
-				child_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
+						  child_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 			{
 				bool make_secondary_datetime_column = false;
 
@@ -21268,8 +21332,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	datetime_end_column.column_name_in_original_data_table = "";
 
 	result_columns.current_block_datetime_column_types = std::make_pair(
-		ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE,
-		ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE);
+				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE,
+				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE);
 	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 
 	ExecuteSQL(result); // Executes all SQL queries up to the current one
@@ -21306,6 +21370,7 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable()
 		{
 			sql_create_empty_table += ", ";
 		}
+
 		first = false;
 
 		sql_create_empty_table += random_sampling_column.column_name_in_temporary_table;
@@ -21350,6 +21415,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 			sqlite3_finalize(allWeightings.insert_random_sample_stmt);
 			allWeightings.insert_random_sample_stmt = nullptr;
 		}
+
 		this_->EndTransaction();
 	} BOOST_SCOPE_EXIT_END
 
@@ -21427,6 +21493,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 					sqlite3_reset(allWeightings.insert_random_sample_stmt);
 
 					++current_rows_stepped;
+
 					if (current_rows_stepped % minimum_desired_rows_per_transaction == 0)
 					{
 						EndTransaction();
@@ -21458,14 +21525,15 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 
 		bool first = true;
 		std::for_each(random_sampling_columns.columns_in_view.cbegin(),
-			random_sampling_columns.columns_in_view.cend(), [&](
-			ColumnsInTempView::ColumnInTempView const & random_sampling_column)
+					  random_sampling_columns.columns_in_view.cend(), [&](
+						  ColumnsInTempView::ColumnInTempView const & random_sampling_column)
 		{
 
 			if (!first)
 			{
 				insert_random_sample_string += ", ";
 			}
+
 			first = false;
 
 			insert_random_sample_string += random_sampling_column.column_name_in_temporary_table;
@@ -21475,6 +21543,7 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 		insert_random_sample_string += ") VALUES (";
 
 		first = true;
+
 		for (size_t n = 0; n < random_sampling_columns.columns_in_view.size(); ++n)
 		{
 
@@ -21482,6 +21551,7 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 			{
 				insert_random_sample_string += ", ";
 			}
+
 			first = false;
 
 			insert_random_sample_string += "?";
@@ -21506,7 +21576,7 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 
 void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings)
 {
-	
+
 	// **************************************************************************************** //
 	// Top-level variable groups that are *not* primary are considered child data,
 	// and are handled here
@@ -21516,7 +21586,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
 
-		if (failed || CheckCancelled()) return;
+		if (failed || CheckCancelled()) { return; }
 
 		if (current_top_level_vg_index == top_level_vg_index)
 		{
@@ -21529,14 +21599,17 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		}
 
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_group_raw_data_columns, current_top_level_vg_index);
-		if (failed || CheckCancelled()) return;
+
+		if (failed || CheckCancelled()) { return; }
+
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		merging_of_children_column_sets.push_back(selected_raw_data_table_schema);
 
 		std::vector<std::string> errorMessages;
 		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
-		if (failed || CheckCancelled()) return;
+
+		if (failed || CheckCancelled()) { return; }
 
 		++current_top_level_vg_index;
 
@@ -21551,10 +21624,12 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 
-		if (failed || CheckCancelled()) return;
+		if (failed || CheckCancelled()) { return; }
 
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(child_variable_group_raw_data_columns, current_child_vg_index);
-		if (failed || CheckCancelled()) return;
+
+		if (failed || CheckCancelled()) { return; }
+
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		merging_of_children_column_sets.push_back(selected_raw_data_table_schema);
@@ -21573,7 +21648,10 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		int current_primary_leaf_number = 0;
 
 		int overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf = 0;
-		for (; overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf < overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf; ++overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf)
+
+		for (; overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf <
+			 overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf;
+			 ++overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf)
 		{
 
 			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&](PrimaryKeySequence::PrimaryKeySequenceEntry const & full_kad_key_info)
@@ -21588,16 +21666,19 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 				}
 
 				bool is_current_index_a_top_level_primary_group_branch = false;
+
 				if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
 				{
 					is_current_index_a_top_level_primary_group_branch = true;
 				}
 
 				// Grab the primary key information for the TOP LEVEL variable group
-				PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_primary_not_child_variable_group = full_kad_key_info.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index];
+				PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_primary_not_child_variable_group =
+					full_kad_key_info.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index];
 
 				// Now grab the primary key information for the current CHILD variable group
-				PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_child_variable_group = full_kad_key_info.variable_group_info_for_primary_keys__top_level_and_child[primary_variable_groups_column_info.size() + current_child_vg_index];
+				PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_child_variable_group =
+					full_kad_key_info.variable_group_info_for_primary_keys__top_level_and_child[primary_variable_groups_column_info.size() + current_child_vg_index];
 
 				if (full_kad_key_info_child_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 0)
 				{
@@ -21606,6 +21687,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 					{
 						++current_primary_branch_index;
 					}
+
 					return;
 				}
 
@@ -21614,6 +21696,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 				// AND it appears in the proper order of the top-level primary keys
 
 				bool is_child_group_branch = false;
+
 				if (full_kad_key_info_child_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
 					is_child_group_branch = true;
@@ -21622,25 +21705,27 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 				if (is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
 				{
 					mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
-					allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
+					allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH,
+							current_primary_branch_index));
 				}
-				else
-				if (is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
+				else if (is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
 				{
 					mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
 					allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
 				}
-				else
-				if (!is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
+				else if (!is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
 				{
-					mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
-					allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+					mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index,
+							current_primary_leaf_number));
+					allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF,
+							current_primary_internal_leaf_index, current_primary_leaf_number));
 				}
-				else
-				if (!is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
+				else if (!is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
 				{
-					mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
-					allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+					mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index,
+							current_primary_leaf_number));
+					allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF,
+							current_primary_internal_leaf_index, current_primary_leaf_number));
 				}
 				else
 				{
@@ -21655,6 +21740,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 				else
 				{
 					++current_primary_internal_leaf_index;
+
 					if (full_kad_key_info.sequence_number_within_dmu_category_primary_uoa + 1 == full_kad_key_info.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
 					{
 						++current_primary_leaf_number;
@@ -21666,7 +21752,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 		}
 
-		if (failed || CheckCancelled()) return;
+		if (failed || CheckCancelled()) { return; }
 
 		// **************************************************************************************** //
 		// We here loop through child variable group raw data
@@ -21688,7 +21774,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 }
 
-void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchOutputRow const &outputRow, AllWeightings &allWeightings)
+void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, BranchOutputRow const & outputRow, AllWeightings & allWeightings)
 {
 	bool first = true;
 
@@ -21731,6 +21817,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 	if (which_primary_index_has_multiplicity_greater_than_1 != -1)
 	{
 		int numberColumnsInTheDMUWithMultiplicityGreaterThan1 = biggest_counts[0].second[which_primary_index_has_multiplicity_greater_than_1].second;
+
 		for (int n = numberLeavesHandled; n < K; ++n)
 		{
 			for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++nk)
@@ -21767,6 +21854,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 			boost::format msg("Logic error: Missing primary variable group data (there isn't even blank data).");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
+
 		++numberLeavesHandled;
 	});
 
@@ -21775,6 +21863,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 	if (which_primary_index_has_multiplicity_greater_than_1 != -1)
 	{
 		int numberSecondaryColumns = top_level_number_secondary_columns[top_level_vg_index];
+
 		for (int n = numberLeavesHandled; n < K; ++n)
 		{
 			for (int nk = 0; nk < numberSecondaryColumns; ++nk)
@@ -21792,6 +21881,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 	// There might be multiple fields for each variable group and within each multiplicity,
 	// ... so the logic is a bit non-trivial to get the display order right.
 	int numberTopLevelGroups = static_cast<int>(primary_variable_groups_vector.size());
+
 	for (int vgNumber = 0; vgNumber < numberTopLevelGroups; ++vgNumber)
 	{
 		for (int multiplicity = 0; multiplicity < K; ++multiplicity)
@@ -21831,9 +21921,11 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 				// Here is where, in addition to the K>1 case, the K=1 case is supported,
 				// because "other_top_level_indices_into_raw_data" is populated
 				// regardless of whether "primary_keys" is populated for the leaf.
-				std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map::value_type const & top_level_vg_and_data_index)
+				std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(),
+							  leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map::value_type const & top_level_vg_and_data_index)
 				{
 					int const vg_number = top_level_vg_and_data_index.first;
+
 					if (vg_number == vgNumber)
 					{
 
@@ -21876,6 +21968,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 					{
 						// Missing a variable group.  Fill with blanks.
 						int numberSecondaries = top_level_number_secondary_columns[vgNumber];
+
 						for (int n = 0; n < numberSecondaries; ++n)
 						{
 							boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
@@ -21896,6 +21989,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 				if (vgNumber != top_level_vg_index)
 				{
 					int numberSecondaries = top_level_number_secondary_columns[vgNumber];
+
 					for (int n = 0; n < numberSecondaries; ++n)
 					{
 						boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
@@ -21914,24 +22008,30 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 	// There might be multiple fields for each variable group and within each multiplicity,
 	// ... so the logic is a bit non-trivial to get the display order right.
 	int numberChildGroups = static_cast<int>(secondary_variable_groups_vector.size());
+
 	for (int vgNumber = 0; vgNumber < numberChildGroups; ++vgNumber)
 	{
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[vgNumber].first.identifier_parent)].second;
+
 		for (int multiplicity = 0; multiplicity < the_child_multiplicity; ++multiplicity)
 		{
 			bool matched = false;
-			std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map::value_type const & leaf_index_mappings)
+			std::for_each(outputRow.child_indices_into_raw_data.cbegin(),
+						  outputRow.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map::value_type const & leaf_index_mappings)
 			{
 				int const vg_number = leaf_index_mappings.first;
+
 				if (vg_number != vgNumber)
 				{
 					return;
 				}
+
 				fast_short_to_int_map const & leaf_number_to_data_index = leaf_index_mappings.second;
 				std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](fast_short_to_int_map::value_type const & leaf_index_mapping)
 				{
 
 					int const leaf_number = leaf_index_mapping.first;
+
 					if (leaf_number != multiplicity)
 					{
 						return;
@@ -21972,7 +22072,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 			// In either case, this means there is no child data so we will not have
 			// an entry in "child_indices_into_raw_data" for the given
 			// variable group and leaf number.
-			// Special case: If there is no data for *any* child leaf, 
+			// Special case: If there is no data for *any* child leaf,
 			// there will be no entry in "child_indices_into_raw_data" for the child variable group.
 			//
 			// See "AllWeightings::MergeTimeSliceDataIntoMap()" for where "child_indices_into_raw_data" is populated:
@@ -21984,76 +22084,24 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 			if (!matched)
 			{
 				int numberSecondaries = child_number_secondary_columns[vgNumber];
+
 				for (int n = 0; n < numberSecondaries; ++n)
 				{
-					boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string())); 
+					boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
 				}
 			}
 		}
 	}
-} 
+}
 
-void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, AllWeightings &allWeightings)
+void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, AllWeightings & allWeightings)
 {
-
-	// *************************************************************************************************************************** //
-	// *************************************************************************************************************************** //
-	// Thankfully, there is no need to MERGE the "hits" data
-	// among time slices that are merged together in this function,
-	// precisely because this function is used to ignore the time units stored in the "hits" data.
-	// *************************************************************************************************************************** //
-	// *************************************************************************************************************************** //
-
-	int orig_random_number_rows = 0;
 
 	if (random_sampling)
 	{
-
-		// ************************************************************************************************************* //
-		// This is a necessary preparatory phase, internal to each branch within individual time slices,
-		// before identical rows can be merged across adjacent time slices.
-		//
-		// In the random sampling case, the output rows that are stored inside each branch
-		// are further separated (binned) into fixed-width time units.
-		// Identical output rows can appear in different bins (but only once within each bin).
-		// Rows are identical if their leaves are identical (this guarantees that all secondary
-		// data will be identical), regardless of which bin within the given branch they lie in.
-		//
-		// In "Consolidate" mode, we consolidate the output into as few rows as possible.
-		// This means that if adjacent rows (time-wise) contain identical data except for the time window,
-		// we will merge these into a single row with the combined time window.
-		//
-		// Because rows in different bins with identical leaves are identical within a branch,
-		// here we simply take advantage of std::set's uniqueness guarantee by looping through
-		// all bins (time units) and inserting all output rows into a single set within the branch.
-		//
-		// The "time unit" index given to this set has the special value of -1.
-		// Because inserts of duplicate data into the set are rejected, this effectively merges
-		// all output rows across time units (bins) within each branch into a single set of rows
-		// for each branch.
-		//
-		// Once this is complete, we are ready to move on to the main consolidation phase
-		// ... namely, merging identical rows *across* time slices.
-		// ************************************************************************************************************* //
-
-		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
-		{
-
-			TimeSlice const & the_slice = timeSlice.first;
-			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
-
-			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
-			{
-				std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & the_branch)
-				{
-					allWeightings.ConsolidateRowsWithinBranch(the_branch, orig_random_number_rows);
-				});
-
-			});
-
-		});
-
+		// This MUST come after the child groups have been merged!
+		// For unbiased sampling, the child groups may only cross a subset of time units within a branch
+		ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(allWeightings);
 	}
 
 	std::set<MergedTimeSliceRow> saved_historic_rows;
@@ -22100,12 +22148,13 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					// ***************************************************************************************************** //
 
 					MergedTimeSliceRow::RHS_wins = true; // optimizer might call copy constructor, which calls operator=(), during "emplace"
+
 					if (random_sampling)
 					{
 						// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
 						auto & incoming_rows = branch.hits_consolidated;
-						//std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
-						for (fast_branch_output_row_vector_huge::iterator rowiter = incoming_rows.begin(); rowiter != branch.consolidated_hits_end_index; ++rowiter)
+						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+									  //for (fast_branch_output_row_vector_huge::iterator rowiter = incoming_rows.begin(); rowiter != branch.consolidated_hits_end_index; ++rowiter)
 						{
 							BranchOutputRow const & incoming_row = *rowiter;
 							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
@@ -22120,6 +22169,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
 						});
 					}
+
 					MergedTimeSliceRow::RHS_wins = false;
 
 					std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
@@ -22184,7 +22234,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 		else
 		{
-			
+
 			// There is a gap in the time slices.
 			// Start fresh
 
@@ -22272,12 +22322,12 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 		output_file.close();
 	} BOOST_SCOPE_EXIT_END
 
-	
+
 	// Write columns headers
 	int column_index = 0;
 	bool first = true;
 	std::for_each(final_result.second.columns_in_view.begin(),
-		final_result.second.columns_in_view.end(), [this, &output_file, &first, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+				  final_result.second.columns_in_view.end(), [this, &output_file, &first, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
 		++column_index;
@@ -22291,9 +22341,11 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 		{
 			output_file << ",";
 		}
+
 		first = false;
 
 		output_file << unformatted_column.column_name_in_original_data_table;
+
 		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 		{
 			output_file << "_";
@@ -22338,6 +22390,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 				{
 					output_file << ",";
 				}
+
 				first = false;
 				output_file << data;
 
@@ -22474,6 +22527,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						std::int64_t current_starting_time = timeSlice.getStart();
 						std::int64_t current_aligned_down_time = TimeRange::determineAligningTimestamp(current_starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
 						long double start_sliver_width = 0.0;
+
 						if (current_aligned_down_time < current_starting_time)
 						{
 							first_hit_is_a_sliver = true;
@@ -22483,6 +22537,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						std::int64_t current_ending_time = timeSlice.getEnd();
 						std::int64_t current_aligned_up_time = TimeRange::determineAligningTimestamp(current_ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
 						long double end_sliver_width = 0.0;
+
 						if (current_aligned_up_time > current_ending_time)
 						{
 							last_hit_is_a_sliver = true;
@@ -22510,8 +22565,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							{
 								current_hit_width = start_sliver_width;
 							}
-							else
-							if (hit_number == total_hits && last_hit_is_a_sliver)
+							else if (hit_number == total_hits && last_hit_is_a_sliver)
 							{
 								current_hit_width = end_sliver_width;
 							}
@@ -22561,7 +22615,9 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 								std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
 								std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
 								std::int64_t time_to_use_for_end = time_start_aligned_higher;
+
 								if (time_start_aligned_higher > time_end) { time_to_use_for_end = time_end; }
+
 								TimeSlice current_slice(current_time_start, time_to_use_for_end);
 								OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
 								current_time_start = time_to_use_for_end;
@@ -22580,7 +22636,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 }
 
-void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t & rows_written)
+void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set & output_rows_for_this_full_time_slice,
+		std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t & rows_written)
 {
 
 	// current_time_slice to be used when the time-slice-start and time-slice-end rows are output
@@ -22608,7 +22665,8 @@ void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current
 
 }
 
-void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings &allWeightings, Branch const & branch, BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> &incoming, TimeSlice const & the_slice, int & orig_row_count)
+void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings & allWeightings, Branch const & branch,
+		BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> & incoming, TimeSlice const & the_slice, int & orig_row_count)
 {
 	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
 	allWeightings.create_output_row_visitor_global_data_cache.clear();
@@ -22624,4 +22682,54 @@ void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringCo
 	allWeightings.create_output_row_visitor_global_data_cache.clear();
 
 	++orig_row_count;
+}
+
+void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(AllWeightings & allWeightings)
+{
+
+	// ************************************************************************************************************* //
+	// This is a necessary preparatory phase, internal to each branch within individual time slices,
+	// before identical rows can be merged across adjacent time slices.
+	//
+	// In the random sampling case, the output rows that are stored inside each branch
+	// are further separated (binned) into fixed-width time units.
+	// Identical output rows can appear in different bins (but only once within each bin).
+	// Rows are identical if their leaves are identical (this guarantees that all secondary
+	// data will be identical), regardless of which bin within the given branch they lie in.
+	//
+	// In "Consolidate" mode, we consolidate the output into as few rows as possible.
+	// This means that if adjacent rows (time-wise) contain identical data except for the time window,
+	// we will merge these into a single row with the combined time window.
+	//
+	// Because rows in different bins with identical leaves are identical within a branch,
+	// here we simply take advantage of std::set's uniqueness guarantee by looping through
+	// all bins (time units) and inserting all output rows into a single set within the branch.
+	//
+	// The "time unit" index given to this set has the special value of -1.
+	// Because inserts of duplicate data into the set are rejected, this effectively merges
+	// all output rows across time units (bins) within each branch into a single set of rows
+	// for each branch.
+	//
+	// Once this is complete, we are ready to move on to the main consolidation phase
+	// ... namely, merging identical rows *across* time slices.
+	// ************************************************************************************************************* //
+
+	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
+	{
+
+		TimeSlice const & the_slice = timeSlice.first;
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+
+		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+		{
+			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & the_branch)
+			{
+				allWeightings.ConsolidateRowsWithinBranch(the_branch);
+			});
+
+		});
+
+	});
+
 }

@@ -7,14 +7,14 @@
 #	include <boost/multiprecision/cpp_dec_float.hpp>
 #	include <boost/assert.hpp>
 #endif
-#include <random> 
+#include <random>
 #include <functional>
 #include <list>
-#include <algorithm> 
+#include <algorithm>
 #include "../../Utilities/TimeRangeHelper.h"
 
 std::fstream * create_output_row_visitor::output_file = nullptr;
-int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor::CREATE_ROW_MODE__NONE); 
+int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor::CREATE_ROW_MODE__NONE);
 InstanceDataVector * create_output_row_visitor::data = nullptr;
 int * create_output_row_visitor::bind_index = nullptr;
 sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
@@ -22,13 +22,13 @@ bool MergedTimeSliceRow::RHS_wins = false;
 std::string create_output_row_visitor::row_in_process;
 
 int Weighting::how_many_weightings = 0;
-  
+
 AllWeightings::AllWeightings(Messager & messager_)
-: insert_random_sample_stmt(nullptr)
-, numberChildVariableGroups(0)
-, time_granularity(TIME_GRANULARITY__NONE)
-, random_rows_added(0)
-, messager(messager_)
+	: insert_random_sample_stmt(nullptr)
+	, numberChildVariableGroups(0)
+	, time_granularity(TIME_GRANULARITY__NONE)
+	, random_rows_added(0)
+	, messager(messager_)
 {
 
 }
@@ -38,14 +38,16 @@ AllWeightings::~AllWeightings()
 	// Never called: This is how we utilize the Boost memory pool
 }
 
-std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling, TimeSlices::iterator mapIterator_, bool const useIterator)
+std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf,
+		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling,
+		TimeSlices::iterator mapIterator_, bool const useIterator)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
 
 	newTimeSlice.Validate();
 
-	bool added = false; // true if there is a match 
+	bool added = false; // true if there is a match
 
 	if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 	{
@@ -53,19 +55,21 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 		added = true;
 	}
 
-	// determine which case we are in terms of the relationship of the incoming new 'timeSliceLeaf' 
+	// determine which case we are in terms of the relationship of the incoming new 'timeSliceLeaf'
 	// so that we know whether/how to break up either the new 'rhs' time slice
 	// or the potentially overlapping existing time slices in the 'timeSlices' map
 
 	// Save beginning, one past end time slices in the existing map for reference
-	TimeSlices::iterator existing_start_slice          = timeSlices.begin();
-	TimeSlices::iterator existing_one_past_end_slice   = timeSlices.end();
+	TimeSlices::iterator existing_start_slice = timeSlices.begin();
+	TimeSlices::iterator existing_one_past_end_slice = timeSlices.end();
 
 	TimeSlices::iterator mapIterator;
+
 	if (useIterator)
 	{
 		mapIterator = mapIterator_;
 	}
+
 	bool normalCase = false;
 
 	if (existing_start_slice == existing_one_past_end_slice)
@@ -96,8 +100,10 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 		{
 			mapIterator = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &AllWeightings::is_map_entry_end_time_greater_than_new_time_slice_start_time);
 		}
+
 		TimeSlices::iterator startMapSlicePtr = mapIterator;
 		bool start_of_new_slice_is_past_end_of_map = false;
+
 		if (startMapSlicePtr == existing_one_past_end_slice)
 		{
 			start_of_new_slice_is_past_end_of_map = true;
@@ -180,6 +186,7 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 	}
 
 	bool call_again = false;
+
 	if (normalCase)
 	{
 		// This is the normal case.  The incoming new slice is guaranteed to have
@@ -188,7 +195,9 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 		// The right edge of the incoming new slice could lie anywhere greater than the left edge -
 		// it could lie either inside the map element, at the right edge of the map element,
 		// or past the right edge of the map element.
-		bool no_more_time_slice = HandleTimeSliceNormalCase(added, branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode, AvgMsperUnit, consolidate_rows, random_sampling);
+		bool no_more_time_slice = HandleTimeSliceNormalCase(added, branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode, AvgMsperUnit, consolidate_rows,
+								  random_sampling);
+
 		if (no_more_time_slice)
 		{
 			// no-op
@@ -243,13 +252,14 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 // - The portion of the incoming slice that extends past the right edge
 //   of the map entry
 // - An iterator to the next map entry.
-bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr,
+		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	bool added_new = false;
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
-	TimeSlice const & mapElement   = mapElementPtr->first;
+	TimeSlice const & mapElement = mapElementPtr->first;
 
 	TimeSlices::iterator newMapElementLeftPtr;
 	TimeSlices::iterator newMapElementMiddlePtr;
@@ -396,7 +406,8 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 }
 
 // breaks an existing map entry into two pieces and returns an iterator to both
-void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr,
+								  TimeSlices::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
@@ -422,7 +433,8 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 }
 
 // breaks an existing map entry into three pieces and returns an iterator to the middle piece
-void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right,
+								  TimeSlices::iterator & newMapElementMiddlePtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
@@ -460,7 +472,8 @@ void AllWeightings::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t co
 }
 
 // Merge time slice data into a map element
-bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode)
+bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number,
+		VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
 	// ******************************************************************************************************************************** //
@@ -522,152 +535,158 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 		{
 
 			case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
-			{ 
-
-				// *********************************************************************************** //
-				// This is where multiple rows with duplicated primary keys 
-				// and overlapping time range will be wiped out.
-				// ... Only one row with given primary keys and time range is allowed
-				// ... (the first one - emplace does nothing if the entry already exists).
-				// ... (Note that the leaf points to a specific row of secondary data.)
-				// *********************************************************************************** //
-				auto branchPtr = branches.find(branch);
-				if (branchPtr == branches.cend())
 				{
-					auto inserted = branches.insert(branch);
-					branchPtr = inserted.first;
+
+					// *********************************************************************************** //
+					// This is where multiple rows with duplicated primary keys
+					// and overlapping time range will be wiped out.
+					// ... Only one row with given primary keys and time range is allowed
+					// ... (the first one - emplace does nothing if the entry already exists).
+					// ... (Note that the leaf points to a specific row of secondary data.)
+					// *********************************************************************************** //
+					auto branchPtr = branches.find(branch);
+
+					if (branchPtr == branches.cend())
+					{
+						auto inserted = branches.insert(branch);
+						branchPtr = inserted.first;
+					}
+
+					branchPtr->InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
+
+					added = true;
+
 				}
-				branchPtr->InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
-
-				added = true;
-
-			}
-			break;
+				break;
 
 			case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
-			{
-				
-				// Let's take a peek and see if our branch is already present
-
-				Branches::iterator branchPtr = branches.find(branch);
-				if (branchPtr != branches.end())
-				{
-					
-					// *********************************************************************************** //
-					// The incoming branch *does* already exist!
-					// We want to see if this branch contains the incoming leaf, or not.
-					// *********************************************************************************** //
-
-					Branch const & current_branch = *branchPtr;
-
-					if (current_branch.doesLeafExist(timeSliceLeaf.second))
-					{
-
-						// This branch *does* contain the incoming leaf!
-						// Set the data in the leaf for this non-primary top-level variable group.
-
-						// Note that many different OUTPUT ROWS might reference this leaf;
-						// perhaps even multiple times within a single output row.  Fine!
-
-						// pass the index over from the incoming leaf (which contains only the index for the current top-level variable group being merged in)
-						// into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
-						// (This active leaf may also have been called previously to set other top-level variable group rows.)
-						current_branch.setTopGroupIndexIntoRawData(timeSliceLeaf.second, variable_group_number, timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
-
-						added = true;
-
-					}
-
-				}
-
-			}
-			break;
-
-			case VARIABLE_GROUP_MERGE_MODE__CHILD:
-			{
-
-				// Construct the child's DMU keys, including leaf
-				ChildDMUInstanceDataVector dmu_keys;
-				dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
-				dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
-
-				// *********************************************************************************** //
-				// Loop through all BRANCHES for this variable group in this time slice.
-				// For each, we have a set of output rows.
-				// *********************************************************************************** //
-
-				for (auto branchesPtr = branches.begin(); branchesPtr != branches.end(); ++branchesPtr)
 				{
 
-					Branch const & the_current_map_branch = *branchesPtr;
+					// Let's take a peek and see if our branch is already present
 
-					// *********************************************************************************** //
-					// "leaves_cache" is a vector cache containing the same leaves in the same order
-					// as the official "leaves" set containing the leaves for the current branch.
-					//
-					// Note that a call to "ResetBranchCaches()" previous to the high-level call to "HandleBranchAndLeaf()",
-					// in which we are nested, has already set the "leaves_cache" cache,
-					// and this cache is copied whenever any map entry changes.
-					// *********************************************************************************** //
+					Branches::iterator branchPtr = branches.find(branch);
 
-					// The following cache will only be filled on the first pass
-					the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
-
-					// *********************************************************************************** //
-					// We have an incoming child variable group branch and leaf.
-					// Find all matching output rows that contain the same DMU data on the matching columns.
-					// *********************************************************************************** //
-					// ... never use "consolidating rows" version here, because consolidation always happens after all rows are merged
-					auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.find(dmu_keys);
-
-					bool no_matches_for_this_child = false;
-					if (matchingOutputRows == the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.cend())
+					if (branchPtr != branches.end())
 					{
-						no_matches_for_this_child = true;
-					}
 
-					// Loop through all matching output rows
-					if (!no_matches_for_this_child)
-					{
-						for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
+						// *********************************************************************************** //
+						// The incoming branch *does* already exist!
+						// We want to see if this branch contains the incoming leaf, or not.
+						// *********************************************************************************** //
+
+						Branch const & current_branch = *branchPtr;
+
+						if (current_branch.doesLeafExist(timeSliceLeaf.second))
 						{
 
-							BranchOutputRow const & outputRow = *matchingOutputRowPtr->first;
-							fast_short_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
+							// This branch *does* contain the incoming leaf!
+							// Set the data in the leaf for this non-primary top-level variable group.
 
-							// matchingOutputChildLeaves is a vector
+							// Note that many different OUTPUT ROWS might reference this leaf;
+							// perhaps even multiple times within a single output row.  Fine!
 
-							// Loop through all matching output row child leaves
-							for (auto matchingOutputChildLeavesPtr = matchingOutputChildLeaves.cbegin(); matchingOutputChildLeavesPtr != matchingOutputChildLeaves.cend(); ++matchingOutputChildLeavesPtr)
-							{
+							// pass the index over from the incoming leaf (which contains only the index for the current top-level variable group being merged in)
+							// into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
+							// (This active leaf may also have been called previously to set other top-level variable group rows.)
+							current_branch.setTopGroupIndexIntoRawData(timeSliceLeaf.second, variable_group_number, timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
 
-								std::int16_t const & matching_child_leaf_index = *matchingOutputChildLeavesPtr;
-
-								auto const found = outputRow.child_indices_into_raw_data.find(variable_group_number);
-								if (found == outputRow.child_indices_into_raw_data.cend())  
-								{
-									outputRow.child_indices_into_raw_data[variable_group_number] = fast_short_to_int_map();
-								}
-								auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
-								outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
-
-								added = true;
-
-							}
+							added = true;
 
 						}
+
 					}
-					 
+
 				}
-				 
-			}
-			break;
+				break;
+
+			case VARIABLE_GROUP_MERGE_MODE__CHILD:
+				{
+
+					// Construct the child's DMU keys, including leaf
+					ChildDMUInstanceDataVector dmu_keys;
+					dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
+					dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
+
+					// *********************************************************************************** //
+					// Loop through all BRANCHES for this variable group in this time slice.
+					// For each, we have a set of output rows.
+					// *********************************************************************************** //
+
+					for (auto branchesPtr = branches.begin(); branchesPtr != branches.end(); ++branchesPtr)
+					{
+
+						Branch const & the_current_map_branch = *branchesPtr;
+
+						// *********************************************************************************** //
+						// "leaves_cache" is a vector cache containing the same leaves in the same order
+						// as the official "leaves" set containing the leaves for the current branch.
+						//
+						// Note that a call to "ResetBranchCaches()" previous to the high-level call to "HandleBranchAndLeaf()",
+						// in which we are nested, has already set the "leaves_cache" cache,
+						// and this cache is copied whenever any map entry changes.
+						// *********************************************************************************** //
+
+						// The following cache will only be filled on the first pass
+						the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
+
+						// *********************************************************************************** //
+						// We have an incoming child variable group branch and leaf.
+						// Find all matching output rows that contain the same DMU data on the matching columns.
+						// *********************************************************************************** //
+						// ... never use "consolidating rows" version here, because consolidation always happens after all rows are merged
+						auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.find(dmu_keys);
+
+						bool no_matches_for_this_child = false;
+
+						if (matchingOutputRows == the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.cend())
+						{
+							no_matches_for_this_child = true;
+						}
+
+						// Loop through all matching output rows
+						if (!no_matches_for_this_child)
+						{
+							for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
+							{
+
+								BranchOutputRow const & outputRow = *matchingOutputRowPtr->first;
+								fast_short_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
+
+								// matchingOutputChildLeaves is a vector
+
+								// Loop through all matching output row child leaves
+								for (auto matchingOutputChildLeavesPtr = matchingOutputChildLeaves.cbegin(); matchingOutputChildLeavesPtr != matchingOutputChildLeaves.cend(); ++matchingOutputChildLeavesPtr)
+								{
+
+									std::int16_t const & matching_child_leaf_index = *matchingOutputChildLeavesPtr;
+
+									auto const found = outputRow.child_indices_into_raw_data.find(variable_group_number);
+
+									if (found == outputRow.child_indices_into_raw_data.cend())
+									{
+										outputRow.child_indices_into_raw_data[variable_group_number] = fast_short_to_int_map();
+									}
+
+									auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
+									outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
+
+									added = true;
+
+								}
+
+							}
+						}
+
+					}
+
+				}
+				break;
 
 			default:
-			{
+				{
 
-			}
-			break;
+				}
+				break;
 
 		}
 
@@ -707,7 +726,7 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 		// we may support multiple variable groups in the random sampler in the future.
 		std::for_each(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
 		{
-			
+
 			Branches & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 			Weighting & variableGroupBranchesAndLeavesWeighting = variableGroupBranchesAndLeaves.weighting;
 			variableGroupBranchesAndLeavesWeighting.setWeightingRangeStart(currentWeighting);
@@ -728,6 +747,7 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 				// It is just the binomial coefficient (assuming K <= N)
 
 				branch.number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
+
 				if (K <= numberLeaves)
 				{
 					branch.number_branch_combinations = BinomialCoefficient(numberLeaves, K);
@@ -735,7 +755,7 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 
 				// clear the hits cache
 				branch.hits.clear();
-				
+
 				// Holes between time slices are handled here, as well as the standard case of no holes between time slices -
 				// There is no gap in the sequence of discretized weight values in branches.
 				branchWeighting.setWeighting(timeSlice.WidthForWeighting(ms_per_unit_time) * branch.number_branch_combinations);
@@ -761,7 +781,7 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 	boost::format msg("%1% time slices and %2% branches");
 	msg % time_slice_count % branch_count;
 	messager.AppendKadStatusText(msg.str(), nullptr);
-	
+
 }
 
 void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)
@@ -805,6 +825,7 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 	std::vector<boost::multiprecision::cpp_int> remaining;
 	std::vector<boost::multiprecision::cpp_int>::iterator remainingPtr;
 	std::set<boost::multiprecision::cpp_int> tmp_random_numbers;
+
 	while (tmp_random_numbers.size() < static_cast<size_t>(how_many))
 	{
 
@@ -822,8 +843,7 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 			}
 
 		}
-		else
-		if (boost::multiprecision::cpp_int(tmp_random_numbers.size()) > weighting.getWeighting() / 2)
+		else if (boost::multiprecision::cpp_int(tmp_random_numbers.size()) > weighting.getWeighting() / 2)
 		{
 			// Over 50% of the available numbers are already consumed.
 			// It must be a "somewhat" small number of available numbers.
@@ -894,13 +914,16 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch)
 	BranchOutputRow single_leaf_combination;
 
 	bool skip = false;
+
 	if (K >= branch.numberLeaves())
 	{
 		skip = true;
+
 		for (int n = 0; n < static_cast<int>(branch.numberLeaves()); ++n)
 		{
 			single_leaf_combination.Insert(n);
 		}
+
 		branch.remaining[which_time_unit].push_back(single_leaf_combination);
 	}
 
@@ -914,7 +937,8 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch)
 		PopulateAllLeafCombinations(which_time_unit, K, branch);
 	}
 
-	branch.hits[which_time_unit].insert(std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].begin()), std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].end()));
+	branch.hits[which_time_unit].insert(std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].begin()),
+										std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].end()));
 	branch.remaining[which_time_unit].clear();
 
 }
@@ -925,7 +949,8 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	random_number -= branch.weighting.getWeightingRangeStart();
 
 	std::int64_t which_time_unit = -1;
-	if (time_granularity != TIME_GRANULARITY__NONE) 
+
+	if (time_granularity != TIME_GRANULARITY__NONE)
 	{
 		boost::multiprecision::cpp_int which_time_unit_ = random_number / branch.number_branch_combinations;
 		which_time_unit = which_time_unit_.convert_to<std::int64_t>();
@@ -941,9 +966,11 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	BranchOutputRow test_leaf_combination;
 
 	bool skip = false;
+
 	if (K >= branch.numberLeaves())
 	{
 		skip = true;
+
 		for (int n = 0; n < branch.numberLeaves(); ++n)
 		{
 			test_leaf_combination.Insert(n);
@@ -958,7 +985,8 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	if (!skip)
 	{
 
-		BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
+		BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) < branch.number_branch_combinations,
+						 "The number of hits is as large as the number of combinations for a branch.  Invalid!");
 
 		// skip any leaf combinations returned from previous random numbers - count will be 1 if previously hit for this time unit
 		// THIS is where random selection WITH REMOVAL is implemented (along with the fact that the random numbers generated are also with removal)
@@ -993,6 +1021,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 			{
 
 				std::vector<int> remaining_leaves;
+
 				for (int n = 0; n < branch.numberLeaves(); ++n)
 				{
 					remaining_leaves.push_back(n);
@@ -1003,7 +1032,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 				{
 
 					// ************************************************************************ //
-					// TODO: 
+					// TODO:
 					// This could be optimized in case K is high
 					// and the number of leaves is just a little larger than K
 					// ************************************************************************ //
@@ -1041,12 +1070,15 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	static size_t bytes_allocated = 0;
 	auto insert_result = branch.hits[which_time_unit].insert(test_leaf_combination);
 	bool inserted = insert_result.second;
+
 	if (inserted)
 	{
 		++random_rows_added;
+
 		if (false)
 		{
 			bytes_allocated += sizeof(test_leaf_combination);
+
 			if (random_rows_added % 10000 == 0)
 			{
 				std::string sdata;
@@ -1058,7 +1090,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 			}
 		}
 	}
-	
+
 }
 
 void AllWeightings::PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch)
@@ -1068,6 +1100,7 @@ void AllWeightings::PopulateAllLeafCombinations(std::int64_t const & which_time_
 
 	branch.remaining.clear();
 	std::vector<int> position;
+
 	for (int n = 0; n < K; ++n)
 	{
 		position.push_back(n);
@@ -1083,7 +1116,7 @@ void AllWeightings::PopulateAllLeafCombinations(std::int64_t const & which_time_
 
 		++total_added;
 
-	}	
+	}
 
 }
 
@@ -1107,7 +1140,7 @@ bool AllWeightings::IncrementPosition(int const K, std::vector<int> & position, 
 {
 
 	int sub_k_being_managed = K;
-	
+
 	int new_leaf = IncrementPositionManageSubK(K, sub_k_being_managed, position, branch);
 
 	if (new_leaf == -1)
@@ -1136,6 +1169,7 @@ int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std
 	int const subK = subK_ - 1; // make it 0-based
 
 	int & index_being_managed_value = position[subK];
+
 	if (index_being_managed_value == max_leaf_for_subk)
 	{
 		if (subK == 0)
@@ -1143,12 +1177,15 @@ int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std
 			// All done!
 			return -1;
 		}
+
 		int previous_k_new_leaf = IncrementPositionManageSubK(K, subK, position, branch);
+
 		if (previous_k_new_leaf == -1)
 		{
 			// All done, as reported by nested call!
 			return -1;
 		}
+
 		index_being_managed_value = previous_k_new_leaf; // we will point to the leaf one higher than the leaf to which the previous index points
 	}
 
@@ -1173,8 +1210,8 @@ boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, i
 
 	// Goddamn boost::multiprecision under no circumstances will allow an integer calculation of the binomial coefficient
 
-	boost::multiprecision::cpp_int numerator{ 1 };
-	boost::multiprecision::cpp_int denominator{ 1 };
+	boost::multiprecision::cpp_int numerator { 1 };
+	boost::multiprecision::cpp_int denominator { 1 };
 
 	for (int n = N; n > N - K; --n)
 	{
@@ -1202,12 +1239,13 @@ void AllWeightings::ResetBranchCaches()
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force, bool const is_consolidating) const
+void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force,
+		bool const is_consolidating) const
 {
 
 	// ************************************************************************************************************************************************** //
 	// This function builds a cache:
-	// A single map for this entire branch that 
+	// A single map for this entire branch that
 	// maps a CHILD primary key set (i.e., a single row of child data,
 	// including the child's branch and the 0 or 1 child leaf)
 	// to a particular output row in a particular time unit in this branch,
@@ -1262,7 +1300,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 				bool branch_component_bad = false;
 
 				// First in the "child DMU" vector are the child's BRANCH DMU values
-				std::for_each(allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cbegin(), allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				std::for_each(allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cbegin(),
+							  allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
 					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the branch)
@@ -1271,53 +1310,56 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					{
 
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-						{
+							{
 
-							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-							child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+								// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+								child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
-						}
-						break;
+							}
+							break;
 
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-						{
-
-							// leaf_number tells us which leaf
-							// index tells us which index in that leaf
-
-							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-
-							if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>(outputRow.primary_leaves_cache.size()))
 							{
-								branch_component_bad = true;
-								break;
+
+								// leaf_number tells us which leaf
+								// index tells us which index in that leaf
+
+								// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+
+								if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
+									(outputRow.primary_leaves_cache.size()))
+								{
+									branch_component_bad = true;
+									break;
+								}
+
+								if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
+									== 0)
+								{
+									// This is the K=1 case - the matching leaf of the *top-level* UOA
+									// has no primary keys.  This is a logic error, as we should never match
+									// a "leaf" in the top-level UOA in this case.
+									//
+									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups()",
+									// in particular the following lines:
+									// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+									// --> // {
+									// --> //     is_current_index_a_top_level_primary_group_branch = true;
+									// --> // }
+
+									boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+
+								child_hit_vector_branch_components.push_back(DMUInstanceData(
+											leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+
 							}
-
-							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size() == 0)
-							{
-								// This is the K=1 case - the matching leaf of the *top-level* UOA
-								// has no primary keys.  This is a logic error, as we should never match
-								// a "leaf" in the top-level UOA in this case.
-								//
-								// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups()",
-								// in particular the following lines:
-								// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
-								// --> // {
-								// --> //     is_current_index_a_top_level_primary_group_branch = true;
-								// --> // }
-
-								boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
-								throw NewGeneException() << newgene_error_description(msg.str());
-							}
-
-							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
-
-						}
-						break;
+							break;
 
 						default:
-						{}
-						break;
+							{}
+							break;
 
 					}
 
@@ -1337,7 +1379,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 				bool missing_top_level_leaf = false;
 				child_hit_vector.clear();
 				child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector_branch_components.begin(), child_hit_vector_branch_components.end());
-				std::for_each(allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cbegin(), allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				std::for_each(allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cbegin(),
+							  allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
 					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the leaf)
@@ -1346,61 +1389,65 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					{
 
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-						{
+							{
 
-							// The next DMU in the child leaf's DMU sequence maps to a branch in the top-level DMU sequence
-							child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+								// The next DMU in the child leaf's DMU sequence maps to a branch in the top-level DMU sequence
+								child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
-						}
-						break;
+							}
+							break;
 
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-						{
-
-							// leaf_number tells us which leaf
-							// index tells us which index in that leaf
-
-							// The next DMU in the child leaf's DMU sequence maps to a leaf in the top-level DMU sequence
-
-							if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>(outputRow.primary_leaves_cache.size()))
 							{
-								// The current child leaf maps to a top-level leaf that has no data.
-								// We therefore cannot match.
-								missing_top_level_leaf = true;
-								break;
+
+								// leaf_number tells us which leaf
+								// index tells us which index in that leaf
+
+								// The next DMU in the child leaf's DMU sequence maps to a leaf in the top-level DMU sequence
+
+								if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
+									(outputRow.primary_leaves_cache.size()))
+								{
+									// The current child leaf maps to a top-level leaf that has no data.
+									// We therefore cannot match.
+									missing_top_level_leaf = true;
+									break;
+								}
+
+								if (outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]
+									>= static_cast<int>(leaves_cache.size()))
+								{
+									boost::format msg("Logic error: Output rows saved with the branch point to leaf indexes that do not exist in the branch!");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+
+								if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
+									== 0)
+								{
+									// This is the K=1 case - the matching leaf of the *top-level* UOA
+									// has no primary keys.  This is a logic error, as we should never match
+									// a "leaf" in the top-level UOA in this case.
+									//
+									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups()",
+									// in particular the following lines:
+									// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+									// --> // {
+									// --> //     is_current_index_a_top_level_primary_group_branch = true;
+									// --> // }
+
+									boost::format msg("Logic error: attempting to match child leaf data to a leaf in the top-level unit of analysis when K=1");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+
+								child_hit_vector.push_back(DMUInstanceData(
+															   leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+
 							}
-
-							if (outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf] >= static_cast<int>(leaves_cache.size()))
-							{
-								boost::format msg("Logic error: Output rows saved with the branch point to leaf indexes that do not exist in the branch!");
-								throw NewGeneException() << newgene_error_description(msg.str());
-							}
-
-							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size() == 0)
-							{
-								// This is the K=1 case - the matching leaf of the *top-level* UOA
-								// has no primary keys.  This is a logic error, as we should never match
-								// a "leaf" in the top-level UOA in this case.
-								//
-								// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups()",
-								// in particular the following lines:
-								// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
-								// --> // {
-								// --> //     is_current_index_a_top_level_primary_group_branch = true;
-								// --> // }
-
-								boost::format msg("Logic error: attempting to match child leaf data to a leaf in the top-level unit of analysis when K=1");
-								throw NewGeneException() << newgene_error_description(msg.str());
-							}
-
-							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
-
-						}
-						break;
+							break;
 
 						default:
-						{}
-						break;
+							{}
+							break;
 
 					}
 
@@ -1424,6 +1471,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 								helper_lookup__from_child_key_set__to_matching_output_rows_consolidating[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 							}
 						}
+
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
 						missing_top_level_leaf = false;
@@ -1488,15 +1536,19 @@ void AllWeightings::PrepareRandomSamples(int const K)
 
 			// no optimization - the random number could lie in any map element
 
-			BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
+			BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0
+							 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
 
-			TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](TimeSlices::value_type const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
+			TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](TimeSlices::value_type const & timeSliceData,
+					boost::multiprecision::cpp_int const & test_random_number)
 			{
 				VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
+
 				if (testVariableGroupTimeSliceData.weighting.getWeightingRangeEnd() < test_random_number)
 				{
 					return true;
 				}
+
 				return false;
 			});
 
@@ -1518,15 +1570,17 @@ void AllWeightings::PrepareRandomSamples(int const K)
 		Branches const & branches = variableGroupBranchesAndLeaves.branches;
 
 		// Pick a branch randomly (with weight!)
-		Branches::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch, boost::multiprecision::cpp_int const & test_random_number)
+		Branches::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch,
+											   boost::multiprecision::cpp_int const & test_random_number)
 		{
 			if (testBranch.weighting.getWeightingRangeEnd() < test_random_number)
 			{
 				return true;
 			}
+
 			return false;
 		});
-		 
+
 		const Branch & new_branch = *branchesPtr;
 
 		// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
@@ -1561,7 +1615,7 @@ void AllWeightings::PrepareFullSamples(int const K)
 
 }
 
-void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & orig_random_number_rows)
+void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 {
 
 	if (time_granularity == TIME_GRANULARITY__NONE)
@@ -1571,7 +1625,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 	}
 
 	// Optimization: no need to clear -1, and besides with the current algorithm, it's never filled if we are in this function in any case
-	//branch.hits[-1].clear(); 
+	//branch.hits[-1].clear();
 
 	// Optimization required: first, reserve memory
 	std::int64_t reserve_size = 0;
@@ -1592,20 +1646,19 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 
 	// Now consolidate the output rows from the time-unit subslices into a single sorted vector
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
-	{  
+	{
 		if (hit.first != -1)
-		{ 
-			orig_random_number_rows += hit.second.size();
+		{
 			for (auto iter = std::begin(hit.second); iter != std::end(hit.second);)
 			{
 				// Profiler shows that about half the time in the "consolidating rows" phase
-				// is spent creating new memory here. 
+				// is spent creating new memory here.
 
 				// Optimization!  Profiler shows that over 95% of time in the "consolidating rows" routine
 				// is *now* spent inserting into the "Boost memory-pool backed" hits[-1].
 				// This is terrible performance, so we must use a std::set.
-				//branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter))); 
-				branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow &>(*iter))); 
+				//branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
+				branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow &>(*iter)));
 
 				// Even after the std::move, above, the Boost memory pool deallocation of the space for the object itself
 				// is requiring 90%+ of the time for the "consolidating rows" routine.
@@ -1624,8 +1677,8 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 	});
 
 	std::sort(branch.hits_consolidated.begin(), branch.hits_consolidated.end());
-	//branch.hits_consolidated.erase(std::unique(branch.hits_consolidated.begin(), branch.hits_consolidated.end()), branch.hits_consolidated.end());
-	branch.consolidated_hits_end_index = std::unique(branch.hits_consolidated.begin(), branch.hits_consolidated.end()); // Do not erase!! Optimization
+	branch.hits_consolidated.erase(std::unique(branch.hits_consolidated.begin(), branch.hits_consolidated.end()), branch.hits_consolidated.end());
+	//branch.consolidated_hits_end_index = std::unique(branch.hits_consolidated.begin(), branch.hits_consolidated.end()); // Do not erase!! Optimization
 
 	// ditto above
 	//branch.hits.erase(++branch.hits.begin(), branch.hits.end());
@@ -1664,6 +1717,7 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(AllWeightings 
 
 		branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 		branch.ResetLeafCache();
+
 		for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
 		{
 			branch.ConstructChildCombinationCache(allWeightings, c, true);
@@ -1677,16 +1731,16 @@ BranchOutputRow::BranchOutputRow()
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
-: primary_leaves(rhs.primary_leaves)
-, child_indices_into_raw_data(rhs.child_indices_into_raw_data)
+	: primary_leaves(rhs.primary_leaves)
+	, child_indices_into_raw_data(rhs.child_indices_into_raw_data)
 {
 	SaveCache();
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
-: primary_leaves(std::move(rhs.primary_leaves))
-, child_indices_into_raw_data(std::move(rhs.child_indices_into_raw_data))
-, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
+	: primary_leaves(std::move(rhs.primary_leaves))
+	, child_indices_into_raw_data(std::move(rhs.child_indices_into_raw_data))
+	, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
 {
 	//SaveCache(); // already moved from rhs
 }
@@ -1697,6 +1751,7 @@ BranchOutputRow & BranchOutputRow::operator=(BranchOutputRow const & rhs)
 	{
 		return *this;
 	}
+
 	primary_leaves = rhs.primary_leaves;
 	child_indices_into_raw_data = rhs.child_indices_into_raw_data;
 	SaveCache();
@@ -1709,6 +1764,7 @@ BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
 	{
 		return *this;
 	}
+
 	primary_leaves = std::move(rhs.primary_leaves);
 	child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
 	SaveCache();
@@ -1727,6 +1783,7 @@ void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 	bool endinf = false;
 
 	sdata += "<TIMESTAMP_START>";
+
 	if (!time_slice.hasTimeGranularity())
 	{
 		if (time_slice.startsAtNegativeInfinity())
@@ -1735,13 +1792,16 @@ void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 			startinf = true;
 		}
 	}
+
 	if (!startinf)
 	{
 		sdata += boost::lexical_cast<std::string>(time_slice.getStart());
 	}
+
 	sdata += "</TIMESTAMP_START>";
 
 	sdata += "<TIMESTAMP_END>";
+
 	if (!time_slice.hasTimeGranularity())
 	{
 		if (time_slice.endsAtPlusInfinity())
@@ -1750,24 +1810,30 @@ void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 			endinf = true;
 		}
 	}
+
 	if (!endinf)
 	{
 		sdata += boost::lexical_cast<std::string>(time_slice.getEnd());
 	}
+
 	sdata += "</TIMESTAMP_END>";
 
 	sdata += "<DATETIME_START>";
+
 	if (!startinf)
 	{
 		sdata += TimeRange::convertTimestampToString(time_slice.getStart());
 	}
+
 	sdata += "</DATETIME_START>";
 
 	sdata += "<DATETIME_END>";
+
 	if (!endinf)
 	{
 		sdata += TimeRange::convertTimestampToString(time_slice.getEnd());
 	}
+
 	sdata += "</DATETIME_END>";
 
 }
@@ -1973,7 +2039,8 @@ void SpitLeaf(std::string & sdata, Leaf const & leaf)
 	SpitKeys(sdata, leaf.primary_keys);
 	sdata += "</LEAF_DMU_DATALIST>";
 	sdata += "<OTHER_NON_PRIMARY_TOP_LEVEL_INDICES__ONE_PER_LEAF__POINTING_INTO_DATA_CACHE>";
-	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map::value_type const & leafindicesintorawdata)
+	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(),
+				  leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map::value_type const & leafindicesintorawdata)
 	{
 		sdata += "<VARIABLE_GROUP>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
@@ -2047,7 +2114,8 @@ void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMappi
 	sdata += "</index_of_column_within_top_level_branch_or_single_leaf>";
 
 	sdata += "<leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf>";
-	sdata += boost::lexical_cast<std::string>(childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf);
+	sdata += boost::lexical_cast<std::string>
+			 (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf);
 	sdata += "</leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf>";
 
 }
@@ -2056,11 +2124,13 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 {
 
 	std::fstream file_;
+
 	if (to_file)
 	{
 		boost::format filenametxt("all_weightings.%1%.xml");
 		filenametxt % file_name_appending_string;
 		file_.open(filenametxt.str(), std::ofstream::out | std::ios::trunc);
+
 		if (!file_.is_open())
 		{
 			std::string theerr = strerror(errno);
@@ -2085,11 +2155,13 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	*sdata += "</TIME_GRANULARITY>";
 
 	*sdata += "<NUMBER_CHILD_VARIABLE_GROUPS>";
-	*sdata += boost::lexical_cast<std::string>(allWeightings.numberChildVariableGroups);  
+	*sdata += boost::lexical_cast<std::string>(allWeightings.numberChildVariableGroups);
 	*sdata += "</NUMBER_CHILD_VARIABLE_GROUPS>";
 
 	*sdata += "<childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
-	std::for_each(allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cbegin(), allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cend(), [&](decltype(allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1)::value_type const & oneChildGroup)
+	std::for_each(allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cbegin(),
+				  allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cend(), [&](decltype(
+							  allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1)::value_type const & oneChildGroup)
 	{
 		*sdata += "<child_group>";
 
@@ -2105,6 +2177,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	*sdata += "</childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
 
 	*sdata += "<CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGS>";
+
 	for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
 	{
 		*sdata += "<CHILD_GROUP>";
@@ -2115,7 +2188,8 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 
 		*sdata += "<CHILD_GROUP_COLUMN_MAPPINGS>";
 		*sdata += "<BRANCH_MAPPINGS>";
-		std::for_each(allWeightings.mappings_from_child_branch_to_primary.cbegin(), allWeightings.mappings_from_child_branch_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_branch_to_primary)::value_type const & oneChildGroupBranchMappings)
+		std::for_each(allWeightings.mappings_from_child_branch_to_primary.cbegin(),
+					  allWeightings.mappings_from_child_branch_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_branch_to_primary)::value_type const & oneChildGroupBranchMappings)
 		{
 			if (oneChildGroupBranchMappings.first == c)
 			{
@@ -2129,7 +2203,8 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		});
 		*sdata += "</BRANCH_MAPPINGS>";
 		*sdata += "<LEAF_MAPPINGS>";
-		std::for_each(allWeightings.mappings_from_child_leaf_to_primary.cbegin(), allWeightings.mappings_from_child_leaf_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_leaf_to_primary)::value_type const & oneChildGroupLeafMappings)
+		std::for_each(allWeightings.mappings_from_child_leaf_to_primary.cbegin(),
+					  allWeightings.mappings_from_child_leaf_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_leaf_to_primary)::value_type const & oneChildGroupLeafMappings)
 		{
 			if (oneChildGroupLeafMappings.first == c)
 			{
@@ -2146,6 +2221,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 
 		*sdata += "</CHILD_GROUP>";
 	}
+
 	*sdata += "</CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGS>";
 
 	*sdata += "<DATA_CACHE_PRIMARY>";
@@ -2261,13 +2337,14 @@ void SpitLeaves(std::string & sdata, Branch const & branch)
 
 //#endif
 
-void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice,
+		std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	// ********************************************************************************************** //
 	// This function is called when time slices (and corresponding output row data)
 	// are SPLIT.
-	// Note that the opposite case - when time slices are MERGED - 
+	// Note that the opposite case - when time slices are MERGED -
 	// it is the context of CONSOLIDATED output,
 	// a scenario where precisely the "hits" data is wiped out and consolidated
 	// so that this function would be irrelevent (and is not called).
@@ -2538,6 +2615,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 			std::int64_t current_starting_time = originalTimeSlice.getStart();
 			std::int64_t current_aligned_down_time = TimeRange::determineAligningTimestamp(current_starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
 			long double start_sliver_width = 0.0;
+
 			if (current_aligned_down_time < current_starting_time)
 			{
 				first_hit_is_a_sliver = true;
@@ -2547,6 +2625,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 			std::int64_t current_ending_time = originalTimeSlice.getEnd();
 			std::int64_t current_aligned_up_time = TimeRange::determineAligningTimestamp(current_ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
 			long double end_sliver_width = 0.0;
+
 			if (current_aligned_up_time > current_ending_time)
 			{
 				last_hit_is_a_sliver = true;
@@ -2576,8 +2655,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					{
 						current_hit_width = start_sliver_width;
 					}
-					else
-					if (hit_number == total_hits && last_hit_is_a_sliver)
+					else if (hit_number == total_hits && last_hit_is_a_sliver)
 					{
 						current_hit_width = end_sliver_width;
 					}
@@ -2591,18 +2669,21 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					hit_total_distance_so_far = hit_end_position;
 
 					bool leftOverlaps = false;
+
 					if (hit_start_position < UnitsLeftFloat)
 					{
 						leftOverlaps = true;
 					}
 
 					bool middleOverlaps = false;
+
 					if (hit_start_position < UnitsLeftFloat + UnitsMiddleFloat && hit_end_position > UnitsLeftFloat)
 					{
 						middleOverlaps = true;
 					}
 
 					bool rightOverlaps = false;
+
 					if (hit_end_position > UnitsLeftFloat + UnitsMiddleFloat)
 					{
 						rightOverlaps = true;
@@ -2612,19 +2693,17 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					{
 						if (rightOverlaps)
 						{
-							new_hits[hit_number-1] = hit.second;
+							new_hits[hit_number - 1] = hit.second;
 						}
 					}
-					else
-					if (useLeft)
+					else if (useLeft)
 					{
 						if (leftOverlaps)
 						{
 							new_hits[hit_number - 1] = hit.second;
 						}
 					}
-					else
-					if (useMiddle)
+					else if (useMiddle)
 					{
 						if (middleOverlaps)
 						{
@@ -2686,16 +2765,14 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 							new_hits[hit_time_index - (originalWidth - rightRounded)] = hit.second;
 						}
 					}
-					else
-					if (useLeft)
+					else if (useLeft)
 					{
 						if (matches_left)
 						{
 							new_hits[hit_time_index] = hit.second;
 						}
 					}
-					else
-					if (useMiddle)
+					else if (useMiddle)
 					{
 						if (matches_middle)
 						{
@@ -2734,7 +2811,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 		});
 
 	});
-	
+
 	ResetBranchCachesSingleTimeSlice(allWeightings);
 
 }
@@ -2746,7 +2823,7 @@ void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, Instanc
 }
 
 void AllWeightings::getMySize() const
-{ 
+{
 
 	memset(&mySize, '\0', sizeof(mySize));
 
@@ -2759,16 +2836,19 @@ void AllWeightings::getMySize() const
 	{
 		mySize.sizeRandomNumbers += sizeof(random_number);
 	}
+
 	mySize.totalSize += mySize.sizeRandomNumbers;
 
 	//consolidated_rows
 	//mySize.sizeConsolidatedRows += sizeof(consolidated_rows);
 	mySize.numberMapNodes += consolidated_rows.size();
+
 	for (auto const & mergedTimeSliceRow : consolidated_rows)
 	{
 		mySize.sizeConsolidatedRows += sizeof(mergedTimeSliceRow);
 		getInstanceDataVectorUsage(mySize.sizeConsolidatedRows, mergedTimeSliceRow.output_row, false);
 	}
+
 	mySize.totalSize += mySize.sizeConsolidatedRows;
 
 	// mappings_from_child_branch_to_primary
@@ -2784,12 +2864,14 @@ void AllWeightings::getMySize() const
 	// childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1
 	//mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1);
 	mySize.numberMapNodes += childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.size();
+
 	for (auto const & single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 : childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1)
 	{
 		//mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1);
 		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.first);
 		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.second);
 	}
+
 	mySize.totalSize += mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 
 	// dataCache
@@ -2800,25 +2882,30 @@ void AllWeightings::getMySize() const
 	// otherTopLevelCache
 	//mySize.sizeOtherTopLevelCache += sizeof(otherTopLevelCache);
 	mySize.numberMapNodes += otherTopLevelCache.size();
+
 	for (auto const & single_otherTopLevelCache : otherTopLevelCache)
 	{
 		mySize.sizeOtherTopLevelCache += sizeof(single_otherTopLevelCache);
 		getDataCacheUsage(mySize.sizeOtherTopLevelCache, single_otherTopLevelCache.second);
 	}
+
 	mySize.totalSize += mySize.sizeOtherTopLevelCache;
 
 	// childCache
 	//mySize.sizeChildCache += sizeof(childCache);
 	mySize.numberMapNodes += childCache.size();
+
 	for (auto const & single_childCache : childCache)
 	{
 		mySize.sizeChildCache += sizeof(single_childCache);
 		getDataCacheUsage(mySize.sizeChildCache, single_childCache.second);
 	}
+
 	mySize.totalSize += mySize.sizeChildCache;
 
 	// timeSlices
 	mySize.sizeTimeSlices += sizeof(timeSlices);
+
 	for (auto const & timeSlice : timeSlices)
 	{
 		mySize.sizeTimeSlices += sizeof(timeSlice.first);
@@ -2838,6 +2925,7 @@ void AllWeightings::getMySize() const
 			Branches const & branches = variableGroupBranchesAndLeaves.branches;
 
 			mySize.numberMapNodes += branches.size();
+
 			for (auto const & branch : branches)
 			{
 
@@ -2883,6 +2971,7 @@ void AllWeightings::getMySize() const
 
 				// helper_lookup__from_child_key_set__to_matching_output_rows is a map
 				mySize.numberMapNodes += helper_lookup__from_child_key_set__to_matching_output_rows.size();
+
 				for (auto const & child_lookup_from_child_data_to_rows : helper_lookup__from_child_key_set__to_matching_output_rows)
 				{
 					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.first);
@@ -2894,6 +2983,7 @@ void AllWeightings::getMySize() const
 					getInstanceDataVectorUsage(mySize.sizeTimeSlices, childDMUInstanceDataVector);
 
 					mySize.numberMapNodes += outputRowsToChildDataMap.size();
+
 					for (auto const & outputRowToChildDataMap : outputRowsToChildDataMap)
 					{
 						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.first);
@@ -2912,6 +3002,7 @@ void AllWeightings::getMySize() const
 
 				// remaining is a map
 				mySize.numberMapNodes += remaining.size();
+
 				for (auto const & remaining_rows : remaining)
 				{
 					auto const & remaining_time_unit = remaining_rows.first;
@@ -2931,11 +3022,12 @@ void AllWeightings::getMySize() const
 
 				// hits is a map
 				mySize.numberMapNodes += hits.size();
+
 				for (auto const & time_unit_hit : hits)
 				{
 					mySize.sizeTimeSlices += sizeof(time_unit_hit.first);
 					mySize.sizeTimeSlices += sizeof(time_unit_hit.second);
-					
+
 					// outputRows is a vector
 					auto const & outputRows = time_unit_hit.second;
 
@@ -2949,6 +3041,7 @@ void AllWeightings::getMySize() const
 		}
 
 	}
+
 	mySize.totalSize += mySize.sizeTimeSlices;
 
 }
@@ -2972,6 +3065,7 @@ void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & out
 	{
 		usage += sizeof(primary_leaf);
 	}
+
 	for (auto const & primary_leaf : primary_leaves_cache)
 	{
 		usage += sizeof(primary_leaf);
@@ -3015,6 +3109,7 @@ void AllWeightings::getInstanceDataVectorUsage(size_t & usage, InstanceDataVecto
 	{
 		usage += sizeof(instanceDataVector);
 	}
+
 	for (auto const & instanceData : instanceDataVector)
 	{
 		// Boost Variant is stack-based
@@ -3026,6 +3121,7 @@ void AllWeightings::getInstanceDataVectorUsage(size_t & usage, InstanceDataVecto
 void AllWeightings::getDataCacheUsage(size_t & usage, DataCache const & dataCache) const
 {
 	mySize.numberMapNodes += dataCache.size();
+
 	for (auto const & rowIdToData : dataCache)
 	{
 		usage += sizeof(rowIdToData.first);
@@ -3037,6 +3133,7 @@ void AllWeightings::getDataCacheUsage(size_t & usage, DataCache const & dataCach
 void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const
 {
 	mySize.numberMapNodes += childToBranchColumnMappings.size();
+
 	for (auto const & single_mappings_from_child_branch_to_primary : childToBranchColumnMappings)
 	{
 		usage += sizeof(single_mappings_from_child_branch_to_primary.first);
@@ -3103,7 +3200,7 @@ void purge_pool()
 	//
 	// Unfortunately, the standard does not specify what the actual size of allocation is
 	// for items in the container.
-	// 
+	//
 	// However, it is quite safe to assume that it will be 4, 8, or perhaps no more than 12 or 16
 	// bytes in excess of sizeof(T).
 	//
@@ -3112,54 +3209,54 @@ void purge_pool()
 
 
 	boost::singleton_pool<TAG, SIZE>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 1>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 2>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 3>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 4>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 5>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 6>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 7>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 8>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 9>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 10>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 11>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 12>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 13>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 14>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 15>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 16>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 17>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 18>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 19>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 20>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 21>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 22>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 23>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 24>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 25>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 26>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 27>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 28>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 29>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 30>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 31>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 32>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 33>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 34>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 35>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 36>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 37>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 38>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 39>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 40>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 41>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 42>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 43>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 44>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 45>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 46>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 47>::purge_memory();
-	boost::singleton_pool<TAG, SIZE + 48>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 1 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 2 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 3 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 4 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 5 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 6 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 7 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 8 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 9 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 10 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 11 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 12 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 13 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 14 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 15 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 16 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 17 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 18 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 19 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 20 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 21 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 22 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 23 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 24 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 25 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 26 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 27 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 28 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 29 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 30 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 31 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 32 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 33 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 34 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 35 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 36 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 37 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 38 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 39 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 40 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 41 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 42 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 43 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 44 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 45 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 46 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 47 >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 48 >::purge_memory();
 }
 
 void AllWeightings::Clear()

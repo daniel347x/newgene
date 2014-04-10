@@ -8,15 +8,15 @@
 #include "../Settings/Setting.h"
 #include "Tables/TableManager.h"
 #include <memory>
-#include <tuple>  
-#include <cstdint> 
+#include <tuple>
+#include <cstdint>
 #include <atomic>
-#include <mutex> 
-#include <fstream> 
+#include <mutex>
+#include <fstream>
 #include <set>
-#include <string> 
+#include <string>
 #include <list>
-#include "./RandomSampling/RandomSampling.h" 
+#include "./RandomSampling/RandomSampling.h"
 
 class PrimaryKeySequence
 {
@@ -30,7 +30,8 @@ class PrimaryKeySequence
 
 				VariableGroup_PrimaryKey_Info()
 					: sequence_number_within_dmu_category_for_this_variable_groups_uoa(-1) // will only be populated later if exists
-					, current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group(-1) // will be populated later
+					, current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group(
+						-1) // will be populated later
 					, total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group(0) // will only be populated later if exists
 					, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group(-1) // will be populated later
 					, total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group(0) // will only be populated later if exists
@@ -81,13 +82,13 @@ class PrimaryKeySequence
 			public:
 
 				PrimaryKeySequenceEntry()
-					: sequence_number_within_dmu_category_spin_control{ -1 }
-					, sequence_number_within_dmu_category_primary_uoa{ -1 }
-					, sequence_number_in_all_primary_keys__of__global_primary_key_sequence_metadata__NOT__of_order_columns_appear_in_top_level_vg{ -1 }
-					, sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg{ -1 }
-					, total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category{ -1 }
-					, total_kad_spin_count_for_this_dmu_category{ -1 }
-					, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group{ -1 }
+					: sequence_number_within_dmu_category_spin_control { -1 }
+				, sequence_number_within_dmu_category_primary_uoa { -1 }
+				, sequence_number_in_all_primary_keys__of__global_primary_key_sequence_metadata__NOT__of_order_columns_appear_in_top_level_vg { -1 }
+				, sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg { -1 }
+				, total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category { -1 }
+				, total_kad_spin_count_for_this_dmu_category { -1 }
+				, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group { -1 }
 				{}
 
 				WidgetInstanceIdentifier dmu_category;
@@ -113,7 +114,7 @@ class ColumnsInTempView
 
 		enum SCHEMA_TYPE
 		{
-			  SCHEMA_TYPE__UNKNOWN
+			SCHEMA_TYPE__UNKNOWN
 			, SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY
 			, SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY
 			, SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD
@@ -127,8 +128,8 @@ class ColumnsInTempView
 
 				enum COLUMN_TYPE
 				{
-					  COLUMN_TYPE__UNKNOWN = 0
-					, COLUMN_TYPE__PRIMARY
+					COLUMN_TYPE__UNKNOWN = 0
+										   , COLUMN_TYPE__PRIMARY
 					, COLUMN_TYPE__SECONDARY
 					, COLUMN_TYPE__DATETIMESTART
 					, COLUMN_TYPE__DATETIMEEND
@@ -495,14 +496,14 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::int64_t datetime_end;
 						std::vector<fast_string> current_parameter_strings;
 						std::vector<std::int64_t> current_parameter_ints;
-						std::vector<long double> current_parameter_floats; 
-						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use; 
+						std::vector<long double> current_parameter_floats;
+						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
 
 						// ************************************************************************************************* //
 						// Use these vectors to obtain the data you want.
 						// First, get the binding and index into the proper bound vector, above.
 						// Then, retrieve the data from the bound vector, above.
-						// ************************************************************************************************* //    
+						// ************************************************************************************************* //
 
 						// std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> contains the following data:
 						// WHICH_BINDING, the index in the corresponding bound vector (above), and the column number
@@ -557,7 +558,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 										  std::vector<std::int64_t> const & new_ints,
 										  std::vector<long double> const & new_floats,
 										  std::vector < std::pair < SQLExecutor::WHICH_BINDING,
-										  std::pair<int, int >>> & new_indices,
+										  std::pair<int, int >> > & new_indices,
 										  bool enforce_all_datetimes = false,
 										  std::int64_t const startdate_current = 0,
 										  std::int64_t const enddate_current = 0,
@@ -731,7 +732,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulateUOAs();
 				void ValidateUOAs();
 				void DetermineChildMultiplicitiesGreaterThanOne();
-				void PopulateVariableGroups();  
+				void PopulateVariableGroups();
 				void PopulatePrimaryKeySequenceInfo();
 
 				size_t top_level_vg_index; // in case there are multiple top-level variable groups, which one to use as primary (the others will be treated as children)
@@ -748,26 +749,32 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				int overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf;
 				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
 				void RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings);
-				void RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages);
-				SqlAndColumnSet RandomSamplingBuildOutputSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info);
+				void RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings,
+						VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages);
+				SqlAndColumnSet RandomSamplingBuildOutputSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns,
+						std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info);
 				void RandomSamplingCreateOutputTable();
 				void RandomSamplingWriteToOutputTable(AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
 				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
 				void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex);
-				void CreateOutputRow(Branch const &branch, BranchOutputRow const &outputRow, AllWeightings &allWeightings);
-				void ConsolidateData(bool const random_sampling, AllWeightings &allWeightings);
-				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings &allWeightings, Branch const & branch, BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> &incoming, TimeSlice const & the_slice, int & orig_row_count);
+				void CreateOutputRow(Branch const & branch, BranchOutputRow const & outputRow, AllWeightings & allWeightings);
+				void ConsolidateData(bool const random_sampling, AllWeightings & allWeightings);
+				void ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(AllWeightings & allWeightings);
+
+				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings & allWeightings, Branch const & branch, BranchOutputRow const & incoming_row,
+						std::set<MergedTimeSliceRow> & incoming, TimeSlice const & the_slice, int & orig_row_count);
 
 				void RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings);
-				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t &rows_written);
+				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set & output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch,
+										 AllWeightings & allWeightings, std::int64_t & rows_written);
 				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
 
-				std::map<int, int> top_level_number_secondary_columns; 
-				std::map<int, int> child_number_secondary_columns; 
+				std::map<int, int> top_level_number_secondary_columns;
+				std::map<int, int> child_number_secondary_columns;
 				// Functions involved in different phases of generation
 				void PopulateSchemaForRawDataTables(AllWeightings & allWeightings);
 				void PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
-					std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index);
+												   std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index);
 				void LoopThroughPrimaryVariableGroups();
 				void MergeHighLevelGroupResults();
 				void MergeChildGroups();
@@ -1140,9 +1147,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// because it is used rarely, but when it is used it is critical
 				// to understand exactly what it is.
 				// The order of elements in this vector exactly corresponds
-				// to the order of elements in the vector corresponding to 
+				// to the order of elements in the vector corresponding to
 				// each UOA in 'biggest_counts', above.
-				std::vector<int> outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA;
+				std::vector<int>
+				outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA;
 				int highest_multiplicity_primary_uoa;
 				std::string highest_multiplicity_primary_uoa_dmu_string_code;
 				bool any_primary_dmu_has_multiplicity_greater_than_1;

@@ -25,7 +25,7 @@ FieldTypeTraits<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID>::type const FieldTypeTraits<
 FieldTypeTraits<FIELD_TYPE_DATETIME_STRING>::type const FieldTypeTraits<FIELD_TYPE_DATETIME_STRING>::default_;
 FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING>::type const FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING>::default_;
 
-bool IsFieldTypeInt32(FIELD_TYPE const & field_type)
+bool IsFieldTypeInt32(FIELD_TYPE const & field_type) 
 {
 
 	bool returnVal = false;
