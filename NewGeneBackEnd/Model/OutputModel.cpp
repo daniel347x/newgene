@@ -617,7 +617,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			RandomSamplingCreateOutputTable();
 			if (failed || CheckCancelled()) return;
 			  
-		}
+		} 
 		  
 		final_result = random_sampling_schema;
 

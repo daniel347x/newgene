@@ -1259,7 +1259,8 @@ typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 typedef FastVector<Leaf> fast_leaf_vector;
 typedef FastSet<Leaf> Leaves;
 
-typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;   
+typedef std::vector<BranchOutputRow> std_branch_output_row_vector; 
+typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;
 typedef FastSet<BranchOutputRow> fast_branch_output_row_set;
 
 typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
@@ -1387,7 +1388,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Time unit index is 0-based
 		//
 		mutable fast__int64__to__fast_branch_output_row_set hits;
-		mutable fast_branch_output_row_vector hits_consolidated;
+		//mutable fast_branch_output_row_vector hits_consolidated;
+		mutable std_branch_output_row_vector hits_consolidated;
 		//
 		// ******************************************************************************************************** //
 		// ******************************************************************************************************** //

@@ -1577,7 +1577,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 	{ 
 		if (hit.first != -1)
 		{
-			orig_random_number_rows += hit.second.size();
+			orig_random_number_rows += hit.second.size(); 
 			for (auto iter = std::begin(hit.second); iter != std::end(hit.second);)
 			{
 				// Profiler shows that about half the time in the "consolidating rows" phase
@@ -3044,9 +3044,10 @@ void AllWeightings::ClearWeightingsAndRemainingBranchJunk()
 				// Due to optimization and use of branch.hits_consolidated, the sole case of a regular,
 				// non-Boost memory pool data structure (besides the cpp_int structures),
 				// we must manually delete it here.
-				// No! The data structure has been switched back to the boost memory pool and changed to a vector,
-				// in an attempt to get the optimization to work.
-				//branch.hits_consolidated.clear();
+				// // No! The data structure has been switched back to the boost memory pool and changed to a vector,
+				// // in an attempt to get the optimization to work.
+				// Actually, yes.
+				branch.hits_consolidated.clear();
 
 				branch.weighting.ClearWeighting();
 				branch.number_branch_combinationsPtr.release(); // The one cpp_int that is not part of a Weighting instance

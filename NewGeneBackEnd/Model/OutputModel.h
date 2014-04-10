@@ -8,7 +8,7 @@
 #include "../Settings/Setting.h"
 #include "Tables/TableManager.h"
 #include <memory>
-#include <tuple>
+#include <tuple> 
 #include <cstdint> 
 #include <atomic>
 #include <mutex> 
