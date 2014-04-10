@@ -803,7 +803,7 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 	// window of discrete values), including no-replacement.
 	bool reverse_mode = false;
 	std::vector<boost::multiprecision::cpp_int> remaining;
-	std::vector<boost::multiprecision::cpp_int>::const_iterator remainingPtr;
+	std::vector<boost::multiprecision::cpp_int>::iterator remainingPtr;
 	std::set<boost::multiprecision::cpp_int> tmp_random_numbers;
 	while (tmp_random_numbers.size() < static_cast<size_t>(how_many))
 	{
@@ -816,7 +816,7 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 
 			++remainingPtr;
 
-			if (remainingPtr == remaining.cend())
+			if (remainingPtr == remaining.end())
 			{
 				break;
 			}
@@ -851,7 +851,7 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 			});
 
 			// Prepare reverse mode, but do not populate a new random number
-			remainingPtr = remaining.cbegin();
+			remainingPtr = remaining.begin();
 			reverse_mode = true;
 		}
 		else
@@ -914,7 +914,7 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch)
 		PopulateAllLeafCombinations(which_time_unit, K, branch);
 	}
 
-	branch.hits[which_time_unit].insert(std::move_iterator<decltype(branch.remaining[which_time_unit])::iterator>(branch.remaining[which_time_unit].begin()), decltype(branch.remaining[which_time_unit])::iterator>(branch.remaining[which_time_unit].end()));
+	branch.hits[which_time_unit].insert(std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].begin()), std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].end()));
 	branch.remaining[which_time_unit].clear();
 
 }
@@ -1571,14 +1571,19 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 	}
 
 	branch.hits[-1].clear();
-
+	 
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
 	{
 		if (hit.first != -1)
 		{
 			orig_random_number_rows += hit.second.size();
-			branch.hits[-1].insert(std::move_iterator<decltype(hit.second)::move_iterator>(hit.second.cbegin()), std::move_iterator<decltype(hit.second)::move_iterator>(hit.second.cend()));
-			hit.second.clear();
+			for (auto iter = std::begin(hit.second); iter != std::end(hit.second);)
+			{
+				// Profiler shows that about half the time in the "consolidating rows" phase
+				// is spent creating new memory here.
+				branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
+				hit.second.erase(iter++);
+			}
 		}
 	});
 
@@ -2323,10 +2328,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 	std::int64_t leftWidth = 0;
 	std::int64_t middleWidth = 0;
 	std::int64_t rightWidth = 0;
-
-	long double UnitsLeftFloat = 0.0;
-	long double UnitsMiddleFloat = 0.0;
-	long double UnitsRightFloat = 0.0;
 
 	// We *leave the data available* no matter how small the time slice is,
 	// and let the output routine ensure that the time widths properly weight the slices.

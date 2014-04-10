@@ -1267,7 +1267,7 @@ typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_r
 
 typedef FastMap<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
 typedef FastMap<std::int64_t, fast_branch_output_row_vector> fast__int64__to__fast_branch_output_row_vector;
-
+ 
 //typedef FastMap<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 typedef FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 
