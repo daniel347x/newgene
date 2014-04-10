@@ -1889,6 +1889,8 @@ void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & da
 	sdata += "</DATA_CACHES>";
 }
 
+std::string & SpitHit(std::string & sdata, fast__int64__to__fast_branch_output_row_set::value_type const &hitsEntry);
+
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits)
 {
 	sdata += "<TIME_UNITS>";
@@ -1899,21 +1901,9 @@ void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set c
 
 	std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set::value_type const & hitsEntry)
 	{
-		sdata += "<TIME_UNIT>";
-
-		sdata += "<TIME_UNIT_MAP_ITSELF>";
-		sdata += boost::lexical_cast<std::string>(sizeof(hitsEntry));
-		sdata += "</TIME_UNIT_MAP_ITSELF>";
-
-		sdata += "<TIME_UNIT_INDEX>";
-		sdata += boost::lexical_cast<std::string>(hitsEntry.first);
-		sdata += "</TIME_UNIT_INDEX>";
-		sdata += "<OUTPUT_ROWS>";
-		SpitSetOfOutputRows(sdata, hitsEntry.second);
-		sdata += "</OUTPUT_ROWS>";
-
-		sdata += "</TIME_UNIT>";
+		SpitHit(sdata, hitsEntry.first, hitsEntry.second);
 	});
+
 	sdata += "</TIME_UNITS>";
 }
 
@@ -2066,12 +2056,12 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	sdata += "</PRIMARY_KEYS>";
 
 	sdata += "<PRIMARY_HITS>";
-	SpitHits(sdata, branch.hits);
+	SpitHits(sdata, -1, branch.hits);
 	sdata += "</PRIMARY_HITS>";
 
-	sdata += "<CONSOLIDATED_HITS>";
-	SpitHits(sdata, branch.hits);
-	sdata += "</CONSOLIDATED_HITS>";
+	sdata += "<CONSOLIDATED_TIME_UNIT_HIT>";
+	SpitHit(sdata, branch.hits_consolidated);
+	sdata += "</CONSOLIDATED_TIME_UNIT_HIT>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 	SpitChildLookup(sdata, branch.helper_lookup__from_child_key_set__to_matching_output_rows);
@@ -3265,6 +3255,26 @@ void purge_pool()
 	boost::singleton_pool < TAG, SIZE + 46, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 47, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 48, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+
+}
+
+void SpitHit(std::string & sdata, std::int64_t const time_unit, fast_branch_output_row_set const & hit)
+{
+
+	sdata += "<TIME_UNIT>";
+
+	sdata += "<TIME_UNIT_MAP_ITSELF>";
+	sdata += boost::lexical_cast<std::string>(sizeof(std::pair<std::int64_t const, fast_branch_output_row_set>));
+	sdata += "</TIME_UNIT_MAP_ITSELF>";
+
+	sdata += "<TIME_UNIT_INDEX>";
+	sdata += boost::lexical_cast<std::string>(time_unit);
+	sdata += "</TIME_UNIT_INDEX>";
+	sdata += "<OUTPUT_ROWS>";
+	SpitSetOfOutputRows(sdata, hit);
+	sdata += "</OUTPUT_ROWS>";
+
+	sdata += "</TIME_UNIT>";
 
 }
 

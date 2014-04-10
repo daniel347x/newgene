@@ -1315,6 +1315,7 @@ void SpitKeys(std::string & sdata, FastVector<DMUInstanceData> const & dmu_keys)
 void SpitDataCache(std::string & sdata, DataCache const & dataCache);
 void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & dataCaches);
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits);
+void SpitHit(std::string & sdata, std::int64_t const time_unit, fast_branch_output_row_set const & hit);
 void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const & setOfRows);
 void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
 void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__output_rows const & helperLookup);
