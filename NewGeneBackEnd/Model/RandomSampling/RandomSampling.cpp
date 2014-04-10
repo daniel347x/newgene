@@ -1750,7 +1750,7 @@ void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set c
 	sdata += "<TIME_UNITS>";
 
 	sdata += "<TIME_UNITS_MAP_ITSELF>";
-	sdata += sizeof(hits);
+	sdata += boost::lexical_cast<std::string>(sizeof(hits));
 	sdata += "</TIME_UNITS_MAP_ITSELF>";
 
 	std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set::value_type const & hitsEntry)
@@ -1758,7 +1758,7 @@ void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set c
 		sdata += "<TIME_UNIT>";
 
 		sdata += "<TIME_UNIT_MAP_ITSELF>";
-		sdata += sizeof(hitsEntry);
+		sdata += boost::lexical_cast<std::string>(sizeof(hitsEntry));
 		sdata += "</TIME_UNIT_MAP_ITSELF>";
 
 		sdata += "<TIME_UNIT_INDEX>";
@@ -1778,7 +1778,7 @@ void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const &
 	sdata += "<SET_OF_ROWS>";
 
 	sdata += "<SET_OF_ROWS_MAP_ITSELF>";
-	sdata += sizeof(setOfRows);
+	sdata += boost::lexical_cast<std::string>(sizeof(setOfRows));
 	sdata += "</SET_OF_ROWS_MAP_ITSELF>";
 
 	int index = 0;
@@ -1803,7 +1803,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 	sdata += "<ROW>";
 
 	sdata += "<ROW_OBJECT_ITSELF>";
-	sdata += sizeof(row);
+	sdata += boost::lexical_cast<std::string>(sizeof(row));
 	sdata += "</ROW_OBJECT_ITSELF>";
 
 	sdata += "<INDICES_FOR_THIS_SINGLE_ROW_POINTING_INTO_LEAF_SET_FOR_THIS_BRANCH>";
@@ -1817,13 +1817,13 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 
 	sdata += "<CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW>";
 	sdata += "<CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
-	sdata += sizeof(row.child_indices_into_raw_data);
+	sdata += boost::lexical_cast<std::string>(sizeof(row.child_indices_into_raw_data));
 	sdata += "</CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
 	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map::value_type const & childindices)
 	{
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA>";
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA_OBJECT_ITSELF>";
-		sdata += sizeof(childindices);
+		sdata += boost::lexical_cast<std::string>(sizeof(childindices));
 		sdata += "</SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA_OBJECT_ITSELF>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
 		sdata += boost::lexical_cast<std::string>(childindices.first);
@@ -1832,7 +1832,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 		{
 			sdata += "<SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW>";
 			sdata += "<SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW_OBJECT_ITSELF>";
-			sdata += sizeof(childleaves);
+			sdata += boost::lexical_cast<std::string>(sizeof(childleaves));
 			sdata += "</SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW_OBJECT_ITSELF>";
 			sdata += "<LEAF_NUMBER>";
 			sdata += boost::lexical_cast<std::string>(childleaves.first);
@@ -2005,7 +2005,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	*sdata += "</TIME_GRANULARITY>";
 
 	*sdata += "<NUMBER_CHILD_VARIABLE_GROUPS>";
-	*sdata += boost::lexical_cast<std::string>(allWeightings.numberChildVariableGroups);
+	*sdata += boost::lexical_cast<std::string>(allWeightings.numberChildVariableGroups); 
 	*sdata += "</NUMBER_CHILD_VARIABLE_GROUPS>";
 
 	*sdata += "<childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
@@ -2082,7 +2082,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 
 	*sdata += "<TIME_SLICES>";
 	*sdata += "<TIME_SLICES_MAP_ITSELF>";
-	*sdata += sizeof(allWeightings.timeSlices);
+	*sdata += boost::lexical_cast<std::string>(sizeof(allWeightings.timeSlices));
 	*sdata += "</TIME_SLICES_MAP_ITSELF>";
 	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 	{
@@ -2096,7 +2096,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		*sdata += "<TIME_SLICE>";
 
 		*sdata += "<TIME_SLICE_MAP_ITSELF>";
-		*sdata += sizeof(timeSlice);
+		*sdata += boost::lexical_cast<std::string>(sizeof(timeSlice));
 		*sdata += "</TIME_SLICE_MAP_ITSELF>";
 
 		TimeSlice const & the_slice = timeSlice.first;
@@ -2117,7 +2117,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 			*sdata += "<VARIABLE_GROUP_BRANCHES_AND_LEAVES>";
 
 			*sdata += "<VARIABLE_GROUP_BRANCHES_AND_LEAVES_MAP_ITSELF>";
-			*sdata += sizeof(variableGroupBranchesAndLeaves);
+			*sdata += boost::lexical_cast<std::string>(sizeof(variableGroupBranchesAndLeaves));
 			*sdata += "</VARIABLE_GROUP_BRANCHES_AND_LEAVES_MAP_ITSELF>";
 
 			*sdata += "<VARIABLE_GROUP_NUMBER>";
@@ -2134,7 +2134,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 				*sdata += "<BRANCH_WITH_LEAVES>";
 
 				*sdata += "<BRANCH_WITH_LEAVES_MAP_ITSELF>";
-				*sdata += sizeof(branch);
+				*sdata += boost::lexical_cast<std::string>(sizeof(branch));
 				*sdata += "</BRANCH_WITH_LEAVES_MAP_ITSELF>";
 
 				SpitBranch(*sdata, branch);
