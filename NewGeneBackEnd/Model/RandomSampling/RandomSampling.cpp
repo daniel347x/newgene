@@ -1889,7 +1889,26 @@ void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & da
 	sdata += "</DATA_CACHES>";
 }
 
-std::string & SpitHit(std::string & sdata, fast__int64__to__fast_branch_output_row_set::value_type const &hitsEntry);
+template<typename T>
+void SpitHit(std::string & sdata, std::int64_t const time_unit, T const & hit)
+{
+
+	sdata += "<TIME_UNIT>";
+
+	sdata += "<TIME_UNIT_MAP_ITSELF>";
+	sdata += boost::lexical_cast<std::string>(sizeof(std::pair<std::int64_t const, fast_branch_output_row_set>));
+	sdata += "</TIME_UNIT_MAP_ITSELF>";
+
+	sdata += "<TIME_UNIT_INDEX>";
+	sdata += boost::lexical_cast<std::string>(time_unit);
+	sdata += "</TIME_UNIT_INDEX>";
+	sdata += "<OUTPUT_ROWS>";
+	SpitSetOfOutputRows(sdata, hit);
+	sdata += "</OUTPUT_ROWS>";
+
+	sdata += "</TIME_UNIT>";
+
+}
 
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits)
 {
@@ -1907,7 +1926,8 @@ void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set c
 	sdata += "</TIME_UNITS>";
 }
 
-void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const & setOfRows)
+template<typename T>
+void SpitSetOfOutputRows(std::string & sdata, T const & setOfRows)
 {
 	sdata += "<SET_OF_ROWS>";
 
@@ -3255,26 +3275,6 @@ void purge_pool()
 	boost::singleton_pool < TAG, SIZE + 46, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 47, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 48, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-
-}
-
-void SpitHit(std::string & sdata, std::int64_t const time_unit, fast_branch_output_row_set const & hit)
-{
-
-	sdata += "<TIME_UNIT>";
-
-	sdata += "<TIME_UNIT_MAP_ITSELF>";
-	sdata += boost::lexical_cast<std::string>(sizeof(std::pair<std::int64_t const, fast_branch_output_row_set>));
-	sdata += "</TIME_UNIT_MAP_ITSELF>";
-
-	sdata += "<TIME_UNIT_INDEX>";
-	sdata += boost::lexical_cast<std::string>(time_unit);
-	sdata += "</TIME_UNIT_INDEX>";
-	sdata += "<OUTPUT_ROWS>";
-	SpitSetOfOutputRows(sdata, hit);
-	sdata += "</OUTPUT_ROWS>";
-
-	sdata += "</TIME_UNIT>";
 
 }
 
