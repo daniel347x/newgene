@@ -2056,11 +2056,11 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	sdata += "</PRIMARY_KEYS>";
 
 	sdata += "<PRIMARY_HITS>";
-	SpitHits(sdata, -1, branch.hits);
+	SpitHits(sdata, branch.hits);
 	sdata += "</PRIMARY_HITS>";
 
 	sdata += "<CONSOLIDATED_TIME_UNIT_HIT>";
-	SpitHit(sdata, branch.hits_consolidated);
+	SpitHit(sdata, -1, branch.hits_consolidated);
 	sdata += "</CONSOLIDATED_TIME_UNIT_HIT>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
