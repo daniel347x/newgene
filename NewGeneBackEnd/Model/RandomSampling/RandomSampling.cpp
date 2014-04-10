@@ -3272,33 +3272,44 @@ void AllWeightings::Clear()
 		insert_random_sample_stmt = nullptr;
 	}
 
-	random_numbers.clear();
-
 	ClearWeightingsAndRemainingBranchJunk();
 
+	purge_pool<boost::pool_allocator_tag, sizeof(InstanceDataVector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(InstanceData)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_short_vector::value_type)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_vector_childtoprimarymapping::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(int)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_int_vector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_leaf_vector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(char)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector::value_type)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector_huge::value_type)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>();
-
+	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeavesVector::value_type)>();
+	  
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__mergedtimeslicerow_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__short__to__fast_short_to_int_map::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_branch_output_row_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_vector::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows::value_type)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaves::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(DataCache::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_data_cache_map::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_short_map::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_childtoprimarymappingvector::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branches::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>();
 
 }

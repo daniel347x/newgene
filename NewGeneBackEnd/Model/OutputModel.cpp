@@ -12,7 +12,7 @@
 #	include <boost/scope_exit.hpp>
 #	include <boost/date_time/local_time/local_time.hpp>
 #endif
-
+ 
 #include <fstream>
 #include <algorithm>
 
@@ -585,10 +585,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 			// The following prepares all randomly-generated output rows
 			boost::format
-			myPrepareRandomSamples("Done generating random numbers.  Pre-populating %1% randomly selected rows of primary variable group data into RAM (out of %2% total rows) ...");
+			myPrepareRandomSamplesDone("Done generating random numbers.");
+			messager.AppendKadStatusText(myPrepareRandomSamplesDone.str(), this);
+
+			boost::format
+			myPrepareRandomSamples("Pre-populating %1% randomly selected rows of primary variable group data into RAM (out of %2% total rows) ...");
 			myPrepareRandomSamples % boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str();
 			messager.AppendKadStatusText(myPrepareRandomSamples.str(), this);
-
 
 			allWeightings.PrepareRandomSamples(K);
 
@@ -598,6 +601,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			boost::format mytxtA("Completed pre-populating randomly selected rows.");
 			//mytxtA % sdata.c_str();
 			messager.AppendKadStatusText(mytxtA.str(), this);
+
+			allWeightings.ClearRandomNumbers();
+
 		}
 		else
 		{

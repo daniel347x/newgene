@@ -12,7 +12,7 @@
 #	include <boost/multiprecision/cpp_int.hpp>
 #	include <boost/variant.hpp>
 #	include <boost/pool/pool_alloc.hpp>
-#endif
+#endif 
 #include "../../Utilities/NewGeneException.h"
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 #include "../TimeGranularity.h"
@@ -1296,7 +1296,7 @@ typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 typedef FastVector<Leaf> fast_leaf_vector;
 typedef FastSet<Leaf> Leaves;
 
-typedef std::vector<BranchOutputRow> std_branch_output_row_vector;
+//typedef std::vector<BranchOutputRow> std_branch_output_row_vector;
 typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;
 typedef FastVector<BranchOutputRow, 4096> fast_branch_output_row_vector_huge;
 typedef FastSet<BranchOutputRow> fast_branch_output_row_set;
@@ -2111,6 +2111,7 @@ class AllWeightings
 		void getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const;
 		void ClearWeightingsAndRemainingBranchJunk(); // only for use when we will never touch this object again.  For use with Boost memory pool.
 		void Clear(); // ditto
+		void ClearRandomNumbers() { random_numbers.clear();  }
 
 	protected:
 

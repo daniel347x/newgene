@@ -15,7 +15,7 @@
 #include <fstream>
 #include <set>
 #include <string>
-#include <list>
+#include <list> 
 #include "./RandomSampling/RandomSampling.h"
 
 class PrimaryKeySequence
