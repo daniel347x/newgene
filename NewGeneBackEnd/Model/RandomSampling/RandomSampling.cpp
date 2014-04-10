@@ -1571,7 +1571,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 	}
 
 	// Optimization: no need to clear -1, and besides with the current algorithm, it's never filled if we are in this function in any case
-	//branch.hits[-1].clear();
+	//branch.hits[-1].clear(); 
 	 
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
 	{ 
@@ -1587,7 +1587,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 				// is *now* spent inserting into the "Boost memory-pool backed" hits[-1].
 				// This is terrible performance, so we must use a std::set.
 				//branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
-				branch.hits_consolidated.insert(std::move(const_cast<BranchOutputRow &>(*iter))); 
+				branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow &>(*iter))); 
 
 				// Even after the std::move, above, the Boost memory pool deallocation of the space for the object itself
 				// is requiring 90%+ of the time for the "consolidating rows" routine.
@@ -1599,6 +1599,9 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 			}
 		}
 	});
+
+	std::sort(branch.hits_consolidated.begin(), branch.hits_consolidated.end());
+	branch.hits_consolidated.erase(std::unique(branch.hits_consolidated.begin(), branch.hits_consolidated.end()), branch.hits_consolidated.end());
 
 	// ditto above
 	//branch.hits.erase(++branch.hits.begin(), branch.hits.end());
@@ -1658,9 +1661,10 @@ BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
 : primary_leaves(std::move(rhs.primary_leaves))
-, child_indices_into_raw_data(rhs.child_indices_into_raw_data)
+, child_indices_into_raw_data(std::move(rhs.child_indices_into_raw_data))
+, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
 {
-	SaveCache();
+	//SaveCache(); // already moved from rhs
 }
 
 BranchOutputRow & BranchOutputRow::operator=(BranchOutputRow const & rhs)

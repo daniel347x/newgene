@@ -616,7 +616,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 			RandomSamplingCreateOutputTable();
 			if (failed || CheckCancelled()) return;
-			 
+			  
 		}
 		  
 		final_result = random_sampling_schema;
@@ -22098,35 +22098,26 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					// In this case, the random sampling algorithm will place all results into index -1,
 					// so the above block that consolidates to index -1 is not necessary.
 					// ***************************************************************************************************** //
-					auto const & incoming_rows = branch.hits[-1];
-
-
-					// To support random sampling,
-					// do a loop here over the hits,
-					// being sure divisions perfectly match,
-					// and setting the initial division to the start of the slice
-					// and the end division to the end of the slice.
-
-
 
 					MergedTimeSliceRow::RHS_wins = true; // optimizer might call copy constructor, which calls operator=(), during "emplace"
-					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+					if (random_sampling)
 					{
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
-						allWeightings.create_output_row_visitor_global_data_cache.clear();
-						CreateOutputRow(branch, incoming_row, allWeightings);
-						create_output_row_visitor::output_file = nullptr;
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
-
-						incoming.emplace(the_slice, allWeightings.create_output_row_visitor_global_data_cache);
-
-						MergedTimeSliceRow const & test_row = *incoming.cbegin();
-						InstanceDataVector const & test_vector = test_row.output_row;
-
-						allWeightings.create_output_row_visitor_global_data_cache.clear();
-
-						++orig_row_count;
-					});
+						// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
+						auto const & incoming_rows = branch.hits_consolidated;
+						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+						{
+							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
+						});
+					}
+					else
+					{
+						// In this case, full sampling, the rows were already added to branch.hits[-1] in consolidated fashion within each branch
+						auto const & incoming_rows = branch.hits[-1];
+						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+						{
+							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
+						});
+					}
 					MergedTimeSliceRow::RHS_wins = false;
 
 					std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
@@ -22613,4 +22604,22 @@ void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current
 
 	});
 
+}
+
+void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings &allWeightings, Branch const & branch, BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> &incoming, TimeSlice const & the_slice, int & orig_row_count)
+{
+	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
+	allWeightings.create_output_row_visitor_global_data_cache.clear();
+	CreateOutputRow(branch, incoming_row, allWeightings);
+	create_output_row_visitor::output_file = nullptr;
+	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+	incoming.emplace(the_slice, allWeightings.create_output_row_visitor_global_data_cache);
+
+	MergedTimeSliceRow const & test_row = *incoming.cbegin();
+	InstanceDataVector const & test_vector = test_row.output_row;
+
+	allWeightings.create_output_row_visitor_global_data_cache.clear();
+
+	++orig_row_count;
 }

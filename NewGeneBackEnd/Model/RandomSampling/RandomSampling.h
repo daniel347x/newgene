@@ -1259,9 +1259,8 @@ typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 typedef FastVector<Leaf> fast_leaf_vector;
 typedef FastSet<Leaf> Leaves;
 
-typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;  
+typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;   
 typedef FastSet<BranchOutputRow> fast_branch_output_row_set;
-typedef std::set<BranchOutputRow> regular_branch_output_row_set; // We must delete manually, as destructor won't be called since we are not deleting the AllWeightings instance!  See comments elsewhere.
 
 typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
 //typedef FastMapFlat<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
@@ -1388,7 +1387,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Time unit index is 0-based
 		//
 		mutable fast__int64__to__fast_branch_output_row_set hits;
-		mutable regular_branch_output_row_set hits_consolidated; // Only used when consolidating randomly-sampled rows (at "hits" index >= 0, one per time unit within a time slice for each branch).  Note that for full sampling, the output is already present in hits[-1].  We only use this "hits_consolidated" because the profiler shows that well over 95% of the time in the "consolidating hits" routine is spent inserting rows into the hits[-1] entry, usually almost all of which are duplicates anyways
+		mutable fast_branch_output_row_vector hits_consolidated;
 		//
 		// ******************************************************************************************************** //
 		// ******************************************************************************************************** //

@@ -12,7 +12,7 @@
 #include <cstdint> 
 #include <atomic>
 #include <mutex> 
-#include <fstream>
+#include <fstream> 
 #include <set>
 #include <string> 
 #include <list>
@@ -756,6 +756,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex);
 				void CreateOutputRow(Branch const &branch, BranchOutputRow const &outputRow, AllWeightings &allWeightings);
 				void ConsolidateData(bool const random_sampling, AllWeightings &allWeightings);
+				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings &allWeightings, Branch const & branch, BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> &incoming, TimeSlice const & the_slice, int & orig_row_count);
+
 				void RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings);
 				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t &rows_written);
 				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
