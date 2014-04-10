@@ -1592,7 +1592,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 
 	// Now consolidate the output rows from the time-unit subslices into a single sorted vector
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
-	{ 
+	{  
 		if (hit.first != -1)
 		{ 
 			orig_random_number_rows += hit.second.size();
@@ -1618,7 +1618,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 
 			// Memory allocation error when NOT deleting the above "hit" vector,
 			// so attempt it here to give it a chance to delete more in bulk.
-			//hit.second.clear();
+			hit.second.clear();
 
 		}
 	});
