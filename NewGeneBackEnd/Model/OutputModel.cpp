@@ -622,6 +622,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText(mytxtB.str(), this);
 		}
 
+		std::vector<std::string> sout;
+		SpitAllWeightings(sout, allWeightings, true, std::string("AfterLoadingPrimary"));
+		std::vector<std::string>().swap(sout);
+
 		if (failed || CheckCancelled()) { return; }
 
 		if (false)
@@ -683,6 +687,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		if (failed || CheckCancelled()) { return; }
 
+		SpitAllWeightings(sout, allWeightings, true, std::string("AfterLoadingChildren"));
+		std::vector<std::string>().swap(sout);
+
 		//sdata.clear();
 		//allWeightings.getMySize();
 		//allWeightings.mySize.spitSizes(sdata);
@@ -721,6 +728,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			ConsolidateData(random_sampling, allWeightings);
 
 			if (failed || CheckCancelled()) { return; }
+
+			SpitAllWeightings(sout, allWeightings, true, std::string("AfterConsolidating"));
+			std::vector<std::string>().swap(sout);
 
 			//sdata.clear();
 			//allWeightings.getMySize();
