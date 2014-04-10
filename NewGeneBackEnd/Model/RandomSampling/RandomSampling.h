@@ -844,7 +844,7 @@ class Weighting
 			, weighting_range_endPtr{ new boost::multiprecision::cpp_int }
 			, weighting{ *weightingPtr}
 			, weighting_range_start{ *weighting_range_startPtr }
-			, weighting_range_end{ *weighting_range_endPtr }
+			, weighting_range_end{ *weighting_range_endPtr } 
 		{
 			++how_many_weightings;
 			InternalSetWeighting();
@@ -1952,7 +1952,7 @@ public:
 			sdata += "</TOTAL_SIZE>";
 
 			sdata += "<TOTAL_NUMBER_MAP_NODES>";
-			sdata += boost::lexical_cast<std::string>(totalSize);
+			sdata += boost::lexical_cast<std::string>(numberMapNodes);
 			sdata += "</TOTAL_NUMBER_MAP_NODES>";
 
 			sdata += "<SIZE_INSTANCE>";

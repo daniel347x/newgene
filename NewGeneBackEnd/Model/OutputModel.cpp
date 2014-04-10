@@ -631,9 +631,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		boost::format myFillChildren("Merging in secondary variable group data...");
 		messager.AppendKadStatusText(myFillChildren.str(), this);
 		RandomSamplerFillDataForChildGroups(allWeightings);
-		if (failed || CheckCancelled()) return;
+		if (failed || CheckCancelled()) return; 
 
-		std::vector<std::string> spitsizes;
+		spitsizes.clear();
 		SpitAllWeightings(spitsizes, allWeightings, true, "child_cache_complete");
 
 		sdata.clear();

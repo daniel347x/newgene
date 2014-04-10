@@ -22,7 +22,7 @@ bool MergedTimeSliceRow::RHS_wins = false;
 std::string create_output_row_visitor::row_in_process;
 
 int Weighting::how_many_weightings = 0;
- 
+  
 AllWeightings::AllWeightings(Messager & messager_)
 : insert_random_sample_stmt(nullptr)
 , numberChildVariableGroups(0)
@@ -1995,6 +1995,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	*sdata += "<ALL_WEIGHTINGS>";
 
 	allWeightings.getMySize();
+
 	*sdata += "<ALL_WEIGHTINGS_TOTAL_SIZE>";
 	allWeightings.mySize.spitSizes(*sdata);
 	*sdata += "</ALL_WEIGHTINGS_TOTAL_SIZE>";
@@ -3250,7 +3251,7 @@ void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & out
 
 		// the_child_lookup_map is a map from POD to POD
 		auto const & the_child_lookup_map = single_child_indices_into_raw_data.second;
-		mySize += the_child_lookup_map.size();
+		mySize.numberMapNodes += the_child_lookup_map.size();
 
 		for (auto const & the_child_lookup_map_entry : the_child_lookup_map)
 		{

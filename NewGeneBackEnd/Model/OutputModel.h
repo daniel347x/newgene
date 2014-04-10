@@ -495,7 +495,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::int64_t datetime_end;
 						std::vector<fast_string> current_parameter_strings;
 						std::vector<std::int64_t> current_parameter_ints;
-						std::vector<long double> current_parameter_floats;
+						std::vector<long double> current_parameter_floats; 
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use; 
 
 						// ************************************************************************************************* //
