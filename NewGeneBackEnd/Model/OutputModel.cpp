@@ -492,7 +492,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
 	} BOOST_SCOPE_EXIT_END
 
-		create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
+	create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
 	Prepare(allWeightings);
 
 	if (failed || CheckCancelled())

@@ -15,7 +15,6 @@
 
 std::fstream * create_output_row_visitor::output_file = nullptr;
 int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor::CREATE_ROW_MODE__NONE); 
-InstanceDataVector AllWeightings::create_output_row_visitor_global_data_cache;
 InstanceDataVector * create_output_row_visitor::data = nullptr;
 int * create_output_row_visitor::bind_index = nullptr;
 sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;

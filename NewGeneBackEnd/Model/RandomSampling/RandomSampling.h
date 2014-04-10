@@ -2085,7 +2085,7 @@ private:
 
 public:
 
-	InstanceData create_output_row_visitor_global_data_cache;
+	InstanceDataVector create_output_row_visitor_global_data_cache;
 
 };
 
