@@ -1298,14 +1298,12 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			: PrimaryKeysGrouping{ DMUInstanceDataVector() }
 			, number_branch_combinationsPtr{ new boost::multiprecision::cpp_int }
 			, number_branch_combinations{ *number_branch_combinationsPtr }
-			, consolidated_hits_end_index{ 0 }
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, number_branch_combinationsPtr{new boost::multiprecision::cpp_int }
 			, number_branch_combinations{ *number_branch_combinationsPtr }
-			, consolidated_hits_end_index{ 0 }
 			{
 		}
 
