@@ -22172,9 +22172,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 						// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
 						auto & incoming_rows = branch.hits_consolidated;
 						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
-						//for (fast_branch_output_row_vector_huge::iterator rowiter = incoming_rows.begin(); rowiter != branch.consolidated_hits_end_index; ++rowiter)
 						{
-							//BranchOutputRow const & incoming_row = *rowiter;
 							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
 						});
 					}
@@ -22264,21 +22262,30 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 			{
 				std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 				{
-					auto const & incoming_rows = branch.hits[-1];
+
 					MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
-					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+
+					if (random_sampling)
 					{
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
-						allWeightings.create_output_row_visitor_global_data_cache.clear();
-						CreateOutputRow(branch, incoming_row, allWeightings);
-						create_output_row_visitor::output_file = nullptr;
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+						// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
+						auto const & incoming_rows = branch.hits_consolidated;
+						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+						{
+							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
+						});
+						MergedTimeSliceRow::RHS_wins = false;
+					}
+					else
+					{
+						// In this case, full sampling, the rows were already added to branch.hits[-1] in consolidated fashion within each branch
+						auto const & incoming_rows = branch.hits[-1];
+						MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
+						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+						{
+							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
+						});
+					}
 
-						ongoing_merged_rows.emplace(the_slice, allWeightings.create_output_row_visitor_global_data_cache);
-						allWeightings.create_output_row_visitor_global_data_cache.clear();
-
-						++orig_row_count;
-					});
 					MergedTimeSliceRow::RHS_wins = false;
 
 				});
@@ -22684,7 +22691,7 @@ void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current
 }
 
 void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings & allWeightings, Branch const & branch,
-		BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> & incoming, TimeSlice const & the_slice, int & orig_row_count)
+	BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, int & orig_row_count)
 {
 	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
 	allWeightings.create_output_row_visitor_global_data_cache.clear();
@@ -22692,10 +22699,7 @@ void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringCo
 	create_output_row_visitor::output_file = nullptr;
 	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 
-	incoming.emplace(the_slice, allWeightings.create_output_row_visitor_global_data_cache);
-
-	MergedTimeSliceRow const & test_row = *incoming.cbegin();
-	InstanceDataVector const & test_vector = test_row.output_row;
+	merging.emplace(the_slice, allWeightings.create_output_row_visitor_global_data_cache);
 
 	allWeightings.create_output_row_visitor_global_data_cache.clear();
 

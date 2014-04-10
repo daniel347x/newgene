@@ -760,9 +760,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void CreateOutputRow(Branch const & branch, BranchOutputRow const & outputRow, AllWeightings & allWeightings);
 				void ConsolidateData(bool const random_sampling, AllWeightings & allWeightings);
 				void ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(AllWeightings & allWeightings);
-
 				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings & allWeightings, Branch const & branch, BranchOutputRow const & incoming_row,
-						std::set<MergedTimeSliceRow> & incoming, TimeSlice const & the_slice, int & orig_row_count);
+						std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, int & orig_row_count);
+
 
 				void RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings);
 				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set & output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch,
