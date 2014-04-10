@@ -574,7 +574,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		if (random_sampling)
 		{
-			std::int64_t const samples = random_sampling_number_rows;
+			std::int64_t const samples = random_sampling_number_rows; 
 
 			// The following prepares all randomly-generated output rows
 			boost::format myGenerateRandomSamples("Generating %1% random numbers between 1 and %2% to be used to select random rows ...");

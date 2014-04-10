@@ -3180,7 +3180,10 @@ void AllWeightings::ClearWeightingsAndRemainingBranchJunk()
 		});
 	});
 	weighting.ClearWeighting();
-	random_numbers.clear();
+
+	// random_numbers.clear() does not usually deallocate!!!
+	std::vector<boost::multiprecision::cpp_int>().swap(random_numbers);
+
 }
 
 template <typename TAG, int SIZE>
