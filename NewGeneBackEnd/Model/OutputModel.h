@@ -1205,7 +1205,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// Basic variables used throughout different functions of this Generator
 				OutputModel * model;
 				InputModel * input_model;
-				OutputProject & project;
+				OutputProject & project; 
 				Messager & messager;
 				sqlite3 * db;
 				sqlite3_stmt * stmt_result; // An overall statement handle that is used only to iterate through the final result of various temporary tables

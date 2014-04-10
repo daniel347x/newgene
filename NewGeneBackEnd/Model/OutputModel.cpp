@@ -496,7 +496,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
 	Prepare(allWeightings);
-
+	 
 	if (failed || CheckCancelled())
 	{
 		return;

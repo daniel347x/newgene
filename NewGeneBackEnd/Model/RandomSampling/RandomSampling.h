@@ -950,9 +950,9 @@ class Weighting
 			// never need this weighting instance ever again.
 			// Obviously the "weighting" references will become dangling references
 			// after this function exits.
-			weightingPtr.release();
-			weighting_range_startPtr.release();
-			weighting_range_endPtr.release();
+			weightingPtr.reset();
+			weighting_range_startPtr.reset();
+			weighting_range_endPtr.reset();
 		}
 
 	private:
@@ -1357,7 +1357,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		{
 		}
 
-		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const & rhs)
+		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const & rhs) 
 		{
 			if (&rhs == this)
 			{

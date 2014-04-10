@@ -3174,7 +3174,7 @@ void AllWeightings::ClearWeightingsAndRemainingBranchJunk()
 				//branch.hits_consolidated.clear();
 
 				branch.weighting.ClearWeighting();
-				branch.number_branch_combinationsPtr.release(); // The one cpp_int that is not part of a Weighting instance
+				branch.number_branch_combinationsPtr.reset(); // The one cpp_int that is not part of a Weighting instance
 
 			});
 		});
@@ -3283,7 +3283,7 @@ void AllWeightings::Clear()
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_int_vector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_leaf_vector::value_type)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>(); 
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector_huge::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>();
