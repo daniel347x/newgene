@@ -638,7 +638,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 							for (auto matchingOutputChildLeavesPtr = matchingOutputChildLeaves.cbegin(); matchingOutputChildLeavesPtr != matchingOutputChildLeaves.cend(); ++matchingOutputChildLeavesPtr)
 							{
 
-								std::int8_t const & matching_child_leaf_index = *matchingOutputChildLeavesPtr;
+								std::int16_t const & matching_child_leaf_index = *matchingOutputChildLeavesPtr;
 
 								auto const found = outputRow.child_indices_into_raw_data.find(variable_group_number);
 								if (found == outputRow.child_indices_into_raw_data.cend())  
@@ -2014,10 +2014,10 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		*sdata += "<child_group>";
 
 		*sdata += "<child_variable_group_index>";
-		*sdata += boost::lexical_cast<std::string>(oneChildGroup.first);
+		*sdata += boost::lexical_cast<std::string>(boost::lexical_cast<std::int32_t>(oneChildGroup.first));
 		*sdata += "</child_variable_group_index>";
 		*sdata += "<column_count_for_child_dmu_with_child_multiplicity_greater_than_1>";
-		*sdata += boost::lexical_cast<std::string>(oneChildGroup.second);
+		*sdata += boost::lexical_cast<std::string>(boost::lexical_cast<std::int32_t>(oneChildGroup.second));
 		*sdata += "</column_count_for_child_dmu_with_child_multiplicity_greater_than_1>";
 
 		*sdata += "</child_group>";

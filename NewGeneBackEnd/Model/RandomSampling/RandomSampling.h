@@ -21,7 +21,7 @@
 
 typedef std::basic_string<char, std::char_traits<char>, boost::pool_allocator<char>> fast_string;
 
-typedef FastMap<std::int8_t, std::int8_t> fast_short_to_short_map;
+typedef FastMap<std::int16_t, std::int16_t> fast_short_to_short_map;
 typedef boost::variant<std::int32_t, double, fast_string> InstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> DMUInstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> SecondaryInstanceData;
@@ -31,7 +31,7 @@ typedef InstanceDataVector DMUInstanceDataVector;
 typedef InstanceDataVector ChildDMUInstanceDataVector;
 typedef InstanceDataVector SecondaryInstanceDataVector;
 
-typedef std::vector<std::int8_t, boost::pool_allocator<std::int8_t>> fast_short_vector;
+typedef std::vector<std::int16_t, boost::pool_allocator<std::int16_t>> fast_short_vector;
 typedef std::vector<int, boost::pool_allocator<int>> fast_int_vector;
 typedef std::set<int, std::less<int>, boost::fast_pool_allocator<int>> fast_int_set;
 typedef FastMap<std::int16_t, std::int32_t> fast_short_to_int_map;
