@@ -159,7 +159,7 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 /************************************************************************/
 void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE action_request)
 {
-	get()->getWorkService().post(DoRandomSamplingChange(action_request, this));
+	get()->getWorkService().post(DoKadSamplerChange(action_request, this));
 }
 
 /************************************************************************/
@@ -167,7 +167,7 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 /************************************************************************/
 void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE action_request)
 {
-	get()->getWorkService().post(RandomSamplingCountPerStageChange(action_request, this));
+	get()->getWorkService().post(KadSamplerCountPerStageChange(action_request, this));
 }
 
 /************************************************************************/

@@ -11,12 +11,12 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-class DoRandomSamplingChange : public DoOutputAction<ACTION_DO_RANDOM_SAMPLING_CHANGE>
+class DoKadSamplerChange : public DoOutputAction<ACTION_DO_RANDOM_SAMPLING_CHANGE>
 {
 
 	public:
 
-		DoRandomSamplingChange(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE & action_request_, OutputProjectWorkQueue * queue_)
+		DoKadSamplerChange(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE & action_request_, OutputProjectWorkQueue * queue_)
 			: DoOutputAction<ACTION_DO_RANDOM_SAMPLING_CHANGE>(static_cast<WidgetActionItemRequest<ACTION_DO_RANDOM_SAMPLING_CHANGE>>(action_request_), queue_)
 		{
 
@@ -25,17 +25,17 @@ class DoRandomSamplingChange : public DoOutputAction<ACTION_DO_RANDOM_SAMPLING_C
 		void operator()()
 		{
 			UIMessagerSingleShot messager(queue->get()->messager);
-			uiactionManagerUI().getBackendManager().DoDoRandomSamplingChange(messager.get(), action_request, queue->get()->backend());
+			uiactionManagerUI().getBackendManager().DoDoKadSamplerChange(messager.get(), action_request, queue->get()->backend());
 		}
 
 };
 
-class RandomSamplingCountPerStageChange : public DoOutputAction<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>
+class KadSamplerCountPerStageChange : public DoOutputAction<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>
 {
 
 	public:
 
-		RandomSamplingCountPerStageChange(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE & action_request_, OutputProjectWorkQueue * queue_)
+		KadSamplerCountPerStageChange(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE & action_request_, OutputProjectWorkQueue * queue_)
 			: DoOutputAction<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>(static_cast<WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>>(action_request_), queue_)
 		{
 
@@ -44,7 +44,7 @@ class RandomSamplingCountPerStageChange : public DoOutputAction<ACTION_RANDOM_SA
 		void operator()()
 		{
 			UIMessagerSingleShot messager(queue->get()->messager);
-			uiactionManagerUI().getBackendManager().DoRandomSamplingCountPerStageChange(messager.get(), action_request, queue->get()->backend());
+			uiactionManagerUI().getBackendManager().DoKadSamplerCountPerStageChange(messager.get(), action_request, queue->get()->backend());
 		}
 
 };

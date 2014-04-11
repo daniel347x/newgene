@@ -62,8 +62,8 @@ void TimeRangeBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 		this->show();
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET)));
-		connect(this, SIGNAL(UpdateDoRandomSampling(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)));
-		connect(this, SIGNAL(UpdateRandomSamplingCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)));
+		connect(this, SIGNAL(UpdateDoKadSampler(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)));
+		connect(this, SIGNAL(UpdateKadSamplerCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)));
 		connect(this, SIGNAL(UpdateConsolidateRows(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)));
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
@@ -106,7 +106,7 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 	bool consolidate_rows = widget_data.consolidate_rows;
 
 	{
-		QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
+		QCheckBox * checkBox = this->findChild<QCheckBox*>("doKadSampler");
 		if (checkBox)
 		{
 			bool is_checked = checkBox->isChecked();
@@ -148,7 +148,7 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 
 }
 
-void TimeRangeBox::on_doRandomSampling_stateChanged(int)
+void TimeRangeBox::on_doKadSampler_stateChanged(int)
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
@@ -157,14 +157,14 @@ void TimeRangeBox::on_doRandomSampling_stateChanged(int)
 		return;
 	}
 
-	QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
+	QCheckBox * checkBox = this->findChild<QCheckBox*>("doKadSampler");
 	if (checkBox)
 	{
 		bool is_checked = checkBox->isChecked();
 		InstanceActionItems actionItems;
 		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
 		WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
-		emit UpdateDoRandomSampling(action_request);
+		emit UpdateDoKadSampler(action_request);
 	}
 
 }
@@ -184,7 +184,7 @@ void TimeRangeBox::on_randomSamplingHowManyRows_textChanged(const QString &)
 		InstanceActionItems actionItems;
 		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Int64(the_number)))));
 		WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
-		emit UpdateRandomSamplingCount(action_request);
+		emit UpdateKadSamplerCount(action_request);
 	}
 
 }

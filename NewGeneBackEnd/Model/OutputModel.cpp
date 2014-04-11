@@ -473,7 +473,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	// The work of the new Sampler class is all done here
 	K = 0;
-	random_sampling_schema = RandomSamplingBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
+	random_sampling_schema = KadSamplerBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 	if (failed || CheckCancelled()) { return; }
 
 	primary_variable_group_column_sets.push_back(SqlAndColumnSets());
@@ -491,7 +491,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText(myLoad.str(), this);
 
 	std::vector<std::string> errorMessages;
-	RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
+	KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 	if (failed || CheckCancelled()) { return; }
 
 	// *************************************************** //
@@ -564,7 +564,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// This is only necessary for debugging
 		// or further sorting/ordering/processing
 
-		RandomSamplingCreateOutputTable();
+		KadSamplerCreateOutputTable();
 
 		if (failed || CheckCancelled()) { return; }
 
@@ -579,14 +579,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// ********************************************************************************* //
 	boost::format myFillChildren("Merging in secondary variable group data...");
 	messager.AppendKadStatusText(myFillChildren.str(), this);
-	RandomSamplerFillDataForChildGroups(allWeightings);
+	KadSamplerFillDataForChildGroups(allWeightings);
 	if (failed || CheckCancelled()) { return; }
 
 	boost::format mytxt2("Completed merging secondary groups.");
 	messager.AppendKadStatusText(mytxt2.str(), this);
 
 	// The following function will clear and re-populate its internal
-	// cache of Leaf objects (which were updated by RandomSamplerFillDataForChildGroups()
+	// cache of Leaf objects (which were updated by KadSamplerFillDataForChildGroups()
 	// by the non-primary top-level variable groups with indexes into their
 	// secondary data caches) from the Leaf set paired with each branch.
 	//
@@ -652,13 +652,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// individual time unit rows),
 		// the necessary splitting of time slices
 		// (which can contain multiple time units)
-		// occurs in "RandomSamplingWriteResultsToFileOrScreen()".
+		// occurs in "KadSamplerWriteResultsToFileOrScreen()".
 	}
 
 	messager.AppendKadStatusText("Writing results to disk...", this);
 	messager.SetPerformanceLabel("Writing results to disk...");
 
-	RandomSamplingWriteResultsToFileOrScreen(allWeightings);
+	KadSamplerWriteResultsToFileOrScreen(allWeightings);
 	if (failed || CheckCancelled()) { return; }
 
 	messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
@@ -2333,7 +2333,7 @@ void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 
 	initialized = true;
 
-	std::tuple<bool, std::int64_t, bool> info_random_sampling = model->t_general_options.getRandomSamplingInfo(model->getDb());
+	std::tuple<bool, std::int64_t, bool> info_random_sampling = model->t_general_options.getKadSamplerInfo(model->getDb());
 	random_sampling = std::get<0>(info_random_sampling);
 	random_sampling_number_rows = std::get<1>(info_random_sampling);
 	consolidate_rows = std::get<2>(info_random_sampling);
@@ -4470,7 +4470,7 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 
 }
 
-void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
+void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
 		AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
 {
 
@@ -4872,7 +4872,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildOutputSchema(std::vector<ColumnsInTempView> const &
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadSamplerBuildOutputSchema(std::vector<ColumnsInTempView> const &
 		primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info)
 {
 
@@ -5297,7 +5297,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable()
+void OutputModel::OutputGenerator::KadSamplerCreateOutputTable()
 {
 
 	std::vector<SQLExecutor> & sql_strings = random_sampling_schema.first;
@@ -5345,7 +5345,7 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable()
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
+void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
 {
 
 	ColumnsInTempView const & random_sampling_columns = random_sampling_schema.second;
@@ -5524,7 +5524,7 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeightings & allWeightings)
 {
 
 	// **************************************************************************************** //
@@ -5557,7 +5557,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		merging_of_children_column_sets.push_back(selected_raw_data_table_schema);
 
 		std::vector<std::string> errorMessages;
-		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
+		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
 
 		if (failed || CheckCancelled()) { return; }
 
@@ -5716,7 +5716,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		// **************************************************************************************** //
 
 		std::vector<std::string> errorMessages;
-		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
+		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
 
 		++current_child_vg_index;
 
@@ -5786,7 +5786,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 
 		// Even the K=1 case is handled in the "index_into_raw_data > 0" block,
 		// because although the leaf has no primary keys,
-		// **it does have an index to data** (See RandomSampling_ReadData_AddToTimeSlices(),
+		// **it does have an index to data** (See KadSampler_ReadData_AddToTimeSlices(),
 		//   where the leaf's data index is set regardless of whether there are DMU columns for the leaf.)
 		// Further, this secondary data is guaranteed to be present,
 		// because it came from the same row of input data that the branch+leaf (or branch, for K=1) did.
@@ -5852,7 +5852,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 			// for both the primary variable group, and all non-primary top-level variable groups.
 			// I.e., the non-primary top-level variable groups populate their
 			// "other_top_level_indices_into_raw_data" variable in the same way that the K>1 case does
-			//  (see RandomSampling_ReadData_AddToTimeSlices(), the VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL case,
+			//  (see KadSampler_ReadData_AddToTimeSlices(), the VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL case,
 			//   for where "other_top_level_indices_into_raw_data" is populated (regardless of the
 			//   K=1 case where there are no primary keys)).
 			std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
@@ -6246,7 +6246,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(AllWeightings & allWeightings)
 {
 
 	std::string setting_path_to_kad_output = CheckOutputFileExists();

@@ -1,4 +1,4 @@
-#include "RandomSampling.h"
+#include "KadSampler.h"
 
 #ifndef Q_MOC_RUN
 #	include <boost/scope_exit.hpp>
@@ -1340,7 +1340,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 									// has no primary keys.  This is a logic error, as we should never match
 									// a "leaf" in the top-level UOA in this case.
 									//
-									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups()",
+									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
 									// in particular the following lines:
 									// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
 									// --> // {
@@ -1428,7 +1428,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 									// has no primary keys.  This is a logic error, as we should never match
 									// a "leaf" in the top-level UOA in this case.
 									//
-									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups()",
+									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
 									// in particular the following lines:
 									// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
 									// --> // {

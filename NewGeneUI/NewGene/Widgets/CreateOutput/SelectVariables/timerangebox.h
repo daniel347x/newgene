@@ -30,8 +30,8 @@ class TimeRangeBox : public QFrame, public NewGeneWidget // do not reorder base 
 	public:
 
 	signals:
-		void UpdateDoRandomSampling(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE);
-		void UpdateRandomSamplingCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE);
+		void UpdateDoKadSampler(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE);
+		void UpdateKadSamplerCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE);
 		void UpdateConsolidateRows(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE);
 		void RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET);
 
@@ -42,7 +42,7 @@ class TimeRangeBox : public QFrame, public NewGeneWidget // do not reorder base 
 		void WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET);
 
 	private slots:
-		void on_doRandomSampling_stateChanged(int arg1);
+		void on_doKadSampler_stateChanged(int arg1);
 		void on_randomSamplingHowManyRows_textChanged(const QString &arg1);
 		void on_dateTimeEdit_start_editingFinished();
 		void on_mergeIdenticalRows_stateChanged(int arg1);

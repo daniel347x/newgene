@@ -11,7 +11,7 @@
 /************************************************************************/
 // ACTION_DO_RANDOM_SAMPLING_CHANGE
 /************************************************************************/
-void UIActionManager::DoDoRandomSamplingChange(Messager & messager, WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE const & action_request, OutputProject & project)
+void UIActionManager::DoDoKadSamplerChange(Messager & messager, WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE const & action_request, OutputProject & project)
 {
 
 	if (FailIfBusy(messager))
@@ -77,7 +77,7 @@ void UIActionManager::DoDoRandomSamplingChange(Messager & messager, WidgetAction
 					// ***************************************** //
 					// Update database and cache
 					// ***************************************** //
-					output_model.t_general_options.UpdateDoRandomSampling(output_model.getDb(), output_model, input_model, change_response);
+					output_model.t_general_options.UpdateDoKadSampler(output_model.getDb(), output_model, input_model, change_response);
 
 					executor.success();
 
@@ -94,7 +94,7 @@ void UIActionManager::DoDoRandomSamplingChange(Messager & messager, WidgetAction
 /************************************************************************/
 // ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE
 /************************************************************************/
-void UIActionManager::DoRandomSamplingCountPerStageChange(Messager & messager, WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE const & action_request, OutputProject & project)
+void UIActionManager::DoKadSamplerCountPerStageChange(Messager & messager, WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE const & action_request, OutputProject & project)
 {
 
 	if (FailIfBusy(messager))
@@ -160,7 +160,7 @@ void UIActionManager::DoRandomSamplingCountPerStageChange(Messager & messager, W
 					// ***************************************** //
 					// Update database and cache
 					// ***************************************** //
-					output_model.t_general_options.UpdateRandomSamplingCountPerStage(output_model.getDb(), output_model, input_model, change_response);
+					output_model.t_general_options.UpdateKadSamplerCountPerStage(output_model.getDb(), output_model, input_model, change_response);
 
 					executor.success();
 

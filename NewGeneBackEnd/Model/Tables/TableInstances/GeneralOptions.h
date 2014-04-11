@@ -29,15 +29,15 @@ public:
 	}
 
 	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
-	bool UpdateDoRandomSampling(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
-	bool UpdateRandomSamplingCountPerStage(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
+	bool UpdateDoKadSampler(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
+	bool UpdateKadSamplerCountPerStage(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
 	bool UpdateConsolidateRows(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
-	std::tuple<bool, std::int64_t, bool> getRandomSamplingInfo(sqlite3 * db);
+	std::tuple<bool, std::int64_t, bool> getKadSamplerInfo(sqlite3 * db);
 
 private:
 
-	void ModifyDoRandomSampling(sqlite3 * db);
-	void ModifyRandomSamplingCountPerStage(sqlite3 * db);
+	void ModifyDoKadSampler(sqlite3 * db);
+	void ModifyKadSamplerCountPerStage(sqlite3 * db);
 	void ModifyConsolidateRows(sqlite3 * db);
 
 	bool do_random_sampling;
