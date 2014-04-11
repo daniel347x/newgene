@@ -189,6 +189,8 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, top_level_vg_index(0)
 	, K(0)
 	, overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf(0)
+	, has_non_primary_top_level_groups{ 0 }
+	, has_child_groups{ 0 }
 {
 	//debug_ordering = true;
 	//delete_tables = false;
@@ -482,7 +484,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	// ********************************************************************************************************************************************************* //
 	// From the schema for the selected columns for the primary variable group,
-	// create a temporary table to store just the selected columns.
+	// create a temporary table to store just the selected columns over just the selected time range.
 	// ********************************************************************************************************************************************************* //
 	messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for primary variable group data (variable group: %1%)...") % Table_VG_CATEGORY::GetVgDisplayText(top_level_vg)).str().c_str(), this);
 	SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
@@ -492,6 +494,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	primary_group_column_sets.push_back(selected_raw_data_table_schema);
 
 	// ********************************************************************************************************************************************************* //
+	// Create TIME SLICES.
 	// From the schema for the selected columns for the primary variable group,
 	// load the selected columns of raw data into the temporary table created with the same schema.
 	// ********************************************************************************************************************************************************* //
@@ -501,124 +504,168 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	if (failed || CheckCancelled()) { return; }
 
 	// ********************************************************************************************************************************************************* //
-	// For each branch, build the leaf cache for that branch.
-	// Also, build a map for that branch that maps all possible child branch + leaves
+	// For each branch, copy the leaf cache for that branch for fast lookup.
+	//
+	// Note that the leaves for each branch are stored in both a std::set and a std::vector.
+	// They are populated into a std::set<> so that they are automatically ordered.
+	// But now, we want fast access without ever adding or removing leaves,
+	// rather than the ability to add or remove new leaves.
+	// So do a one-time pass to copy the leaves from the set into the vector
+	// for rapid lookup access WHEN CONSTRUCTING OUTPUT ROWS.
+	//
+	// The code that constructs the output rows looks in each "BranchOutputRow" instance
+	// for an INDEX into a leaf, so that it can look into that leaf and retrieve
+	// the actual DMU data for the leaf, AND indexes into the non-primary top-level data cache
+	// for that data.
+	//
+	// Also, if there are any child groups, build a child DMU key lookup map
+	// for that branch that maps all possible child branch + leaves
 	// that map to any corresponding combination of primary branch + leaves for the given primary branch.
+	// This will be used by the child variable groups when they are merged in.
 	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("For each branch node, create a cache of all primary leaf nodes, and create a lookup cache that indexes all possible child branch/leaf combinations (for all child variable groups) that match against the given primary branch and leaves.")).str().c_str(), this);
-	allWeightings.ResetBranchCaches();
+	messager.AppendKadStatusText((boost::format("For each branch node, create a cache of all primary leaf nodes, and create a lookup cache that indexes all possible child branch/leaf combinations (for all child variable groups) that match against the given primary branch and leaves...")).str().c_str(), this);
+	allWeightings.ResetBranchCaches(has_child_groups);
 	if (failed || CheckCancelled()) { return; }
 
 	// ********************************************************************************************************************************************************* //
 	// Calculate the number of possible K-ad combinations for each branch, given the leaves available.
 	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("Calculate the number of possible K-ad combinations for each branch, given the leaves available.")).str().c_str(), this);
+	messager.AppendKadStatusText((boost::format("Calculate the total number of K-ad combinations...")).str().c_str(), this);
 	allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 	if (failed || CheckCancelled()) { return; }
 
-	boost::format msg("Total number of unconsolidated rows for this choice of K-ad: %1%");
-	msg % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str();
-	messager.AppendKadStatusText(msg.str(), this);
+	// ********************************************************************************************************************************************************* //
+	// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
+	// ********************************************************************************************************************************************************* //
+	messager.AppendKadStatusText((boost::format("Total number of (granulated) K-adic combinations for the given choice of K: %1%") % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
 
 	if (random_sampling)
 	{
-		std::int64_t const samples = random_sampling_number_rows;
 
-		// The following prepares all randomly-generated output rows
-		boost::format myGenerateRandomSamples("Generating %1% random numbers between 1 and %2% to be used to select random rows ...");
-		myGenerateRandomSamples % boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str();
-		messager.AppendKadStatusText(myGenerateRandomSamples.str(), this);
+		// ********************************************************************************************************************************************************* //
+		// Give text feedback that the sampler is entering random sampling mode
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Entering random sampling mode...")).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Number of desired random samples selected: %1% ") % boost::lexical_cast<std::string>(random_sampling_number_rows).c_str()).str().c_str(), this);
 
+		// ********************************************************************************************************************************************************* //
+		// If the user selects more random rows than there are K-ad combinations, then set the number of rows to be equal to the number of K-ad combinations.
+		// Note: We remain nonetheless in random sampling mode, mostly for testing purposes.  One of the best ways to confirm that the random sampling and full
+		// sampling modes are both working is to see that they give identical results when the number of random samples is set to be equal to the number of full samples.
+		// Also, it is possible that the end user wishes to test the scaling properties of the code for their given data when randomly sampled, in which case
+		// they will want to be able to remain in random sampling mode even at the 100% sampling level
+		// ********************************************************************************************************************************************************* //
+		std::int64_t samples = random_sampling_number_rows;
+		if (boost::multiprecision::cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
+		{
+			messager.AppendKadStatusText((boost::format("Because the number of requested random samples, %1%, is is greater than the number of available K-ads, %2%, the number of random samples will be decreased to match the number of K-ads.") % boost::lexical_cast<std::string>(random_sampling_number_rows).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
+			samples = allWeightings.weighting.getWeighting().convert_to<int>();
+		}
+
+		// ********************************************************************************************************************************************************* //
+		// Generate and store the desired number of random numbers - one random number per output row is stored here
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Generating %1% random numbers between 1 and %2% to be used to select random rows ...") % boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
 		allWeightings.PrepareRandomNumbers(samples);
 		if (failed || CheckCancelled()) { return; }
+		messager.AppendKadStatusText((boost::format("Done generating random numbers.")).str().c_str(), this);
 
-		// The following prepares all randomly-generated output rows
-		boost::format
-			myPrepareRandomSamplesDone("Done generating random numbers.");
-		messager.AppendKadStatusText(myPrepareRandomSamplesDone.str(), this);
-
-		boost::format
-			myPrepareRandomSamples("Pre-populating %1% randomly selected rows of primary variable group data into RAM (out of %2% total rows) ...");
-		myPrepareRandomSamples % boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str();
-		messager.AppendKadStatusText(myPrepareRandomSamples.str(), this);
-
+		// ********************************************************************************************************************************************************* //
+		// Select the random rows now and stash in memory
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Selecting %1% randomly selected K-ad combinations from the raw data (out of %2% total possible combinations) ...") % boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
 		allWeightings.PrepareRandomSamples(K);
-
-		boost::format mytxtA("Completed pre-populating randomly selected rows.");
-		messager.AppendKadStatusText(mytxtA.str(), this);
-
-		allWeightings.ClearRandomNumbers();
+		allWeightings.ClearRandomNumbers(); // This function will not only "clear()" the vector, but "swap()" it with an empty vector to actually force deallocation - a major C++ gotcha!
+		messager.AppendKadStatusText((boost::format("Completed pre-populating randomly selected rows.")).str(), this);
 
 	}
 	else
 	{
-		boost::format myPrepareFullSamples("Pre-populating the complete set of %1% rows of primary variable group data into RAM...");
-		myPrepareFullSamples % allWeightings.weighting.getWeighting();
-		messager.AppendKadStatusText(myPrepareFullSamples.str(), this);
+
+		// ********************************************************************************************************************************************************* //
+		// Give text feedback that the sampler is entering full sampling mode
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-ad combinations will be generated.") % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
+
+		// ********************************************************************************************************************************************************* //
+		// Generate all K-ad combinations now
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Generating all %1% K-ad combinations from the raw data ...") % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
 		allWeightings.PrepareFullSamples(K);
-
-		boost::format mytxtB("Completed pre-populating full selection of rows.");
-		messager.AppendKadStatusText(mytxtB.str(), this);
-	}
-
-	if (failed || CheckCancelled()) { return; }
-
-	if (false)
-	{
-
-		// This is only necessary for debugging
-		// or further sorting/ordering/processing
-
-		KadSamplerCreateOutputTable();
-
+		messager.AppendKadStatusText((boost::format("Completed generating full selection of K-ad combinations.")).str(), this);
 		if (failed || CheckCancelled()) { return; }
 
 	}
 
+	if (false)
+	{
+
+		// ********************************************************************************************************************************************************* //
+		// This is only necessary for debugging
+		// or further sorting/ordering/processing
+		//
+		// We aren't doing any post-processing of the data that requires it be stored in a table, rather than in memory,
+		// but leave this code here as a starting point for when larger data sets are supported that require
+		// disk-based management during K-ad generation
+		// ********************************************************************************************************************************************************* //
+		KadSamplerCreateOutputTable();
+		if (failed || CheckCancelled()) { return; }
+
+	}
+
+	// ********************************************************************************************************************************************************* //
+	// Create the schema for the output
+	// ********************************************************************************************************************************************************* //
 	messager.AppendKadStatusText((boost::format("Creating output column set information...")).str().c_str(), this);
 	random_sampling_schema = KadSamplerBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 	if (failed || CheckCancelled()) { return; }
-
 	final_result = random_sampling_schema;
 
-	// ********************************************************************************* //
-	// The following function populates (merges)
-	// *BOTH* child variable groups *AND*
-	// non-primary top-level variable groups
-	// ********************************************************************************* //
-	boost::format myFillChildren("Merging in secondary variable group data...");
-	messager.AppendKadStatusText(myFillChildren.str(), this);
-	KadSamplerFillDataForChildGroups(allWeightings);
-	if (failed || CheckCancelled()) { return; }
-
-	boost::format mytxt2("Completed merging secondary groups.");
-	messager.AppendKadStatusText(mytxt2.str(), this);
-
-	// The following function will clear and re-populate its internal
-	// cache of Leaf objects (which were updated by KadSamplerFillDataForChildGroups()
-	// by the non-primary top-level variable groups with indexes into their
-	// secondary data caches) from the Leaf set paired with each branch.
-	//
-	// ***NOTE that these two leaf caches are completely redundant and one of them can be removed***
-	// The only reason the cache internal to each branch object was added was for convenience
-	// for easy access.  That should remain the primary source and the Leaf cache
-	// paired with each branch should be removed.  The data is not denormalized, just duplicated,
-	// because each branch has its own Leaf cache, and currently this cache simply appears twice.
-	//
-	// Additional notes, just saying the same thing in a different way:
-	//
-	// After child and non-primary top-level VG's are merged, clear and rebuild the branch leaf caches
-	// to pick up the new leaf-specific data added by the non-primary top-level VG's.
-	boost::format myResetCaches("Building caches to map secondary columns to final output rows...");
-	messager.AppendKadStatusText(myResetCaches.str(), this);
-	allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
-	if (failed || CheckCancelled()) { return; }
-
-	boost::format mytxt3("Completed building caches.");
-	messager.AppendKadStatusText(mytxt3.str(), this);
-
-	if (consolidate_rows) // Consolidate data mode is on
+	if (has_non_primary_top_level_groups || has_child_groups)
 	{
+
+		// ********************************************************************************************************************************************************* //
+		// Populate (merge) *BOTH* child variable groups *AND* non-primary top-level variable groups
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Merging secondary variable group data...")).str(), this);
+		KadSamplerFillDataForChildGroups(allWeightings);
+		if (failed || CheckCancelled()) { return; }
+		boost::format mytxt2("Completed merging secondary groups.");
+		messager.AppendKadStatusText(mytxt2.str(), this);
+
+		// ********************************************************************************************************************************************************* //
+		// For each branch, copy the leaf cache for that branch for fast lookup.
+		//
+		// Note that the leaves for each branch are stored in both a std::set and a std::vector.
+		// They are populated into a std::set<> so that they are automatically ordered.
+		// But now, we want fast access without ever adding or removing leaves,
+		// rather than the ability to add or remove new leaves.
+		// So do a one-time pass to copy the leaves from the set into the vector
+		// for rapid lookup access WHEN CONSTRUCTING OUTPUT ROWS.
+		//
+		// The code that constructs the output rows looks in each "BranchOutputRow" instance
+		// for an INDEX into a leaf, so that it can look into that leaf and retrieve
+		// the actual DMU data for the leaf, AND indexes into the non-primary top-level data cache
+		// for that data.
+		//
+		// This time, do not build the child DMU key lookup map, because the chilren
+		// are already merged in, so we don't need to look up in the map to see what output rows incoming child rows map to.
+		//
+		// No need to rebuild the leaf cache if there are no non-primary variable groups,
+		// because no leaves in the std::set have been updates since the leaf cache (the std::vector)
+		// was populated after the primary group was loaded, above.
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Rebuild cache of all primary leaf nodes for each branch node...")).str().c_str(), this);
+		allWeightings.ResetBranchCaches(false);
+		if (failed || CheckCancelled()) { return; }
+		messager.AppendKadStatusText((boost::format("Completed building cache.")).str().c_str(), this);
+
+	}
+
+	if (consolidate_rows)
+	{
+
+		// ********************************************************************************************************************************************************* //
 		// Eliminates the division of sets of output rows within
 		// each branch among internal (to the branch)
 		// "time unit entries" (each such entry containing
@@ -642,49 +689,41 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// See detailed comments in the "PruneTimeUnits()" function.
 		//
 		// The output is stored in "consolidated_rows" of the AllWeightings object.
-
-		boost::format myConsolidateRows("Consolidating adjacent rows...");
-		messager.AppendKadStatusText(myConsolidateRows.str(), this);
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Consolidating adjacent rows...")).str(), this);
 		ConsolidateData(random_sampling, allWeightings);
 		if (failed || CheckCancelled()) { return; }
-
-		boost::format mytxtC("Completed consolidating adjacent rows.");
-		messager.AppendKadStatusText(mytxtC.str(), this);
+		messager.AppendKadStatusText((boost::format("Completed consolidating adjacent rows.")).str().c_str(), this);
 
 	}
-	else
-	{
-		// no-op: When data is being "un-consolidated" -
-		// i.e., displayed with one row of output data
-		// per time granularity unit of the primary variable group
-		// (or sub-time-units if child merges have split
-		// individual time unit rows),
-		// the necessary splitting of time slices
-		// (which can contain multiple time units)
-		// occurs in "KadSamplerWriteResultsToFileOrScreen()".
-	}
 
+	// ********************************************************************************************************************************************************* //
+	// Write the output to disk
+	// ********************************************************************************************************************************************************* //
 	messager.AppendKadStatusText("Writing results to disk...", this);
 	messager.SetPerformanceLabel("Writing results to disk...");
-
 	KadSamplerWriteResultsToFileOrScreen(allWeightings);
 	if (failed || CheckCancelled()) { return; }
 
+	// ********************************************************************************************************************************************************* //
+	// Vacuum database, because for large runs, SQLite often increases the database file size from,
+	// for example, 20 MB to nearly a GB.
+	// The database will be left at this size on the end-user's machine if we do not vacuum it here.
+	// ********************************************************************************************************************************************************* //
 	messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
 	messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
-
 	if (delete_tables)
 	{
+		// ********************************************************************************************************************************************************* //
+		// Delete the tables we used to store the selected columns of raw data over the selected time range
+		// ********************************************************************************************************************************************************* //
 		input_model.ClearRemnantTemporaryTables();
 	}
-
 	input_model.VacuumDatabase();
 
 	messager.UpdateProgressBarValue(1000);
 
-	boost::format msg_2("Output successfully generated (%1%)");
-	msg_2 % boost::filesystem::path(setting_path_to_kad_output).filename();
-	messager.UpdateStatusBarText(msg_2.str().c_str(), this);
+	messager.UpdateStatusBarText((boost::format("Output successfully generated (%1%)") % boost::filesystem::path(setting_path_to_kad_output).filename().c_str()).str().c_str(), this);
 	messager.AppendKadStatusText("Done.", this);
 
 	boost::format msg1("Number transactions begun: %1%");
@@ -2452,6 +2491,8 @@ void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 	});
 
 	K = highest_multiplicity;
+	has_non_primary_top_level_groups = (primary_variable_groups_column_info.size() - 1) > 0;
+	has_child_groups = secondary_variable_groups_column_info.size() > 0;
 
 }
 
@@ -4616,7 +4657,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 	view_name += "_";
 	view_name += newUUID(true);
-
+	 
 	result_columns.view_name = view_name;
 	result_columns.view_number = 1;
 	result_columns.has_no_datetime_columns = false;

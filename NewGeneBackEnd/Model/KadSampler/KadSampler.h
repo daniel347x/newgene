@@ -1709,7 +1709,7 @@ class VariableGroupTimeSliceData
 		VariableGroupBranchesAndLeavesVector branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves in all variable groups
 
-		void ResetBranchCachesSingleTimeSlice(AllWeightings & allWeightings);
+		void ResetBranchCachesSingleTimeSlice(AllWeightings & allWeightings, bool const reset_child_dmu_lookup);
 		void PruneTimeUnits(AllWeightings & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit,
 							bool const consolidate_rows, bool const random_sampling);
 
@@ -2103,7 +2103,7 @@ class AllWeightings
 		void PrepareFullSamples(int const K);
 		bool RetrieveNextBranchAndLeaves(int const K);
 		void PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch);
-		void ResetBranchCaches();
+		void ResetBranchCaches(bool const reset_child_dmu_lookup);
 		void ConsolidateRowsWithinBranch(Branch const & branch);
 		void getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const;
 		void getDataCacheUsage(size_t & usage, DataCache const & dataCache) const;

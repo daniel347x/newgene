@@ -562,6 +562,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool consolidate_rows;
 				bool random_sampling;
 				std::int64_t random_sampling_number_rows;
+				bool has_non_primary_top_level_groups;
+				bool has_child_groups;
 				// For each child variable group, a vector of mapping from the child key columns to the top-level key columns
 				std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_branch_to_primary;
 				std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_leaf_to_primary;

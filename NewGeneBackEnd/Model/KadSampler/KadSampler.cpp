@@ -1227,13 +1227,13 @@ boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, i
 
 }
 
-void AllWeightings::ResetBranchCaches()
+void AllWeightings::ResetBranchCaches(bool const reset_child_dmu_lookup)
 {
 
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices::value_type  & timeSliceData)
 	{
 
-		timeSliceData.second.ResetBranchCachesSingleTimeSlice(*this);
+		timeSliceData.second.ResetBranchCachesSingleTimeSlice(*this, reset_child_dmu_lookup);
 
 	});
 
@@ -1699,7 +1699,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 
 }
 
-void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(AllWeightings & allWeightings)
+void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(AllWeightings & allWeightings, bool const reset_child_dmu_lookup)
 {
 
 	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = branches_and_leaves;
@@ -1720,9 +1720,12 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(AllWeightings 
 		branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 		branch.ResetLeafCache();
 
-		for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
+		if (reset_child_dmu_lookup)
 		{
-			branch.ConstructChildCombinationCache(allWeightings, c, true);
+			for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
+			{
+				branch.ConstructChildCombinationCache(allWeightings, c, true);
+			}
 		}
 
 	});
@@ -2830,7 +2833,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 	});
 
-	ResetBranchCachesSingleTimeSlice(allWeightings);
+	ResetBranchCachesSingleTimeSlice(allWeightings, true);
 
 }
 
