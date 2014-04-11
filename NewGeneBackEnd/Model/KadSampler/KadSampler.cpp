@@ -23,22 +23,23 @@ std::string create_output_row_visitor::row_in_process;
 
 int Weighting::how_many_weightings = 0;
 
-AllWeightings::AllWeightings(Messager & messager_)
+KadSampler::KadSampler(Messager & messager_)
 	: insert_random_sample_stmt(nullptr)
 	, numberChildVariableGroups(0)
 	, time_granularity(TIME_GRANULARITY__NONE)
 	, random_rows_added(0)
 	, messager(messager_)
+	, number_rows_generatedPtr{new boost::multiprecision::cpp_int}
 {
 
 }
 
-AllWeightings::~AllWeightings()
+KadSampler::~KadSampler()
 {
 	// Never called: This is how we utilize the Boost memory pool
 }
 
-std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf,
+std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf,
 		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling,
 		TimeSlices::iterator mapIterator_, bool const useIterator)
 {
@@ -98,7 +99,7 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 
 		if (!useIterator)
 		{
-			mapIterator = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &AllWeightings::is_map_entry_end_time_greater_than_new_time_slice_start_time);
+			mapIterator = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &KadSampler::is_map_entry_end_time_greater_than_new_time_slice_start_time);
 		}
 
 		TimeSlices::iterator startMapSlicePtr = mapIterator;
@@ -252,7 +253,7 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 // - The portion of the incoming slice that extends past the right edge
 //   of the map entry
 // - An iterator to the next map entry.
-bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr,
+bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr,
 		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
@@ -406,7 +407,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 }
 
 // breaks an existing map entry into two pieces and returns an iterator to both
-void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr,
+void KadSampler::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr,
 								  TimeSlices::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
@@ -433,7 +434,7 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 }
 
 // breaks an existing map entry into three pieces and returns an iterator to the middle piece
-void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right,
+void KadSampler::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right,
 								  TimeSlices::iterator & newMapElementMiddlePtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
@@ -464,7 +465,7 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 
 // Slices off the left part of the "incoming_slice" TimeSliceLeaf and returns it in the "new_left_slice" TimeSliceLeaf.
 // The "incoming_slice" TimeSliceLeaf is adjusted to become equal to the remaining part on the right.
-void AllWeightings::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice)
+void KadSampler::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice)
 {
 	new_left_slice = incoming_slice;
 	new_left_slice.first.setEnd(slicePoint);
@@ -472,7 +473,7 @@ void AllWeightings::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t co
 }
 
 // Merge time slice data into a map element
-bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number,
+bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number,
 		VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
@@ -696,7 +697,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 }
 
-void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_unit_time)
+void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit_time)
 {
 
 	boost::multiprecision::cpp_int currentWeighting = 0;
@@ -784,7 +785,7 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 
 }
 
-void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)
+void KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)
 {
 	VariableGroupTimeSliceData variableGroupTimeSliceData;
 	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
@@ -797,7 +798,7 @@ void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch co
 	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
 }
 
-void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
+void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 {
 
 	if (weighting.getWeighting() < 1)
@@ -826,6 +827,7 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 	std::vector<boost::multiprecision::cpp_int>::iterator remainingPtr;
 	std::set<boost::multiprecision::cpp_int> tmp_random_numbers;
 
+	ProgressBarMeter meter(messager, "Generated %1% out of %2% random numbers", how_many);
 	while (tmp_random_numbers.size() < static_cast<size_t>(how_many))
 	{
 
@@ -879,6 +881,8 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 			tmp_random_numbers.insert(distribution(engine));
 		}
 
+		meter.UpdateProgressBarValue(tmp_random_numbers.size());
+
 	}
 
 	random_numbers.insert(random_numbers.begin(), tmp_random_numbers.cbegin(), tmp_random_numbers.cend());
@@ -901,7 +905,7 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 
 }
 
-void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch)
+void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 {
 
 	std::int64_t which_time_unit = -1;  // -1 means "full sampling for branch" - no need to break down into time units (which have identical full sets)
@@ -925,6 +929,9 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch)
 		}
 
 		branch.remaining[which_time_unit].push_back(single_leaf_combination);
+
+		++(*number_rows_generatedPtr);
+
 	}
 
 	if (K <= 0)
@@ -943,7 +950,7 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch)
 
 }
 
-void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch)
+void KadSampler::GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch)
 {
 
 	random_number -= branch.weighting.getWeightingRangeStart();
@@ -1093,7 +1100,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 
 }
 
-void AllWeightings::PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch)
+void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch)
 {
 
 	boost::multiprecision::cpp_int total_added = 0;
@@ -1118,9 +1125,11 @@ void AllWeightings::PopulateAllLeafCombinations(std::int64_t const & which_time_
 
 	}
 
+	(*number_rows_generatedPtr) += total_added;
+
 }
 
-void AllWeightings::AddPositionToRemaining(std::int64_t const & which_time_unit, std::vector<int> const & position, Branch const & branch)
+void KadSampler::AddPositionToRemaining(std::int64_t const & which_time_unit, std::vector<int> const & position, Branch const & branch)
 {
 
 	BranchOutputRow new_remaining;
@@ -1136,7 +1145,7 @@ void AllWeightings::AddPositionToRemaining(std::int64_t const & which_time_unit,
 
 }
 
-bool AllWeightings::IncrementPosition(int const K, std::vector<int> & position, Branch const & branch)
+bool KadSampler::IncrementPosition(int const K, std::vector<int> & position, Branch const & branch)
 {
 
 	int sub_k_being_managed = K;
@@ -1153,7 +1162,7 @@ bool AllWeightings::IncrementPosition(int const K, std::vector<int> & position, 
 
 }
 
-int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std::vector<int> & position, Branch const & branch)
+int KadSampler::IncrementPositionManageSubK(int const K, int const subK_, std::vector<int> & position, Branch const & branch)
 {
 
 	int number_leaves = static_cast<int>(branch.numberLeaves());
@@ -1195,7 +1204,7 @@ int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std
 
 }
 
-boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, int const K)
+boost::multiprecision::cpp_int KadSampler::BinomialCoefficient(int const N, int const K)
 {
 
 	if (N == 0)
@@ -1227,19 +1236,24 @@ boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, i
 
 }
 
-void AllWeightings::ResetBranchCaches(bool const reset_child_dmu_lookup)
+void KadSampler::ResetBranchCaches(bool const reset_child_dmu_lookup)
 {
 
+	ProgressBarMeter meter(messager, "Processed %1% of %2% time slices", timeSlices.size());
+	std::int64_t current_loop_iteration = 0;
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices::value_type  & timeSliceData)
 	{
 
 		timeSliceData.second.ResetBranchCachesSingleTimeSlice(*this, reset_child_dmu_lookup);
 
+		++current_loop_iteration;
+		meter.UpdateProgressBarValue(current_loop_iteration);
+
 	});
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force,
+void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampler & allWeightings, int const variable_group_number, bool const force,
 		bool const is_consolidating) const
 {
 
@@ -1489,7 +1503,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 
 }
 
-void AllWeightings::PrepareRandomSamples(int const K)
+void KadSampler::PrepareRandomSamples(int const K)
 {
 
 	TimeSlices::const_iterator timeSlicePtr = timeSlices.cbegin();
@@ -1592,9 +1606,11 @@ void AllWeightings::PrepareRandomSamples(int const K)
 
 }
 
-void AllWeightings::PrepareFullSamples(int const K)
+void KadSampler::PrepareFullSamples(int const K)
 {
 
+	(*number_rows_generatedPtr) = 0;
+	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% K-ad combinations"), weighting.getWeighting());
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
 
@@ -1611,11 +1627,13 @@ void AllWeightings::PrepareFullSamples(int const K)
 
 		});
 
+		meter.UpdateProgressBarValue(*number_rows_generatedPtr);
+
 	});
 
 }
 
-void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
+void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch)
 {
 
 	if (time_granularity == TIME_GRANULARITY__NONE)
@@ -1699,7 +1717,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 
 }
 
-void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(AllWeightings & allWeightings, bool const reset_child_dmu_lookup)
+void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & allWeightings, bool const reset_child_dmu_lookup)
 {
 
 	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = branches_and_leaves;
@@ -2141,7 +2159,7 @@ void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMappi
 
 }
 
-void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file, std::string const & file_name_appending_string)
+void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & allWeightings, bool const to_file, std::string const & file_name_appending_string)
 {
 
 	std::fstream file_;
@@ -2358,7 +2376,7 @@ void SpitLeaves(std::string & sdata, Branch const & branch)
 
 //#endif
 
-void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice,
+void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice,
 		std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
@@ -2843,7 +2861,7 @@ void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, Instanc
 	boost::apply_visitor(visitor, data);
 }
 
-void AllWeightings::getMySize() const
+void KadSampler::getMySize() const
 {
 
 	memset(&mySize, '\0', sizeof(mySize));
@@ -3067,7 +3085,7 @@ void AllWeightings::getMySize() const
 
 }
 
-void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const
+void KadSampler::getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const
 {
 	usage += sizeof(outputRow);
 
@@ -3109,7 +3127,7 @@ void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & out
 	}
 }
 
-void AllWeightings::getLeafUsage(size_t & usage, Leaf const & leaf) const
+void KadSampler::getLeafUsage(size_t & usage, Leaf const & leaf) const
 {
 	//usage += sizeof(leaf);
 
@@ -3124,7 +3142,7 @@ void AllWeightings::getLeafUsage(size_t & usage, Leaf const & leaf) const
 	}
 }
 
-void AllWeightings::getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf) const
+void KadSampler::getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf) const
 {
 	if (includeSelf)
 	{
@@ -3139,7 +3157,7 @@ void AllWeightings::getInstanceDataVectorUsage(size_t & usage, InstanceDataVecto
 	}
 }
 
-void AllWeightings::getDataCacheUsage(size_t & usage, DataCache const & dataCache) const
+void KadSampler::getDataCacheUsage(size_t & usage, DataCache const & dataCache) const
 {
 	mySize.numberMapNodes += dataCache.size();
 
@@ -3151,7 +3169,7 @@ void AllWeightings::getDataCacheUsage(size_t & usage, DataCache const & dataCach
 	}
 }
 
-void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const
+void KadSampler::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const
 {
 	mySize.numberMapNodes += childToBranchColumnMappings.size();
 
@@ -3170,7 +3188,7 @@ void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int
 }
 
 // only for use when we will never touch this object again.  For use with Boost memory pool.
-void AllWeightings::ClearWeightingsAndRemainingBranchJunk()
+void KadSampler::ClearWeightingsAndRemainingBranchJunk()
 {
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
@@ -3199,6 +3217,7 @@ void AllWeightings::ClearWeightingsAndRemainingBranchJunk()
 		});
 	});
 	weighting.ClearWeighting();
+	weighting.number_rows_generatedPtr.reset();
 
 }
 
@@ -3281,7 +3300,7 @@ void purge_pool()
 
 }
 
-void AllWeightings::Clear()
+void KadSampler::Clear()
 {
 
 	create_output_row_visitor::data = nullptr;

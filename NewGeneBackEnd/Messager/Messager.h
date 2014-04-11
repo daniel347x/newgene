@@ -7,9 +7,11 @@
 #include "../../NewGeneBackEnd/globals.h"
 #include "../UIData/DataWidgets.h"
 #include "../UIAction/ActionChanges.h"
-
 #ifndef Q_MOC_RUN
-#endif
+#	include <boost/multiprecision/number.hpp>
+#	include <boost/multiprecision/cpp_int.hpp>
+#	include <boost/multiprecision/cpp_dec_float.hpp>
+#endif 
 
 enum MESSAGER_MESSAGE_ENUM
 {
@@ -186,7 +188,93 @@ class Messager
 
 	protected:
 
-		Messager() {} // Must only instantiate UIMessager from UI layer
+		Messager()
+			: current_progress_bar_max_value{ 0 }
+		{
+		}
+
+};
+
+class ProgressBarMeter
+{
+
+	public:
+
+		ProgressBarMeter(Messager & messager_, std::string const & progress_message, std::int64_t max_value)
+			: messager(messager_)
+			, msg{ progress_message }
+			, progress_bar_max_value{ max_value }
+			, update_every_how_often{0}
+			, cpp_int_mode(false)
+		{
+
+			messager.StartProgressBar(0, progress_bar_max_value);
+			messager.UpdateProgressBarValue(0);
+			update_every_how_often = progress_bar_max_value / 1000;
+			if (update_every_how_often == 0) ++update_every_how_often;
+
+		}
+
+		ProgressBarMeter(Messager & messager_, std::string const & progress_message, boost::multiprecision::cpp_int const & max_value)
+			: messager(messager_)
+			, msg{ progress_message }
+			, progress_bar_max_value{ max_value }
+			, update_every_how_often{ 0 }
+			, cpp_int_mode(true)
+			, progress_bar_max_huge_value{ max_value }
+			, ratio_1000_const{0.0}
+		{
+
+			// set to 1000
+
+			messager.StartProgressBar(0, 1000);
+			messager.UpdateProgressBarValue(0);
+
+		}
+
+		~ProgressBarMeter()
+		{
+			messager.UpdateProgressBarValue(1000);
+			messager.SetPerformanceLabel("");
+		}
+
+		void UpdateProgressBarValue(std::int64_t const current_value)
+		{
+
+			if (current_value % update_every_how_often == 0)
+			{
+				messager.UpdateProgressBarValue(current_value);
+				messager.SetPerformanceLabel((msg % current_value % progress_bar_max_value).str().c_str());
+			}
+
+		}
+
+		void UpdateProgressBarValue(boost::multiprecision::cpp_int const & current_value)
+		{
+
+			// This version of the function is only called by the routine that actually generates output rows.
+			// It's OK to do this calculation every time in the loop,
+			// because we know that this loop is only going to be called once per time slice,
+			// *not* once per calculation of an output row.
+
+			boost::multiprecision::cpp_dec_float current_value_for_ratio(current_value);
+			boost::multiprecision::cpp_dec_float ratio = (current_value_for_ratio / progress_bar_max_huge_value) * 1000.0;
+			int current_progress_bar_value = ratio.convert_to<int>(ratio);
+			messager.UpdateProgressBarValue(current_progress_bar_value);
+			messager.SetPerformanceLabel((msg % boost::lexical_cast<std::string>(current_value).c_str() % boost::lexical_cast<std::string>(progress_bar_max_value).c_str()).str().c_str());
+
+		}
+
+	protected:
+
+		Messager & messager;
+		boost::format msg;
+		std::int64_t progress_bar_max_value;
+		std::int64_t update_every_how_often;
+
+		bool cpp_int_mode;
+		boost::multiprecision::cpp_dec_float progress_bar_max_huge_value;
+		boost::multiprecision::cpp_dec_float ratio_1000_const;
 
 };
 

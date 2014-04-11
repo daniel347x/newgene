@@ -73,7 +73,6 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				// ***************************************** //
 				OutputModel::OutputGenerator output_generator(messager, output_model, project);
 				output_generator.GenerateOutput(change_response);
-				messager.SetPerformanceLabel("");
 				if (!output_generator.done)
 				{
 					messager.UpdateStatusBarText("", &output_generator);

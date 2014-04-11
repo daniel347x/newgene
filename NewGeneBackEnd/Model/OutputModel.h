@@ -543,10 +543,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
 
-				void SetFailureMessage(std::string const & failure_message_);
+				void SetFailureErrorMessage(std::string const & failure_message_);
 
 				// Initialize generator
-				void Prepare(AllWeightings & allWeightings);
+				void Prepare(KadSampler & allWeightings);
 				void PopulateDMUCounts();
 				void PopulateUOAs();
 				void ValidateUOAs();
@@ -570,30 +570,30 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 				int overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf;
 				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
-				void KadSamplerFillDataForChildGroups(AllWeightings & allWeightings);
-				void KadSampler_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings,
+				void KadSamplerFillDataForChildGroups(KadSampler & allWeightings);
+				void KadSampler_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, KadSampler & allWeightings,
 						VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages);
 				SqlAndColumnSet KadSamplerBuildOutputSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns,
 						std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info);
 				void KadSamplerCreateOutputTable();
-				void KadSamplerWriteToOutputTable(AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
+				void KadSamplerWriteToOutputTable(KadSampler & allWeightings, std::vector<std::string> & errorMessages);
 				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
 				void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex);
-				void CreateOutputRow(Branch const & branch, BranchOutputRow const & outputRow, AllWeightings & allWeightings);
-				void ConsolidateData(bool const random_sampling, AllWeightings & allWeightings);
-				void ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(AllWeightings & allWeightings);
-				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings & allWeightings, Branch const & branch, BranchOutputRow const & incoming_row,
+				void CreateOutputRow(Branch const & branch, BranchOutputRow const & outputRow, KadSampler & allWeightings);
+				void ConsolidateData(bool const random_sampling, KadSampler & allWeightings);
+				void ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(KadSampler & allWeightings);
+				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch, BranchOutputRow const & incoming_row,
 						std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, int & orig_row_count);
 
-				void KadSamplerWriteResultsToFileOrScreen(AllWeightings & allWeightings);
+				void KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings);
 				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set & output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch,
-										 AllWeightings & allWeightings, std::int64_t & rows_written);
-				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
+										 KadSampler & allWeightings, std::int64_t & rows_written);
+				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(KadSampler & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
 
 				std::map<int, int> top_level_number_secondary_columns;
 				std::map<int, int> child_number_secondary_columns;
 				// Functions involved in different phases of generation
-				void PopulateSchemaForRawDataTables(AllWeightings & allWeightings);
+				void PopulateSchemaForRawDataTables(KadSampler & allWeightings);
 				void PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
 												   std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index);
 
@@ -617,7 +617,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// Progress bar variables and functions
 				void DetermineNumberStages();
-				void UpdateProgressBarValue(Messager & messager, std::int64_t const current_rows_stepped);
 				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_incoming_rows;
 				std::map<WidgetInstanceIdentifier, int> multiplicities;
 				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_primary_merged_rows;
@@ -630,7 +629,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::string setting_path_to_kad_output;
 				int current_progress_value;
 				std::int64_t ms_elapsed;
-				std::int64_t current_number_rows_to_sort;
 
 				// Save the SQL and column sets corresponding to each primary and child variable group in global data structures
 				//

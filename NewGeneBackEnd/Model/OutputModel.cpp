@@ -10,9 +10,9 @@
 #	include <boost/filesystem.hpp>
 #	include <boost/format.hpp>
 #	include <boost/scope_exit.hpp>
-#	include <boost/date_time/local_time/local_time.hpp> 
+#	include <boost/date_time/local_time/local_time.hpp>
 #endif
- 
+
 #include <fstream>
 #include <algorithm>
 
@@ -182,23 +182,15 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, delete_tables(true)
 	, debug_ordering(false)
 	, ms_elapsed(0)
-	, current_number_rows_to_sort(0)
 	, consolidate_rows(true)
 	, random_sampling_number_rows(1)
 	, random_sampling(false)
 	, top_level_vg_index(0)
 	, K(0)
 	, overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf(0)
-	, has_non_primary_top_level_groups{ 0 }
-	, has_child_groups{ 0 }
-{
-	//debug_ordering = true;
-	//delete_tables = false;
-	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
-	//random_sampling = true;
-	//random_sampling_number_rows = 1000000;
-	messager.StartProgressBar(0, 1000);
-}
+	, has_non_primary_top_level_groups { 0 }
+, has_child_groups { 0 }
+{}
 
 OutputModel::OutputGenerator::~OutputGenerator()
 {
@@ -334,7 +326,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (the_map->size() == 0)
 	{
-		SetFailureMessage(boost::format("No variables are selected for output.").str().c_str());
+		SetFailureErrorMessage(boost::format("No variables are selected for output.").str().c_str());
 		failed = true;
 		return;
 	}
@@ -345,7 +337,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (!found)
 	{
-		SetFailureMessage(boost::format("Cannot determine time range from database.").str().c_str());
+		SetFailureErrorMessage(boost::format("Cannot determine time range from database.").str().c_str());
 		failed = true;
 		return;
 	}
@@ -357,7 +349,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (!found)
 	{
-		SetFailureMessage(boost::format("Cannot determine time range end value from database.").str().c_str());
+		SetFailureErrorMessage(boost::format("Cannot determine time range end value from database.").str().c_str());
 		failed = true;
 		return;
 	}
@@ -367,12 +359,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// The time range controls are only accurate to 1 second
 	if (timerange_end <= (timerange_start + 999))
 	{
-		SetFailureMessage(boost::format("The ending value of the time range must be greater than the starting value.").str().c_str());
+		SetFailureErrorMessage(boost::format("The ending value of the time range must be greater than the starting value.").str().c_str());
 		failed = true;
 		return;
 	}
 
 	setting_path_to_kad_output = CheckOutputFileExists();
+
 	if (failed || CheckCancelled()) { return; }
 
 	if (setting_path_to_kad_output.empty()) { return; }
@@ -446,8 +439,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// ******************************************************************************************* //
 	// ******************************************************************************************* //
 	// ******************************************************************************************* //
-	AllWeightings * allWeightings_ = new AllWeightings(messager); // SEE NOTE!  Do not delete this object!
-	AllWeightings & allWeightings = *allWeightings_;
+	KadSampler * allWeightings_ = new KadSampler(messager); // SEE NOTE!  Do not delete this object!
+	KadSampler & allWeightings = *allWeightings_;
 	BOOST_SCOPE_EXIT(&allWeightings, &model, &input_model)
 	{
 		if (model)
@@ -456,295 +449,378 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			{
 				sqlite3_db_release_memory(model->getDb());
 			}
+
 			sqlite3_db_release_memory(input_model.getDb());
 		}
+
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
 	} BOOST_SCOPE_EXIT_END
 
 
-
 	// ********************************************************************************************************************************************************* //
-	// Initialize all metadata about the selected variables and variable groups,
-	// multiplicities, units of analysis, primary keys, output column names, etc.
+	// The main body of the K-ad generation routine follows
 	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("Populating K-ad metadata...")).str().c_str(), this);
-	create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
-	Prepare(allWeightings);
-	if (failed || CheckCancelled()) { return; }
-
-	// ********************************************************************************************************************************************************* //
-	// Build a schema object, one per variable group with selected data,
-	// intended for internal use by the K-ad algorithm (i.e., converted from the raw format used in the database into a handy set of schema instances)
-	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("Building schema objects to represent metadata for selected variable groups...")).str().c_str(), this);
-	PopulateSchemaForRawDataTables(allWeightings);
-	if (failed || CheckCancelled()) { return; }
-	primary_variable_group_column_sets.push_back(SqlAndColumnSets());
-	SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
-
-	// ********************************************************************************************************************************************************* //
-	// From the schema for the selected columns for the primary variable group,
-	// create a temporary table to store just the selected columns over just the selected time range.
-	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for primary variable group data (variable group: %1%)...") % Table_VG_CATEGORY::GetVgDisplayText(top_level_vg)).str().c_str(), this);
-	SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
-	if (failed || CheckCancelled()) { return; }
-	selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
-	ExecuteSQL(selected_raw_data_table_schema);
-	primary_group_column_sets.push_back(selected_raw_data_table_schema);
-
-	// ********************************************************************************************************************************************************* //
-	// Create TIME SLICES.
-	// From the schema for the selected columns for the primary variable group,
-	// load the selected columns of raw data into the temporary table created with the same schema.
-	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("Load selected columns for primary variable group into internal table...")).str().c_str(), this);
-	std::vector<std::string> errorMessages;
-	KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
-	if (failed || CheckCancelled()) { return; }
-
-	// ********************************************************************************************************************************************************* //
-	// For each branch, copy the leaf cache for that branch for fast lookup.
-	//
-	// Note that the leaves for each branch are stored in both a std::set and a std::vector.
-	// They are populated into a std::set<> so that they are automatically ordered.
-	// But now, we want fast access without ever adding or removing leaves,
-	// rather than the ability to add or remove new leaves.
-	// So do a one-time pass to copy the leaves from the set into the vector
-	// for rapid lookup access WHEN CONSTRUCTING OUTPUT ROWS.
-	//
-	// The code that constructs the output rows looks in each "BranchOutputRow" instance
-	// for an INDEX into a leaf, so that it can look into that leaf and retrieve
-	// the actual DMU data for the leaf, AND indexes into the non-primary top-level data cache
-	// for that data.
-	//
-	// Also, if there are any child groups, build a child DMU key lookup map
-	// for that branch that maps all possible child branch + leaves
-	// that map to any corresponding combination of primary branch + leaves for the given primary branch.
-	// This will be used by the child variable groups when they are merged in.
-	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("For each branch node, create a cache of all primary leaf nodes, and create a lookup cache that indexes all possible child branch/leaf combinations (for all child variable groups) that match against the given primary branch and leaves...")).str().c_str(), this);
-	allWeightings.ResetBranchCaches(has_child_groups);
-	if (failed || CheckCancelled()) { return; }
-
-	// ********************************************************************************************************************************************************* //
-	// Calculate the number of possible K-ad combinations for each branch, given the leaves available.
-	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("Calculate the total number of K-ad combinations...")).str().c_str(), this);
-	allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
-	if (failed || CheckCancelled()) { return; }
-
-	// ********************************************************************************************************************************************************* //
-	// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
-	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("Total number of (granulated) K-adic combinations for the given choice of K: %1%") % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
-
-	if (random_sampling)
+	try
 	{
 
 		// ********************************************************************************************************************************************************* //
-		// Give text feedback that the sampler is entering random sampling mode
+		// Initialize all metadata about the selected variables and variable groups,
+		// multiplicities, units of analysis, primary keys, output column names, etc.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Entering random sampling mode...")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Number of desired random samples selected: %1% ") % boost::lexical_cast<std::string>(random_sampling_number_rows).c_str()).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Populating K-ad metadata...")).str().c_str(), this);
+		create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
+		Prepare(allWeightings);
+
+		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
-		// If the user selects more random rows than there are K-ad combinations, then set the number of rows to be equal to the number of K-ad combinations.
-		// Note: We remain nonetheless in random sampling mode, mostly for testing purposes.  One of the best ways to confirm that the random sampling and full
-		// sampling modes are both working is to see that they give identical results when the number of random samples is set to be equal to the number of full samples.
-		// Also, it is possible that the end user wishes to test the scaling properties of the code for their given data when randomly sampled, in which case
-		// they will want to be able to remain in random sampling mode even at the 100% sampling level
+		// Build a schema object, one per variable group with selected data,
+		// intended for internal use by the K-ad algorithm (i.e., converted from the raw format used in the database into a handy set of schema instances)
 		// ********************************************************************************************************************************************************* //
-		std::int64_t samples = random_sampling_number_rows;
-		if (boost::multiprecision::cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
+		messager.AppendKadStatusText((boost::format("Building schema objects to represent metadata for selected variable groups...")).str().c_str(), this);
+		PopulateSchemaForRawDataTables(allWeightings);
+
+		if (failed || CheckCancelled()) { return; }
+
+		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
+		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
+
+		// ********************************************************************************************************************************************************* //
+		// From the schema for the selected columns for the primary variable group,
+		// create a temporary table to store just the selected columns over just the selected time range.
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for primary variable group data (variable group: %1%)...") %
+									  Table_VG_CATEGORY::GetVgDisplayText(top_level_vg)).str().c_str(), this);
+		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
+
+		if (failed || CheckCancelled()) { return; }
+
+		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
+		ExecuteSQL(selected_raw_data_table_schema);
+		primary_group_column_sets.push_back(selected_raw_data_table_schema);
+
+		// ********************************************************************************************************************************************************* //
+		// Create TIME SLICES.
+		// From the schema for the selected columns for the primary variable group,
+		// load the selected columns of raw data into the temporary table created with the same schema.
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Load selected columns for primary variable group into internal table...")).str().c_str(), this);
+		std::vector<std::string> errorMessages;
+		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
+		if (failed || CheckCancelled())
 		{
-			messager.AppendKadStatusText((boost::format("Because the number of requested random samples, %1%, is is greater than the number of available K-ads, %2%, the number of random samples will be decreased to match the number of K-ads.") % boost::lexical_cast<std::string>(random_sampling_number_rows).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
-			samples = allWeightings.weighting.getWeighting().convert_to<int>();
+			std::string errorsOut;
+			bool first = true;
+
+			for (auto errorMsg : errorMessages)
+			{
+				if (!first)
+				{
+					errorsOut += "\n";
+				}
+
+				first = false;
+				errorsOut += errorMsg;
+			}
+
+			SetFailureErrorMessage(errorsOut);
+			return;
 		}
-
-		// ********************************************************************************************************************************************************* //
-		// Generate and store the desired number of random numbers - one random number per output row is stored here
-		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Generating %1% random numbers between 1 and %2% to be used to select random rows ...") % boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
-		allWeightings.PrepareRandomNumbers(samples);
-		if (failed || CheckCancelled()) { return; }
-		messager.AppendKadStatusText((boost::format("Done generating random numbers.")).str().c_str(), this);
-
-		// ********************************************************************************************************************************************************* //
-		// Select the random rows now and stash in memory
-		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Selecting %1% randomly selected K-ad combinations from the raw data (out of %2% total possible combinations) ...") % boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
-		allWeightings.PrepareRandomSamples(K);
-		allWeightings.ClearRandomNumbers(); // This function will not only "clear()" the vector, but "swap()" it with an empty vector to actually force deallocation - a major C++ gotcha!
-		messager.AppendKadStatusText((boost::format("Completed pre-populating randomly selected rows.")).str(), this);
-
-	}
-	else
-	{
-
-		// ********************************************************************************************************************************************************* //
-		// Give text feedback that the sampler is entering full sampling mode
-		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-ad combinations will be generated.") % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
-
-		// ********************************************************************************************************************************************************* //
-		// Generate all K-ad combinations now
-		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Generating all %1% K-ad combinations from the raw data ...") % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
-		allWeightings.PrepareFullSamples(K);
-		messager.AppendKadStatusText((boost::format("Completed generating full selection of K-ad combinations.")).str(), this);
-		if (failed || CheckCancelled()) { return; }
-
-	}
-
-	if (false)
-	{
-
-		// ********************************************************************************************************************************************************* //
-		// This is only necessary for debugging
-		// or further sorting/ordering/processing
-		//
-		// We aren't doing any post-processing of the data that requires it be stored in a table, rather than in memory,
-		// but leave this code here as a starting point for when larger data sets are supported that require
-		// disk-based management during K-ad generation
-		// ********************************************************************************************************************************************************* //
-		KadSamplerCreateOutputTable();
-		if (failed || CheckCancelled()) { return; }
-
-	}
-
-	// ********************************************************************************************************************************************************* //
-	// Create the schema for the output
-	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText((boost::format("Creating output column set information...")).str().c_str(), this);
-	random_sampling_schema = KadSamplerBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
-	if (failed || CheckCancelled()) { return; }
-	final_result = random_sampling_schema;
-
-	if (has_non_primary_top_level_groups || has_child_groups)
-	{
-
-		// ********************************************************************************************************************************************************* //
-		// Populate (merge) *BOTH* child variable groups *AND* non-primary top-level variable groups
-		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Merging secondary variable group data...")).str(), this);
-		KadSamplerFillDataForChildGroups(allWeightings);
-		if (failed || CheckCancelled()) { return; }
-		boost::format mytxt2("Completed merging secondary groups.");
-		messager.AppendKadStatusText(mytxt2.str(), this);
 
 		// ********************************************************************************************************************************************************* //
 		// For each branch, copy the leaf cache for that branch for fast lookup.
 		//
 		// Note that the leaves for each branch are stored in both a std::set and a std::vector.
-		// They are populated into a std::set<> so that they are automatically ordered.
+		// They are populated into a std::set<> so that they are automatically ordered and so that inserts go quickly.
 		// But now, we want fast access without ever adding or removing leaves,
 		// rather than the ability to add or remove new leaves.
 		// So do a one-time pass to copy the leaves from the set into the vector
 		// for rapid lookup access WHEN CONSTRUCTING OUTPUT ROWS.
 		//
-		// The code that constructs the output rows looks in each "BranchOutputRow" instance
+		// The code that constructs the output rows looks in each "BranchOutputRow" instance within (a time unit within) the branch
 		// for an INDEX into a leaf, so that it can look into that leaf and retrieve
 		// the actual DMU data for the leaf, AND indexes into the non-primary top-level data cache
 		// for that data.
 		//
-		// This time, do not build the child DMU key lookup map, because the chilren
-		// are already merged in, so we don't need to look up in the map to see what output rows incoming child rows map to.
-		//
-		// No need to rebuild the leaf cache if there are no non-primary variable groups,
-		// because no leaves in the std::set have been updates since the leaf cache (the std::vector)
-		// was populated after the primary group was loaded, above.
+		// Also, if there are any child groups, this function builds a child DMU key lookup map
+		// for that branch that maps all possible child branch + leaves
+		// that map to any corresponding combination of primary branch + leaves for the given primary branch.
+		// This will be used by the child variable groups when they are merged in.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Rebuild cache of all primary leaf nodes for each branch node...")).str().c_str(), this);
-		allWeightings.ResetBranchCaches(false);
+		messager.AppendKadStatusText((
+										 boost::format("For each branch node, create a cache of all primary leaf nodes, and create a lookup cache that indexes all possible child branch/leaf combinations (for all child variable groups) that match against the given primary branch and leaves...")).str().c_str(),
+									 this);
+		allWeightings.ResetBranchCaches(has_child_groups);
+
 		if (failed || CheckCancelled()) { return; }
-		messager.AppendKadStatusText((boost::format("Completed building cache.")).str().c_str(), this);
+
+		// ********************************************************************************************************************************************************* //
+		// Calculate the number of possible K-ad combinations for each branch, given the leaves available.
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Calculate the total number of K-ad combinations...")).str().c_str(), this);
+		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
+
+		if (failed || CheckCancelled()) { return; }
+
+		// ********************************************************************************************************************************************************* //
+		// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Total number of (granulated) K-adic combinations for the given choice of K: %1%") % boost::lexical_cast<std::string>
+									  (allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
+
+		if (random_sampling)
+		{
+
+			// ********************************************************************************************************************************************************* //
+			// Give text feedback that the sampler is entering random sampling mode
+			// ********************************************************************************************************************************************************* //
+			messager.AppendKadStatusText((boost::format("Entering random sampling mode...")).str().c_str(), this);
+			messager.AppendKadStatusText((boost::format("Number of desired random samples selected: %1% ") % boost::lexical_cast<std::string>
+										  (random_sampling_number_rows).c_str()).str().c_str(), this);
+
+			// ********************************************************************************************************************************************************* //
+			// If the user selects more random rows than there are K-ad combinations, then set the number of rows to be equal to the number of K-ad combinations.
+			// Note: We remain nonetheless in random sampling mode, mostly for testing purposes.  One of the best ways to confirm that the random sampling and full
+			// sampling modes are both working is to see that they give identical results when the number of random samples is set to be equal to the number of full samples.
+			// Also, it is possible that the end user wishes to test the scaling properties of the code for their given data when randomly sampled, in which case
+			// they will want to be able to remain in random sampling mode even at the 100% sampling level
+			// ********************************************************************************************************************************************************* //
+			std::int64_t samples = random_sampling_number_rows;
+
+			if (boost::multiprecision::cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
+			{
+				messager.AppendKadStatusText((
+												 boost::format("Because the number of requested random samples, %1%, is is greater than the number of available K-ads, %2%, the number of random samples will be decreased to match the number of K-ads.")
+												 % boost::lexical_cast<std::string>(random_sampling_number_rows).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
+				samples = allWeightings.weighting.getWeighting().convert_to<int>();
+			}
+
+			// ********************************************************************************************************************************************************* //
+			// Generate and store the desired number of random numbers - one random number per output row is stored here
+			// ********************************************************************************************************************************************************* //
+			messager.AppendKadStatusText((boost::format("Generating %1% random numbers between 1 and %2% to be used to select random rows ...") % boost::lexical_cast<std::string>
+										  (samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
+			allWeightings.PrepareRandomNumbers(samples);
+
+			if (failed || CheckCancelled()) { return; }
+
+			messager.AppendKadStatusText((boost::format("Done generating random numbers.")).str().c_str(), this);
+
+			// ********************************************************************************************************************************************************* //
+			// Select the random rows now and stash in memory
+			// ********************************************************************************************************************************************************* //
+			messager.AppendKadStatusText((boost::format("Selecting %1% randomly selected K-ad combinations from the raw data (out of %2% total possible combinations) ...") %
+										  boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
+			allWeightings.PrepareRandomSamples(K);
+			messager.SetPerformanceLabel((boost::format("Clearing cache of random numbers...")).str().c_str());
+			allWeightings.ClearRandomNumbers(); // This function will not only "clear()" the vector, but "swap()" it with an empty vector to actually force deallocation - a major C++ gotcha!
+			messager.SetPerformanceLabel("");
+			messager.AppendKadStatusText((boost::format("Completed pre-populating randomly selected rows.")).str(), this);
+
+		}
+		else
+		{
+
+			// ********************************************************************************************************************************************************* //
+			// Give text feedback that the sampler is entering full sampling mode
+			// ********************************************************************************************************************************************************* //
+			messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-ad combinations will be generated.") % boost::lexical_cast<std::string>
+										  (allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
+
+			// ********************************************************************************************************************************************************* //
+			// Generate all K-ad combinations now
+			// ********************************************************************************************************************************************************* //
+			messager.AppendKadStatusText((boost::format("Generating all %1% K-ad combinations from the raw data ...") % boost::lexical_cast<std::string>
+										  (allWeightings.weighting.getWeighting()).c_str()).str(), this);
+			allWeightings.PrepareFullSamples(K);
+			messager.AppendKadStatusText((boost::format("Completed generating full selection of K-ad combinations.")).str(), this);
+
+			if (failed || CheckCancelled()) { return; }
+
+		}
+
+		if (false)
+		{
+
+			// ********************************************************************************************************************************************************* //
+			// This is only necessary for debugging
+			// or further sorting/ordering/processing
+			//
+			// We aren't doing any post-processing of the data that requires it be stored in a table, rather than in memory,
+			// but leave this code here as a starting point for when larger data sets are supported that require
+			// disk-based management during K-ad generation
+			// ********************************************************************************************************************************************************* //
+			KadSamplerCreateOutputTable();
+
+			if (failed || CheckCancelled()) { return; }
+
+		}
+
+		// ********************************************************************************************************************************************************* //
+		// Create the schema for the output
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Creating output column set information...")).str().c_str(), this);
+		random_sampling_schema = KadSamplerBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
+
+		if (failed || CheckCancelled()) { return; }
+
+		final_result = random_sampling_schema;
+
+		if (has_non_primary_top_level_groups || has_child_groups)
+		{
+
+			// ********************************************************************************************************************************************************* //
+			// Populate (merge) *BOTH* child variable groups *AND* non-primary top-level variable groups
+			// ********************************************************************************************************************************************************* //
+			messager.AppendKadStatusText((boost::format("Merging secondary variable group data...")).str(), this);
+			KadSamplerFillDataForChildGroups(allWeightings);
+
+			if (failed || CheckCancelled()) { return; }
+
+			boost::format mytxt2("Completed merging secondary groups.");
+			messager.AppendKadStatusText(mytxt2.str(), this);
+
+			// ********************************************************************************************************************************************************* //
+			// For each branch, copy the leaf cache for that branch for fast lookup.
+			//
+			// Note that the leaves for each branch are stored in both a std::set and a std::vector.
+			// They are populated into a std::set<> so that they are automatically ordered and so that inserts go quickly.
+			// But now, we want fast access without ever adding or removing leaves,
+			// rather than the ability to add or remove new leaves.
+			// So do a one-time pass to copy the leaves from the set into the vector
+			// for rapid lookup access WHEN CONSTRUCTING OUTPUT ROWS.
+			//
+			// The code that constructs the output rows looks in each "BranchOutputRow" instance within (a time unit within) the branch
+			// for an INDEX into a leaf, so that it can look into that leaf and retrieve
+			// the actual DMU data for the leaf, AND indexes into the non-primary top-level data cache
+			// for that data.
+			//
+			// This time, do not build the child DMU key lookup map, because the chilren
+			// are already merged in, so we don't need to look up in the map to see what output rows incoming child rows map to.
+			//
+			// No need to rebuild the leaf cache if there are no non-primary variable groups,
+			// because no leaves in the std::set have been updates since the leaf cache (the std::vector)
+			// was populated after the primary group was loaded, above.
+			// ********************************************************************************************************************************************************* //
+			messager.AppendKadStatusText((boost::format("Rebuild cache of all primary leaf nodes for each branch node...")).str().c_str(), this);
+			allWeightings.ResetBranchCaches(false);
+
+			if (failed || CheckCancelled()) { return; }
+
+			messager.AppendKadStatusText((boost::format("Completed building cache.")).str().c_str(), this);
+
+		}
+
+		if (consolidate_rows)
+		{
+
+			// ********************************************************************************************************************************************************* //
+			// Eliminates the division of sets of output rows within
+			// each branch among internal (to the branch)
+			// "time unit entries" (each such entry containing
+			// data for only a single time unit corresponding to the
+			// primary variable group - noting that it is possible
+			// for a single branch to contain *multiple* such time units;
+			// i.e., the primary variable group has "month" time granularity,
+			// but some branches (corresponding to rows of raw input data)
+			// span multiple months.
+			// Note that the merging of child groups can split
+			// branches corresponding to only a SINGLE time unit
+			// into branches corresponding to SUB-time units;
+			// such as a "second" granularity child group
+			// intersecting a month.
+			// (Even time slices with multiple months in this example
+			// can be split such that one or two resulting time slices
+			// has such a sub-month width.)
+			// This latter case is handled properly by the "PruneTimeUnits()"
+			// function, guaranteeing that even in such sub-time-unit
+			// branches, the rows appear once.
+			// See detailed comments in the "PruneTimeUnits()" function.
+			//
+			// The output is stored in "consolidated_rows" of the AllWeightings object.
+			// ********************************************************************************************************************************************************* //
+			messager.AppendKadStatusText((boost::format("Consolidating adjacent rows...")).str(), this);
+			ConsolidateData(random_sampling, allWeightings);
+
+			if (failed || CheckCancelled()) { return; }
+
+			messager.AppendKadStatusText((boost::format("Completed consolidating adjacent rows.")).str().c_str(), this);
+
+		}
+
+
+		// ********************************************************************************************************************************************************* //
+		// ********************************************************************************************************************************************************* //
+		//
+		// For future developers:
+		// Here is an excellent way to debug the data structures used by this software.
+		// Generate a full XML output of *all* data loaded into the KadSampler here.
+		// The XML tags are almost disgracefully wordy so the file can take up a huge amount of space,
+		// but the lengthy tag names make it clear what the purpose of the data is.
+		//
+		// Note that the full file is written to an array of strings first (in memory), so could crash the program
+		// when trying to allocate memory for the strings if there's hundreds of MB's worth of XML
+		//
+		// std::vector<std::string> sdata_;
+		// SpitAllWeightings(sdata_, allWeightings, true, "file_name_appending_text");
+		//
+		// ********************************************************************************************************************************************************* //
+		// ********************************************************************************************************************************************************* //
+
+
+		// ********************************************************************************************************************************************************* //
+		// Write the output to disk
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText("Writing results to disk...", this);
+		messager.SetPerformanceLabel("Writing results to disk...");
+		KadSamplerWriteResultsToFileOrScreen(allWeightings);
+
+		if (failed || CheckCancelled()) { return; }
+
+		// ********************************************************************************************************************************************************* //
+		// Vacuum database, because for large runs, SQLite often increases the database file size from,
+		// for example, 20 MB to nearly a GB.
+		// The database will be left at this size on the end-user's machine if we do not vacuum it here.
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
+		messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
+
+		if (delete_tables)
+		{
+			// ********************************************************************************************************************************************************* //
+			// Delete the tables we used to store the selected columns of raw data over the selected time range
+			// ********************************************************************************************************************************************************* //
+			input_model.ClearRemnantTemporaryTables();
+		}
+
+		input_model.VacuumDatabase();
+		messager.SetPerformanceLabel("");
+
+		messager.UpdateProgressBarValue(1000);
+
+		messager.UpdateStatusBarText((boost::format("Output successfully generated (%1%)") % boost::filesystem::path(setting_path_to_kad_output).filename().c_str()).str().c_str(), this);
+		messager.AppendKadStatusText("Done.", this);
 
 	}
-
-	if (consolidate_rows)
+	catch (boost::exception & e)
 	{
-
-		// ********************************************************************************************************************************************************* //
-		// Eliminates the division of sets of output rows within
-		// each branch among internal (to the branch)
-		// "time unit entries" (each such entry containing
-		// data for only a single time unit corresponding to the
-		// primary variable group - noting that it is possible
-		// for a single branch to contain *multiple* such time units;
-		// i.e., the primary variable group has "month" time granularity,
-		// but some branches (corresponding to rows of raw input data)
-		// span multiple months.
-		// Note that the merging of child groups can split
-		// branches corresponding to only a SINGLE time unit
-		// into branches corresponding to SUB-time units;
-		// such as a "second" granularity child group
-		// intersecting a month.
-		// (Even time slices with multiple months in this example
-		// can be split such that one or two resulting time slices
-		// has such a sub-month width.)
-		// This latter case is handled properly by the "PruneTimeUnits()"
-		// function, guaranteeing that even in such sub-time-unit
-		// branches, the rows appear once.
-		// See detailed comments in the "PruneTimeUnits()" function.
-		//
-		// The output is stored in "consolidated_rows" of the AllWeightings object.
-		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Consolidating adjacent rows...")).str(), this);
-		ConsolidateData(random_sampling, allWeightings);
-		if (failed || CheckCancelled()) { return; }
-		messager.AppendKadStatusText((boost::format("Completed consolidating adjacent rows.")).str().c_str(), this);
-
+		if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
+		{
+			boost::format msg("Error: %1%");
+			msg % error_desc;
+			SetFailureErrorMessage(msg.str());
+			failed = true;
+		}
+	}
+	catch (std::exception & e)
+	{
+		boost::format msg("Exception thrown: %1%");
+		msg % e.what();
+		SetFailureErrorMessage(msg.str());
+		failed = true;
 	}
 
-
-	// ********************************************************************************************************************************************************* //
-	// ********************************************************************************************************************************************************* //
-	//
-	// For future developers:
-	// Here is an excellent way to debug the data structures used by this software.
-	// Generate a full XML output of *all* data loaded into the KadSampler here.
-	// The XML tags are almost disgracefully wordy so the file can take up a huge amount of space,
-	// but the lengthy tag names make it clear what the purpose of the data is.
-	//
-	// Note that the full file is written to an array of strings first (in memory), so could crash the program
-	// when trying to allocate memory for the strings if there's hundreds of MB's worth of XML
-	//
-	// std::vector<std::string> sdata_;
-	// SpitAllWeightings(sdata_, allWeightings, true, "file_name_appending_text");
-	//
-	// ********************************************************************************************************************************************************* //
-	// ********************************************************************************************************************************************************* //
-
-
-	// ********************************************************************************************************************************************************* //
-	// Write the output to disk
-	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText("Writing results to disk...", this);
-	messager.SetPerformanceLabel("Writing results to disk...");
-	KadSamplerWriteResultsToFileOrScreen(allWeightings);
 	if (failed || CheckCancelled()) { return; }
-
-	// ********************************************************************************************************************************************************* //
-	// Vacuum database, because for large runs, SQLite often increases the database file size from,
-	// for example, 20 MB to nearly a GB.
-	// The database will be left at this size on the end-user's machine if we do not vacuum it here.
-	// ********************************************************************************************************************************************************* //
-	messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
-	messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
-	if (delete_tables)
-	{
-		// ********************************************************************************************************************************************************* //
-		// Delete the tables we used to store the selected columns of raw data over the selected time range
-		// ********************************************************************************************************************************************************* //
-		input_model.ClearRemnantTemporaryTables();
-	}
-	input_model.VacuumDatabase();
-
-	messager.UpdateProgressBarValue(1000);
-
-	messager.UpdateStatusBarText((boost::format("Output successfully generated (%1%)") % boost::filesystem::path(setting_path_to_kad_output).filename().c_str()).str().c_str(), this);
-	messager.AppendKadStatusText("Done.", this);
 
 	boost::format msg1("Number transactions begun: %1%");
 	msg1 % OutputModel::OutputGenerator::number_transaction_begins;
@@ -806,7 +882,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	number_of_multiplicities = 0;
 }
 
-void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema,
+void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGreaterThanOne(KadSampler & allWeightings, ColumnsInTempView const & column_schema,
 		int const child_variable_group_index)
 {
 
@@ -854,7 +930,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	int reverse_index_to_final_relevant_date_column = (int)
 			column_schema.columns_in_view.size(); // ensures that even if there is only one inner table, it will match as the final inner table
 	std::for_each(column_schema.columns_in_view.crbegin(),
-				  column_schema.columns_in_view.crend(), [this, &reverse_index_to_final_relevant_date_column, &column_schema, &reached_first_dates, &reached_second_dates, &on_other_side_of_first_dates, &on_other_side_of_second_dates, &first_variable_group, &current_column](
+				  column_schema.columns_in_view.crend(), [this, &reverse_index_to_final_relevant_date_column, &column_schema, &reached_first_dates, &reached_second_dates,
+						  &on_other_side_of_first_dates, &on_other_side_of_second_dates, &first_variable_group, &current_column](
 					  ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 		if (possible_duplicate_view_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
@@ -899,7 +976,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	bool not_first_variable_group = false;
 
 	std::for_each(column_schema.columns_in_view.cbegin(),
-				  column_schema.columns_in_view.cend(), [this, &xr_table_category, &not_first_variable_group, &column_index_of_start_of_final_inner_table, &column_schema, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_float, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](
+				  column_schema.columns_in_view.cend(), [this, &xr_table_category, &not_first_variable_group, &column_index_of_start_of_final_inner_table, &column_schema, &reached_first_dates,
+						  &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_float, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](
 					  ColumnsInTempView::ColumnInTempView const & one_column)
 	{
 
@@ -1444,7 +1522,7 @@ bool OutputModel::OutputGenerator::StepData()
 		sql_error = sqlite3_errmsg(db);
 		boost::format msg("SQLite database error when iterating through rows: %1%");
 		msg % sql_error;
-		SetFailureMessage(msg.str());
+		SetFailureErrorMessage(msg.str());
 		failed = true;
 		return false;
 	}
@@ -1484,7 +1562,7 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 		sql_error = sqlite3_errmsg(db);
 		boost::format msg("SQLite database error when preparing SELECT * SQL statement for table %1%: %2% (The SQL query is \"%3%\")");
 		msg % column_set.view_name % sql_error % sql;
-		SetFailureMessage(msg.str());
+		SetFailureErrorMessage(msg.str());
 		failed = true;
 		return;
 	}
@@ -1523,7 +1601,7 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 		sql_error = sqlite3_errmsg(db);
 		boost::format msg("SQLite database error when preparing SELECT * SQL statement for table %1%: %2% (The SQL query is \"%3%\")");
 		msg % column_set.view_name % sql_error % sql;
-		SetFailureMessage(msg.str());
+		SetFailureErrorMessage(msg.str());
 		failed = true;
 		return 0;
 	}
@@ -1543,7 +1621,7 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 		sql_error = sqlite3_errmsg(db);
 		boost::format msg("Unexpected result (row not returned) when attempting to step through result set of SQL query \"%1%\": %2%");
 		msg % sql % sql_error;
-		SetFailureMessage(msg.str());
+		SetFailureErrorMessage(msg.str());
 		failed = true;
 		return 0;
 	}
@@ -1600,7 +1678,7 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 		if (sql_executor.failed)
 		{
 			// Error already posted
-			SetFailureMessage(sql_executor.error_message);
+			SetFailureErrorMessage(sql_executor.error_message);
 			failed = true;
 			return;
 		}
@@ -1903,7 +1981,8 @@ void OutputModel::OutputGenerator::SQLExecutor::DoExecute(sqlite3 * db, OutputMo
 		int current_float_index = 0;
 		int current_index = 1;
 		std::for_each(bound_parameter_which_binding_to_use.cbegin(),
-					  bound_parameter_which_binding_to_use.cend(), [&stmt, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &current_string_index, &current_int64_index, &current_float_index, &current_index](
+					  bound_parameter_which_binding_to_use.cend(), [&stmt, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use,
+							  &current_string_index, &current_int64_index, &current_float_index, &current_index](
 						  WHICH_BINDING const & which_binding)
 		{
 			switch (which_binding)
@@ -2313,7 +2392,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (failed)
 		{
-			SetFailureMessage(sql_error);
+			SetFailureErrorMessage(sql_error);
 			return result;
 		}
 
@@ -2349,7 +2428,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (failed)
 		{
-			SetFailureMessage(sql_error);
+			SetFailureErrorMessage(sql_error);
 			return result;
 		}
 
@@ -2384,7 +2463,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 {
 
 	// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
@@ -2409,7 +2488,7 @@ void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 	if (random_sampling && (random_sampling_number_rows <= 0))
 	{
 		boost::format msg("You have selected random sampling, but the number of desired rows to generate is 0.");
-		SetFailureMessage(msg.str());
+		SetFailureErrorMessage(msg.str());
 		failed = true;
 	}
 
@@ -2492,7 +2571,7 @@ void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 	{
 		boost::format
 		msg("\"Granulated output\" mode (i.e., consolidate output rows is UNCHECKED) is not possible for the primary variable group you have selected because the primary variable group has no time granularity associated with it.  NewGene would not know how to separate the output rows into time slices.");
-		SetFailureMessage(msg.str());
+		SetFailureErrorMessage(msg.str());
 		failed = true;
 	}
 
@@ -2500,7 +2579,7 @@ void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 	int highest_multiplicity = 1;
 	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[top_level_vg_index];
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 	{
 
 		if (raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > highest_multiplicity)
@@ -2516,7 +2595,7 @@ void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 
 }
 
-void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & allWeightings)
 {
 
 	// ***************************************************************************************************************** //
@@ -2742,7 +2821,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 	{
 		boost::format msg("The number of datetime columns in the raw data tables in the database is not either 0 or 2 (table %1%)");
 		msg % vg_data_table_name;
-		SetFailureMessage(msg.str());
+		SetFailureErrorMessage(msg.str());
 		failed = true;
 		return;
 	}
@@ -2785,7 +2864,9 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 
 	std::for_each(variables_in_group_sorted.cbegin(),
-				  variables_in_group_sorted.cend(), [this, &vg_data_table_name, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group, &variables_in_group_primary_keys_metadata](
+				  variables_in_group_sorted.cend(), [this, &vg_data_table_name, &dmu_counts_corresponding_to_top_level_uoa,
+						  &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group,
+						  &variables_in_group_primary_keys_metadata](
 					  WidgetInstanceIdentifier const & variable_group_set_member)
 	{
 		columns_in_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
@@ -2808,7 +2889,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 		{
 			boost::format msg("There is no unit of analysis that can be retrieved for table %1% while attempting to retrieve raw data from this table.");
 			msg % vg_data_table_name;
-			SetFailureMessage(msg.str());
+			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return;
 		}
@@ -2855,7 +2936,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 		int number_inner_tables = 0;
 		std::for_each(sequence.primary_key_sequence_info.cbegin(),
-					  sequence.primary_key_sequence_info.cend(), [this, &number_inner_tables, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table, &variables_in_group_primary_keys_metadata](
+					  sequence.primary_key_sequence_info.cend(), [this, &number_inner_tables, &dmu_counts_corresponding_to_top_level_uoa,
+							  &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table, &variables_in_group_primary_keys_metadata](
 						  PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry__output__including_multiplicities)
 		{
 
@@ -2894,7 +2976,10 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 			// You can see that each column therefore corresponds to possibly *multiple* variable groups,
 			// and correspondingly for each such VG one and the same column can be a member of a different inner table.
 			std::for_each(primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child.cbegin(),
-						  primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child.cend(), [this, &number_inner_tables, &k_count__corresponding_to_top_level_uoa__and_current_dmu_category, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities, &variables_in_group_primary_keys_metadata](
+						  primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child.cend(), [this, &number_inner_tables,
+								  &k_count__corresponding_to_top_level_uoa__and_current_dmu_category, &dmu_counts_corresponding_to_top_level_uoa,
+								  &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table,
+								  &primary_key_entry__output__including_multiplicities, &variables_in_group_primary_keys_metadata](
 							  PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
 			{
 				if (current_variable_group_primary_key_entry.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))
@@ -2952,7 +3037,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 									k_count__corresponding_to_top_level_uoa__and_current_dmu_category;
 
 								std::for_each(dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cbegin(),
-											  dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cend(), [this, &number_inner_tables, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities](
+											  dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cend(), [this, &number_inner_tables, &column_in_variable_group_data_table,
+													  &primary_key_entry__output__including_multiplicities](
 												  Table_UOA_Identifier::DMU_Plus_Count const & dmu_count)
 								{
 									if (dmu_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key_entry__output__including_multiplicities.dmu_category))
@@ -2975,7 +3061,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 								// Now determine if this primary key field should be treated as numeric for sorting and ordering
 								std::for_each(variables_in_group_primary_keys_metadata.cbegin(),
-											  variables_in_group_primary_keys_metadata.cend(), [&column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities, &current_variable_group_primary_key_entry](
+											  variables_in_group_primary_keys_metadata.cend(), [&column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities,
+													  &current_variable_group_primary_key_entry](
 												  WidgetInstanceIdentifier const & primary_key_in_variable_group_metadata)
 								{
 									if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, *primary_key_in_variable_group_metadata.longhand))
@@ -3095,7 +3182,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 				// error in algorithm logic
 				boost::format msg("Unable to determine DMU counts for unit of analysis %1%.");
 				msg % *uoa__to__dmu_counts__pair.first.code;
-				SetFailureMessage(msg.str());
+				SetFailureErrorMessage(msg.str());
 				failed = true;
 				return; // from lambda
 			}
@@ -3111,7 +3198,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 			// overlapping UOA's: not yet implemented
 			// Todo: Error message
 			boost::format msg("Overlapping top-level variable groups are not yet supported.");
-			SetFailureMessage(msg.str());
+			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from labmda
 		}
@@ -3132,7 +3219,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 		{
 			// error in algorithm logic
 			boost::format msg("Unknown evaluation of DMU counts for top-level variable groups.");
-			SetFailureMessage(msg.str());
+			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -3168,7 +3255,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		if (!the_dmu_category.uuid || !the_dmu_category.code)
 		{
 			boost::format msg("DMU code (or UUID) is unknown while validating units of analysis.");
-			SetFailureMessage(msg.str());
+			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -3194,14 +3281,14 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					boost::format
 					msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis \"%5%\".");
 					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.longhand;
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 				}
 				else
 				{
 					boost::format
 					msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis %5%.");
 					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.code;
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 				}
 			}
 			else
@@ -3211,14 +3298,14 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					boost::format
 					msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis \"%4%\".");
 					msg % *the_dmu_category.code % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.longhand;
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 				}
 				else
 				{
 					boost::format
 					msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis %4%.");
 					msg % *the_dmu_category.code % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.code;
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 				}
 			}
 
@@ -3246,13 +3333,13 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				{
 					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is not an even multiple of the minimum K-value for the unit of analysis %4% (%5%).");
 					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % *biggest_counts[0].first.longhand % uoa_count_current_dmu_category;
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 				}
 				else
 				{
 					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is not an even multiple of the minimum K-value for the unit of analysis %4% (%5%).");
 					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 				}
 			}
 			else
@@ -3261,13 +3348,13 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				{
 					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimum K-value for the unit of analysis %3% (%4%).");
 					msg % *the_dmu_category.code % kad_count_current_dmu_category % *biggest_counts[0].first.longhand % uoa_count_current_dmu_category;
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 				}
 				else
 				{
 					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimum K-value for the unit of analysis %3% (%4%).");
 					msg % *the_dmu_category.code % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 				}
 			}
 
@@ -3298,7 +3385,8 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	int current_index = 0;
 	std::for_each(
 		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cbegin(),
-		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cend(), [this, &current_index](
+		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cend(), [this,
+				&current_index](
 			int const & test_multiplicity)
 	{
 		if (failed || CheckCancelled())
@@ -3315,7 +3403,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				// ********************************************************************************************************************** //
 				failed = true;
 				boost::format msg("Only a single DMU category may have its K value in the spin control set to larger than the minimum.  Future versions of NewGene may allow this.");
-				SetFailureMessage(msg.str());
+				SetFailureErrorMessage(msg.str());
 				return; // from lambda
 			}
 
@@ -3402,14 +3490,14 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 							boost::format
 							msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (%2%) may only be greater than 1 if it matches the K-value within the UOA of the top-level variable group/s.");
 							msg % *current_dmu_plus_count.first.code % *current_dmu_plus_count.first.longhand;
-							SetFailureMessage(msg.str());
+							SetFailureErrorMessage(msg.str());
 						}
 						else
 						{
 							boost::format
 							msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% may only be greater than 1 if it matches the K-value within the UOA of the top-level variable group/s.");
 							msg % *current_dmu_plus_count.first.code;
-							SetFailureMessage(msg.str());
+							SetFailureErrorMessage(msg.str());
 						}
 
 						failed = true;
@@ -3445,14 +3533,14 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 								boost::format
 								msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (%2%) cannot currently be 1 if the K-value within the UOA of the top-level variable group/s is greater than 1 when that DMU category does not have multiplicity greater than 1 for the top-level variable group.");
 								msg % *current_dmu_plus_count.first.code % *current_dmu_plus_count.first.longhand;
-								SetFailureMessage(msg.str());
+								SetFailureErrorMessage(msg.str());
 							}
 							else
 							{
 								boost::format
 								msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% cannot currently be 1 if the K-value within the UOA of the top-level variable group/s is greater than 1 when that DMU category does not have multiplicity greater than 1 for the top-level variable group.");
 								msg % *current_dmu_plus_count.first.code;
-								SetFailureMessage(msg.str());
+								SetFailureErrorMessage(msg.str());
 							}
 
 							failed = true;
@@ -3473,7 +3561,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			boost::format
 			msg("For child variable group with unit of analysis %1%, the K-value for more than one DMU category is less than the corresponding K-values within the UOA of the top-level variable group/s.  This is currently not supported by NewGene.");
 			msg % *uoa__to__dmu_counts__pair.first.code;
-			SetFailureMessage(msg.str());
+			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -3502,7 +3590,7 @@ void OutputModel::OutputGenerator::PopulateUOAs()
 		{
 			boost::format msg("Unit of analysis %1% does not have a UUID.  (Error while populating metadata for units of analysis.)");
 			msg % *uoa.code;
-			SetFailureMessage(msg.str());
+			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -3542,7 +3630,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 			if (!the_dmu_category_identifier.uuid || !the_dmu_category_identifier.code)
 			{
 				boost::format msg("Unknown DMU identifier while obtaining metadata for child variable groups.");
-				SetFailureMessage(msg.str());
+				SetFailureErrorMessage(msg.str());
 				failed = true;
 				return; // from lambda
 			}
@@ -3569,7 +3657,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 						msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis \"%5%\".");
 						msg % *the_dmu_category_identifier.code % *the_dmu_category_identifier.longhand % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category %
 						*uoa_identifier.longhand;
-						SetFailureMessage(msg.str());
+						SetFailureErrorMessage(msg.str());
 					}
 					else
 					{
@@ -3577,7 +3665,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 						msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis %5%.");
 						msg % *the_dmu_category_identifier.code % *the_dmu_category_identifier.longhand % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category %
 						*uoa_identifier.code;
-						SetFailureMessage(msg.str());
+						SetFailureErrorMessage(msg.str());
 					}
 				}
 				else
@@ -3587,14 +3675,14 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 						boost::format
 						msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis \"%4%\".");
 						msg % *the_dmu_category_identifier.code % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.longhand;
-						SetFailureMessage(msg.str());
+						SetFailureErrorMessage(msg.str());
 					}
 					else
 					{
 						boost::format
 						msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis %4%.");
 						msg % *the_dmu_category_identifier.code % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.code;
-						SetFailureMessage(msg.str());
+						SetFailureErrorMessage(msg.str());
 					}
 				}
 
@@ -3660,7 +3748,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 		if (!the_dmu_category.uuid || !the_dmu_category.code)
 		{
 			boost::format msg("Unknown DMU identifier while populating primary key sequence metadata.");
-			SetFailureMessage(msg.str());
+			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -3699,7 +3787,9 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 
 			int view_count = 0;
 			std::for_each(primary_variable_groups_vector.cbegin(),
-						  primary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](
+						  primary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category,
+								  &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys,
+								  &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](
 							  std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 			{
 				if (failed || CheckCancelled())
@@ -3711,7 +3801,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				{
 					// Todo: error message
 					boost::format msg("Unknown variable group identifier while populating primary key sequence metadata.");
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -3720,7 +3810,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				{
 					// Todo: error message
 					boost::format msg("Unknown unit of analysis identifier while populating primary key sequence metadata.");
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -3748,14 +3838,17 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				{
 					// Todo: error message
 					boost::format msg("Global data tables - i.e., tables of raw data with no DMU category primary key - are not yet supported in NewGene.");
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 					failed = true;
 					return;
 				}
 
 				int total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group = 0;
 				std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(),
-							  dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, the_dmu_category, &total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](
+							  dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, the_dmu_category,
+									  &total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group,
+									  &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category,
+									  &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](
 								  WidgetInstanceIdentifier const & current_primary_or_child_variable_group__current_dmu_category__primary_key_instance)
 				{
 					if (current_primary_or_child_variable_group__current_dmu_category__primary_key_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
@@ -3805,7 +3898,11 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					// Only append info for the single instance that matches the sequence number of interest.
 					int inner_sequence_number__current_variable_group__current_primary_key_dmu_category = 0;
 					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(),
-								  dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &outer_sequence_number__current_variable_group__current_primary_key_dmu_category, &the_dmu_category, &inner_sequence_number__current_variable_group__current_primary_key_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](
+								  dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m,
+										  &outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa,
+										  &current_variable_group_current_primary_key_info, &the_variable_group, &outer_sequence_number__current_variable_group__current_primary_key_dmu_category, &the_dmu_category,
+										  &inner_sequence_number__current_variable_group__current_primary_key_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category,
+										  &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](
 									  WidgetInstanceIdentifier const & current_variable_group__current_dmu_primary_key_instance)
 					{
 						if (failed || CheckCancelled())
@@ -3857,7 +3954,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								{
 									boost::format msg("Unable to locate variable \"%1%\" (%2%) while populating primary key sequence metadata.");
 									msg % *current_variable_group__current_dmu_primary_key_instance.longhand % *the_variable_group.first.uuid;
-									SetFailureMessage(msg.str());
+									SetFailureErrorMessage(msg.str());
 									failed = true;
 									return; // from lambda
 								}
@@ -3907,7 +4004,9 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 
 			view_count = 0;
 			std::for_each(child_variable_groups_vector.cbegin(),
-						  child_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](
+						  child_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category,
+								  &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys,
+								  &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](
 							  std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 			{
 				if (failed || CheckCancelled())
@@ -3919,7 +4018,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				{
 					// Todo: error message
 					boost::format msg("Unknown variable group identifier while populating primary key sequence metadata.");
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -3928,7 +4027,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				{
 					// Todo: error message
 					boost::format msg("Unknown unit of analysis identifier while populating primary key sequence metadata.");
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -3957,14 +4056,17 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				{
 					// Todo: error message
 					boost::format msg("Global data tables - i.e., tables of raw data with no DMU category primary key - are not yet supported in NewGene.");
-					SetFailureMessage(msg.str());
+					SetFailureErrorMessage(msg.str());
 					failed = true;
 					return;
 				}
 
 				int total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group = 0;
 				std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(),
-							  dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, the_dmu_category, &total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](
+							  dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, the_dmu_category,
+									  &total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group,
+									  &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category,
+									  &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](
 								  WidgetInstanceIdentifier const & current_primary_or_child_variable_group__current_dmu_category__primary_key_instance)
 				{
 					if (current_primary_or_child_variable_group__current_dmu_category__primary_key_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
@@ -4036,7 +4138,12 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 
 					int inner_sequence_number__current_variable_group__current_primary_key_dmu_category = 0;
 					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(),
-								  dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &outer_sequence_number__current_variable_group__current_primary_key_dmu_category, &the_dmu_category, &inner_sequence_number__current_variable_group__current_primary_key_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group](
+								  dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m,
+										  &outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa,
+										  &current_variable_group_current_primary_key_info, &the_variable_group, &outer_sequence_number__current_variable_group__current_primary_key_dmu_category, &the_dmu_category,
+										  &inner_sequence_number__current_variable_group__current_primary_key_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category,
+										  &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys,
+										  &total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group](
 									  WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
 					{
 
@@ -4093,7 +4200,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								{
 									boost::format msg("Unable to locate variable \"%1%\" (%2%) while populating primary key sequence metadata.");
 									msg % *current_variable_group_current_dmu_primary_key.longhand % *the_variable_group.first.uuid;
-									SetFailureMessage(msg.str());
+									SetFailureErrorMessage(msg.str());
 									failed = true;
 									return; // from lambda
 								}
@@ -4229,7 +4336,7 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 	return "";
 }
 
-void OutputModel::OutputGenerator::SetFailureMessage(std::string const & failure_message_)
+void OutputModel::OutputGenerator::SetFailureErrorMessage(std::string const & failure_message_)
 {
 	failure_message = failure_message_;
 	std::string report_failure_message = "Failed: ";
@@ -4238,14 +4345,10 @@ void OutputModel::OutputGenerator::SetFailureMessage(std::string const & failure
 	messager.UpdateStatusBarText(report_failure_message, nullptr);
 }
 
-void OutputModel::OutputGenerator::UpdateProgressBarValue(Messager & messager, std::int64_t const current_rows_stepped)
+void OutputModel::OutputGenerator::UpdateProgressBarValue(Messager & messager, std::int64_t const current_rows_stepped, boost::format & msg_for_progress_bar)
 {
 
-	boost::format msg("Processed %1% of %2% temporary rows this stage.");
-	msg % current_rows_stepped % current_number_rows_to_sort;
-	messager.SetPerformanceLabel(msg.str());
-
-	int current_progress_bar_value = (int)(((long double)(current_rows_stepped) / (long double)(current_number_rows_to_sort)) * 1000.0);
+	int current_progress_bar_value = (int)(((long double)(current_rows_stepped) / (long double)(messager.current_progress_bar_max_value)) * 1000.0);
 
 	if (current_progress_bar_value > 1000)
 	{
@@ -4253,408 +4356,383 @@ void OutputModel::OutputGenerator::UpdateProgressBarValue(Messager & messager, s
 	}
 
 	messager.UpdateProgressBarValue(current_progress_bar_value);
+	messager.SetPerformanceLabel((msg_for_progress_bar % current_progress_bar_value % messager.current_progress_bar_max_value).str().c_str());
 
 }
 
 void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
-		AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
+		KadSampler & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
 {
 
+	std::int64_t current_rows_stepped = 0;
+	sqlite3_stmt *& the_prepared_stmt = SQLExecutor::stmt_insert;
+	std::shared_ptr<bool> statement_is_prepared(std::make_shared<bool>(false));
+	SQLExecutor::stmt_insert = nullptr;
+	sqlite3_stmt *& the_stmt__ = SQLExecutor::stmt_insert;
+	boost::format msg_for_progress_bar("Processed %1% of %2% incoming rows");
+	BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared, &the_stmt__)
+	{
+		if (the_prepared_stmt && *statement_is_prepared)
+		{
+			sqlite3_finalize(the_prepared_stmt);
+			++SQLExecutor::number_statement_finalizes;
+			the_prepared_stmt = nullptr;
+			*statement_is_prepared = false;
+		}
+
+		the_stmt__ = nullptr;
+	} BOOST_SCOPE_EXIT_END
+
+	messager.current_progress_bar_max_value = ObtainCount(variable_group_selected_columns_schema);
+	messager.StartProgressBar(0, messager.current_progress_bar_max_value);
+	messager.UpdateProgressBarValue(0);
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->CloseObtainData();
+	} BOOST_SCOPE_EXIT_END
+
+	ObtainData(variable_group_selected_columns_schema, true);
+
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
+
+	SavedRowData sorting_row_of_data;
+
+	while (StepData())
 	{
 
-		std::int64_t current_rows_stepped = 0;
-		sqlite3_stmt *& the_prepared_stmt = SQLExecutor::stmt_insert;
-		std::shared_ptr<bool> statement_is_prepared(std::make_shared<bool>(false));
-		SQLExecutor::stmt_insert = nullptr;
-		sqlite3_stmt *& the_stmt__ = SQLExecutor::stmt_insert;
-		BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared, &the_stmt__) 
+		if (CheckCancelled())
 		{
-			if (the_prepared_stmt && *statement_is_prepared)
-			{
-				sqlite3_finalize(the_prepared_stmt);
-				++SQLExecutor::number_statement_finalizes;
-				the_prepared_stmt = nullptr;
-				*statement_is_prepared = false;
-			}
+			return;
+		}
 
-			the_stmt__ = nullptr;
-		} BOOST_SCOPE_EXIT_END
+		sorting_row_of_data.PopulateFromCurrentRowInDatabase(variable_group_selected_columns_schema, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true);
 
+		// Construct branch and leaf
+
+		failed = sorting_row_of_data.failed;
+
+		if (failed)
+		{
+			SetFailureErrorMessage(sorting_row_of_data.error_message);
+			return;
+		}
+
+		// Construct Leaf
+		DMUInstanceDataVector dmus_leaf;
+		bool bad = false;
+		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(),
+					  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 		{
 
-			BOOST_SCOPE_EXIT(this_)
-			{
-				this_->CloseObtainData();
-			} BOOST_SCOPE_EXIT_END
-
-			ObtainData(variable_group_selected_columns_schema, true);
-
-			if (failed || CheckCancelled())
+			if (bad)
 			{
 				return;
 			}
 
-			//BeginNewTransaction();
+			SQLExecutor::WHICH_BINDING binding = binding_info.first;
+			std::pair<int, int> const & indices = binding_info.second;
+			int const index_in_bound_vector = indices.first;
+			int const column_number = indices.second;
 
-			SavedRowData sorting_row_of_data;
-
-			while (StepData())
+			switch (binding)
 			{
 
-				if (CheckCancelled())
-				{
-					return;
-				}
-
-				sorting_row_of_data.PopulateFromCurrentRowInDatabase(variable_group_selected_columns_schema, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true);
-
-				// Construct branch and leaf
-
-				failed = sorting_row_of_data.failed;
-
-				if (failed)
-				{
-					SetFailureMessage(sorting_row_of_data.error_message);
-					return;
-				}
-
-				// Construct Leaf
-				DMUInstanceDataVector dmus_leaf;
-				bool bad = false;
-				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(),
-							  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
-				{
-
-					if (bad)
+				case SQLExecutor::INT64:
 					{
+						dmus_leaf.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
+					}
+					break;
+
+				case SQLExecutor::FLOAT:
+					{
+						dmus_leaf.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
+					}
+					break;
+
+				case SQLExecutor::STRING:
+					{
+						dmus_leaf.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+					}
+					break;
+
+				default:
+					{
+						errorMessages.push_back((boost::format("Invalid row binding for row %1%") % boost::lexical_cast<std::string>(current_rows_stepped).c_str()).str());
+						bad = true;
 						return;
 					}
-
-					SQLExecutor::WHICH_BINDING binding = binding_info.first;
-					std::pair<int, int> const & indices = binding_info.second;
-					int const index_in_bound_vector = indices.first;
-					int const column_number = indices.second;
-
-					switch (binding)
-					{
-
-						case SQLExecutor::INT64:
-							{
-								dmus_leaf.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
-							}
-							break;
-
-						case SQLExecutor::FLOAT:
-							{
-								dmus_leaf.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
-							}
-							break;
-
-						case SQLExecutor::STRING:
-							{
-								dmus_leaf.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
-							}
-							break;
-
-						default:
-							{
-								// No throw... TODO: log error
-								//boost::format msg("Data cannot be NULL in a primary key field.");
-								//throw NewGeneException() << newgene_error_description(msg.str());
-								bad = true;
-								return;
-							}
-							break;
-
-					}
-
-				});
-
-				// Construct Branch
-				DMUInstanceDataVector dmus_branch;
-				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cbegin(),
-							  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
-				{
-
-					if (bad)
-					{
-						return;
-					}
-
-					SQLExecutor::WHICH_BINDING binding = binding_info.first;
-					std::pair<int, int> const & indices = binding_info.second;
-					int const index_in_bound_vector = indices.first;
-					int const column_number = indices.second;
-
-					switch (binding)
-					{
-
-						case SQLExecutor::INT64:
-							{
-								dmus_branch.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
-							}
-							break;
-
-						case SQLExecutor::FLOAT:
-							{
-								dmus_branch.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
-							}
-							break;
-
-						case SQLExecutor::STRING:
-							{
-								dmus_branch.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
-							}
-							break;
-
-						default:
-							{
-								// No throw... TODO: log error
-								//boost::format msg("Data cannot be NULL in a primary key field.");
-								//throw NewGeneException() << newgene_error_description(msg.str());
-								bad = true;
-								return;
-							}
-							break;
-
-					}
-
-				});
-
-				// Store secondary key data for use in constructing final output.
-				// Note that this is stored in a cache.
-				// In the future, this cache can be enhanced to become an intelligent LIFO memory/disk cache
-				// to support huge input datasets.
-				DMUInstanceDataVector secondary_data;
-				std::for_each(sorting_row_of_data.indices_of_secondary_key_columns.cbegin(),
-							  sorting_row_of_data.indices_of_secondary_key_columns.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
-				{
-
-					if (bad)
-					{
-						return;
-					}
-
-					SQLExecutor::WHICH_BINDING binding = binding_info.first;
-					std::pair<int, int> const & indices = binding_info.second;
-					int const index_in_bound_vector = indices.first;
-					int const column_number = indices.second;
-
-					switch (binding)
-					{
-
-						case SQLExecutor::INT64:
-							{
-								secondary_data.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
-							}
-							break;
-
-						case SQLExecutor::FLOAT:
-							{
-								secondary_data.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
-							}
-							break;
-
-						case SQLExecutor::STRING:
-							{
-								secondary_data.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
-							}
-							break;
-
-						default:
-							{
-								// No throw... TODO: log error
-								//boost::format msg("Data cannot be NULL in a primary key field.");
-								//throw NewGeneException() << newgene_error_description(msg.str());
-								bad = true;
-								return;
-							}
-							break;
-
-					}
-
-				});
-
-				if (!bad)
-				{
-
-					//try
-					{
-
-						TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
-
-						switch (merge_mode)
-						{
-
-							case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
-								{
-
-									Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid));
-									Branch branch(dmus_branch);
-
-									bool call_again = false;
-									bool added = false;
-									bool first = true;
-									TimeSlices::iterator mapIterator;
-									auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
-
-									while (first || call_again)
-									{
-										first = false;
-										std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
-												AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
-										bool added_recurse = std::get<0>(ret);
-
-										if (added_recurse)
-										{
-											added = true;
-										}
-
-										call_again = std::get<1>(ret);
-										mapIterator = std::get<2>(ret);
-									}
-
-									if (added)
-									{
-										// Add the secondary data for this primary variable group to the cache
-										allWeightings.dataCache[static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
-									}
-
-								}
-								break;
-
-							case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
-								{
-
-									Leaf leaf(dmus_leaf);
-									Branch branch(dmus_branch);
-
-									// Set the secondary data index into the above cache for this non-primary top-level variable group
-									// so that it can be set in the corresponding leaf already present for the branch
-									leaf.other_top_level_indices_into_raw_data[static_cast<std::int16_t>(variable_group_number)] = static_cast<std::int32_t>(sorting_row_of_data.rowid);
-
-									bool call_again = false;
-									bool added = false;
-									bool first = true;
-									TimeSlices::iterator mapIterator;
-									auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
-
-									while (first || call_again)
-									{
-										first = false;
-										std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
-												AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
-										bool added_recurse = std::get<0>(ret);
-
-										if (added_recurse)
-										{
-											added = true;
-										}
-
-										call_again = std::get<1>(ret);
-										mapIterator = std::get<2>(ret);
-									}
-
-									if (added)
-									{
-										// Add the secondary data for this non-primary top-level variable group to the cache
-										allWeightings.otherTopLevelCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
-									}
-
-								}
-								break;
-
-							case VARIABLE_GROUP_MERGE_MODE__CHILD:
-								{
-
-									// pack the child data index into the main leaf for use in the function called below - because this leaf is TEMPORARY
-									// (this data will be unpacked from the temporary leaf and put into the proper place in the function called below)
-									Leaf leaf(dmus_leaf, static_cast<std::int16_t>(sorting_row_of_data.rowid));
-									Branch branch(dmus_branch);
-
-									// ************************************************************************************************** //
-									// Important!
-									// This is a *CHILD* merge,
-									// so all LEAVES in the primary variable group have already been added to all branches.
-									// No new leaves will be added to any branches here.
-									// Therefore, even though 'HandleBranchAndLeaf()' is called,
-									// which might slice the time slices, each such slice will not add any new primary leaves
-									// and the previous set of cached leaves will be persisted in the time slice copies.
-									// ************************************************************************************************** //
-									bool call_again = false;
-									bool added = false;
-									bool first = true;
-									TimeSlices::iterator mapIterator;
-									auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
-
-									while (first || call_again)
-									{
-										first = false;
-										std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
-												AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
-										bool added_recurse = std::get<0>(ret);
-
-										if (added_recurse)
-										{
-											added = true;
-										}
-
-										call_again = std::get<1>(ret);
-										mapIterator = std::get<2>(ret);
-									}
-
-									if (added)
-									{
-										// Add the secondary data for this child variable group to the cache
-										allWeightings.childCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
-									}
-
-								}
-								break;
-
-							default:
-								{
-
-								}
-								break;
-
-						}
-
-					}
-					//catch (boost::exception & e)
-					//{
-					//	bad = true;
-					//	if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
-					//	{
-					//		boost::format msg("Error: %1%");
-					//		errorMessages.push_back(error_desc->c_str());
-					//	}
-					//}
-
-				}
-
-				++current_rows_stepped;
-
-				if (current_rows_stepped % 100 == 0 || current_rows_stepped == current_number_rows_to_sort)
-				{
-					//UpdateProgressBarValue(messager, current_rows_stepped);
-				}
-
-				if (bad)
-				{
-					continue;
-				}
+					break;
 
 			}
 
-			//messager.UpdateProgressBarValue(1000);
-			//boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
-			//msg % current_rows_stepped % current_number_rows_to_sort;
-			//messager.SetPerformanceLabel(msg.str());
+		});
+
+		// Construct Branch
+		DMUInstanceDataVector dmus_branch;
+		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cbegin(),
+					  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+		{
+
+			if (bad)
+			{
+				return;
+			}
+
+			SQLExecutor::WHICH_BINDING binding = binding_info.first;
+			std::pair<int, int> const & indices = binding_info.second;
+			int const index_in_bound_vector = indices.first;
+			int const column_number = indices.second;
+
+			switch (binding)
+			{
+
+				case SQLExecutor::INT64:
+					{
+						dmus_branch.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
+					}
+					break;
+
+				case SQLExecutor::FLOAT:
+					{
+						dmus_branch.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
+					}
+					break;
+
+				case SQLExecutor::STRING:
+					{
+						dmus_branch.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+					}
+					break;
+
+				default:
+					{
+						errorMessages.push_back((boost::format("Invalid row binding for row %1%") % boost::lexical_cast<std::string>(current_rows_stepped).c_str()).str());
+						bad = true;
+						return;
+					}
+					break;
+
+			}
+
+		});
+
+		// Store secondary key data for use in constructing final output.
+		// Note that this is stored in a cache.
+		// In the future, this cache can be enhanced to become an intelligent LIFO memory/disk cache
+		// to support huge input datasets.
+		DMUInstanceDataVector secondary_data;
+		std::for_each(sorting_row_of_data.indices_of_secondary_key_columns.cbegin(),
+					  sorting_row_of_data.indices_of_secondary_key_columns.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+		{
+
+			if (bad)
+			{
+				return;
+			}
+
+			SQLExecutor::WHICH_BINDING binding = binding_info.first;
+			std::pair<int, int> const & indices = binding_info.second;
+			int const index_in_bound_vector = indices.first;
+			int const column_number = indices.second;
+
+			switch (binding)
+			{
+
+				case SQLExecutor::INT64:
+					{
+						secondary_data.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
+					}
+					break;
+
+				case SQLExecutor::FLOAT:
+					{
+						secondary_data.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
+					}
+					break;
+
+				case SQLExecutor::STRING:
+					{
+						secondary_data.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+					}
+					break;
+
+				default:
+					{
+						errorMessages.push_back((boost::format("Invalid row binding for row %1%") % boost::lexical_cast<std::string>(current_rows_stepped).c_str()).str());
+						bad = true;
+						return;
+					}
+					break;
+
+			}
+
+		});
+
+		if (!bad)
+		{
+
+			TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
+
+			switch (merge_mode)
+			{
+
+				case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
+					{
+
+						Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid));
+						Branch branch(dmus_branch);
+
+						bool call_again = false;
+						bool added = false;
+						bool first = true;
+						TimeSlices::iterator mapIterator;
+						auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
+
+						while (first || call_again)
+						{
+							first = false;
+							std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
+									AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+							bool added_recurse = std::get<0>(ret);
+
+							if (added_recurse)
+							{
+								added = true;
+							}
+
+							call_again = std::get<1>(ret);
+							mapIterator = std::get<2>(ret);
+						}
+
+						if (added)
+						{
+							// Add the secondary data for this primary variable group to the cache
+							allWeightings.dataCache[static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
+						}
+
+					}
+					break;
+
+				case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
+					{
+
+						Leaf leaf(dmus_leaf);
+						Branch branch(dmus_branch);
+
+						// Set the secondary data index into the above cache for this non-primary top-level variable group
+						// so that it can be set in the corresponding leaf already present for the branch
+						leaf.other_top_level_indices_into_raw_data[static_cast<std::int16_t>(variable_group_number)] = static_cast<std::int32_t>(sorting_row_of_data.rowid);
+
+						bool call_again = false;
+						bool added = false;
+						bool first = true;
+						TimeSlices::iterator mapIterator;
+						auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
+
+						while (first || call_again)
+						{
+							first = false;
+							std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
+									AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+							bool added_recurse = std::get<0>(ret);
+
+							if (added_recurse)
+							{
+								added = true;
+							}
+
+							call_again = std::get<1>(ret);
+							mapIterator = std::get<2>(ret);
+						}
+
+						if (added)
+						{
+							// Add the secondary data for this non-primary top-level variable group to the cache
+							allWeightings.otherTopLevelCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
+						}
+
+					}
+					break;
+
+				case VARIABLE_GROUP_MERGE_MODE__CHILD:
+					{
+
+						// pack the child data index into the main leaf for use in the function called below - because this leaf is TEMPORARY
+						// (this data will be unpacked from the temporary leaf and put into the proper place in the function called below)
+						Leaf leaf(dmus_leaf, static_cast<std::int16_t>(sorting_row_of_data.rowid));
+						Branch branch(dmus_branch);
+
+						// ************************************************************************************************** //
+						// Important!
+						// This is a *CHILD* merge,
+						// so all LEAVES in the primary variable group have already been added to all branches.
+						// No new leaves will be added to any branches here.
+						// Therefore, even though 'HandleBranchAndLeaf()' is called,
+						// which might slice the time slices, each such slice will not add any new primary leaves
+						// and the previous set of cached leaves will be persisted in the time slice copies.
+						// ************************************************************************************************** //
+						bool call_again = false;
+						bool added = false;
+						bool first = true;
+						TimeSlices::iterator mapIterator;
+						auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
+
+						while (first || call_again)
+						{
+							first = false;
+							std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
+									AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+							bool added_recurse = std::get<0>(ret);
+
+							if (added_recurse)
+							{
+								added = true;
+							}
+
+							call_again = std::get<1>(ret);
+							mapIterator = std::get<2>(ret);
+						}
+
+						if (added)
+						{
+							// Add the secondary data for this child variable group to the cache
+							allWeightings.childCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
+						}
+
+					}
+					break;
+
+				default:
+					{
+						boost::format msg("Invalid merge mode while reading raw data.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+					break;
+
+			}
 
 		}
 
+		++current_rows_stepped;
+
+		if (current_rows_stepped % 100 == 0 || current_rows_stepped == messager.current_progress_bar_max_value)
+		{
+			messager.UpdateProgressBarValue(current_rows_stepped, msg_for_progress_bar);
+		}
+
+		if (bad)
+		{
+			continue;
+		}
+
 	}
+
+	messager.UpdateProgressBarValue(1000);
+	messager.SetPerformanceLabel("");
 
 }
 
@@ -4677,7 +4755,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 	view_name += "_";
 	view_name += newUUID(true);
-	 
+
 	result_columns.view_name = view_name;
 	result_columns.view_number = 1;
 	result_columns.has_no_datetime_columns = false;
@@ -5103,7 +5181,7 @@ void OutputModel::OutputGenerator::KadSamplerCreateOutputTable()
 
 	if (failed)
 	{
-		SetFailureMessage(sql_error);
+		SetFailureErrorMessage(sql_error);
 		return;
 	}
 
@@ -5114,7 +5192,7 @@ void OutputModel::OutputGenerator::KadSamplerCreateOutputTable()
 
 }
 
-void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
+void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(KadSampler & allWeightings, std::vector<std::string> & errorMessages)
 {
 
 	ColumnsInTempView const & random_sampling_columns = random_sampling_schema.second;
@@ -5293,7 +5371,7 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 
 }
 
-void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler & allWeightings)
 {
 
 	// **************************************************************************************** //
@@ -5321,9 +5399,12 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeighting
 		// From the schema for the selected columns for the non-primary top-level variable group,
 		// create a temporary table to store just the selected columns over just the selected time range.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for non-primary top-level variable group data (variable group: %1%)...") % Table_VG_CATEGORY::GetVgDisplayText(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for non-primary top-level variable group data (variable group: %1%)...") %
+									  Table_VG_CATEGORY::GetVgDisplayText(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_group_raw_data_columns, current_top_level_vg_index);
+
 		if (failed || CheckCancelled()) { return; }
+
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		merging_of_children_column_sets.push_back(selected_raw_data_table_schema);
@@ -5336,6 +5417,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeighting
 		messager.AppendKadStatusText((boost::format("Load selected columns for non-primary top-level variable group into internal table...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
+
 		if (failed || CheckCancelled()) { return; }
 
 		++current_top_level_vg_index;
@@ -5357,9 +5439,12 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeighting
 		// From the schema for the selected columns for the child variable group,
 		// create a temporary table to store just the selected columns over just the selected time range.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for child variable group data (variable group: %1%)...") % Table_VG_CATEGORY::GetVgDisplayText(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for child variable group data (variable group: %1%)...") %
+									  Table_VG_CATEGORY::GetVgDisplayText(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(child_variable_group_raw_data_columns, current_child_vg_index);
+
 		if (failed || CheckCancelled()) { return; }
+
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		merging_of_children_column_sets.push_back(selected_raw_data_table_schema);
@@ -5513,7 +5598,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeighting
 
 }
 
-void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, BranchOutputRow const & outputRow, AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, BranchOutputRow const & outputRow, KadSampler & allWeightings)
 {
 	bool first = true;
 
@@ -5833,7 +5918,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 	}
 }
 
-void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, KadSampler & allWeightings)
 {
 
 	if (random_sampling)
@@ -6035,7 +6120,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 }
 
-void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings)
 {
 
 	std::string setting_path_to_kad_output = CheckOutputFileExists();
@@ -6057,7 +6142,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(AllWeigh
 	{
 		boost::format msg("Cannot open output file %1%");
 		msg % setting_path_to_kad_output;
-		SetFailureMessage(msg.str());
+		SetFailureErrorMessage(msg.str());
 		failed = true;
 		return;
 	}
@@ -6383,7 +6468,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(AllWeigh
 }
 
 void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set & output_rows_for_this_full_time_slice,
-		std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t & rows_written)
+		std::fstream & output_file, Branch const & branch, KadSampler & allWeightings, std::int64_t & rows_written)
 {
 
 	// current_time_slice to be used when the time-slice-start and time-slice-end rows are output
@@ -6411,8 +6496,8 @@ void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current
 
 }
 
-void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings & allWeightings, Branch const & branch,
-	BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, int & orig_row_count)
+void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch,
+		BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, int & orig_row_count)
 {
 	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
 	allWeightings.create_output_row_visitor_global_data_cache.clear();
@@ -6427,7 +6512,7 @@ void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringCo
 	++orig_row_count;
 }
 
-void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(KadSampler & allWeightings)
 {
 
 	// ************************************************************************************************************* //

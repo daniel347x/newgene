@@ -10,6 +10,7 @@
 #ifndef Q_MOC_RUN
 #	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
+#	include <boost/multiprecision/cpp_dec_float.hpp>
 #	include <boost/variant.hpp>
 #	include <boost/pool/pool_alloc.hpp>
 #endif 
@@ -44,7 +45,7 @@ typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
 
 typedef FastMap<std::int16_t, DataCache> fast_short_to_data_cache_map;
 
-class AllWeightings;
+class KadSampler;
 
 class TimeSlice
 {
@@ -1322,7 +1323,7 @@ void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__
 void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
-void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file, std::string const & file_name_appending_string);
+void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & allWeightings, bool const to_file, std::string const & file_name_appending_string);
 void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
 //#endif
 
@@ -1532,7 +1533,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// and the profiler shows a major hit during the consolidating of rows in managing this cache, so disable it.
 		mutable fast__lookup__from_child_dmu_set__to__output_rows helper_lookup__from_child_key_set__to_matching_output_rows_consolidating;
 
-		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force,
+		void ConstructChildCombinationCache(KadSampler & allWeightings, int const variable_group_number, bool const force,
 											bool const is_consolidating = false) const; // Populate the above data structure
 
 		void InsertLeaf(Leaf const & leaf) const
@@ -1709,8 +1710,8 @@ class VariableGroupTimeSliceData
 		VariableGroupBranchesAndLeavesVector branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves in all variable groups
 
-		void ResetBranchCachesSingleTimeSlice(AllWeightings & allWeightings, bool const reset_child_dmu_lookup);
-		void PruneTimeUnits(AllWeightings & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit,
+		void ResetBranchCachesSingleTimeSlice(KadSampler & allWeightings, bool const reset_child_dmu_lookup);
+		void PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit,
 							bool const consolidate_rows, bool const random_sampling);
 
 };
@@ -1969,13 +1970,13 @@ class SortMergedRowsByTimeThenKeys
 
 typedef FastSet<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> fast__mergedtimeslicerow_set;
 
-class AllWeightings
+class KadSampler
 {
 
 	public:
 
-		AllWeightings(Messager & messager_);
-		~AllWeightings();
+		KadSampler(Messager & messager_);
+		~KadSampler();
 
 	public:
 
@@ -1988,7 +1989,7 @@ class AllWeightings
 		struct SizeOfSampler
 		{
 			SizeOfSampler()
-				: numberMapNodes { 0 }
+			: numberMapNodes { 0 }
 			, sizePod { 0 }
 			, sizeTimeSlices { 0 }
 			, sizeDataCache { 0 }
@@ -1999,7 +2000,7 @@ class AllWeightings
 			, size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 { 0 }
 			, sizeConsolidatedRows { 0 }
 			, sizeRandomNumbers { 0 }
-			, totalSize { 0 }
+			, totalSize{ 0 }
 			{}
 
 			size_t numberMapNodes;
@@ -2168,6 +2169,8 @@ class AllWeightings
 	public:
 
 		InstanceDataVector create_output_row_visitor_global_data_cache;
+
+		std::unique_ptr<boost::multiprecision::cpp_int> number_rows_generatedPtr;
 
 };
 
