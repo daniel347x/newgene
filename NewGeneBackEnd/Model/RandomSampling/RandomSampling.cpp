@@ -1927,7 +1927,7 @@ void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set c
 }
 
 template<typename T>
-void SpitSetOfOutputRows(std::string & sdata, T const & setOfRows)
+void SpitSetOfOutputRows(std::string & sdata, T const & setOfRows) 
 {
 	sdata += "<SET_OF_ROWS>";
 

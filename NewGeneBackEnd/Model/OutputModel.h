@@ -581,146 +581,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				};
 
-				class ColumnSorter
-				{
-
-					public:
-
-						std::vector<std::string> strings;
-						std::vector<std::int64_t> ints;
-						std::vector<long double> floats;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings__primary_keys_with_multiplicity_greater_than_1;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings__all_primary_keys;
-
-						ColumnSorter()
-						{
-
-						}
-
-						ColumnSorter(
-							std::vector<std::string> const & strings_
-							, std::vector<std::int64_t> const & ints_
-							, std::vector<long double> const & floats_
-							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings_
-							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> const & bindings__primary_keys_with_multiplicity_greater_than_1_
-							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> const & bindings__all_primary_keys_
-						)
-							:
-							strings(strings_)
-							, ints(ints_)
-							, floats(floats_)
-							, bindings(bindings_)
-							, bindings__primary_keys_with_multiplicity_greater_than_1(bindings__primary_keys_with_multiplicity_greater_than_1_)
-							, bindings__all_primary_keys(bindings__all_primary_keys_)
-						{
-
-						}
-
-						ColumnSorter(ColumnSorter const & rhs)
-							:
-							strings(rhs.strings)
-							, ints(rhs.ints)
-							, floats(rhs.floats)
-							, bindings(rhs.bindings)
-							, bindings__primary_keys_with_multiplicity_greater_than_1(rhs.bindings__primary_keys_with_multiplicity_greater_than_1)
-							, bindings__all_primary_keys(rhs.bindings__all_primary_keys)
-						{
-
-						}
-
-						bool operator<(ColumnSorter const & rhs) const;
-
-				};
-
-				class TimeRangeSorter
-				{
-
-					public:
-
-						TimeRangeSorter() : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false), DoCompareFinalInnerTable(false), bad_row(false) {}
-						TimeRangeSorter(TimeRangeSorter const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = rhs.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent; DoCompareFinalInnerTable = rhs.DoCompareFinalInnerTable; bad_row = rhs.bad_row; }
-						TimeRangeSorter(SavedRowData const & rhs) : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false), DoCompareFinalInnerTable(false), bad_row(false) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs; }
-						SavedRowData the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table;
-						bool operator<(TimeRangeSorter const & rhs) const;
-						SavedRowData const & GetSavedRowData() const { return the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; }
-						SavedRowData & GetSavedRowData() { return the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; }
-
-						bool ShouldReturnEqual_EvenIf_TimeRangesAreDifferent;
-						bool DoCompareFinalInnerTable;
-
-						bool bad_row;
-
-				};
-
-				class TimeRanges
-				{
-
-					public:
-
-						std::list<std::pair<std::int64_t, std::int64_t>> ranges;
-
-						void append(std::int64_t const datetime_start, std::int64_t const datetime_end);
-						void subtract(TimeRanges const & rhs);
-						bool empty();
-
-				};
-
-				class TimeRangeMapper_Ints
-				{
-
-					public:
-
-						TimeRangeMapper_Ints(TimeRangeMapper_Ints const & rhs);
-						TimeRangeMapper_Ints(std::set<std::vector<std::int64_t>> const & rhs);
-
-						bool operator<(TimeRangeMapper_Ints const & rhs) const;
-						bool operator==(TimeRangeMapper_Ints const & rhs) const;
-						bool operator==(std::set<std::vector<std::int64_t>> const & rhs) const;
-
-						std::set<std::vector<std::int64_t>> sets;
-						static std::set<std::vector<std::int64_t>> test_set;
-
-				};
-
-				class TimeRangeMapper_Floats
-				{
-
-					public:
-
-						TimeRangeMapper_Floats(TimeRangeMapper_Floats const & rhs);
-						TimeRangeMapper_Floats(std::set<std::vector<long double>> const & rhs);
-
-						bool operator<(TimeRangeMapper_Floats const & rhs) const;
-						bool operator==(TimeRangeMapper_Floats const & rhs) const;
-						bool operator==(std::set<std::vector<long double>> const & rhs) const;
-
-						std::set<std::vector<long double>> sets;
-						static std::set<std::vector<long double>> test_set;
-
-				};
-
-				class TimeRangeMapper_Strings
-				{
-
-					public:
-
-						TimeRangeMapper_Strings(TimeRangeMapper_Strings const & rhs);
-						TimeRangeMapper_Strings(std::set<std::vector<std::string>> const & rhs);
-
-						bool operator<(TimeRangeMapper_Strings const & rhs) const;
-						bool operator==(TimeRangeMapper_Strings const & rhs) const;
-						bool operator==(std::set<std::vector<std::string>> const & rhs) const;
-
-						std::set<std::vector<std::string>> sets;
-						static std::set<std::vector<std::string>> test_set;
-
-				};
-
-				typedef std::map<TimeRangeMapper_Ints, TimeRanges> TimeRangesForIndividualGroup_IntKeys;
-				typedef std::map<TimeRangeMapper_Floats, TimeRanges> TimeRangesForIndividualGroup_FloatKeys;
-				typedef std::map<TimeRangeMapper_Strings, TimeRanges> TimeRangesForIndividualGroup_StringKeys;
-
 				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
 
@@ -739,6 +599,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				int K; // the multiplicity
 
 				// Random sampling
+				WidgetInstanceIdentifier top_level_vg;
 				bool consolidate_rows;
 				bool random_sampling;
 				std::int64_t random_sampling_number_rows;
@@ -763,7 +624,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(AllWeightings & allWeightings, Branch const & branch, BranchOutputRow const & incoming_row,
 						std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, int & orig_row_count);
 
-
 				void RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings);
 				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set & output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch,
 										 AllWeightings & allWeightings, std::int64_t & rows_written);
@@ -775,41 +635,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulateSchemaForRawDataTables(AllWeightings & allWeightings);
 				void PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
 												   std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index);
-				void LoopThroughPrimaryVariableGroups();
-				void MergeHighLevelGroupResults();
-				void MergeChildGroups();
-				void FormatResultsForOutput();
-				void WriteResultsToFileOrScreen();
-				SqlAndColumnSet ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets,
-						int const primary_group_number = 1);
-				SqlAndColumnSet CreateInitialPrimaryXTable_OrCount(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number, bool const count_only);
-				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
-				SqlAndColumnSet CreateInitialPrimaryMergeXRTable(ColumnsInTempView const & primary_variable_group_x1_columns);
-				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns,
-													int const current_multiplicity, int const primary_group_number);
-				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity,
-												  int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
-				SqlAndColumnSet CreateXRTable(ColumnsInTempView const & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number,
-											  XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
-				SqlAndColumnSet CreateSortedTable(ColumnsInTempView const & final_xr_columns, int const primary_group_number, int const current_multiplicity,
-												  XR_TABLE_CATEGORY const xr_table_category);
-				SqlAndColumnSet RemoveDuplicates_Or_OrderWithinRows(ColumnsInTempView const & previous_result_columns, int const primary_group_number, std::int64_t & current_rows_added,
-						int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows = false);
-				void RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> & rows_to_sort,
-						std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt,
-						std::vector<SQLExecutor> & sql_strings, ColumnsInTempView & result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added,
-						std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings,
-						std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use,
-						std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows = false,
-						std::string const datetimestart_colname_text = std::string(), std::string const datetimeend_colname_text = std::string());
-
-				enum PRIMARY_KEY_MATCH_CONDITION
-				{
-					MATCH_ON_ALL_KEYS
-					, MATCH_ON_ALL_BUT_FINAL_INNER_TABLE
-					, MATCH_ON_ALL_BUT_FINAL_TWO_INNER_TABLES
-					, MATCH_ON_ALL_MULTIPLICITY_1_KEYS
-				};
 
 				// Helper functions used by the functions above
 				void BeginNewTransaction();
@@ -819,202 +644,11 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void CloseObtainData();
 				std::int64_t ObtainCount(ColumnsInTempView const & column_set);
 				bool StepData();
-				bool CreateNewXRRow(SavedRowData const & current_row_of_data, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name,
-									std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints,
-									std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start,
-									std::int64_t const datetime_end, ColumnsInTempView const & previous_x_columns, ColumnsInTempView & current_xr_columns, bool const include_previous_data,
-									bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category, bool const sort_only, bool const no_new_column_names);
-				bool TestPrimaryKeyMatch(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index,
-										 PRIMARY_KEY_MATCH_CONDITION const match_condition);
-				bool ProcessCurrentDataRowOverlapWithPreviousSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data,
-						XR_TABLE_CATEGORY const xr_table_category);
-				void MergeRows(SavedRowData & merged_data_row, SavedRowData const & current_row_of_data, SavedRowData const & first_incoming_row, XR_TABLE_CATEGORY const xr_table_category);
-				void WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name,
-										   std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name,
-										   ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution,
-										   std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints,
-										   std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, XR_TABLE_CATEGORY const xr_table_category,
-										   bool const no_new_column_names, std::string const datetimestart_text_colname = std::string(), std::string const datetimeend_text_colname = std::string());
-				SqlAndColumnSet MergeIndividualTopLevelGroupIntoPrevious(ColumnsInTempView const & primary_variable_group_final_result,
-						OutputModel::OutputGenerator::SqlAndColumnSet & previous_merged_primary_variable_groups_table, int const count);
 				void ClearTables(SqlAndColumnSets const & tables_to_clear);
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
 				std::string CheckOutputFileExists();
-				SqlAndColumnSet SortAndOrRemoveDuplicates(ColumnsInTempView const & column_set, WidgetInstanceIdentifier const & variable_group, std::string & msg_sort_preface,
-						std::string & msg_remove_duplicates_preface, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets, bool const do_clear_table,
-						XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows = false);
-				SqlAndColumnSet CreateKadResultSet(ColumnsInTempView const & column_set);
-				void SortOrderByMultiplicityOnes(ColumnsInTempView const & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier const & first_variable_group,
-												 std::string & sql_create_final_primary_group_table, bool & first);
-				void SortOrderByMultiplicityGreaterThanOnes(ColumnsInTempView const & result_columns, XR_TABLE_CATEGORY const xr_table_category,
-						WidgetInstanceIdentifier const & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first);
-				void PopulateSplitRowInfo_FromCurrentMergingColumns(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> & rows_to_insert_info,
-						int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index,
-						int const current_datetime_end_column_index, SavedRowData const & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category);
-				void Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table,
-						TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_FloatKeys & group_time_ranges__floatkeys,
-						TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys,
-						ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, std::vector<SavedRowData> & outgoing_rows_of_data,
-						std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index,
-						int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index,
-						XR_TABLE_CATEGORY const xr_table_category);
-				void HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table,
-						TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_FloatKeys & group_time_ranges__floatkeys,
-						TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns,
-						int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index,
-						int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt,
-						std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added,
-						std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row,
-						std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats,
-						std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end,
-						ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
-				void AddRowsToXRTable(std::vector<SavedRowData> & outgoing_rows_of_data, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt,
-									  std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added,
-									  std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row,
-									  std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats,
-									  std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end,
-									  ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
-				void EliminateRedundantNullsInFinalInnerTable(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table,
-						TimeRangesForIndividualGroup_IntKeys const & group_time_ranges__intkeys, TimeRangesForIndividualGroup_FloatKeys const & group_time_ranges__floatkeys,
-						TimeRangesForIndividualGroup_StringKeys const & group_time_ranges__stringkeys);
 				void FindDatetimeIndices(ColumnsInTempView const & columns, int & previous_datetime_start_column_index, int & previous_datetime_end_column_index,
 										 int & current_datetime_start_column_index, int & current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category);
-				bool CheckForIdenticalData(ColumnsInTempView const & columns, SavedRowData const & previous_row, SavedRowData const & current_row);
-				SqlAndColumnSet Randomize(ColumnsInTempView const & columns, WidgetInstanceIdentifier const & variable_group, int const current_multiplicity, int const primary_group_number,
-										  SqlAndColumnSets & sql_and_column_sets);
-
-				SavedRowData saved_temp_merged_row;
-				std::deque<std::vector<std::string>> saved_strings_deque;
-				std::deque<std::vector<std::int64_t>> saved_ints_deque;
-				std::deque<std::vector<long double>> saved_floats_deque;
-
-				template <typename ROW_DEQUE>
-				void HandleSetOfRowsThatMatchOnPrimaryKeys(ColumnsInTempView const & columns, ROW_DEQUE & rows_to_sort, std::deque<SavedRowData> & outgoing_rows_of_data,
-						XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows = false)
-				{
-
-					SavedRowData current_row_of_data;
-					std::deque<SavedRowData> incoming_rows_of_data;
-					std::deque<SavedRowData> intermediate_rows_of_data;
-
-					while (!rows_to_sort.empty())
-					{
-
-						current_row_of_data = std::move(rows_to_sort.front().GetSavedRowData());
-						rows_to_sort.pop_front();
-
-						// If we're starting fresh, just add the current row of input to incoming_rows_of_data
-						// and proceed to the next row of input.
-						if (incoming_rows_of_data.empty())
-						{
-							incoming_rows_of_data.push_back(std::move(current_row_of_data));
-							continue;
-						}
-
-						// Quick check here before moving on to main part of loop:
-						// If the current row of input starts past
-						// the end of any of the saved rows, then
-						// there can be no overlap with these rows, and they are done.
-						// Move them to outgoing_rows_of_data.
-						while (!incoming_rows_of_data.empty())
-						{
-							SavedRowData & first_incoming_row = incoming_rows_of_data.front();
-
-							if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
-							{
-								outgoing_rows_of_data.push_back(std::move(first_incoming_row));
-								incoming_rows_of_data.pop_front();
-							}
-							else
-							{
-								break;
-							}
-						}
-
-						// There is guaranteed to either:
-						// (1) be overlap of the current row of input with the first saved row,
-						// (2) have the current row be completely beyond the end of all saved rows
-						// (or, falling into the same category,
-						// the current row's starting datetime is exactly equal to the ending datetime
-						// of the last of the saved rows)
-						bool current_row_complete = false;
-
-						while (!current_row_complete)
-						{
-							if (incoming_rows_of_data.empty())
-							{
-								break;
-							}
-
-							SavedRowData & first_incoming_row = incoming_rows_of_data.front();
-							current_row_complete = ProcessCurrentDataRowOverlapWithPreviousSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, xr_table_category);
-
-							if (failed)
-							{
-								return;
-							}
-
-							incoming_rows_of_data.pop_front();
-						}
-
-						if (!current_row_complete)
-						{
-							intermediate_rows_of_data.push_back(std::move(current_row_of_data));
-						}
-
-						incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), std::make_move_iterator(intermediate_rows_of_data.begin()), std::make_move_iterator(intermediate_rows_of_data.end()));
-						intermediate_rows_of_data.clear();
-
-					}
-
-					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), std::make_move_iterator(incoming_rows_of_data.begin()), std::make_move_iterator(incoming_rows_of_data.end()));
-					incoming_rows_of_data.clear();
-
-					if (consider_merging_timerange_adjacent_identical_rows && consolidate_rows)
-					{
-						// Do a pass to merge adjacent rows timerange-wise that have identical secondary key data
-						while (outgoing_rows_of_data.size() > 1)
-						{
-							SavedRowData const previous_row = std::move(outgoing_rows_of_data.front());
-							SavedRowData current_row = std::move(*(++outgoing_rows_of_data.cbegin()));
-							outgoing_rows_of_data.pop_front();
-							outgoing_rows_of_data.pop_front();
-
-							if (previous_row.datetime_end == current_row.datetime_start)
-							{
-								bool is_data_identical = CheckForIdenticalData(columns, previous_row, current_row);
-
-								if (is_data_identical)
-								{
-									// Merge the rows into one
-									current_row.datetime_start = previous_row.datetime_start;
-									outgoing_rows_of_data.push_front(std::move(current_row));
-								}
-								else
-								{
-									// Leave the rows as-is
-									intermediate_rows_of_data.push_back(std::move(previous_row));
-									outgoing_rows_of_data.push_front(std::move(current_row));
-								}
-							}
-							else
-							{
-								// Leave the rows as-is
-								intermediate_rows_of_data.push_back(std::move(previous_row));
-								outgoing_rows_of_data.push_front(std::move(current_row));
-							}
-						}
-
-						if (outgoing_rows_of_data.size() == 1)
-						{
-							intermediate_rows_of_data.push_back(std::move(outgoing_rows_of_data.front()));
-							outgoing_rows_of_data.pop_front();
-						}
-
-						outgoing_rows_of_data.swap(intermediate_rows_of_data);
-					}
-
-				}
 
 				inline static bool CheckCancelled()
 				{
@@ -1024,7 +658,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// Progress bar variables and functions
 				void DetermineNumberStages();
-				void UpdateProgressBarToNextStage(std::string const helper_text_first_choice, std::string helper_text_second_choice);
 				void UpdateProgressBarValue(Messager & messager, std::int64_t const current_rows_stepped);
 				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_incoming_rows;
 				std::map<WidgetInstanceIdentifier, int> multiplicities;
@@ -1199,7 +832,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// and "child" or "secondary" variable groups, which simply add additional
 				// columns of output variables, but do not add to the multiplicity of the
 				// DMU categories, which are obtained from the primary variable groups.
-				std::vector<ColumnsInTempView> primary_variable_groups_column_info;
+				std::vector<ColumnsInTempView> primary_variable_groups_column_info; 
 				std::vector<ColumnsInTempView> secondary_variable_groups_column_info;
 
 				// Basic variables used throughout different functions of this Generator
@@ -1249,19 +882,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				static int number_transaction_begins;
 				static int number_transaction_ends;
-
-
-				// To be options / settings integrated later
-				bool remove_self_kads;
-				bool random_sampling_old;
-
-				// optimization
-				std::vector<std::string> test_strings;
-				std::vector<std::int64_t> test_ints;
-				std::vector<long double> test_floats;
-				std::vector<std::string> rhs_test_strings;
-				std::vector<std::int64_t> rhs_test_ints;
-				std::vector<long double> rhs_test_floats;
 
 		};
 
