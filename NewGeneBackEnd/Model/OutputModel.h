@@ -774,7 +774,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// (Also, multiple, identical UOA's are acceptable, possibly differing in time granularity)
 				// I.e., possibly multiple PRIMARY variable groups, all corresponding to the same primary UOA (regardless of time granularity and/or UOA multiplicity)
 				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector primary_variable_groups_vector;
-				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector secondary_variable_groups_vector;
+				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector child_variable_groups_vector;
 
 				// Information about *all* primary key columns, in the sequence they appear in the output
 				// ... including "duplicate" primary keys resulting from multiplicity greater than 1.

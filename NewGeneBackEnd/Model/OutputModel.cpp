@@ -697,6 +697,26 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	}
 
+
+	// ********************************************************************************************************************************************************* //
+	// ********************************************************************************************************************************************************* //
+	//
+	// For future developers:
+	// Here is an excellent way to debug the data structures used by this software.
+	// Generate a full XML output of *all* data loaded into the KadSampler here.
+	// The XML tags are almost disgracefully wordy so the file can take up a huge amount of space,
+	// but the lengthy tag names make it clear what the purpose of the data is.
+	//
+	// Note that the full file is written to an array of strings first (in memory), so could crash the program
+	// when trying to allocate memory for the strings if there's hundreds of MB's worth of XML
+	//
+	// std::vector<std::string> sdata_;
+	// SpitAllWeightings(sdata_, allWeightings, true, "file_name_appending_text");
+	//
+	// ********************************************************************************************************************************************************* //
+	// ********************************************************************************************************************************************************* //
+
+
 	// ********************************************************************************************************************************************************* //
 	// Write the output to disk
 	// ********************************************************************************************************************************************************* //
@@ -2516,9 +2536,9 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(AllWeightings 
 	// ***************************************************************************************************************** //
 	int secondary_view_count = 0;
 	primary_or_secondary_view_index = 0;
-	allWeightings.numberChildVariableGroups = static_cast<int>(secondary_variable_groups_vector.size());
-	std::for_each(secondary_variable_groups_vector.cbegin(),
-				  secondary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
+	allWeightings.numberChildVariableGroups = static_cast<int>(child_variable_groups_vector.size());
+	std::for_each(child_variable_groups_vector.cbegin(),
+				  child_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
 	{
 		PopulateSchemaForRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false, primary_or_secondary_view_index);
 		ColumnsInTempView const & childSchema = secondary_variable_groups_column_info.back();
@@ -3620,7 +3640,7 @@ void OutputModel::OutputGenerator::PopulateVariableGroups()
 	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
 	{
 		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = (*the_map)[uoa__to__dmu_category_counts.first];
-		secondary_variable_groups_vector.insert(secondary_variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
+		child_variable_groups_vector.insert(child_variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
 	});
 }
 
@@ -3886,8 +3906,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 			}
 
 			view_count = 0;
-			std::for_each(secondary_variable_groups_vector.cbegin(),
-						  secondary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](
+			std::for_each(child_variable_groups_vector.cbegin(),
+						  child_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](
 							  std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 			{
 				if (failed || CheckCancelled())
@@ -5297,17 +5317,25 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeighting
 			return;
 		}
 
+		// ********************************************************************************************************************************************************* //
+		// From the schema for the selected columns for the non-primary top-level variable group,
+		// create a temporary table to store just the selected columns over just the selected time range.
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for non-primary top-level variable group data (variable group: %1%)...") % Table_VG_CATEGORY::GetVgDisplayText(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_group_raw_data_columns, current_top_level_vg_index);
-
 		if (failed || CheckCancelled()) { return; }
-
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		merging_of_children_column_sets.push_back(selected_raw_data_table_schema);
 
+		// ********************************************************************************************************************************************************* //
+		// Merge into the existing TIME SLICES.
+		// From the schema for the selected columns for the non-primary top-level variable group,
+		// load the selected columns of raw data into the temporary table created with the same schema.
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Load selected columns for non-primary top-level variable group into internal table...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
-
 		if (failed || CheckCancelled()) { return; }
 
 		++current_top_level_vg_index;
@@ -5325,16 +5353,18 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeighting
 
 		if (failed || CheckCancelled()) { return; }
 
+		// ********************************************************************************************************************************************************* //
+		// From the schema for the selected columns for the child variable group,
+		// create a temporary table to store just the selected columns over just the selected time range.
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for child variable group data (variable group: %1%)...") % Table_VG_CATEGORY::GetVgDisplayText(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(child_variable_group_raw_data_columns, current_child_vg_index);
-
 		if (failed || CheckCancelled()) { return; }
-
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		merging_of_children_column_sets.push_back(selected_raw_data_table_schema);
 
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
-
 
 		// **************************************************************************************** //
 		// Populate the index mappings that map each child group's branch DMU data,
@@ -5353,10 +5383,14 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeighting
 			 ++overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf)
 		{
 
+			// **************************************************************************************** //
+			// The following column order bookkeeping is a pain in the &$^,
+			// but it has to be done, and this is a fine place to do it.
+			//
+			// Enforce that the sequence number appears in order
+			// **************************************************************************************** //
 			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&](PrimaryKeySequence::PrimaryKeySequenceEntry const & full_kad_key_info)
 			{
-
-				// Enforce that the sequence number appears in order
 
 				if (overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf !=
 					full_kad_key_info.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg)
@@ -5464,6 +5498,12 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(AllWeighting
 		// regardless of the child leaf number in that particular output row.
 		// **************************************************************************************** //
 
+		// ********************************************************************************************************************************************************* //
+		// Merge into the existing TIME SLICES.
+		// From the schema for the selected columns for the child variable group,
+		// load the selected columns of raw data into the temporary table created with the same schema.
+		// ********************************************************************************************************************************************************* //
+		messager.AppendKadStatusText((boost::format("Load selected columns for child variable group into internal table...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
 
@@ -5706,11 +5746,11 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 	// then by multiplicity.
 	// There might be multiple fields for each variable group and within each multiplicity,
 	// ... so the logic is a bit non-trivial to get the display order right.
-	int numberChildGroups = static_cast<int>(secondary_variable_groups_vector.size());
+	int numberChildGroups = static_cast<int>(child_variable_groups_vector.size());
 
 	for (int vgNumber = 0; vgNumber < numberChildGroups; ++vgNumber)
 	{
-		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[vgNumber].first.identifier_parent)].second;
+		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_groups_vector[vgNumber].first.identifier_parent)].second;
 
 		for (int multiplicity = 0; multiplicity < the_child_multiplicity; ++multiplicity)
 		{
