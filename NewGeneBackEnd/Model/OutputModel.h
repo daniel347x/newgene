@@ -534,50 +534,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<int> inner_table_number;
 						int number_of_multiplicities;
 
-						bool operator<(SavedRowData const & rhs) const;
-						bool TestLessEqual(SavedRowData const & rhs, OutputModel::OutputGenerator & generator) const;
-
 						std::string error_message;
 
 						bool failed;
-
-						void SwapBindings(std::vector<std::string> const & new_strings,
-										  std::vector<std::int64_t> const & new_ints,
-										  std::vector<long double> const & new_floats,
-										  std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings,
-										  bool enforce_all_datetimes = false,
-										  std::int64_t const startdate_current = 0,
-										  std::int64_t const enddate_current = 0,
-										  std::int64_t const startdate_previous = 0,
-										  std::int64_t const enddate_previous = 0,
-										  int const current_datetime_start_column_index = 0,
-										  int const current_datetime_end_column_index = 0,
-										  int const previous_datetime_start_column_index = 0,
-										  int const previous_datetime_end_column_index = 0);
-						void SwapBindings(std::vector<std::string> const & new_strings,
-										  std::vector<std::int64_t> const & new_ints,
-										  std::vector<long double> const & new_floats,
-										  std::vector < std::pair < SQLExecutor::WHICH_BINDING,
-										  std::pair<int, int >> > & new_indices,
-										  bool enforce_all_datetimes = false,
-										  std::int64_t const startdate_current = 0,
-										  std::int64_t const enddate_current = 0,
-										  std::int64_t const startdate_previous = 0,
-										  std::int64_t const enddate_previous = 0,
-										  int const current_datetime_start_column_index = 0,
-										  int const current_datetime_end_column_index = 0,
-										  int const previous_datetime_start_column_index = 0,
-										  int const previous_datetime_end_column_index = 0);
-						void AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & bindings, SQLExecutor::WHICH_BINDING binding_type,
-										int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_int_binding_to_add,
-										std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_float_binding_to_add,
-										std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_string_binding_to_add);
-						void SetFinalInnerTableToNull(bool const set_datetime_to_previous_block);
-						void SetLast2DateTimeColumns(std::int64_t const start_datetime_to_set, std::int64_t const end_datetime_to_set);
-
-						void ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::int64_t>> & inner_table_primary_key_groups) const;
-						void ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<long double>> & inner_table_primary_key_groups) const;
-						void ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::string>> & inner_table_primary_key_groups) const;
 
 				};
 
@@ -647,8 +606,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ClearTables(SqlAndColumnSets const & tables_to_clear);
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
 				std::string CheckOutputFileExists();
-				void FindDatetimeIndices(ColumnsInTempView const & columns, int & previous_datetime_start_column_index, int & previous_datetime_end_column_index,
-										 int & current_datetime_start_column_index, int & current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category);
 
 				inline static bool CheckCancelled()
 				{
