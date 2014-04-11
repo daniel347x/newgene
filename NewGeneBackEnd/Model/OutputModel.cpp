@@ -459,50 +459,60 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
 	} BOOST_SCOPE_EXIT_END
 
+
+
+	// ********************************************************************************************************************************************************* //
+	// Initialize all metadata about the selected variables and variable groups,
+	// multiplicities, units of analysis, primary keys, output column names, etc.
+	// ********************************************************************************************************************************************************* //
+	messager.AppendKadStatusText((boost::format("Populating K-ad metadata...")).str().c_str(), this);
 	create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
 	Prepare(allWeightings);
 	if (failed || CheckCancelled()) { return; }
 
-	messager.AppendKadStatusText((boost::format("Preparing to retrieve primary variable group data (variable group: %1%)...") % Table_VG_CATEGORY::GetVgDisplayText(top_level_vg)).str().c_str(), this);
+	// ********************************************************************************************************************************************************* //
+	// Build a schema object, one per variable group with selected data,
+	// intended for internal use by the K-ad algorithm (i.e., converted from the raw format used in the database into a handy set of schema instances)
+	// ********************************************************************************************************************************************************* //
+	messager.AppendKadStatusText((boost::format("Building schema objects to represent metadata for selected variable groups...")).str().c_str(), this);
 	PopulateSchemaForRawDataTables(allWeightings);
 	if (failed || CheckCancelled()) { return; }
-
-	messager.AppendKadStatusText((boost::format("Preparing to retrieve primary variable group data (variable group: %1%)...") % Table_VG_CATEGORY::GetVgDisplayText(top_level_vg)).str().c_str(), this);
-	random_sampling_schema = KadSamplerBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
-	if (failed || CheckCancelled()) { return; }
-
 	primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 	SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
 
+	// ********************************************************************************************************************************************************* //
+	// From the schema for the selected columns for the primary variable group,
+	// create a temporary table to store just the selected columns.
+	// ********************************************************************************************************************************************************* //
+	messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for primary variable group data (variable group: %1%)...") % Table_VG_CATEGORY::GetVgDisplayText(top_level_vg)).str().c_str(), this);
 	SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
 	if (failed || CheckCancelled()) { return; }
-
 	selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(selected_raw_data_table_schema);
 	primary_group_column_sets.push_back(selected_raw_data_table_schema);
 
-	// The following prepares all randomly-generated output rows
-	boost::format myLoad("Loading raw data...");
-	messager.AppendKadStatusText(myLoad.str(), this);
-
+	// ********************************************************************************************************************************************************* //
+	// From the schema for the selected columns for the primary variable group,
+	// load the selected columns of raw data into the temporary table created with the same schema.
+	// ********************************************************************************************************************************************************* //
+	messager.AppendKadStatusText((boost::format("Load selected columns for primary variable group into internal table...")).str().c_str(), this);
 	std::vector<std::string> errorMessages;
 	KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 	if (failed || CheckCancelled()) { return; }
 
-	// *************************************************** //
-	// Build leaf cache and empty child leaf mapping to output row caches.
-	// *************************************************** //
-	boost::format myReset("Resetting caches...");
-	messager.AppendKadStatusText(myReset.str(), this);
-
+	// ********************************************************************************************************************************************************* //
+	// For each branch, build the leaf cache for that branch.
+	// Also, build a map for that branch that maps all possible child branch + leaves
+	// that map to any corresponding combination of primary branch + leaves for the given primary branch.
+	// ********************************************************************************************************************************************************* //
+	messager.AppendKadStatusText((boost::format("For each branch node, create a cache of all primary leaf nodes, and create a lookup cache that indexes all possible child branch/leaf combinations (for all child variable groups) that match against the given primary branch and leaves.")).str().c_str(), this);
 	allWeightings.ResetBranchCaches();
 	if (failed || CheckCancelled()) { return; }
 
-	boost::format myWeights("Calculating weights...");
-	messager.AppendKadStatusText(myWeights.str(), this);
-
-	// Calculate weightings even for full sampling,
-	// for use with progress bar
+	// ********************************************************************************************************************************************************* //
+	// Calculate the number of possible K-ad combinations for each branch, given the leaves available.
+	// ********************************************************************************************************************************************************* //
+	messager.AppendKadStatusText((boost::format("Calculate the number of possible K-ad combinations for each branch, given the leaves available.")).str().c_str(), this);
 	allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 	if (failed || CheckCancelled()) { return; }
 
@@ -564,6 +574,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		if (failed || CheckCancelled()) { return; }
 
 	}
+
+	messager.AppendKadStatusText((boost::format("Creating output column set information...")).str().c_str(), this);
+	random_sampling_schema = KadSamplerBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
+	if (failed || CheckCancelled()) { return; }
 
 	final_result = random_sampling_schema;
 
