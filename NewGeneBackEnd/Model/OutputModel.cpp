@@ -6200,6 +6200,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 		// (as well as all primary key data for both branch and leaves),
 		// and including all leaves.
 
+		ProgressBarMeter meter(messager, std::string("%1% / %2% rows written to output file"), allWeightings.consolidated_rows.size());
 		std::for_each(allWeightings.consolidated_rows.cbegin(), allWeightings.consolidated_rows.cend(), [&](decltype(allWeightings.consolidated_rows)::value_type const & output_row)
 		{
 
@@ -6229,6 +6230,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 			++rows_written;
 			output_file << std::endl;
+			meter.UpdateProgressBarValue(rows_written);
 
 		});
 
@@ -6279,7 +6281,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 				}
 
 				// ***************************************************************************************** //
-				// Full sampling, but the output should *not* be consolidated -
+				// The output should *not* be consolidated -
 				// i.e., the output should be displayed with one row per
 				// unit time granularity (i.e., one row per day if the time granularity
 				// of the primary variable group is "day"),

@@ -200,7 +200,7 @@ class ProgressBarMeter
 
 	public:
 
-		ProgressBarMeter(Messager & messager_, std::string const & progress_message, std::int64_t max_value)
+		ProgressBarMeter(Messager & messager_, std::string const & progress_message, std::int64_t const max_value, bool const doNotStart = false)
 			: messager(messager_)
 			, msg{ progress_message }
 			, progress_bar_max_value{ max_value }
@@ -208,17 +208,20 @@ class ProgressBarMeter
 			, cpp_int_mode(false)
 		{
 
-			messager.StartProgressBar(0, progress_bar_max_value);
-			messager.UpdateProgressBarValue(0);
-			update_every_how_often = progress_bar_max_value / 1000;
-			if (update_every_how_often == 0) ++update_every_how_often;
+			if (!doNotStart)
+			{
+				messager.StartProgressBar(0, progress_bar_max_value);
+				messager.UpdateProgressBarValue(0);
+				update_every_how_often = progress_bar_max_value / 1000;
+				if (update_every_how_often == 0) ++update_every_how_often;
+			}
 
 		}
 
 		ProgressBarMeter(Messager & messager_, std::string const & progress_message, boost::multiprecision::cpp_int const & max_value)
 			: messager(messager_)
 			, msg{ progress_message }
-			, progress_bar_max_value{ max_value }
+			, progress_bar_max_value{ 0 }
 			, update_every_how_often{ 0 }
 			, cpp_int_mode(true)
 			, progress_bar_max_huge_value{ max_value }
@@ -236,6 +239,19 @@ class ProgressBarMeter
 		{
 			messager.UpdateProgressBarValue(1000);
 			messager.SetPerformanceLabel("");
+		}
+
+		void StartProgressBar(std::int64_t const max_value)
+		{
+
+			// Used in case of delayed start
+			progress_bar_max_value = max_value;
+
+			// set to 1000
+
+			messager.StartProgressBar(0, 1000);
+			messager.UpdateProgressBarValue(0);
+
 		}
 
 		void UpdateProgressBarValue(std::int64_t const current_value)

@@ -958,9 +958,6 @@ class Weighting
 
 	private:
 
-		// Yes - these are RAW pointers,
-		// because we are using a memory pool
-		// and never deleting them
 		mutable std::unique_ptr<boost::multiprecision::cpp_int> weightingPtr;
 		mutable std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_startPtr;
 		mutable std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_endPtr;
@@ -1297,35 +1294,35 @@ typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 typedef FastVector<Leaf> fast_leaf_vector;
 typedef FastSet<Leaf> Leaves; 
 
-//typedef std::vector<BranchOutputRow> std_branch_output_row_vector;
 typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;
 typedef FastVector<BranchOutputRow> fast_branch_output_row_vector_huge; // no difference at this point because code pre-allocates full size, so extra template param was removed
 typedef FastSet<BranchOutputRow> fast_branch_output_row_set;
 
 typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
-//typedef FastMapFlat<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
 
 typedef FastMap<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
 typedef FastMap<std::int64_t, fast_branch_output_row_vector> fast__int64__to__fast_branch_output_row_vector;
 
-//typedef FastMap<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 typedef FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 
-//#ifdef _DEBUG
+// ******************************************************************************************************************************************************************** //
+// Output data to XML for debugging
+// ******************************************************************************************************************************************************************** //
+void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & allWeightings, bool const to_file, std::string const & file_name_appending_string);
+// ******************************************************************************************************************************************************************** //
+// SpitAllWeightings() is the important one... just use that for debugging.
+// Internally, it calls the functions below.
+// ******************************************************************************************************************************************************************** //
 void SpitKeys(std::string & sdata, FastVector<DMUInstanceData> const & dmu_keys);
 void SpitDataCache(std::string & sdata, DataCache const & dataCache);
 void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & dataCaches);
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits);
-//void SpitHit(std::string & sdata, std::int64_t const time_unit, fast_branch_output_row_set const & hit); // templatized
-//void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const & setOfRows); // templatized 
 void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
 void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__output_rows const & helperLookup);
 void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
-void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & allWeightings, bool const to_file, std::string const & file_name_appending_string);
 void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
-//#endif
 
 // "Branch"
 class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
