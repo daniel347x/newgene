@@ -700,11 +700,25 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit_time)
 {
 
-	boost::multiprecision::cpp_int currentWeighting = 0;
+	// first, calculate the number of branches that need to have weightings calculated
+	std::int64_t total_branches = 0;
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices::value_type & timeSliceEntry)
+	{
+		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
+		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		Weighting & variableGroupTimeSliceDataWeighting = variableGroupTimeSliceData.weighting;
+		std::for_each(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
+		{
+			Branches & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+			total_branches += static_cast<std::int64_t>(branchesAndLeaves.size());
+		});
+	});
 
+	// Now calculate the weightings
+	boost::multiprecision::cpp_int currentWeighting = 0;
 	std::int64_t branch_count = 0;
 	std::int64_t time_slice_count = 0;
-
+	ProgressBarMeter meter(messager, std::string("Weighting for %1% / %2% branches calculated"), total_branches);
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices::value_type & timeSliceEntry)
 	{
 
@@ -768,6 +782,8 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 				//messager.AppendKadStatusText(msg.str(), nullptr);
 
 				variableGroupBranchesAndLeavesWeighting.addWeighting(branchWeighting.getWeighting());
+
+				meter.UpdateProgressBarValue(branch_count);
 
 			});
 
@@ -1509,6 +1525,8 @@ void KadSampler::PrepareRandomSamples(int const K)
 	TimeSlices::const_iterator timeSlicePtr = timeSlices.cbegin();
 	boost::multiprecision::cpp_int currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
 
+	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% randomly selected rows"), static_cast<std::int32_t>(random_numbers.size()));
+	std::int32_t random_rows_generated = 0;
 	while (true)
 	{
 
@@ -1598,6 +1616,9 @@ void KadSampler::PrepareRandomSamples(int const K)
 
 		++random_number_iterator;
 
+		++random_rows_generated;
+		meter.UpdateProgressBarValue(random_rows_generated);
+
 	}
 
 }
@@ -1629,7 +1650,7 @@ void KadSampler::PrepareFullSamples(int const K)
 
 }
 
-void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch)
+void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t & current_rows, ProgressBarMeter & meter)
 {
 
 	if (time_granularity == TIME_GRANULARITY__NONE)
@@ -1681,6 +1702,9 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch)
 				// We'll gladly pay the cost in memory in exchange for rapidly speeding up the "consolidating rows" stage.
 
 				//hit.second.erase(iter++);
+
+				++current_rows;
+				meter.UpdateProgressBarValue(current_rows);
 			}
 
 			// Memory allocation error when NOT deleting the above "hit" vector,
@@ -1702,7 +1726,9 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch)
 	// Disable for now.  Profiler shows a major hit is taken here during "consolidating rows" phase.
 	// Since we don't NEED to look up in this cache AFTER the "consolidating rows" phase,
 	// disable this.  However, all code is in place to populate it if we ever need it;
-	// just set to "true".
+	// perhaps because after consolidation we need to nonetheless merge with another child variable group, etc.;
+	// if so,
+	// just set to "true" - but pay for the runtime time hit.
 	if (false)
 	{
 		for (int c = 0; c < numberChildVariableGroups; ++c)

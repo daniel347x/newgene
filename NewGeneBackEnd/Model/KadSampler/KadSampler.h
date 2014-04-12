@@ -2098,7 +2098,7 @@ class KadSampler
 		bool RetrieveNextBranchAndLeaves(int const K);
 		void PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch);
 		void ResetBranchCaches(bool const reset_child_dmu_lookup);
-		void ConsolidateRowsWithinBranch(Branch const & branch);
+		void ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t & current_rows, ProgressBarMeter & meter);
 		void getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const;
 		void getDataCacheUsage(size_t & usage, DataCache const & dataCache) const;
 		void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf = false) const;

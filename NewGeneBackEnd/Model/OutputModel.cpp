@@ -5907,178 +5907,245 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	std::set<MergedTimeSliceRow> saved_historic_rows;
 	std::set<MergedTimeSliceRow> ongoing_merged_rows;
 
-	TimeSlice previousTimeSlice;
+	// ***************************************************************************************************** //
+	// First, calculate the number of rows that must be processed, for use by the progress bar
+	// ***************************************************************************************************** //
+	// Avoid variable name collisions by placing in block
+	std::int64_t total_row_count = 0;
+	{
+		TimeSlice previousTimeSlice;
+		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
+		{
+			TimeSlice const & the_slice = timeSlice.first;
+			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			// See equivalent loop, below, for some comments
+			if (previousTimeSlice.DoesOverlap(the_slice))
+			{
+				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+				{
+					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
+					{
+						if (random_sampling)
+						{
+							auto & incoming_rows = branch.hits_consolidated;
+							total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+						}
+						else
+						{
+							auto const & incoming_rows = branch.hits[-1];
+							total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+						}
+					});
+				});
+			}
+			else
+			{
+				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+				{
+					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
+					{
+						if (random_sampling)
+						{
+							auto const & incoming_rows = branch.hits_consolidated;
+							total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+						}
+						else
+						{
+							auto const & incoming_rows = branch.hits[-1];
+							total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+						}
+					});
+				});
+			}
+			previousTimeSlice = the_slice;
+		});
+	}
 
-	int orig_row_count = 0;
 
-	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
+	// ***************************************************************************************************** //
+	// Now, actually perform the consolidation of the rows
+	// ***************************************************************************************************** //
+	// Avoid variable name collisions by placing in block
+	ProgressBarMeter meter(messager, std::string("%1% / %2% rows consolidated"), total_row_count);
 	{
 
-		TimeSlice const & the_slice = timeSlice.first;
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
-
-		if (previousTimeSlice.DoesOverlap(the_slice))
+		TimeSlice previousTimeSlice;
+		std::int64_t orig_row_count = 0;
+		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 		{
 
-			// The current time slice is adjacent to the previous.  Merge identical rows
+			TimeSlice const & the_slice = timeSlice.first;
+			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
-			// We have a single time slice here
-
-			std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			if (previousTimeSlice.DoesOverlap(the_slice))
 			{
 
-				// One primary variable group for the current time slice (for now, this is all that is supported).
-				// Iterate through all of its branches (fixed values of raw data for the primary keys that are not part of the K-ad; i.e., have multiplicity 1)
-				std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
+				// The current time slice is adjacent to the previous.  Merge identical rows
+
+				// We have a single time slice here
+
+				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
 
-					// Here is a single branch and its leaves, corresponding to the primary variable group and the current time slice.
-					std::set<MergedTimeSliceRow> incoming;
-
-					// ***************************************************************************************************** //
-					// All data within a single branch is guaranteed to have been consolidated into index -1.
-					// This was either done in the block above (for random sampling),
-					// or it was done automatically by full sampling (in the case of full sampling,
-					// the data within each branch is always placed into index -1
-					// and "granulated" only upon output).
-					// Special case exception: Random sampling with the primary variable group having no time granularity.
-					// In this case, the random sampling algorithm will place all results into index -1,
-					// so the above block that consolidates to index -1 is not necessary.
-					// ***************************************************************************************************** //
-
-					MergedTimeSliceRow::RHS_wins = true; // optimizer might call copy constructor, which calls operator=(), during "emplace"
-
-					if (random_sampling)
+					// One primary variable group for the current time slice (for now, this is all that is supported).
+					// Iterate through all of its branches (fixed values of raw data for the primary keys that are not part of the K-ad; i.e., have multiplicity 1)
+					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 					{
-						// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
-						auto & incoming_rows = branch.hits_consolidated;
-						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+
+						// Here is a single branch and its leaves, corresponding to the primary variable group and the current time slice.
+						std::set<MergedTimeSliceRow> incoming;
+
+						// ***************************************************************************************************** //
+						// All data within a single branch is guaranteed to have been consolidated into index -1.
+						// This was either done in the block above (for random sampling),
+						// or it was done automatically by full sampling (in the case of full sampling,
+						// the data within each branch is always placed into index -1
+						// and "granulated" only upon output).
+						// Special case exception: Random sampling with the primary variable group having no time granularity.
+						// In this case, the random sampling algorithm will place all results into index -1,
+						// so the above block that consolidates to index -1 is not necessary.
+						// ***************************************************************************************************** //
+
+						MergedTimeSliceRow::RHS_wins = true; // optimizer might call copy constructor, which calls operator=(), during "emplace"
+
+						if (random_sampling)
 						{
-							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
-						});
-					}
-					else
-					{
-						// In this case, full sampling, the rows were already added to branch.hits[-1] in consolidated fashion within each branch
-						auto const & incoming_rows = branch.hits[-1];
-						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+							// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
+							auto & incoming_rows = branch.hits_consolidated;
+							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+							{
+								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
+								meter.UpdateProgressBarValue(orig_row_count);
+							});
+						}
+						else
 						{
-							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
+							// In this case, full sampling, the rows were already added to branch.hits[-1] in consolidated fashion within each branch
+							auto const & incoming_rows = branch.hits[-1];
+							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+							{
+								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
+								meter.UpdateProgressBarValue(orig_row_count);
+							});
+						}
+
+						MergedTimeSliceRow::RHS_wins = false;
+
+						std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
+						std::vector<MergedTimeSliceRow> only_previous(ongoing_merged_rows.size());
+						std::vector<MergedTimeSliceRow> only_new(incoming.size());
+
+						// ************************************************************************************************************************************************************** //
+						// Find out which rows match just in terms of DATA (not time) between the incoming, and the previous, sets of rows
+						// ************************************************************************************************************************************************************** //
+						auto finalpos = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
+						auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
+						auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
+
+						intersection.resize(finalpos - intersection.begin());
+						only_previous.resize(finalpos_previous - only_previous.begin());
+						only_new.resize(finalpos_incoming - only_new.begin());
+
+						// ************************************************************************************************************************************************************** //
+						// Any rows that match in terms of DATA are also known to be adjacent in TIME,
+						// and these can now be placed into the ongoing set.
+						// Those previous rows that did not match are stashed away.
+						// ************************************************************************************************************************************************************** //
+
+						// We need to extend the time slice of the "intersection" rows,
+						// which are guaranteed to have been copied by "set_intersection" from the "ongoing_merged_rows" container,
+						// and will therefore (using the custom assignment operator which always takes the element that is not empty -
+						// and the result vector contained default-constructed elements which were empty)
+						// contain the time slices from the "ongoing_merged_rows" container,
+						// guaranteeing that these time slices, which may start at different places for different rows
+						// although they all *end* at the start of the new time slice, are saved.
+						std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow & merged_row)
+						{
+							merged_row.time_slice.setEnd(the_slice.getEnd());
 						});
-					}
 
-					MergedTimeSliceRow::RHS_wins = false;
+						// Intersection now contains all previous rows that matched with incoming rows,
+						// and they have been properly extended.
 
-					std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
-					std::vector<MergedTimeSliceRow> only_previous(ongoing_merged_rows.size());
-					std::vector<MergedTimeSliceRow> only_new(incoming.size());
+						ongoing_merged_rows.clear();
 
-					// ************************************************************************************************************************************************************** //
-					// Find out which rows match just in terms of DATA (not time) between the incoming, and the previous, sets of rows
-					// ************************************************************************************************************************************************************** //
-					auto finalpos = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
-					auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
-					auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
 
-					intersection.resize(finalpos - intersection.begin());
-					only_previous.resize(finalpos_previous - only_previous.begin());
-					only_new.resize(finalpos_incoming - only_new.begin());
+						MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
 
-					// ************************************************************************************************************************************************************** //
-					// Any rows that match in terms of DATA are also known to be adjacent in TIME,
-					// and these can now be placed into the ongoing set.
-					// Those previous rows that did not match are stashed away.
-					// ************************************************************************************************************************************************************** //
+						// Set ongoing to "intersection"
+						ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
 
-					// We need to extend the time slice of the "intersection" rows,
-					// which are guaranteed to have been copied by "set_intersection" from the "ongoing_merged_rows" container,
-					// and will therefore (using the custom assignment operator which always takes the element that is not empty -
-					// and the result vector contained default-constructed elements which were empty)
-					// contain the time slices from the "ongoing_merged_rows" container,
-					// guaranteeing that these time slices, which may start at different places for different rows
-					// although they all *end* at the start of the new time slice, are saved.
-					std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow & merged_row)
-					{
-						merged_row.time_slice.setEnd(the_slice.getEnd());
+						// Now, add any new rows that were not present previously...
+						// these are new rows from this time slice that did not intersect the previous rows
+						// in terms of data columns.
+						ongoing_merged_rows.insert(only_new.cbegin(), only_new.cend());
+
+						// The rows that existed previously, but do not match, now must be set aside and saved.
+						saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
+
+						MergedTimeSliceRow::RHS_wins = false;
+
 					});
 
-					// Intersection now contains all previous rows that matched with incoming rows,
-					// and they have been properly extended.
-
-					ongoing_merged_rows.clear();
-
-
-					MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
-
-					// Set ongoing to "intersection"
-					ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
-
-					// Now, add any new rows that were not present previously...
-					// these are new rows from this time slice that did not intersect the previous rows
-					// in terms of data columns.
-					ongoing_merged_rows.insert(only_new.cbegin(), only_new.cend());
-
-					// The rows that existed previously, but do not match, now must be set aside and saved.
-					saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
-
-					MergedTimeSliceRow::RHS_wins = false;
-
 				});
 
-			});
+			}
 
-		}
-
-		else
-		{
-
-			// There is a gap in the time slices.
-			// Start fresh
-
-			saved_historic_rows.insert(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend());
-
-			ongoing_merged_rows.clear();
-
-			std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			else
 			{
-				std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
+
+				// There is a gap in the time slices.
+				// Start fresh
+
+				saved_historic_rows.insert(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend());
+
+				ongoing_merged_rows.clear();
+
+				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
-
-					MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
-
-					if (random_sampling)
+					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 					{
-						// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
-						auto const & incoming_rows = branch.hits_consolidated;
-						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
-						{
-							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
-						});
-						MergedTimeSliceRow::RHS_wins = false;
-					}
-					else
-					{
-						// In this case, full sampling, the rows were already added to branch.hits[-1] in consolidated fashion within each branch
-						auto const & incoming_rows = branch.hits[-1];
+
 						MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
-						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
-						{
-							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
-						});
-					}
 
-					MergedTimeSliceRow::RHS_wins = false;
+						if (random_sampling)
+						{
+							// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
+							auto const & incoming_rows = branch.hits_consolidated;
+							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+							{
+								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
+								meter.UpdateProgressBarValue(orig_row_count);
+							});
+							MergedTimeSliceRow::RHS_wins = false;
+						}
+						else
+						{
+							// In this case, full sampling, the rows were already added to branch.hits[-1] in consolidated fashion within each branch
+							auto const & incoming_rows = branch.hits[-1];
+							MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
+							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
+							{
+								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
+								meter.UpdateProgressBarValue(orig_row_count);
+							});
+						}
+
+						MergedTimeSliceRow::RHS_wins = false;
+
+					});
 
 				});
 
-			});
+			}
 
-		}
+			previousTimeSlice = the_slice;
 
-		previousTimeSlice = the_slice;
+		});
 
-	});
+	}
 
 	// Empty out the current ongoing rows; we've hit the end
 	MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
@@ -6598,6 +6665,9 @@ void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTi
 	// ... namely, merging identical rows *across* time slices.
 	// ************************************************************************************************************* //
 
+	// First, calculate the number of rows that will be consolidated,
+	// for use by the progress bar
+	std::int64_t total_rows = 0;
 	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 	{
 
@@ -6609,7 +6679,36 @@ void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTi
 		{
 			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & the_branch)
 			{
-				allWeightings.ConsolidateRowsWithinBranch(the_branch);
+				std::for_each(the_branch.hits.begin(), the_branch.hits.end(), [&](decltype(the_branch.hits)::value_type & hit)
+				{
+					if (hit.first != -1)
+					{
+						total_rows += hit.second.size();
+					}
+				});
+			});
+
+		});
+
+	});
+
+	// ************************************************************************************************************* //
+	// Now actually perform the consolidation across time units within individual time slices
+	// ************************************************************************************************************* //
+	ProgressBarMeter meter(messager, std::string("%1% / %2% rows consolidated"), total_rows);
+	std::int64_t current_rows = 0;
+	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
+	{
+
+		TimeSlice const & the_slice = timeSlice.first;
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+
+		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+		{
+			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & the_branch)
+			{
+				allWeightings.ConsolidateRowsWithinBranch(the_branch, current_rows, meter);
 			});
 
 		});
