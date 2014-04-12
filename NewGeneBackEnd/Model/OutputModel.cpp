@@ -492,9 +492,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for primary variable group data (variable group: %1%)...") %
 									  Table_VG_CATEGORY::GetVgDisplayText(top_level_vg)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
-
 		if (failed || CheckCancelled()) { return; }
-
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		primary_group_column_sets.push_back(selected_raw_data_table_schema);
@@ -551,7 +549,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 										 boost::format("For each branch node, create a cache of all primary leaf nodes, and create a lookup cache that indexes all possible child branch/leaf combinations (for all child variable groups) that match against the given primary branch and leaves...")).str().c_str(),
 									 this);
 		allWeightings.ResetBranchCaches(has_child_groups);
-
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
@@ -559,7 +556,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Calculate the total number of K-ad combinations...")).str().c_str(), this);
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
-
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
@@ -567,7 +563,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Total number of (granulated) K-adic combinations for the given choice of K: %1%") % boost::lexical_cast<std::string>
 									  (allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
-
 		if (random_sampling)
 		{
 
@@ -601,9 +596,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText((boost::format("Generating %1% random numbers between 1 and %2% to be used to select random rows ...") % boost::lexical_cast<std::string>
 										  (samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
 			allWeightings.PrepareRandomNumbers(samples);
-
 			if (failed || CheckCancelled()) { return; }
-
 			messager.AppendKadStatusText((boost::format("Done generating random numbers.")).str().c_str(), this);
 
 			// ********************************************************************************************************************************************************* //
@@ -634,7 +627,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 										  (allWeightings.weighting.getWeighting()).c_str()).str(), this);
 			allWeightings.PrepareFullSamples(K);
 			messager.AppendKadStatusText((boost::format("Completed generating full selection of K-ad combinations.")).str(), this);
-
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -651,7 +643,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// disk-based management during K-ad generation
 			// ********************************************************************************************************************************************************* //
 			KadSamplerCreateOutputTable();
-
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -2575,24 +2566,6 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 		failed = true;
 	}
 
-	K = 0;
-	int highest_multiplicity = 1;
-	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[top_level_vg_index];
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
-	{
-
-		if (raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > highest_multiplicity)
-		{
-			highest_multiplicity = raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
-		}
-
-	});
-
-	K = highest_multiplicity;
-	has_non_primary_top_level_groups = (primary_variable_groups_column_info.size() - 1) > 0;
-	has_child_groups = secondary_variable_groups_column_info.size() > 0;
-
 }
 
 void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & allWeightings)
@@ -2624,6 +2597,24 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 		DetermineInternalChildLeafCountMultiplicityGreaterThanOne(allWeightings, childSchema, primary_or_secondary_view_index);
 		++primary_or_secondary_view_index;
 	});
+
+	K = 0;
+	int highest_multiplicity = 1;
+	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[top_level_vg_index];
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
+		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+	{
+
+		if (raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > highest_multiplicity)
+		{
+			highest_multiplicity = raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
+		}
+
+	});
+
+	K = highest_multiplicity;
+	has_non_primary_top_level_groups = (primary_variable_groups_column_info.size() - 1) > 0;
+	has_child_groups = secondary_variable_groups_column_info.size() > 0;
 
 }
 
