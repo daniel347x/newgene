@@ -6620,7 +6620,7 @@ void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current
 }
 
 void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch,
-		BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, int & orig_row_count)
+		BranchOutputRow const & incoming_row, std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count)
 {
 	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
 	allWeightings.create_output_row_visitor_global_data_cache.clear();
