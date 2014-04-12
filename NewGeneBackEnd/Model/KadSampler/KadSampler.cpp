@@ -31,7 +31,6 @@ KadSampler::KadSampler(Messager & messager_)
 	, messager(messager_)
 	, number_rows_generatedPtr{new boost::multiprecision::cpp_int}
 {
-	NewGenePool::InitializePools();
 }
 
 KadSampler::~KadSampler()

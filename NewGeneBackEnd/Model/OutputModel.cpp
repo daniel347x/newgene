@@ -439,6 +439,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// ******************************************************************************************* //
 	// ******************************************************************************************* //
 	// ******************************************************************************************* //
+	NewGenePool::InitializePools();
 	KadSampler * allWeightings_ = new KadSampler(messager); // SEE NOTE!  Do not delete this object!
 	KadSampler & allWeightings = *allWeightings_;
 	BOOST_SCOPE_EXIT(&allWeightings, &model, &input_model)
