@@ -51,7 +51,7 @@
 				boost::format msg("Cannot deallocate more than one item at a time!");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
-			if ((ptr - previous_block_holding_deleted_item) / mySize < BLOCK_ITEM_COUNT)
+			if ((ptr >= previous_block_holding_deleted_item) && (ptr - previous_block_holding_deleted_item) / mySize < BLOCK_ITEM_COUNT)
 			{
 				// The current item being deleted is in the same block as the previous that was deleted
 				previous_index_to_deleted_item = (ptr - previous_block_holding_deleted_item) / mySize;
@@ -62,14 +62,14 @@
 				// We have to find the block from which to delete
 				auto found_block = std::lower_bound(&blocks[0], &blocks[current_block+1], ptr, [&](char * const & existing_test, char * const existing)
 				{
-					if ((existing - existing_test) / mySize < BLOCK_ITEM_COUNT)
+					if ((existing >= existing_test) && (existing - existing_test) / mySize < BLOCK_ITEM_COUNT)
 					{
 						return true;
 					}
 					return false;
 				});
 
-				if (*found_block == nullptr || (ptr - *found_block) / mySize >= BLOCK_ITEM_COUNT)
+				if (*found_block == nullptr || (ptr < *found_block) || (ptr - *found_block) / mySize >= BLOCK_ITEM_COUNT)
 				{
 					boost::format msg("Item being deallocated cannot be found!");
 					throw NewGeneException() << newgene_error_description(msg.str());
@@ -155,7 +155,7 @@
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 				blocks[current_block] = new char[BLOCK_ITEM_COUNT * mySize];
-				blocks_sorted[blocks[current_block]] = current_block;
+				blocks_sorted[blocks[current_block]] = current_block; // reverse lookup to find the block index from the pointer to the data for the block
 				++highest_block_index;
 				current_block_available_index = 0;
 			}
