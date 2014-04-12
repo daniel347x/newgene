@@ -12,36 +12,20 @@
 #include <time.h>
 #include "NewGeneException.h"
 
-#define MAX_NUMBER_BLOCKS 1000000
+#define MAX_NUMBER_BLOCKS 1000
 #define BLOCK_ITEM_COUNT 4096
 #define BYTEBITS_PER_BLOCK 512
 #define FREE_WALK_MAX_STEPS 5
+#define MAX_ITEM_SIZE_IN_BYTES 256
 
 	class NewGenePool
 	{
 
 	public:
 
-		static void ClearAllPools()
-		{
-			for (std::map<std::int32_t, NewGenePool *>::iterator ptr = existingMaps.begin(); ptr != existingMaps.end();)
-			{
-				auto existingPool = *ptr;
-				delete existingPool.second;
-				existingMaps.erase(ptr++);
-			}
-		}
-
 		static NewGenePool * getInstance(std::int32_t const theSize)
 		{
-			auto found = existingMaps.find(theSize);
-			if (found == existingMaps.end())
-			{
-				NewGenePool * newPool = new NewGenePool(theSize);
-				existingMaps[theSize] = newPool;
-				return newPool;
-			}
-			return (*found).second;
+			return existingMaps[theSize / 4 - 1];
 		}
 
 		void deallocate(char * const ptr, size_t n)
@@ -187,7 +171,24 @@
 
 		std::int32_t highest_block_index;
 
-		static std::map<std::int32_t, NewGenePool *> existingMaps;
+		static void InitializePools()
+		{
+			for (int n = 0; n < MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
+			{
+				existingMaps[n] = new NewGenePool(n * 4);
+			}
+		}
+
+		static void ClearAllPools()
+		{
+			for (int n = 0; n < MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
+			{
+				delete existingMaps[n];
+			}
+		}
+
+		//static std::map<std::int32_t, NewGenePool *> existingMaps;
+		static NewGenePool * existingMaps[MAX_ITEM_SIZE_IN_BYTES/4];
 
 	};
 
@@ -207,6 +208,11 @@
 
 		NewGeneMemoryPoolAllocator()
 		{
+			if (sizeof(T) > MAX_ITEM_SIZE_IN_BYTES)
+			{
+				boost::format msg("Item size too large!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
 		}
 
 		template <typename U>
