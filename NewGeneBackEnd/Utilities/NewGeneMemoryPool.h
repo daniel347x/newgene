@@ -28,6 +28,22 @@
 			return existingMaps[theSize / 4 - 1];
 		}
 
+		static void InitializePools()
+		{
+			for (int n = 0; n < MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
+			{
+				existingMaps[n] = new NewGenePool(n * 4);
+			}
+		}
+
+		static void ClearAllPools()
+		{
+			for (int n = 0; n < MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
+			{
+				delete existingMaps[n];
+			}
+		}
+
 		void deallocate(char * const ptr, size_t n)
 		{
 			if (n > 1)
@@ -170,22 +186,6 @@
 		std::int32_t previous_index_to_deleted_item;
 
 		std::int32_t highest_block_index;
-
-		static void InitializePools()
-		{
-			for (int n = 0; n < MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
-			{
-				existingMaps[n] = new NewGenePool(n * 4);
-			}
-		}
-
-		static void ClearAllPools()
-		{
-			for (int n = 0; n < MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
-			{
-				delete existingMaps[n];
-			}
-		}
 
 		//static std::map<std::int32_t, NewGenePool *> existingMaps;
 		static NewGenePool * existingMaps[MAX_ITEM_SIZE_IN_BYTES/4];
