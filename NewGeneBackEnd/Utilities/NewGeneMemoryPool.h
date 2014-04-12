@@ -106,6 +106,7 @@
 						{
 							previous_index_to_deleted_item = 0;
 						}
+						char * ptr = CheckReturnFreeSlot();
 						if (ptr) { return ptr; }
 					}
 					// jump to a random block - defies any pattern of memory usage by an application
@@ -119,6 +120,7 @@
 						{
 							previous_index_to_deleted_item = 0;
 						}
+						char * ptr = CheckReturnFreeSlot();
 						if (ptr) { return ptr; }
 					}
 				}
