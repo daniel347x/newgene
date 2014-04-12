@@ -6223,7 +6223,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		std::int64_t total_number_output_rows = 0;
 
-		auto loop_through_time_units = [&](TimeSlice const & timeSlice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, boost::function<void()> & c)
+		auto loop_through_time_units = [&](TimeSlice const & timeSlice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)> & c)
 		{
 			// Just do the calculation of how many total time units are overlapped by the current time slice.
 			// This is the same calculation that is used below.
@@ -6234,11 +6234,12 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 			std::int64_t current_time_start = time_start;
 			while (current_time_start < time_end)
 			{
-				c();
-
 				std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
 				std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
 				std::int64_t time_to_use_for_end = time_start_aligned_higher;
+
+				c(current_time_start, time_to_use_for_end);
+
 				if (time_start_aligned_higher > time_end) { time_to_use_for_end = time_end; }
 				current_time_start = time_to_use_for_end;
 			}
@@ -6291,7 +6292,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						fast_branch_output_row_set const & output_rows_for_this_full_time_slice = branch.hits[-1];
 
 						// granulated output, full sampling
-						loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void()>([&]()
+						loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start, std::int64_t const time_to_use_for_end)
 						{
 							size_t number_rows_this_time_slice = output_rows_for_this_full_time_slice.size();
 							total_number_output_rows += static_cast<std::int64_t>(number_rows_this_time_slice);
@@ -6489,29 +6490,11 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 							// *********************************************************************************** //
 
 							fast_branch_output_row_set const & output_rows_for_this_full_time_slice = time_unit_hit.second;
-
-							// Loop through our time range data
-
-							// The time slice has time granularity.
-							// Start at the beginning, and loop through.
-
-							std::int64_t const time_start = timeSlice.getStart();
-							std::int64_t const time_end = timeSlice.getEnd();
-
-							std::int64_t current_time_start = time_start;
-
-							while (current_time_start < time_end)
+							loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start, std::int64_t const time_to_use_for_end)
 							{
-								std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
-								std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
-								std::int64_t time_to_use_for_end = time_start_aligned_higher;
-
-								if (time_start_aligned_higher > time_end) { time_to_use_for_end = time_end; }
-
 								TimeSlice current_slice(current_time_start, time_to_use_for_end);
 								OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
-								current_time_start = time_to_use_for_end;
-							}
+							}));
 
 						}
 
