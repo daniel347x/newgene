@@ -19,6 +19,7 @@
 #include "../TimeGranularity.h"
 #include "../../Messager/Messager.h"
 #include "../../Utilities/FastMap.h"
+#include "../../Utilities/NewGeneMemoryPool.h"
 
 typedef std::basic_string<char, std::char_traits<char>, boost::pool_allocator<char>> fast_string;
 

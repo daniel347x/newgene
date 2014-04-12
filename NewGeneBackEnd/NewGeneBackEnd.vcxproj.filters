@@ -357,6 +357,9 @@
     <ClInclude Include="Utilities\FastMap.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\NewGeneMemoryPool.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -594,6 +597,9 @@
       <Filter>Source Files\Model\KadSampler</Filter>
     </ClCompile>
     <ClCompile Include="Utilities\FastMap.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\NewGeneMemoryPool.cpp">
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
