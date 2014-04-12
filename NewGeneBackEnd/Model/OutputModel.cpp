@@ -5361,7 +5361,6 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for non-primary top-level variable group data (variable group: %1%)...") %
 									  Table_VG_CATEGORY::GetVgDisplayText(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_group_raw_data_columns, current_top_level_vg_index);
-
 		if (failed || CheckCancelled()) { return; }
 
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
@@ -5376,8 +5375,25 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		messager.AppendKadStatusText((boost::format("Load selected columns for non-primary top-level variable group into internal table...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
+		if (failed || CheckCancelled())
+		{
+			std::string errorsOut;
+			bool first = true;
 
-		if (failed || CheckCancelled()) { return; }
+			for (auto errorMsg : errorMessages)
+			{
+				if (!first)
+				{
+					errorsOut += "\n";
+				}
+
+				first = false;
+				errorsOut += errorMsg;
+			}
+
+			SetFailureErrorMessage(errorsOut);
+			return;
+		}
 
 		++current_top_level_vg_index;
 
@@ -5550,7 +5566,25 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		messager.AppendKadStatusText((boost::format("Load selected columns for child variable group into internal table...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
+		if (failed || CheckCancelled())
+		{
+			std::string errorsOut;
+			bool first = true;
 
+			for (auto errorMsg : errorMessages)
+			{
+				if (!first)
+				{
+					errorsOut += "\n";
+				}
+
+				first = false;
+				errorsOut += errorMsg;
+			}
+
+			SetFailureErrorMessage(errorsOut);
+			return;
+		}
 		++current_child_vg_index;
 
 	});
