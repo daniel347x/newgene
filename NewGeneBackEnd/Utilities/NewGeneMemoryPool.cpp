@@ -46,7 +46,7 @@ char * NewGenePool::CheckReturnFreeSlotCurrent()
 
 }
 
-void NewGenePool::AddNewBlock()
+char * NewGenePool::AddNewBlock()
 {
 	++highest_block_index;
 	if (highest_block_index == MAX_NUMBER_BLOCKS)
@@ -61,5 +61,6 @@ void NewGenePool::AddNewBlock()
 	free_slots[current_block_index] += BLOCK_ITEM_COUNT;
 	--free_slots[current_block_index]; // We're using one up right now
 	total_free_slots += BLOCK_ITEM_COUNT;
-	++current_block_available_index;
+	char * ptr = CheckReturnFreeSlotCurrent();
+	return ptr;
 }

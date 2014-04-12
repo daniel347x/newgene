@@ -165,12 +165,11 @@
 			}
 
 			// No luck.  Add new block
-			AddNewBlock();
-			ptr = blocks[current_block_index];
+			ptr = AddNewBlock();
 			return ptr;
 		}
 
-		void AddNewBlock();
+		char * AddNewBlock();
 
 	private:
 
