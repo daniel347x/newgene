@@ -6223,6 +6223,13 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		std::int64_t total_number_output_rows = 0;
 
+		// ************************************************************************************************************************ //
+		// Define a lambda that wraps the following loop that calculates the starting and ending times of the individual time units
+		// (or fractions thereof) within a given time slice.
+		// Every time unit or fraction thereof within a time slice has the same width
+		// (equal to the width of the time granularity associated with the unit of analysis),
+		// except possibly for the first piece and last piece within the time slice, which might be fractional.
+		// ************************************************************************************************************************ //
 		auto loop_through_time_units = [&](TimeSlice const & timeSlice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)> & c)
 		{
 			// Just do the calculation of how many total time units are overlapped by the current time slice.
