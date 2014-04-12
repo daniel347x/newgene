@@ -665,9 +665,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Merging secondary variable group data...")).str(), this);
 			KadSamplerFillDataForChildGroups(allWeightings);
-
 			if (failed || CheckCancelled()) { return; }
-
 			boost::format mytxt2("Completed merging secondary groups.");
 			messager.AppendKadStatusText(mytxt2.str(), this);
 
@@ -695,9 +693,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Rebuild cache of all primary leaf nodes for each branch node...")).str().c_str(), this);
 			allWeightings.ResetBranchCaches(false);
-
 			if (failed || CheckCancelled()) { return; }
-
 			messager.AppendKadStatusText((boost::format("Completed building cache.")).str().c_str(), this);
 
 		}
@@ -732,9 +728,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Consolidating adjacent rows...")).str(), this);
 			ConsolidateData(random_sampling, allWeightings);
-
 			if (failed || CheckCancelled()) { return; }
-
 			messager.AppendKadStatusText((boost::format("Completed consolidating adjacent rows.")).str().c_str(), this);
 
 		}
@@ -765,7 +759,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
 		KadSamplerWriteResultsToFileOrScreen(allWeightings);
-
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
@@ -786,9 +779,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		input_model.VacuumDatabase();
 		messager.SetPerformanceLabel("");
-
 		messager.UpdateProgressBarValue(1000);
-
 		messager.UpdateStatusBarText((boost::format("Output successfully generated (%1%)") % boost::filesystem::path(setting_path_to_kad_output).filename().c_str()).str().c_str(), this);
 		messager.AppendKadStatusText("Done.", this);
 
