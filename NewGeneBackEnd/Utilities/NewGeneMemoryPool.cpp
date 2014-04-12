@@ -1,5 +1,6 @@
 #include "NewGeneMemoryPool.h"
 
+std::map<std::int32_t, NewGenePool *> NewGenePool::existingMaps;
 
 char * NewGenePool::CheckReturnFreeSlot()
 {
