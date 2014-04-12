@@ -56,6 +56,7 @@
 				// The current item being deleted is in the same block as the previous that was deleted
 				previous_index_to_deleted_item = (ptr - previous_block_holding_deleted_item) / mySize;
 				blockbits[previous_block_holding_deleted_item_index * BYTEBITS_PER_BLOCK + previous_index_to_deleted_item / 8] &= ~(static_cast<char>(0x01 << (previous_index_to_deleted_item % 8)));
+				++free_slots[previous_block_holding_deleted_item_index];
 			}
 			else
 			{
@@ -74,27 +75,44 @@
 				previous_block_holding_deleted_item = found_block->first;
 				previous_index_to_deleted_item = (ptr - previous_block_holding_deleted_item) / mySize;
 				previous_block_holding_deleted_item_index = blocks_sorted[previous_block_holding_deleted_item];
+				++free_slots[previous_block_holding_deleted_item_index];
 			}
+			++total_free_slots;
+			--total_used_slots;
 		}
 
 		char * allocate(size_t n)
 		{
-			static char * prev = nullptr;
+
 			if (n > 1)
 			{
 				boost::format msg("Cannot allocate more than one item at a time!");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
-			char * ptr = CheckReturnFreeSlot();
-			if (ptr)
+
+			--total_free_slots;
+			++total_used_slots;
+
+			char * ptr = CheckReturnFreeSlotCurrent();
+			if (ptr) { return ptr; }
+			else
 			{
-				if (prev == ptr)
+				// take a few steps and see if there's a nearby match...
+				for (int f = 0; f < FREE_WALK_MAX_STEPS; ++f)
 				{
-					int m = 0;
+					++current_block_available_index;
+					if (current_block_available_index == BLOCK_ITEM_COUNT)
+					{
+						current_block_available_index = 0;
+					}
+					char * ptr = CheckReturnFreeSlotCurrent();
+					if (ptr) { return ptr; }
 				}
-				prev = ptr;
-				return ptr; 
 			}
+
+			// No go with the current block, so try previous blocks for deleted items
+			ptr = CheckReturnFreeSlot();
+			if (ptr) { return ptr; }
 			else
 			{
 				// take a few steps and see if there's a nearby match...
@@ -106,19 +124,15 @@
 						previous_index_to_deleted_item = 0;
 					}
 					char * ptr = CheckReturnFreeSlot();
-					if (ptr)
-					{
-						if (prev == ptr)
-						{
-							int m = 0;
-						}
-						prev = ptr;
-						return ptr;
-					}
+					if (ptr) { return ptr; }
 				}
+
+				// The closer we are to filling up, the harsher we try to use what we have
+
 				// jump to a random block - defies any pattern of memory usage by an application
 				previous_block_holding_deleted_item_index = rand() % (highest_block_index+1);
 				previous_index_to_deleted_item = rand() % BLOCK_ITEM_COUNT;
+				previous_block_holding_deleted_item = blocks[previous_block_holding_deleted_item_index];
 				// again, take a few steps and see if there's a nearby match...
 				for (int f = 0; f < FREE_WALK_MAX_STEPS; ++f)
 				{
@@ -128,42 +142,54 @@
 						previous_index_to_deleted_item = 0;
 					}
 					char * ptr = CheckReturnFreeSlot();
-					if (ptr)
+					if (ptr) { return ptr; }
+				}
+
+				// still no luck.  Let's step it up to find a nearby block with a hopefully hefty number of free slots.
+				// But only if we know we have some decent space hanging around somewhere
+				bool dire = false;
+				if (highest_block_index > static_cast<double>(MAX_NUMBER_BLOCKS)* 0.75)
+				{
+					dire = true;
+				}
+				if (dire || static_cast<double>(total_free_slots) / static_cast<double>(total_used_slots + total_free_slots) > 0.3)
+				{
+					// Find block with most space
+					std::int64_t best_free_count = 0;
+					std::int32_t best_free_block_index = 0;
+					for (int n = 0; n < highest_block_index; ++n)
 					{
-						if (prev == ptr)
+						std::int64_t free_count = free_slots[n];
+						if (free_count > best_free_count)
 						{
-							int m = 0;
+							best_free_count = free_count;
+							best_free_block_index = n;
 						}
-						prev = ptr;
-						return ptr;
+					}
+					previous_block_holding_deleted_item_index = best_free_block_index;
+					previous_block_holding_deleted_item = blocks[previous_block_holding_deleted_item_index];
+					for (previous_index_to_deleted_item = 0; previous_index_to_deleted_item < BLOCK_ITEM_COUNT; ++previous_index_to_deleted_item)
+					{
+						char * ptr = CheckReturnFreeSlot();
+						if (ptr) { return ptr; }
 					}
 				}
+
 			}
-			// No luck.  Add new item at end
-			ptr = blocks[current_block_index] + current_block_available_index * mySize;
-			++current_block_available_index;
-			if (current_block_available_index == BLOCK_ITEM_COUNT)
+
+			// No luck.  Add new block
+			++highest_block_index;
+			if (highest_block_index == MAX_NUMBER_BLOCKS)
 			{
-				++current_block_index;
-				if (current_block_index == MAX_NUMBER_BLOCKS)
-				{
-					boost::format msg("Exceeded maximum number of blocks!");
-					throw NewGeneException() << newgene_error_description(msg.str());
-				}
-				blocks[current_block_index] = new char[BLOCK_ITEM_COUNT * mySize];
-				blocks_sorted[blocks[current_block_index]] = current_block_index; // reverse lookup to find the block index from the pointer to the data for the block
-				++highest_block_index;
-				current_block_available_index = 0;
+				boost::format msg("Exceeded maximum number of blocks!");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
-			if (ptr)
-			{
-				if (prev == ptr)
-				{
-					int m = 0;
-				}
-				prev = ptr;
-				return ptr;
-			}
+			current_block_index = highest_block_index;
+			current_block_available_index = 0;
+			blocks[current_block_index] = new char[BLOCK_ITEM_COUNT * mySize];
+			blocks_sorted[blocks[current_block_index]] = current_block_index; // reverse lookup to find the block index from the pointer to the data for the block
+			ptr = blocks[current_block_index];
+			total_free_slots += BLOCK_ITEM_COUNT;
 			return ptr;
 		}
 
@@ -177,13 +203,18 @@
 			, previous_block_holding_deleted_item_index{ 0 }
 			, previous_index_to_deleted_item{ 0 }
 			, highest_block_index{ 0 }
+			, total_free_slots{ 0 }
+			, total_used_slots{ 0 }
 		{
 			srand(static_cast<unsigned int>(time(NULL)));
-			memset(blocks, '\0', MAX_NUMBER_BLOCKS + 1); // space for "end" block pointer which is always NULL
+			memset(blocks, '\0', MAX_NUMBER_BLOCKS); // space for "end" block pointer which is always NULL
 			memset(blockbits, '\0', BYTEBITS_PER_BLOCK * MAX_NUMBER_BLOCKS);
 			blocks[current_block_index] = new char[BLOCK_ITEM_COUNT * mySize];
 			previous_block_holding_deleted_item = blocks[current_block_index];
 			blocks_sorted[blocks[current_block_index]] = current_block_index;
+			memset(free_slots, '\0',  MAX_NUMBER_BLOCKS * sizeof(std::int32_t));
+			total_free_slots = BLOCK_ITEM_COUNT;
+			free_slots[current_block_index] += BLOCK_ITEM_COUNT;
 		}
 
 		~NewGenePool()
@@ -199,13 +230,15 @@
 		}
 
 		char * NewGenePool::CheckReturnFreeSlot();
+		char * NewGenePool::CheckReturnFreeSlotCurrent();
 
 		std::int32_t mySize;
-		char * blocks[MAX_NUMBER_BLOCKS + 1]; // space for "end" block pointer which is always NULL
+		char * blocks[MAX_NUMBER_BLOCKS]; // space for "end" block pointer which is always NULL
 		char blockbits[BYTEBITS_PER_BLOCK * MAX_NUMBER_BLOCKS];
-		std::map<char*, std::int32_t> blocks_sorted; // lookup
+		std::map<char*, std::int32_t> blocks_sorted; // lookup from pointer to block data, to bl
 		std::int32_t current_block_index;
 		std::int32_t current_block_available_index;
+		std::int32_t free_slots[MAX_NUMBER_BLOCKS];
 
 		std::int32_t previous_block_holding_deleted_item_index;
 		char * previous_block_holding_deleted_item;
@@ -213,8 +246,10 @@
 
 		std::int32_t highest_block_index;
 
-		//static std::map<std::int32_t, NewGenePool *> existingMaps;
 		static NewGenePool * existingMaps[MAX_ITEM_SIZE_IN_BYTES/4];
+
+		std::int64_t total_free_slots;
+		std::int64_t total_used_slots;
 
 	};
 
