@@ -6223,8 +6223,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		std::int64_t total_number_output_rows = 0;
 
-		template<typename CALLABLE>
-		auto loop_through_time_units = [](TimeSlice const & timeSlice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, CALLABLE c)
+		auto loop_through_time_units = [&](TimeSlice const & timeSlice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, boost::function<void()> & c)
 		{
 			// Just do the calculation of how many total time units are overlapped by the current time slice.
 			// This is the same calculation that is used below.
@@ -6289,14 +6288,14 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 					else
 					{
 
-						fast_branch_output_row_set const & output_rows_for_this_full_time_slice = time_unit_hit.second;
+						fast_branch_output_row_set const & output_rows_for_this_full_time_slice = branch.hits[-1];
 
 						// granulated output, full sampling
-						loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, [&]()
+						loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void()>([&]()
 						{
 							size_t number_rows_this_time_slice = output_rows_for_this_full_time_slice.size();
 							total_number_output_rows += static_cast<std::int64_t>(number_rows_this_time_slice);
-						});
+						}));
 
 					}
 				}
