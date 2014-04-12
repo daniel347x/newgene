@@ -217,7 +217,7 @@ class ProgressBarMeter
 			{
 				messager.StartProgressBar(0, progress_bar_max_value);
 				messager.UpdateProgressBarValue(0);
-				update_every_how_often = progress_bar_max_value / 1000;
+				update_every_how_often = progress_bar_max_value / 100;
 				if (update_every_how_often == 0) ++update_every_how_often;
 			}
 
@@ -237,7 +237,7 @@ class ProgressBarMeter
 
 			BOOST_ASSERT_MSG(sizeof(boost::multiprecision::cpp_dec_float_100) < 20000, "boost::multiprecision::cpp_dec_float<10000> is too large a data type to use!");
 
-			messager.StartProgressBar(0, 1000);
+			messager.StartProgressBar(0, 100);
 			messager.UpdateProgressBarValue(0);
 
 		}
@@ -245,7 +245,7 @@ class ProgressBarMeter
 		~ProgressBarMeter()
 		{
 
-			messager.UpdateProgressBarValue(1000);
+			messager.UpdateProgressBarValue(100);
 			messager.SetPerformanceLabel("");
 
 		}
@@ -258,7 +258,7 @@ class ProgressBarMeter
 
 			// set to 1000
 
-			messager.StartProgressBar(0, 1000);
+			messager.StartProgressBar(0, 100);
 			messager.UpdateProgressBarValue(0);
 
 		}
@@ -287,7 +287,7 @@ class ProgressBarMeter
 			{
 				boost::multiprecision::cpp_dec_float_100 ratio(current_value);
 				ratio /= progress_bar_max_huge_value;
-				ratio *= 1000.0L;
+				ratio *= 100.0L;
 				int current_progress_bar_value = ratio.convert_to<int>();
 				messager.UpdateProgressBarValue(current_progress_bar_value);
 				messager.SetPerformanceLabel((msg % boost::lexical_cast<std::string>(current_value).c_str() % boost::lexical_cast<std::string>(progress_bar_max_value).c_str()).str().c_str());

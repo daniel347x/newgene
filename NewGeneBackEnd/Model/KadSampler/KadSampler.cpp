@@ -1766,7 +1766,14 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 		branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 		branch.ResetLeafCache();
 
-		if (reset_child_dmu_lookup)
+		// **************************************************** //
+		// Incredibly, performance is MASSIVELY WORSE
+		// when the following loop is NOT entered.
+		// When NOT entered, the above lines of code cause
+		// the Boost Pool memory management system to spend FAR
+		// more time managing memory.
+		// **************************************************** //
+		if (true || reset_child_dmu_lookup)
 		{
 			for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
 			{
