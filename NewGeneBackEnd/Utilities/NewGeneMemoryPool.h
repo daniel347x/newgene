@@ -144,6 +144,7 @@
 			, current_block{ 0 }
 			, current_block_available_index{ 0 }
 			, previous_block_holding_deleted_item{ nullptr }
+			, previous_block_holding_deleted_item_index{ 0 }
 			, previous_index_to_deleted_item{ 0 }
 			, highest_block_index{ 0 }
 		{
