@@ -60,22 +60,18 @@
 			else
 			{
 				// We have to find the block from which to delete
-				auto found_block = std::lower_bound(&blocks[0], &blocks[current_block+1], ptr, [&](char * const & existing_test, char * const existing)
+				auto found_block = std::lower_bound(blocks_sorted.begin(), blocks_sorted.end(), ptr, [&](std::pair<char * const, std::int32_t> & existing_test, char * const existing)
 				{
-					if ((existing >= existing_test) && (existing - existing_test) / mySize < BLOCK_ITEM_COUNT)
-					{
-						return true;
-					}
-					return false;
+					return existing_test.first + BLOCK_ITEM_COUNT * mySize < existing;
 				});
 
-				if (*found_block == nullptr || (ptr < *found_block) || (ptr - *found_block) / mySize >= BLOCK_ITEM_COUNT)
+				if (found_block == blocks_sorted.end() || (ptr < found_block->first) || (ptr - found_block->first) / mySize >= BLOCK_ITEM_COUNT)
 				{
 					boost::format msg("Item being deallocated cannot be found!");
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 
-				previous_block_holding_deleted_item = *found_block;
+				previous_block_holding_deleted_item = found_block->first;
 				previous_index_to_deleted_item = (ptr - previous_block_holding_deleted_item) / mySize;
 				previous_block_holding_deleted_item_index = blocks_sorted[previous_block_holding_deleted_item];
 			}
@@ -144,18 +140,18 @@
 				}
 			}
 			// No luck.  Add new item at end
-			ptr = blocks[current_block] + current_block_available_index * mySize;
+			ptr = blocks[current_block_index] + current_block_available_index * mySize;
 			++current_block_available_index;
 			if (current_block_available_index == BLOCK_ITEM_COUNT)
 			{
-				++current_block;
-				if (current_block == MAX_NUMBER_BLOCKS)
+				++current_block_index;
+				if (current_block_index == MAX_NUMBER_BLOCKS)
 				{
 					boost::format msg("Exceeded maximum number of blocks!");
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
-				blocks[current_block] = new char[BLOCK_ITEM_COUNT * mySize];
-				blocks_sorted[blocks[current_block]] = current_block; // reverse lookup to find the block index from the pointer to the data for the block
+				blocks[current_block_index] = new char[BLOCK_ITEM_COUNT * mySize];
+				blocks_sorted[blocks[current_block_index]] = current_block_index; // reverse lookup to find the block index from the pointer to the data for the block
 				++highest_block_index;
 				current_block_available_index = 0;
 			}
@@ -175,7 +171,7 @@
 
 		NewGenePool(std::int32_t const theSize)
 			: mySize{ theSize }
-			, current_block{ 0 }
+			, current_block_index{ 0 }
 			, current_block_available_index{ 0 }
 			, previous_block_holding_deleted_item{ nullptr }
 			, previous_block_holding_deleted_item_index{ 0 }
@@ -185,9 +181,9 @@
 			srand(static_cast<unsigned int>(time(NULL)));
 			memset(blocks, '\0', MAX_NUMBER_BLOCKS + 1); // space for "end" block pointer which is always NULL
 			memset(blockbits, '\0', BYTEBITS_PER_BLOCK * MAX_NUMBER_BLOCKS);
-			blocks[current_block] = new char[BLOCK_ITEM_COUNT * mySize];
-			previous_block_holding_deleted_item = blocks[current_block];
-			blocks_sorted[blocks[current_block]] = current_block;
+			blocks[current_block_index] = new char[BLOCK_ITEM_COUNT * mySize];
+			previous_block_holding_deleted_item = blocks[current_block_index];
+			blocks_sorted[blocks[current_block_index]] = current_block_index;
 		}
 
 		~NewGenePool()
@@ -207,8 +203,8 @@
 		std::int32_t mySize;
 		char * blocks[MAX_NUMBER_BLOCKS + 1]; // space for "end" block pointer which is always NULL
 		char blockbits[BYTEBITS_PER_BLOCK * MAX_NUMBER_BLOCKS];
-		std::map<char*, std::int32_t> blocks_sorted;
-		std::int32_t current_block;
+		std::map<char*, std::int32_t> blocks_sorted; // lookup
+		std::int32_t current_block_index;
 		std::int32_t current_block_available_index;
 
 		std::int32_t previous_block_holding_deleted_item_index;
