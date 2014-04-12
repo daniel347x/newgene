@@ -59,7 +59,6 @@ char * NewGenePool::AddNewBlock()
 	blocks[current_block_index] = new char[BLOCK_ITEM_COUNT * mySize];
 	blocks_sorted[blocks[current_block_index]] = current_block_index; // reverse lookup to find the block index from the pointer to the data for the block
 	free_slots[current_block_index] += BLOCK_ITEM_COUNT;
-	--free_slots[current_block_index]; // We're using one up right now
 	total_free_slots += BLOCK_ITEM_COUNT;
 	char * ptr = CheckReturnFreeSlotCurrent();
 	return ptr;
