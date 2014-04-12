@@ -45,3 +45,21 @@ char * NewGenePool::CheckReturnFreeSlotCurrent()
 	return ret;
 
 }
+
+void NewGenePool::AddNewBlock()
+{
+	++highest_block_index;
+	if (highest_block_index == MAX_NUMBER_BLOCKS)
+	{
+		boost::format msg("Exceeded maximum number of blocks!");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	current_block_index = highest_block_index;
+	current_block_available_index = 0;
+	blocks[current_block_index] = new char[BLOCK_ITEM_COUNT * mySize];
+	blocks_sorted[blocks[current_block_index]] = current_block_index; // reverse lookup to find the block index from the pointer to the data for the block
+	free_slots[current_block_index] += BLOCK_ITEM_COUNT;
+	--free_slots[current_block_index]; // We're using one up right now
+	total_free_slots += BLOCK_ITEM_COUNT;
+	++current_block_available_index;
+}

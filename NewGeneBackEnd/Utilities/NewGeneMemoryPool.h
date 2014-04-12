@@ -95,22 +95,9 @@
 
 			char * ptr = CheckReturnFreeSlotCurrent();
 			if (ptr) { return ptr; }
-			else
-			{
-				// take a few steps and see if there's a nearby match...
-				for (int f = 0; f < FREE_WALK_MAX_STEPS; ++f)
-				{
-					++current_block_available_index;
-					if (current_block_available_index == BLOCK_ITEM_COUNT)
-					{
-						current_block_available_index = 0;
-					}
-					char * ptr = CheckReturnFreeSlotCurrent();
-					if (ptr) { return ptr; }
-				}
-			}
 
-			// No go with the current block, so try previous blocks for deleted items
+			// No go with the current block, so we're done filling it up.
+			// Try previous blocks for deleted items before attempting to create a new block.
 			ptr = CheckReturnFreeSlot();
 			if (ptr) { return ptr; }
 			else
@@ -178,20 +165,12 @@
 			}
 
 			// No luck.  Add new block
-			++highest_block_index;
-			if (highest_block_index == MAX_NUMBER_BLOCKS)
-			{
-				boost::format msg("Exceeded maximum number of blocks!");
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
-			current_block_index = highest_block_index;
-			current_block_available_index = 0;
-			blocks[current_block_index] = new char[BLOCK_ITEM_COUNT * mySize];
-			blocks_sorted[blocks[current_block_index]] = current_block_index; // reverse lookup to find the block index from the pointer to the data for the block
+			AddNewBlock();
 			ptr = blocks[current_block_index];
-			total_free_slots += BLOCK_ITEM_COUNT;
 			return ptr;
 		}
+
+		void AddNewBlock();
 
 	private:
 
