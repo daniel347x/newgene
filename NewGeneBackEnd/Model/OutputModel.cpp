@@ -441,7 +441,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// ******************************************************************************************* //
 	NewGenePool::InitializePools();
 
-
+	/*
 	NewGeneMemoryPoolAllocator<BranchOutputRow> pool;
 	std::set<BranchOutputRow*> tests;
 	for (int n = 0; n < 1000000; ++n)
@@ -483,7 +483,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 		tests.insert(ptr);
 
-	}
+	}*/
 
 
 	KadSampler * allWeightings_ = new KadSampler(messager); // SEE NOTE!  Do not delete this object!

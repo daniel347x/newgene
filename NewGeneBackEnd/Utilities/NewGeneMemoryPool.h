@@ -38,7 +38,7 @@
 
 		static void ClearAllPools()
 		{
-			for (int n = 0; n < MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
+			for (int n = 1; n <= MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
 			{
 				delete existingMaps[n];
 			}
