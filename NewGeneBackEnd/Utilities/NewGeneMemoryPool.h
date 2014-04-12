@@ -185,7 +185,7 @@
 			, total_used_slots{ 0 }
 		{
 			srand(static_cast<unsigned int>(time(NULL)));
-			memset(blocks, '\0', MAX_NUMBER_BLOCKS); // space for "end" block pointer which is always NULL
+			memset(blocks, '\0', MAX_NUMBER_BLOCKS * sizeof(char*)); // space for "end" block pointer which is always NULL
 			memset(blockbits, '\0', BYTEBITS_PER_BLOCK * MAX_NUMBER_BLOCKS);
 			blocks[current_block_index] = new char[BLOCK_ITEM_COUNT * mySize];
 			previous_block_holding_deleted_item = blocks[current_block_index];
