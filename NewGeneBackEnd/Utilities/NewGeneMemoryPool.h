@@ -281,4 +281,25 @@
 
 	};
 
+	template<>
+	class NewGeneMemoryPoolAllocator<void>
+	{
+	public:
+		typedef void*       pointer;
+		typedef const void* const_pointer;
+		typedef void        value_type;
+
+		//! \brief Nested class rebind allows for transformation from
+		//! fast_pool_allocator<T> to fast_pool_allocator<U>.
+		//!
+		//! Nested class rebind allows for transformation from
+		//! fast_pool_allocator<T> to fast_pool_allocator<U> via the member
+		//! typedef other.
+		template <class U> struct rebind
+		{
+			typedef NewGeneMemoryPoolAllocator<U> other;
+		};
+	};
+
+
 #endif
