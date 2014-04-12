@@ -88,60 +88,53 @@
 				boost::format msg("Cannot allocate more than one item at a time!");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
-			if (current_block_available_index < BLOCK_ITEM_COUNT)
-			{
-				return blocks[current_block] + current_block_available_index;
-			}
+			char * ptr = CheckReturnFreeSlot();
+			if (ptr) { return ptr; }
 			else
 			{
-				char * ptr = CheckReturnFreeSlot();
-				if (ptr) { return ptr; }
-				else
+				// take a few steps and see if there's a nearby match...
+				for (int f = 0; f < FREE_WALK_MAX_STEPS; ++f)
 				{
-					// take a few steps and see if there's a nearby match...
-					for (int f = 0; f < FREE_WALK_MAX_STEPS; ++f)
+					++previous_index_to_deleted_item;
+					if (previous_index_to_deleted_item == BLOCK_ITEM_COUNT)
 					{
-						++previous_index_to_deleted_item;
-						if (previous_index_to_deleted_item == BLOCK_ITEM_COUNT)
-						{
-							previous_index_to_deleted_item = 0;
-						}
-						char * ptr = CheckReturnFreeSlot();
-						if (ptr) { return ptr; }
+						previous_index_to_deleted_item = 0;
 					}
-					// jump to a random block - defies any pattern of memory usage by an application
-					previous_block_holding_deleted_item_index = rand() % (highest_block_index+1);
-					previous_index_to_deleted_item = rand() % BLOCK_ITEM_COUNT;
-					// again, take a few steps and see if there's a nearby match...
-					for (int f = 0; f < FREE_WALK_MAX_STEPS; ++f)
-					{
-						++previous_index_to_deleted_item;
-						if (previous_index_to_deleted_item == BLOCK_ITEM_COUNT)
-						{
-							previous_index_to_deleted_item = 0;
-						}
-						char * ptr = CheckReturnFreeSlot();
-						if (ptr) { return ptr; }
-					}
+					char * ptr = CheckReturnFreeSlot();
+					if (ptr) { return ptr; }
 				}
-				// No luck.  Add new item at end
-				ptr = blocks[current_block] + current_block_available_index;
-				++current_block_available_index;
-				if (current_block_available_index == BLOCK_ITEM_COUNT)
+				// jump to a random block - defies any pattern of memory usage by an application
+				previous_block_holding_deleted_item_index = rand() % (highest_block_index+1);
+				previous_index_to_deleted_item = rand() % BLOCK_ITEM_COUNT;
+				// again, take a few steps and see if there's a nearby match...
+				for (int f = 0; f < FREE_WALK_MAX_STEPS; ++f)
 				{
-					++current_block;
-					if (MAX_NUMBER_BLOCKS == MAX_NUMBER_BLOCKS)
+					++previous_index_to_deleted_item;
+					if (previous_index_to_deleted_item == BLOCK_ITEM_COUNT)
 					{
-						boost::format msg("Exceeded maximum number of blocks!");
-						throw NewGeneException() << newgene_error_description(msg.str());
+						previous_index_to_deleted_item = 0;
 					}
-					blocks[current_block] = new char[BLOCK_ITEM_COUNT * mySize];
-					blocks_sorted[blocks[current_block]] = current_block;
-					++highest_block_index;
-					current_block_available_index = 0;
+					char * ptr = CheckReturnFreeSlot();
+					if (ptr) { return ptr; }
 				}
-				return ptr;
 			}
+			// No luck.  Add new item at end
+			ptr = blocks[current_block] + current_block_available_index;
+			++current_block_available_index;
+			if (current_block_available_index == BLOCK_ITEM_COUNT)
+			{
+				++current_block;
+				if (MAX_NUMBER_BLOCKS == MAX_NUMBER_BLOCKS)
+				{
+					boost::format msg("Exceeded maximum number of blocks!");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+				blocks[current_block] = new char[BLOCK_ITEM_COUNT * mySize];
+				blocks_sorted[blocks[current_block]] = current_block;
+				++highest_block_index;
+				current_block_available_index = 0;
+			}
+			return ptr;
 		}
 
 	private:
