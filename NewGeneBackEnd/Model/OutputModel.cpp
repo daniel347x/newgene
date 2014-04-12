@@ -4345,21 +4345,6 @@ void OutputModel::OutputGenerator::SetFailureErrorMessage(std::string const & fa
 	messager.UpdateStatusBarText(report_failure_message, nullptr);
 }
 
-void OutputModel::OutputGenerator::UpdateProgressBarValue(Messager & messager, std::int64_t const current_rows_stepped, boost::format & msg_for_progress_bar)
-{
-
-	int current_progress_bar_value = (int)(((long double)(current_rows_stepped) / (long double)(messager.current_progress_bar_max_value)) * 1000.0);
-
-	if (current_progress_bar_value > 1000)
-	{
-		current_progress_bar_value = 1000;
-	}
-
-	messager.UpdateProgressBarValue(current_progress_bar_value);
-	messager.SetPerformanceLabel((msg_for_progress_bar % current_progress_bar_value % messager.current_progress_bar_max_value).str().c_str());
-
-}
-
 void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
 		KadSampler & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
 {
@@ -4382,10 +4367,6 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 		the_stmt__ = nullptr;
 	} BOOST_SCOPE_EXIT_END
-
-	messager.current_progress_bar_max_value = ObtainCount(variable_group_selected_columns_schema);
-	messager.StartProgressBar(0, messager.current_progress_bar_max_value);
-	messager.UpdateProgressBarValue(0);
 
 	BOOST_SCOPE_EXIT(this_)
 	{
@@ -4718,11 +4699,6 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		}
 
 		++current_rows_stepped;
-
-		if (current_rows_stepped % 100 == 0 || current_rows_stepped == messager.current_progress_bar_max_value)
-		{
-			messager.UpdateProgressBarValue(current_rows_stepped, msg_for_progress_bar);
-		}
 
 		if (bad)
 		{
@@ -6245,6 +6221,88 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
 
+		std::int64_t total_number_output_rows = 0;
+
+		template<typename CALLABLE>
+		auto loop_through_time_units = [](TimeSlice const & timeSlice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, CALLABLE c)
+		{
+			// Just do the calculation of how many total time units are overlapped by the current time slice.
+			// This is the same calculation that is used below.
+			// The time slice has time granularity.
+			// Start at the beginning, and loop through.
+			std::int64_t const time_start = timeSlice.getStart();
+			std::int64_t const time_end = timeSlice.getEnd();
+			std::int64_t current_time_start = time_start;
+			while (current_time_start < time_end)
+			{
+				c();
+
+				std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
+				std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
+				std::int64_t time_to_use_for_end = time_start_aligned_higher;
+				if (time_start_aligned_higher > time_end) { time_to_use_for_end = time_end; }
+				current_time_start = time_to_use_for_end;
+			}
+		};
+
+		// Do a first pass to calculate the number of output rows that will be generated
+		// ... this is for the progress bar
+		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices::value_type const & timeSliceData)
+		{
+			TimeSlice const & timeSlice = timeSliceData.first;
+			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
+			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			if (variableGroupBranchesAndLeavesVector.size() > 1)
+			{
+				boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+			VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+			Branches const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+			std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](Branch const & branch)
+			{
+
+				if (!timeSlice.hasTimeGranularity())
+				{
+					// If the time slice has no time range granularity, just spit out the rows once
+					for (auto const & time_unit_hit : branch.hits)
+					{
+						// *********************************************************************************** //
+						// There should be only one hit unit at index -1
+						// ... so this loop should only be entered once
+						// *********************************************************************************** //
+						fast_branch_output_row_set const & output_rows_for_this_full_time_slice = time_unit_hit.second;
+						total_number_output_rows += static_cast<std::int64_t>(output_rows_for_this_full_time_slice.size());
+					}
+				}
+				else
+				{
+					if (random_sampling)
+					{
+						// granulated output, random sampling
+						for (auto const & time_unit_hit : branch.hits)
+						{
+							fast_branch_output_row_set const & output_rows_for_this_time_unit = time_unit_hit.second;
+							total_number_output_rows += static_cast<std::int64_t>(output_rows_for_this_time_unit.size());
+						}
+					}
+					else
+					{
+
+						fast_branch_output_row_set const & output_rows_for_this_full_time_slice = time_unit_hit.second;
+
+						// granulated output, full sampling
+						loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, [&]()
+						{
+							size_t number_rows_this_time_slice = output_rows_for_this_full_time_slice.size();
+							total_number_output_rows += static_cast<std::int64_t>(number_rows_this_time_slice);
+						});
+
+					}
+				}
+			});
+		});
+
 		int which_time_slice = 0;
 
 		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices::value_type const & timeSliceData)
@@ -6320,7 +6378,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						// ... so this loop should only be entered once
 						// *********************************************************************************** //
 
-						fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second;
+						fast_branch_output_row_set const & output_rows_for_this_full_time_slice = time_unit_hit.second;
 
 						std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow const & outputRow)
 						{
@@ -6412,10 +6470,10 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 
 
-							fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second;
+							fast_branch_output_row_set const & output_rows_for_this_time_unit = time_unit_hit.second;
 
 							TimeSlice current_slice(static_cast<std::int64_t>(hit_start_position + 0.5), static_cast<std::int64_t>(hit_end_position + 0.5));
-							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
+							OutputGranulatedRow(current_slice, output_rows_for_this_time_unit, output_file, branch, allWeightings, rows_written);
 
 						}
 
@@ -6431,7 +6489,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 							// ... so this loop should only be entered once
 							// *********************************************************************************** //
 
-							fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second;
+							fast_branch_output_row_set const & output_rows_for_this_full_time_slice = time_unit_hit.second;
 
 							// Loop through our time range data
 
@@ -6469,7 +6527,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 }
 
-void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set & output_rows_for_this_full_time_slice,
+void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice,
 		std::fstream & output_file, Branch const & branch, KadSampler & allWeightings, std::int64_t & rows_written)
 {
 

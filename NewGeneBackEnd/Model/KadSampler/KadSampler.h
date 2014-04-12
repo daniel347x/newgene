@@ -1394,7 +1394,6 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			return *this;
 		}
 
-		//#		ifdef _DEBUG
 		void SpitLeaves(std::string & sdata) const
 		{
 			int index = 0;
@@ -1411,7 +1410,6 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				sdata += "</LEAF>";
 			});
 		}
-		//#		endif
 
 		// The following must be MUTABLE
 		// because the BRANCH is used as the KEY for various maps...
@@ -1440,7 +1438,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ******************************************************************************************************** //
 
 
-		// Used for optimization purposes only
+		// Used for optimization purposes only during random sampling construction of output rows
 		mutable fast__int64__to__fast_branch_output_row_vector remaining;
 
 		// **************************************************************************************** //
@@ -1453,7 +1451,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// with 0, 1, or more top-level *non-primary* variable groups.
 		// (A "top-level" group is one whose UOA is a superset of all non-top-level VG's,
 		//  and equal to all other top-level VG's.  By "superset" is meant the DMU
-		//  columns - not the time range granularity.)
+		//  columns - not the time range granularity or secondary data columns.)
 		//
 		// Each branch corresponds to a single combination of specific primary key data values
 		// ... for those primary keys of multiplicity 1
@@ -1519,8 +1517,12 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// (including only child primary keys and selected child variables in the incoming row)
 		// - this corresponds to incoming child variable group (NOT non-primary top-level variable group) -
 		// to output rows for that variable group.
-		// The output rows are represented by a map from the actual pointer to a specific output row,
+		// The output rows are represented by a map from the actual pointer pointing to a specific output row,
 		// to a vector of child leaf numbers in the output row matching the single incoming child leaf.
+		// This is how NewGene quickly locates the rows that match incoming child variable groups,
+		// so that it can set an index in the BranchOutputRow pointing to an entry in the Leaf cache
+		// for the child variable group, which NewGene will use to retrieve the correct child data
+		// when it writes the given row to the output.
 		// **************************************************************************************** //
 		// **************************************************************************************** //
 		mutable fast__lookup__from_child_dmu_set__to__output_rows helper_lookup__from_child_key_set__to_matching_output_rows;
@@ -1645,18 +1647,12 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		mutable std::unique_ptr<boost::multiprecision::cpp_int> number_branch_combinationsPtr;
 		boost::multiprecision::cpp_int & number_branch_combinations;
-#		ifdef _DEBUG
-		//mutable std::string number_branch_combinations_string;
-#		endif
 
 };
 
 typedef PrimaryKeysGroupingMultiplicityOne Branch;
 
-//#ifdef _DEBUG
 void SpitBranch(std::string & sdata, Branch const & branch);
-//#endif
-
 
 // ******************************************************************************************************** //
 // ******************************************************************************************************** //

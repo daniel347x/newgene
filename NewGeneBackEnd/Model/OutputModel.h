@@ -586,7 +586,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, int & orig_row_count);
 
 				void KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings);
-				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set & output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch,
+				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch,
 										 KadSampler & allWeightings, std::int64_t & rows_written);
 				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(KadSampler & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
 

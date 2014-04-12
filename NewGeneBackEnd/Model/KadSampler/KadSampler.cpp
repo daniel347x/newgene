@@ -1519,10 +1519,6 @@ void KadSampler::PrepareRandomSamples(int const K)
 
 		boost::multiprecision::cpp_int const & random_number = *random_number_iterator;
 
-#	ifdef _DEBUG
-		std::string val1 = random_number.str();
-#	endif
-
 		bool optimization = true;
 
 		// Optimization: The incoming random numbers are sorted.
@@ -3217,7 +3213,7 @@ void KadSampler::ClearWeightingsAndRemainingBranchJunk()
 		});
 	});
 	weighting.ClearWeighting();
-	weighting.number_rows_generatedPtr.reset();
+	number_rows_generatedPtr.reset();
 
 }
 
