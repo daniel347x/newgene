@@ -55,21 +55,21 @@
 			{
 				// The current item being deleted is in the same block as the previous that was deleted
 				previous_index_to_deleted_item = (ptr - previous_block_holding_deleted_item) / mySize;
-				blockbits[previous_block_holding_deleted_item_index + previous_index_to_deleted_item / 8] &= ~(static_cast<char>(0x01 << (previous_index_to_deleted_item % 8)));
+				blockbits[previous_block_holding_deleted_item_index * BYTEBITS_PER_BLOCK + previous_index_to_deleted_item / 8] &= ~(static_cast<char>(0x01 << (previous_index_to_deleted_item % 8)));
 			}
 			else
 			{
 				// We have to find the block from which to delete
 				auto found_block = std::lower_bound(&blocks[0], &blocks[current_block+1], ptr, [&](char * const & existing_test, char * const existing)
 				{
-					if (existing - existing_test < BLOCK_ITEM_COUNT)
+					if ((existing - existing_test) / mySize < BLOCK_ITEM_COUNT)
 					{
 						return true;
 					}
 					return false;
 				});
 
-				if (*found_block == nullptr || ptr - *found_block >= BLOCK_ITEM_COUNT)
+				if (*found_block == nullptr || (ptr - *found_block) / mySize >= BLOCK_ITEM_COUNT)
 				{
 					boost::format msg("Item being deallocated cannot be found!");
 					throw NewGeneException() << newgene_error_description(msg.str());
@@ -83,13 +83,22 @@
 
 		char * allocate(size_t n)
 		{
+			static char * prev = nullptr;
 			if (n > 1)
 			{
 				boost::format msg("Cannot allocate more than one item at a time!");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 			char * ptr = CheckReturnFreeSlot();
-			if (ptr) { return ptr; }
+			if (ptr)
+			{
+				if (prev == ptr)
+				{
+					int m = 0;
+				}
+				prev = ptr;
+				return ptr; 
+			}
 			else
 			{
 				// take a few steps and see if there's a nearby match...
@@ -101,7 +110,15 @@
 						previous_index_to_deleted_item = 0;
 					}
 					char * ptr = CheckReturnFreeSlot();
-					if (ptr) { return ptr; }
+					if (ptr)
+					{
+						if (prev == ptr)
+						{
+							int m = 0;
+						}
+						prev = ptr;
+						return ptr;
+					}
 				}
 				// jump to a random block - defies any pattern of memory usage by an application
 				previous_block_holding_deleted_item_index = rand() % (highest_block_index+1);
@@ -115,7 +132,15 @@
 						previous_index_to_deleted_item = 0;
 					}
 					char * ptr = CheckReturnFreeSlot();
-					if (ptr) { return ptr; }
+					if (ptr)
+					{
+						if (prev == ptr)
+						{
+							int m = 0;
+						}
+						prev = ptr;
+						return ptr;
+					}
 				}
 			}
 			// No luck.  Add new item at end
@@ -133,6 +158,15 @@
 				blocks_sorted[blocks[current_block]] = current_block;
 				++highest_block_index;
 				current_block_available_index = 0;
+			}
+			if (ptr)
+			{
+				if (prev == ptr)
+				{
+					int m = 0;
+				}
+				prev = ptr;
+				return ptr;
 			}
 			return ptr;
 		}
@@ -172,7 +206,7 @@
 
 		std::int32_t mySize;
 		char * blocks[MAX_NUMBER_BLOCKS + 1]; // space for "end" block pointer which is always NULL
-		int blockbits[BYTEBITS_PER_BLOCK * MAX_NUMBER_BLOCKS];
+		char blockbits[BYTEBITS_PER_BLOCK * MAX_NUMBER_BLOCKS];
 		std::map<char*, std::int32_t> blocks_sorted;
 		std::int32_t current_block;
 		std::int32_t current_block_available_index;
@@ -266,12 +300,6 @@
 				boost::format msg("Unable to obtain memory!");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
-			static pointer prev = nullptr;
-			if (ret == prev)
-			{
-				int m = 0;
-			}
-			prev = ret;
 			return ret;
 		}
 
