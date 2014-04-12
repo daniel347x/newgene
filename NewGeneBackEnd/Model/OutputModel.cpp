@@ -6204,8 +6204,9 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 			});
 
-			++rows_written;
 			output_file << std::endl;
+
+			++rows_written;
 			meter.UpdateProgressBarValue(rows_written);
 
 		});
@@ -6312,6 +6313,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		int which_time_slice = 0;
 
+		ProgressBarMeter meter(messager, std::string("%1% / %2% rows written to output file"), total_number_output_rows);
 		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices::value_type const & timeSliceData)
 		{
 
@@ -6404,7 +6406,9 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 							create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 
 							output_file << std::endl;
+
 							++rows_written;
+							meter.UpdateProgressBarValue(rows_written);
 
 						});
 
@@ -6475,12 +6479,13 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 							long double hit_end_position = hit_start_position + current_hit_width;
 							hit_total_distance_so_far = hit_end_position;
 
-
-
 							fast_branch_output_row_set const & output_rows_for_this_time_unit = time_unit_hit.second;
 
 							TimeSlice current_slice(static_cast<std::int64_t>(hit_start_position + 0.5), static_cast<std::int64_t>(hit_end_position + 0.5));
 							OutputGranulatedRow(current_slice, output_rows_for_this_time_unit, output_file, branch, allWeightings, rows_written);
+
+							++rows_written;
+							meter.UpdateProgressBarValue(rows_written);
 
 						}
 
@@ -6501,6 +6506,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 							{
 								TimeSlice current_slice(current_time_start, time_to_use_for_end);
 								OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
+								++rows_written;
+								meter.UpdateProgressBarValue(rows_written);
 							}));
 
 						}
