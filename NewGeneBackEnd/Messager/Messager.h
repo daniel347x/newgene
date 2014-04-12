@@ -244,8 +244,10 @@ class ProgressBarMeter
 
 		~ProgressBarMeter()
 		{
+
 			messager.UpdateProgressBarValue(1000);
 			messager.SetPerformanceLabel("");
+
 		}
 
 		void StartProgressBar(std::int64_t const max_value)
@@ -272,7 +274,7 @@ class ProgressBarMeter
 
 		}
 
-		void UpdateProgressBarValue(boost::multiprecision::cpp_int const & current_value)
+		void UpdateProgressBarValue(std::int32_t cropped_current_value, boost::multiprecision::cpp_int const & current_value)
 		{
 
 			// This version of the function is only called by the routine that actually generates output rows.
@@ -280,21 +282,26 @@ class ProgressBarMeter
 			// because we know that this loop is only going to be called once per time slice,
 			// *not* once per calculation of an output row.
 
-			boost::multiprecision::cpp_dec_float_100 ratio(current_value);
-			ratio /= progress_bar_max_huge_value;
-			ratio *= 1000.0L;
-			int current_progress_bar_value = ratio.convert_to<int>();
-			messager.UpdateProgressBarValue(current_progress_bar_value);
-			messager.SetPerformanceLabel((msg % boost::lexical_cast<std::string>(current_value).c_str() % boost::lexical_cast<std::string>(progress_bar_max_value).c_str()).str().c_str());
+			// For efficiency, evaluate 'cropped_current_value', which does not need to be exact, but only exists for the modulus
+			if (cropped_current_value % update_every_how_often == 0)
+			{
+				boost::multiprecision::cpp_dec_float_100 ratio(current_value);
+				ratio /= progress_bar_max_huge_value;
+				ratio *= 1000.0L;
+				int current_progress_bar_value = ratio.convert_to<int>();
+				messager.UpdateProgressBarValue(current_progress_bar_value);
+				messager.SetPerformanceLabel((msg % boost::lexical_cast<std::string>(current_value).c_str() % boost::lexical_cast<std::string>(progress_bar_max_value).c_str()).str().c_str());
+			}
 
 		}
+
+		std::int64_t update_every_how_often;
 
 	protected:
 
 		Messager & messager;
 		boost::format msg;
 		std::int64_t progress_bar_max_value;
-		std::int64_t update_every_how_often;
 
 		bool cpp_int_mode;
 		boost::multiprecision::cpp_dec_float_100 progress_bar_max_huge_value;

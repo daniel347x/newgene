@@ -1628,6 +1628,7 @@ void KadSampler::PrepareFullSamples(int const K)
 
 	(*number_rows_generatedPtr) = 0;
 	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% K-ad combinations"), weighting.getWeighting());
+	std::int32_t cropped_current_iteration = 0;
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
 
@@ -1644,7 +1645,12 @@ void KadSampler::PrepareFullSamples(int const K)
 
 		});
 
-		meter.UpdateProgressBarValue(*number_rows_generatedPtr);
+		++cropped_current_iteration;
+		meter.UpdateProgressBarValue(cropped_current_iteration, *number_rows_generatedPtr);
+		if (cropped_current_iteration > meter.update_every_how_often)
+		{
+			cropped_current_iteration = 0;
+		}
 
 	});
 
