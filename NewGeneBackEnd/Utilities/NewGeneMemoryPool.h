@@ -214,6 +214,12 @@
 		{
 		}
 
+		template <typename U>
+		struct rebind
+		{
+			typedef NewGeneMemoryPoolAllocator<U> other;
+		};
+
 		static pointer address(reference r)
 		{
 			return &r;
