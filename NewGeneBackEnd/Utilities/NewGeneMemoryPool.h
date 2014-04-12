@@ -30,9 +30,9 @@
 
 		static void InitializePools()
 		{
-			for (int n = 0; n < MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
+			for (int n = 1; n <= MAX_ITEM_SIZE_IN_BYTES / 4; ++n)
 			{
-				existingMaps[n] = new NewGenePool(n * 4);
+				existingMaps[n-1] = new NewGenePool(n * 4);
 			}
 		}
 
@@ -51,10 +51,10 @@
 				boost::format msg("Cannot deallocate more than one item at a time!");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
-			if (ptr - previous_block_holding_deleted_item < MAX_NUMBER_BLOCKS)
+			if ((ptr - previous_block_holding_deleted_item) / mySize < BLOCK_ITEM_COUNT)
 			{
 				// The current item being deleted is in the same block as the previous that was deleted
-				previous_index_to_deleted_item = ptr - previous_block_holding_deleted_item;
+				previous_index_to_deleted_item = (ptr - previous_block_holding_deleted_item) / mySize;
 				blockbits[previous_block_holding_deleted_item_index + previous_index_to_deleted_item / 8] &= ~(static_cast<char>(0x01 << (previous_index_to_deleted_item % 8)));
 			}
 			else
@@ -76,7 +76,7 @@
 				}
 
 				previous_block_holding_deleted_item = *found_block;
-				previous_index_to_deleted_item = ptr - previous_block_holding_deleted_item;
+				previous_index_to_deleted_item = (ptr - previous_block_holding_deleted_item) / mySize;
 				previous_block_holding_deleted_item_index = blocks_sorted[previous_block_holding_deleted_item];
 			}
 		}
@@ -119,12 +119,12 @@
 				}
 			}
 			// No luck.  Add new item at end
-			ptr = blocks[current_block] + current_block_available_index;
+			ptr = blocks[current_block] + current_block_available_index * mySize;
 			++current_block_available_index;
 			if (current_block_available_index == BLOCK_ITEM_COUNT)
 			{
 				++current_block;
-				if (MAX_NUMBER_BLOCKS == MAX_NUMBER_BLOCKS)
+				if (current_block == MAX_NUMBER_BLOCKS)
 				{
 					boost::format msg("Exceeded maximum number of blocks!");
 					throw NewGeneException() << newgene_error_description(msg.str());
@@ -150,7 +150,7 @@
 		{
 			srand(static_cast<unsigned int>(time(NULL)));
 			memset(blocks, '\0', MAX_NUMBER_BLOCKS + 1); // space for "end" block pointer which is always NULL
-			memset(blockbits, '\0', BYTEBITS_PER_BLOCK);
+			memset(blockbits, '\0', BYTEBITS_PER_BLOCK * MAX_NUMBER_BLOCKS);
 			blocks[current_block] = new char[BLOCK_ITEM_COUNT * mySize];
 			previous_block_holding_deleted_item = blocks[current_block];
 			blocks_sorted[blocks[current_block]] = current_block;
@@ -266,6 +266,12 @@
 				boost::format msg("Unable to obtain memory!");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+			static pointer prev = nullptr;
+			if (ret == prev)
+			{
+				int m = 0;
+			}
+			prev = ret;
 			return ret;
 		}
 
