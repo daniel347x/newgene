@@ -9,6 +9,8 @@
 #	include <boost/container/flat_set.hpp>
 #endif
 
+//#include "MemoryPool/MemoryPool.h"
+
 #include <map>
 #include <vector>
 #include <set>
@@ -19,11 +21,17 @@ using FastVector = std::vector<K, boost::pool_allocator<K, boost::default_user_a
 template<typename K, typename V, class Comp_ = std::less<K>>
 using FastMap = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>>;
 
+//template<typename K, typename V, class Comp_ = std::less<K>>
+//using FastMap = std::map<K, V, Comp_, MemoryPool<std::pair<K const, V>>;
+
 template<typename K, typename V, class Comp_ = std::less<K>>
 using FastMapFlat = boost::container::flat_map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>>;
 
 template<typename K, class Comp_ = std::less<K>>
 using FastSet = std::set<K, Comp_, boost::fast_pool_allocator<K, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>>;
+
+//template<typename K, class Comp_ = std::less<K>>
+//using FastSet = std::set<K, Comp_, MemoryPool<K>>;
 
 template<typename K, class Comp_ = std::less<K>>
 using FastSetFlat = boost::container::flat_set<K, Comp_, boost::fast_pool_allocator<K, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>>;

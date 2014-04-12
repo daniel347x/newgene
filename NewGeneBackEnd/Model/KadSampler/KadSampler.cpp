@@ -1270,7 +1270,7 @@ void KadSampler::ResetBranchCaches(bool const reset_child_dmu_lookup)
 }
 
 void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampler & allWeightings, int const variable_group_number, bool const force,
-		bool const is_consolidating) const
+	bool const is_consolidating, bool const reset_child_dmu_lookup) const
 {
 
 	// ************************************************************************************************************************************************** //
@@ -1297,9 +1297,22 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 		// used to store the cache).
 		// So for the "consolidating rows" phase, we'll pay the *memory cost* of a new data structure
 		// in that scenario and not pay the price in time to clear the previous cache.
-		if (!is_consolidating)
+		if (!is_consolidating || !reset_child_dmu_lookup)
 		{
 			helper_lookup__from_child_key_set__to_matching_output_rows.clear();
+		}
+
+		if (!reset_child_dmu_lookup)
+		{
+			// Only reset the child lookup - nothing else.
+			// This is important to free up memory so that the memory pool
+			// does not take forever with the other aspects of the ResetCache
+			// functionality in the final stage after all child groups are 
+			// merged and memory is at a premium.
+			
+			// No! The optimization does not work - for some reason,
+			// ENTERING the following blocks SPEED THINGS RADICALLY UP
+			//return;
 		}
 
 		ChildDMUInstanceDataVector child_hit_vector_branch_components;
@@ -1766,19 +1779,9 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 		branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 		branch.ResetLeafCache();
 
-		// **************************************************** //
-		// Incredibly, performance is MASSIVELY WORSE
-		// when the following loop is NOT entered.
-		// When NOT entered, the above lines of code cause
-		// the Boost Pool memory management system to spend FAR
-		// more time managing memory.
-		// **************************************************** //
-		if (true || reset_child_dmu_lookup)
+		for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
 		{
-			for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
-			{
-				branch.ConstructChildCombinationCache(allWeightings, c, true);
-			}
+			branch.ConstructChildCombinationCache(allWeightings, c, true, false, reset_child_dmu_lookup);
 		}
 
 	});

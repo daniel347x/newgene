@@ -1533,7 +1533,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		mutable fast__lookup__from_child_dmu_set__to__output_rows helper_lookup__from_child_key_set__to_matching_output_rows_consolidating;
 
 		void ConstructChildCombinationCache(KadSampler & allWeightings, int const variable_group_number, bool const force,
-											bool const is_consolidating = false) const; // Populate the above data structure
+			bool const is_consolidating = false, bool const reset_child_dmu_lookup = false) const; // Populate the above data structure
 
 		void InsertLeaf(Leaf const & leaf) const
 		{
