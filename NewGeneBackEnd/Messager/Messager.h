@@ -266,8 +266,6 @@ class ProgressBarMeter
 		void UpdateProgressBarValue(std::int64_t const current_value)
 		{
 
-			return;
-
 			if (current_value % update_every_how_often == 0)
 			{
 				messager.UpdateProgressBarValue(current_value);
@@ -278,8 +276,6 @@ class ProgressBarMeter
 
 		void UpdateProgressBarValue(std::int32_t cropped_current_value, boost::multiprecision::cpp_int const & current_value)
 		{
-
-			return;
 
 			// This version of the function is only called by the routine that actually generates output rows.
 			// It's OK to do this calculation every time in the loop,

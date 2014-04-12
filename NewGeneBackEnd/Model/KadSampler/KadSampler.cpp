@@ -3255,7 +3255,6 @@ void KadSampler::ClearWeightingsAndRemainingBranchJunk()
 	});
 	weighting.ClearWeighting();
 	number_rows_generatedPtr.reset();
-	NewGenePool::ClearAllPools();
 }
 
 template <typename TAG, int SIZE>

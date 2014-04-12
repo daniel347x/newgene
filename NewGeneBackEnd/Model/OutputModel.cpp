@@ -439,52 +439,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// ******************************************************************************************* //
 	// ******************************************************************************************* //
 	// ******************************************************************************************* //
-	NewGenePool::InitializePools();
-
-	/*
-	NewGeneMemoryPoolAllocator<BranchOutputRow> pool;
-	std::set<BranchOutputRow*> tests;
-	for (int n = 0; n < 1000000; ++n)
-	{
-
-		BranchOutputRow * ptr = pool.allocate(1);
-		NewGeneMemoryPoolAllocator<BranchOutputRow>::construct(ptr, *ptr);
-
-		if (tests.find(ptr) != tests.end())
-		{
-			int m = 0;
-		}
-		tests.insert(ptr);
-
-	}
-
-	std::vector<BranchOutputRow*> testsvec;
-
-	testsvec.insert(testsvec.begin(), tests.begin(), tests.end());
-
-	for (int n = 0; n < 1000000; ++n)
-	{
-		if (n % 2 == 0)
-		{
-			NewGeneMemoryPoolAllocator<BranchOutputRow>::deallocate(testsvec[n], 1);
-			tests.erase(testsvec[n]);
-		}
-	}
-
-	for (int n = 0; n < 500000; ++n)
-	{
-
-		BranchOutputRow * ptr = pool.allocate(1);
-		NewGeneMemoryPoolAllocator<BranchOutputRow>::construct(ptr, *ptr);
-
-		if (tests.find(ptr) != tests.end())
-		{
-			int m = 0;
-		}
-		tests.insert(ptr);
-
-	}*/
-
 
 	KadSampler * allWeightings_ = new KadSampler(messager); // SEE NOTE!  Do not delete this object!
 	KadSampler & allWeightings = *allWeightings_;

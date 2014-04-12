@@ -12,7 +12,7 @@
 #include <time.h>
 #include "NewGeneException.h"
 
-#define MAX_NUMBER_BLOCKS 1000
+#define MAX_NUMBER_BLOCKS 2500
 #define BLOCK_ITEM_COUNT 4096
 #define BYTEBITS_PER_BLOCK 512
 #define FREE_WALK_MAX_STEPS 5
