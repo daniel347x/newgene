@@ -5375,7 +5375,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		messager.AppendKadStatusText((boost::format("Load selected columns for non-primary top-level variable group into internal table...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
-		if (failed || CheckCancelled())
+		if (failed || CheckCancelled() || errorMessages.size() > 0)
 		{
 			std::string errorsOut;
 			bool first = true;
@@ -5566,7 +5566,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		messager.AppendKadStatusText((boost::format("Load selected columns for child variable group into internal table...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
-		if (failed || CheckCancelled())
+		if (failed || CheckCancelled() || errorMessages.size() > 0)
 		{
 			std::string errorsOut;
 			bool first = true;
