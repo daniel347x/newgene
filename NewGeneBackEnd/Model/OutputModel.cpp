@@ -701,15 +701,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// the actual DMU data for the leaf, AND indexes into the non-primary top-level data cache
 			// for that data.
 			//
-			// This time, do not build the child DMU key lookup map, because the chilren
+			// This time, do not build the child DMU key lookup map, because the children
 			// are already merged in, so we don't need to look up in the map to see what output rows incoming child rows map to.
 			//
-			// No need to rebuild the leaf cache if there are no non-primary variable groups,
-			// because no leaves in the std::set have been updates since the leaf cache (the std::vector)
-			// was populated after the primary group was loaded, above.
+			// No need to rebuild any of the leaf caches if there are no non-primary variable groups;
+			// hence this belongs in this block.
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Rebuild cache of all primary leaf nodes for each branch node...")).str().c_str(), this);
-			allWeightings.ResetBranchCaches(false);
+			allWeightings.ResetBranchCaches(false); // just update the primary "leaves" vector - not the child leaf lookup cache
 			if (failed || CheckCancelled()) { return; }
 			messager.AppendKadStatusText((boost::format("Completed building cache.")).str().c_str(), this);
 
@@ -6198,6 +6197,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	allWeightings.consolidated_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
 	MergedTimeSliceRow::RHS_wins = false;
 	saved_historic_rows.clear();
+
+	SpitAllWeightings(allWeightings, "smallset");
 
 }
 

@@ -1271,7 +1271,7 @@ void KadSampler::ResetBranchCaches(bool const reset_child_dmu_lookup)
 }
 
 void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampler & allWeightings, int const variable_group_number, bool const force,
-	bool const is_consolidating, bool const reset_child_dmu_lookup) const
+	bool const is_consolidating) const
 {
 
 	// ************************************************************************************************************************************************** //
@@ -1298,22 +1298,9 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 		// used to store the cache).
 		// So for the "consolidating rows" phase, we'll pay the *memory cost* of a new data structure
 		// in that scenario and not pay the price in time to clear the previous cache.
-		if (!is_consolidating || !reset_child_dmu_lookup)
+		if (!is_consolidating)
 		{
 			helper_lookup__from_child_key_set__to_matching_output_rows.clear();
-		}
-
-		if (!reset_child_dmu_lookup)
-		{
-			// Only reset the child lookup - nothing else.
-			// This is important to free up memory so that the memory pool
-			// does not take forever with the other aspects of the ResetCache
-			// functionality in the final stage after all child groups are 
-			// merged and memory is at a premium.
-			
-			// No! The optimization does not work - for some reason,
-			// ENTERING the following blocks SPEED THINGS RADICALLY UP
-			return;
 		}
 
 		ChildDMUInstanceDataVector child_hit_vector_branch_components;
@@ -1744,20 +1731,6 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 	// ditto above
 	//branch.hits.erase(++branch.hits.begin(), branch.hits.end());
 
-	// Disable for now.  Profiler shows a major hit is taken here during "consolidating rows" phase.
-	// Since we don't NEED to look up in this cache AFTER the "consolidating rows" phase,
-	// disable this.  However, all code is in place to populate it if we ever need it;
-	// perhaps because after consolidation we need to nonetheless merge with another child variable group, etc.;
-	// if so,
-	// just set to "true" - but pay for the runtime time hit.
-	if (false)
-	{
-		for (int c = 0; c < numberChildVariableGroups; ++c)
-		{
-			branch.ConstructChildCombinationCache(*this, c, true, true);
-		}
-	}
-
 }
 
 void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & allWeightings, bool const reset_child_dmu_lookup)
@@ -1781,9 +1754,12 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 		branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 		branch.ResetLeafCache();
 
-		for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
+		if (reset_child_dmu_lookup)
 		{
-			branch.ConstructChildCombinationCache(allWeightings, c, true, false, reset_child_dmu_lookup);
+			for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
+			{
+				branch.ConstructChildCombinationCache(allWeightings, c, true, false);
+			}
 		}
 
 	});
