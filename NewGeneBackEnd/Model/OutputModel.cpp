@@ -594,7 +594,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			std::int64_t samples = random_sampling_number_rows;
 			if (boost::multiprecision::cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
-			{
+			{ 
 				messager.AppendKadStatusText((boost::format("Decreasing the number of random samples to match the number of total K-adic combinations.")).str().c_str(), this);
 				samples = allWeightings.weighting.getWeighting().convert_to<int>();
 			}

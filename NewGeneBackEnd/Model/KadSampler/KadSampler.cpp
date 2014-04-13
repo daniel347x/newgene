@@ -1700,8 +1700,8 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 				// is *now* spent inserting into the "Boost memory-pool backed" hits[-1].
 				// This is terrible performance, so we must use a std::set.
 				//branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
-				//branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow &>(*iter)));
-				branch.hits_consolidated.emplace_back(*iter);
+				branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow &>(*iter)));
+				//branch.hits_consolidated.emplace_back(*iter);
 
 				// Even after the std::move, above, the Boost memory pool deallocation of the space for the object itself
 				// is requiring 90%+ of the time for the "consolidating rows" routine.
@@ -1709,16 +1709,14 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 				// just skip all but the -1 index of branch.hits.
 				// We'll gladly pay the cost in memory in exchange for rapidly speeding up the "consolidating rows" stage.
 
+				// No! Performance hit
 				//hit.second.erase(iter++);
 
 				++current_rows;
 				meter.UpdateProgressBarValue(current_rows);
 			}
 
-			// Memory allocation error when NOT deleting the above "hit" vector,
-			// so attempt it here to give it a chance to delete more in bulk.
-			// Actually ... try it now
-			// Nope.  Causes MASSIVE hang for many minutes to handle memory
+			// Nope.  Causes MASSIVE hang for many minutes to handle memory model using memory pool - intended for rapid creates, but not rapid deletes
 			//hit.second.clear();
 
 		}
