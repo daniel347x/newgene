@@ -794,6 +794,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			SetFailureErrorMessage(msg.str());
 			failed = true;
 		}
+		else
+		{
+			std::string the_error = boost::diagnostic_information(e);
+			boost::format msg("Error: %1%");
+			msg % the_error.c_str();
+			SetFailureErrorMessage(msg.str());
+			failed = true;
+		}
 	}
 	catch (std::exception & e)
 	{
@@ -4689,9 +4697,6 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		}
 
 	}
-
-	messager.UpdateProgressBarValue(1000);
-	messager.SetPerformanceLabel("");
 
 }
 

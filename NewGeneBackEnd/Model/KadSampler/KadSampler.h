@@ -36,10 +36,8 @@ typedef InstanceDataVector SecondaryInstanceDataVector;
 typedef FastVector<std::int16_t> fast_short_vector;
 typedef FastVector<int> fast_int_vector;
 typedef FastSet<int> fast_int_set;
-typedef FastMap<std::int16_t, std::int32_t> fast_short_to_int_map;
-
+typedef FastMap4096<std::int16_t, std::int32_t> fast_short_to_int_map; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
 typedef FastMap<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
-//typedef FastMapFlat<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
 typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
@@ -1309,7 +1307,7 @@ typedef FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__
 // ******************************************************************************************************************************************************************** //
 // Output data to XML for debugging
 // ******************************************************************************************************************************************************************** //
-void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & allWeightings, bool const to_file, std::string const & file_name_appending_string);
+void SpitAllWeightings(KadSampler const & allWeightings, std::string const & file_name_appending_string);
 // ******************************************************************************************************************************************************************** //
 // SpitAllWeightings() is the important one... just use that for debugging.
 // Internally, it calls the functions below.

@@ -549,6 +549,15 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
 		}
+		else
+		{
+			std::string the_error = boost::diagnostic_information(e);
+			boost::format msg("Error: %1%");
+			msg % the_error.c_str();
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+		}
 		boost::format msg( "Unable to create input project database." );
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
 		return;
@@ -675,6 +684,15 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 			boost::format msg(error_desc->c_str());
 			QMessageBox msgBox;
 			msgBox.setText(msg.str().c_str());
+			msgBox.exec();
+		}
+		else
+		{
+			std::string the_error = boost::diagnostic_information(e);
+			boost::format msg("Error: %1%");
+			msg % the_error.c_str();
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
 		}
 		boost::format msg("Unable to create output project database.");

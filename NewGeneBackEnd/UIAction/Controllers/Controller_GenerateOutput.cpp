@@ -72,7 +72,31 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				// Generate output
 				// ***************************************** //
 				OutputModel::OutputGenerator output_generator(messager, output_model, project);
-				output_generator.GenerateOutput(change_response);
+				try
+				{
+					output_generator.GenerateOutput(change_response);
+				}
+				catch (boost::exception & e)
+				{
+					if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
+					{
+						boost::format msg(error_desc->c_str());
+						messager.AppendKadStatusText(msg.str().c_str(), &output_generator);
+					}
+					else
+					{
+						std::string the_error = boost::diagnostic_information(e);
+						boost::format msg("Error: %1%");
+						msg % the_error.c_str();
+						messager.AppendKadStatusText(msg.str().c_str(), &output_generator);
+					}
+				}
+				catch (std::exception & e)
+				{
+					boost::format msg("Exception thrown: %1%");
+					msg % e.what();
+					messager.AppendKadStatusText(msg.str().c_str(), &output_generator);
+				}
 				if (!output_generator.done)
 				{
 					messager.UpdateStatusBarText("", &output_generator);

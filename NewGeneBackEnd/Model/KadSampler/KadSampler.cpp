@@ -12,6 +12,7 @@
 #include <list>
 #include <algorithm>
 #include "../../Utilities/TimeRangeHelper.h"
+#include <fstream>
 
 std::fstream * create_output_row_visitor::output_file = nullptr;
 int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor::CREATE_ROW_MODE__NONE);
@@ -29,7 +30,7 @@ KadSampler::KadSampler(Messager & messager_)
 	, time_granularity(TIME_GRANULARITY__NONE)
 	, random_rows_added(0)
 	, messager(messager_)
-	, number_rows_generatedPtr{new boost::multiprecision::cpp_int}
+	, number_rows_generatedPtr{ new boost::multiprecision::cpp_int }
 {
 }
 
@@ -62,7 +63,6 @@ std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranch
 	// Save beginning, one past end time slices in the existing map for reference
 	TimeSlices::iterator existing_start_slice = timeSlices.begin();
 	TimeSlices::iterator existing_one_past_end_slice = timeSlices.end();
-
 	TimeSlices::iterator mapIterator;
 
 	if (useIterator)
@@ -319,8 +319,9 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 			// The remainder of the new time slice (at the right) is now in the variable "newTimeSliceLeaf" and ready for the next iteration.
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.getEnd(), new_left_slice);
+			
 			added_new = MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_number, merge_mode);
-
+			
 			mapElementPtr = ++mapElementPtr;
 
 		}
@@ -675,6 +676,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 								}
 
 							}
+
 						}
 
 					}
@@ -2196,27 +2198,23 @@ void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMappi
 
 }
 
-void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & allWeightings, bool const to_file, std::string const & file_name_appending_string)
+void SpitAllWeightings(KadSampler const & allWeightings, std::string const & file_name_appending_string)
 {
 
 	std::fstream file_;
 
-	if (to_file)
-	{
-		boost::format filenametxt("all_weightings.%1%.xml");
-		filenametxt % file_name_appending_string;
-		file_.open(filenametxt.str(), std::ofstream::out | std::ios::trunc);
+	boost::format filenametxt("all_weightings.%1%.xml");
+	filenametxt % file_name_appending_string;
+	file_.open(filenametxt.str(), std::ofstream::out | std::ios::trunc);
 
-		if (!file_.is_open())
-		{
-			std::string theerr = strerror(errno);
-			int m = 0;
-		}
+	if (!file_.is_open())
+	{
+		std::string theerr = strerror(errno);
+		return;
 	}
 
-	sdata_.push_back(std::string());
-
-	std::string * sdata = &sdata_.back();
+	std::string sdata_;
+	std::string * sdata = &sdata_;
 
 	*sdata += "<ALL_WEIGHTINGS>";
 
@@ -2233,6 +2231,9 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 	*sdata += "<NUMBER_CHILD_VARIABLE_GROUPS>";
 	*sdata += boost::lexical_cast<std::string>(allWeightings.numberChildVariableGroups);
 	*sdata += "</NUMBER_CHILD_VARIABLE_GROUPS>";
+
+	file_.write(sdata_.c_str(), sdata_.size());
+	sdata_.clear();
 
 	*sdata += "<childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
 	std::for_each(allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cbegin(),
@@ -2252,6 +2253,9 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 	});
 	*sdata += "</childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
 
+	file_.write(sdata_.c_str(), sdata_.size());
+	sdata_.clear();
+
 	*sdata += "<CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGS>";
 
 	for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
@@ -2264,6 +2268,9 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 
 		*sdata += "<CHILD_GROUP_COLUMN_MAPPINGS>";
 		*sdata += "<BRANCH_MAPPINGS>";
+		file_.write(sdata_.c_str(), sdata_.size());
+		sdata_.clear();
+
 		std::for_each(allWeightings.mappings_from_child_branch_to_primary.cbegin(),
 					  allWeightings.mappings_from_child_branch_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_branch_to_primary)::value_type const & oneChildGroupBranchMappings)
 		{
@@ -2271,14 +2278,21 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 			{
 				std::for_each(oneChildGroupBranchMappings.second.cbegin(), oneChildGroupBranchMappings.second.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
+					file_.write(sdata_.c_str(), sdata_.size());
+					sdata_.clear();
+
 					*sdata += "<BRANCH_MAPPING>";
 					SpitChildToPrimaryKeyColumnMapping(*sdata, childToPrimaryMapping);
 					*sdata += "</BRANCH_MAPPING>";
+					file_.write(sdata_.c_str(), sdata_.size());
+					sdata_.clear();
+
 				});
 			}
 		});
 		*sdata += "</BRANCH_MAPPINGS>";
 		*sdata += "<LEAF_MAPPINGS>";
+
 		std::for_each(allWeightings.mappings_from_child_leaf_to_primary.cbegin(),
 					  allWeightings.mappings_from_child_leaf_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_leaf_to_primary)::value_type const & oneChildGroupLeafMappings)
 		{
@@ -2286,9 +2300,16 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 			{
 				std::for_each(oneChildGroupLeafMappings.second.cbegin(), oneChildGroupLeafMappings.second.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
+					file_.write(sdata_.c_str(), sdata_.size());
+					sdata_.clear();
+
 					*sdata += "<LEAF_MAPPING>";
 					SpitChildToPrimaryKeyColumnMapping(*sdata, childToPrimaryMapping);
 					*sdata += "</LEAF_MAPPING>";
+
+					file_.write(sdata_.c_str(), sdata_.size());
+					sdata_.clear();
+
 				});
 			}
 		});
@@ -2297,20 +2318,35 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 
 		*sdata += "</CHILD_GROUP>";
 	}
+	file_.write(sdata_.c_str(), sdata_.size());
+	sdata_.clear();
+
 
 	*sdata += "</CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGS>";
+
+	file_.write(sdata_.c_str(), sdata_.size());
+	sdata_.clear();
 
 	*sdata += "<DATA_CACHE_PRIMARY>";
 	SpitDataCache(*sdata, allWeightings.dataCache);
 	*sdata += "</DATA_CACHE_PRIMARY>";
 
+	file_.write(sdata_.c_str(), sdata_.size());
+	sdata_.clear();
+
 	*sdata += "<DATA_CACHES_TOP_LEVEL_NON_PRIMARY>";
 	SpitDataCaches(*sdata, allWeightings.otherTopLevelCache);
 	*sdata += "</DATA_CACHES_TOP_LEVEL_NON_PRIMARY>";
 
+	file_.write(sdata_.c_str(), sdata_.size());
+	sdata_.clear();
+
 	*sdata += "<DATA_CACHES_CHILDREN>";
 	SpitDataCaches(*sdata, allWeightings.childCache);
 	*sdata += "</DATA_CACHES_CHILDREN>";
+
+	file_.write(sdata_.c_str(), sdata_.size());
+	sdata_.clear();
 
 	*sdata += "<TIME_SLICES>";
 	*sdata += "<TIME_SLICES_MAP_ITSELF>";
@@ -2318,12 +2354,6 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 	*sdata += "</TIME_SLICES_MAP_ITSELF>";
 	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 	{
-
-		if (sdata->size() > 500000)
-		{
-			sdata_.push_back(std::string());
-			sdata = &sdata_.back();
-		}
 
 		*sdata += "<TIME_SLICE>";
 
@@ -2335,9 +2365,15 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
 		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 
+		file_.write(sdata_.c_str(), sdata_.size());
+		sdata_.clear();
+
 		*sdata += "<TIME>";
 		SpitTimeSlice(*sdata, the_slice);
 		*sdata += "</TIME>";
+
+		file_.write(sdata_.c_str(), sdata_.size());
+		sdata_.clear();
 
 		*sdata += "<WEIGHTING>";
 		SpitWeighting(*sdata, variableGroupTimeSliceData.weighting);
@@ -2360,6 +2396,9 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 			SpitWeighting(*sdata, variableGroupBranchesAndLeaves.weighting);
 			*sdata += "</WEIGHTING>";
 
+			file_.write(sdata_.c_str(), sdata_.size());
+			sdata_.clear();
+
 			*sdata += "<BRANCHES_WITH_LEAVES>";
 			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 			{
@@ -2369,15 +2408,31 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 				*sdata += boost::lexical_cast<std::string>(sizeof(branch));
 				*sdata += "</BRANCH_WITH_LEAVES_MAP_ITSELF>";
 
+				file_.write(sdata_.c_str(), sdata_.size());
+				sdata_.clear();
+
 				SpitBranch(*sdata, branch);
 
+				file_.write(sdata_.c_str(), sdata_.size());
+				sdata_.clear();
+
 				branch.SpitLeaves(*sdata);
+
+				file_.write(sdata_.c_str(), sdata_.size());
+				sdata_.clear();
 
 				*sdata += "</BRANCH_WITH_LEAVES>";
 			});
 			*sdata += "</BRANCHES_WITH_LEAVES>";
 
+			file_.write(sdata_.c_str(), sdata_.size());
+			sdata_.clear();
+
 			*sdata += "</VARIABLE_GROUP_BRANCHES_AND_LEAVES>";
+
+			file_.write(sdata_.c_str(), sdata_.size());
+			sdata_.clear();
+
 		});
 		*sdata += "</VARIABLE_GROUPS_BRANCHES_AND_LEAVES>";
 
@@ -2386,20 +2441,19 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, KadSampler const & all
 	});
 	*sdata += "</TIME_SLICES>";
 
+	file_.write(sdata_.c_str(), sdata_.size());
+	sdata_.clear();
+
 	*sdata += "<WEIGHTING>";
 	SpitWeighting(*sdata, allWeightings.weighting);
 	*sdata += "</WEIGHTING>";
 
 	*sdata += "</ALL_WEIGHTINGS>";
 
-	if (to_file)
-	{
-		std::for_each(sdata_.cbegin(), sdata_.cend(), [&](std::string const & sdata__)
-		{
-			file_ << sdata__;
-		});
-		file_.close();
-	}
+	file_.write(sdata_.c_str(), sdata_.size());
+	sdata_.clear();
+
+	file_.close();
 
 }
 

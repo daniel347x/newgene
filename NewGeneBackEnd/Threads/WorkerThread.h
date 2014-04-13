@@ -51,7 +51,9 @@ public:
 				}
 				else
 				{
-					boost::format msg("Unknown exception thrown");
+					std::string the_error = boost::diagnostic_information(e);
+					boost::format msg("Error: %1%");
+					msg % the_error.c_str();
 					messager.ShowMessageBox(msg.str());
 				}
 

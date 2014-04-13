@@ -95,7 +95,9 @@ bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
 		}
 		else
 		{
-			boost::format msg( "Unknown exception thrown" );
+			std::string the_error = boost::diagnostic_information(e);
+			boost::format msg("Error: %1%");
+			msg % the_error.c_str();
 			QMessageBox msgBox;
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
