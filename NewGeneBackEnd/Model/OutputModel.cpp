@@ -457,7 +457,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
 	} BOOST_SCOPE_EXIT_END
 
-
 	// ********************************************************************************************************************************************************* //
 	// The main body of the K-ad generation routine follows
 	// ********************************************************************************************************************************************************* //
