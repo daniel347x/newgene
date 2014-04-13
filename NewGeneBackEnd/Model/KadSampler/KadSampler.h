@@ -36,8 +36,9 @@ typedef InstanceDataVector SecondaryInstanceDataVector;
 typedef FastVector<std::int16_t> fast_short_vector;
 typedef FastVector<int> fast_int_vector;
 typedef FastSet<int> fast_int_set;
-typedef FastMap4096<std::int16_t, std::int32_t> fast_short_to_int_map; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
-typedef FastMap<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
+typedef FastMapLoaded<std::int16_t, std::int32_t> fast_short_to_int_map;
+typedef FastMapLoaded<std::int16_t, std::int32_t> fast_short_to_int_map__loaded; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
+typedef FastMapLoaded<std::int16_t, fast_short_to_int_map__loaded> fast__short__to__fast_short_to_int_map__loaded;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
 typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
@@ -1153,19 +1154,35 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne()
 			: PrimaryKeysGrouping { DMUInstanceDataVector() }
-		, index_into_raw_data { 0 }
+			, index_into_raw_data { 0 }
+			, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+			, other_top_level_indices_into_raw_data(*other_top_level_indices_into_raw_data_)
 		{}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data { index_into_raw_data_ }
+			, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+			, other_top_level_indices_into_raw_data{ *other_top_level_indices_into_raw_data_ }
 		{}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
-			, index_into_raw_data { rhs.index_into_raw_data }
-		, other_top_level_indices_into_raw_data { rhs.other_top_level_indices_into_raw_data }
-		{}
+			, index_into_raw_data{ rhs.index_into_raw_data }
+			, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+			, other_top_level_indices_into_raw_data{ *other_top_level_indices_into_raw_data_ }
+		{
+			other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
+		}
+
+		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
+			: PrimaryKeysGrouping(std::move(rhs))
+			, index_into_raw_data{ rhs.index_into_raw_data }
+			, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+			, other_top_level_indices_into_raw_data{ *other_top_level_indices_into_raw_data_ }
+		{
+			other_top_level_indices_into_raw_data = std::move(rhs.other_top_level_indices_into_raw_data);
+		}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne & operator=(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
 		{
@@ -1189,15 +1206,24 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 			PrimaryKeysGrouping::operator=(std::move(rhs));
 			index_into_raw_data = rhs.index_into_raw_data;
-			other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
+			other_top_level_indices_into_raw_data = std::move(rhs.other_top_level_indices_into_raw_data);
 			return *this;
+		}
+
+		~PrimaryKeysGroupingMultiplicityGreaterThanOne()
+		{
+			// Do not delete other_top_level_indices_into_raw_data_!!!!!!!!!!!!!!!!!
+			// Let the Boost memory pool do it
 		}
 
 		std::int32_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
 
 		// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
-		mutable fast_short_to_int_map
-		other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
+		mutable fast_short_to_int_map *
+		other_top_level_indices_into_raw_data_; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
+
+		mutable fast_short_to_int_map &
+			other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
 
 };
 
@@ -1276,7 +1302,8 @@ class BranchOutputRow
 		// Map from child variable group ID to:
 		// Map from child leaf index to:
 		// index into child variable group's raw data cache (stored in the AllWeightings instance)
-		mutable fast__short__to__fast_short_to_int_map child_indices_into_raw_data;
+		mutable fast__short__to__fast_short_to_int_map__loaded * child_indices_into_raw_data_;
+		mutable fast__short__to__fast_short_to_int_map__loaded & child_indices_into_raw_data;
 
 	private:
 
@@ -1302,7 +1329,7 @@ typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_r
 typedef FastMap<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
 typedef FastMap<std::int64_t, fast_branch_output_row_vector> fast__int64__to__fast_branch_output_row_vector;
 
-typedef FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
+typedef FastMap<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 
 // ******************************************************************************************************************************************************************** //
 // Output data to XML for debugging
@@ -1660,7 +1687,7 @@ void SpitBranch(std::string & sdata, Branch const & branch);
 // (Only one, since currently only one primary top-level variable group is supported)
 //
 //typedef FastSet<Branch> Branches;
-typedef FastSetFlat<Branch> Branches;
+typedef FastSet<Branch> Branches;
 //
 // ******************************************************************************************************** //
 // ******************************************************************************************************** //

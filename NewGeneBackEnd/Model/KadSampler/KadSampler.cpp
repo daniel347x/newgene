@@ -1313,7 +1313,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 			
 			// No! The optimization does not work - for some reason,
 			// ENTERING the following blocks SPEED THINGS RADICALLY UP
-			//return;
+			return;
 		}
 
 		ChildDMUInstanceDataVector child_hit_vector_branch_components;
@@ -1789,21 +1789,28 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 }
 
 BranchOutputRow::BranchOutputRow()
+: child_indices_into_raw_data_(new fast__short__to__fast_short_to_int_map__loaded)
+, child_indices_into_raw_data(*child_indices_into_raw_data_)
 {
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
-	: primary_leaves(rhs.primary_leaves)
-	, child_indices_into_raw_data(rhs.child_indices_into_raw_data)
+: child_indices_into_raw_data_(new fast__short__to__fast_short_to_int_map__loaded)
+, child_indices_into_raw_data(*child_indices_into_raw_data_)
+, primary_leaves(rhs.primary_leaves)
 {
+	// WE NEED THIS COPY.  We have only created it, above, but not copied from RHS
+	child_indices_into_raw_data = rhs.child_indices_into_raw_data;
 	SaveCache();
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
 	: primary_leaves(std::move(rhs.primary_leaves))
-	, child_indices_into_raw_data(std::move(rhs.child_indices_into_raw_data))
 	, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
+	, child_indices_into_raw_data(*child_indices_into_raw_data_)
 {
+	// WE NEED THIS COPY.  We have only created it, above, but not copied from RHS
+	child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
 	//SaveCache(); // already moved from rhs
 }
 
@@ -1835,6 +1842,8 @@ BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
 
 BranchOutputRow::~BranchOutputRow()
 {
+	// DO NOT DELETE THE POINTER child_indices_into_raw_data_!!!!!!!!!!!!
+	// Let the Boost memory pool do it
 }
 
 //#ifdef _DEBUG
@@ -2033,7 +2042,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 	sdata += "<CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
 	sdata += boost::lexical_cast<std::string>(sizeof(row.child_indices_into_raw_data));
 	sdata += "</CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
-	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map::value_type const & childindices)
+	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map__loaded::value_type const & childindices)
 	{
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA>";
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA_OBJECT_ITSELF>";
@@ -3424,7 +3433,8 @@ void KadSampler::Clear()
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__mergedtimeslicerow_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__short__to__fast_short_to_int_map::value_type)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map__loaded::value_type)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__short__to__fast_short_to_int_map__loaded::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_branch_output_row_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_set::value_type)>();

@@ -449,12 +449,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// at a time when memory is available, and then request it to store something,
 	// which triggers initial instantiation of a very large global pool for all instances of this class
 	// that will be shared by the KadSampler.
-	fast_short_to_int_map dummy_memory_instantiator;
-	dummy_memory_instantiator[0] = 0; // Will trigger allocation of a huge block of global storage for use by all other instances of this class.
+	//fast_short_to_int_map dummy_memory_instantiator;
+	//dummy_memory_instantiator[0] = 0; // Will trigger allocation of a huge block of global storage for use by all other instances of this class.
 
 	KadSampler * allWeightings_ = new KadSampler(messager); // SEE NOTE!  Do not delete this object!
 	KadSampler & allWeightings = *allWeightings_;
-	BOOST_SCOPE_EXIT(&allWeightings, &model, &input_model)
+	BOOST_SCOPE_EXIT(&allWeightings, &allWeightings_, &model, &input_model)
 	{
 		if (model)
 		{
@@ -467,6 +467,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
+		//delete allWeightings_;
 	} BOOST_SCOPE_EXIT_END
 
 	// ********************************************************************************************************************************************************* //
@@ -5850,7 +5851,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 		{
 			bool matched = false;
 			std::for_each(outputRow.child_indices_into_raw_data.cbegin(),
-						  outputRow.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map::value_type const & leaf_index_mappings)
+						  outputRow.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map__loaded::value_type const & leaf_index_mappings)
 			{
 				int const vg_number = leaf_index_mappings.first;
 
