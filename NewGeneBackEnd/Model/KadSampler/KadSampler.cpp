@@ -1844,8 +1844,6 @@ BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
 
 BranchOutputRow::~BranchOutputRow()
 {
-	// DO NOT DELETE THE POINTER child_indices_into_raw_data_!!!!!!!!!!!!
-	// Let the Boost memory pool do it
 	delete child_indices_into_raw_data_;
 }
 
@@ -3321,6 +3319,9 @@ void KadSampler::ClearWeightingsAndRemainingBranchJunk()
 	});
 	weighting.ClearWeighting();
 	number_rows_generatedPtr.reset();
+
+	ClearRandomNumbers();
+
 }
 
 template <typename TAG, int SIZE>
@@ -3405,6 +3406,8 @@ void purge_pool()
 void KadSampler::Clear()
 {
 
+	messager.SetPerformanceLabel("Cleaning up a bit; please be patient...");
+
 	create_output_row_visitor::data = nullptr;
 
 	if (insert_random_sample_stmt)
@@ -3453,5 +3456,7 @@ void KadSampler::Clear()
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branches::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>();
+
+	messager.SetPerformanceLabel("");
 
 }

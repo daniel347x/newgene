@@ -594,7 +594,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// they will want to be able to remain in random sampling mode even at the 100% sampling level
 			// ********************************************************************************************************************************************************* //
 			std::int64_t samples = random_sampling_number_rows;
-
 			if (boost::multiprecision::cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
 			{
 				messager.AppendKadStatusText((
@@ -619,7 +618,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 										  boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
 			allWeightings.PrepareRandomSamples(K);
 			messager.SetPerformanceLabel((boost::format("Clearing cache of random numbers...")).str().c_str());
-			allWeightings.ClearRandomNumbers(); // This function will not only "clear()" the vector, but "swap()" it with an empty vector to actually force deallocation - a major C++ gotcha!
+
+			// Do not clear random numbers!  Deallocation requires ~5-10 seconds for 1-2M on a solid CPU, but takes ~10-20MB memory.
+			// For now - prioritize speed over memory.  Leave the memory in place and allow the Boost memory pool to clear at the end.
+			// Note that when Boost Pool is enhanced to support class-level pools, THEN we'll be able to get the best of both worlds
+			// and just clear the pool right here (in an instant).
+			//allWeightings.ClearRandomNumbers(); // This function will not only "clear()" the vector, but "swap()" it with an empty vector to actually force deallocation - a major C++ gotcha!
 			messager.SetPerformanceLabel("");
 			messager.AppendKadStatusText((boost::format("Completed pre-populating randomly selected rows.")).str(), this);
 

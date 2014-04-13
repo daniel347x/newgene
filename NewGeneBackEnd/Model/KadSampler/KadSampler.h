@@ -1212,8 +1212,6 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 		~PrimaryKeysGroupingMultiplicityGreaterThanOne()
 		{
-			// Do not delete other_top_level_indices_into_raw_data_!!!!!!!!!!!!!!!!!
-			// Let the Boost memory pool do it
 			delete other_top_level_indices_into_raw_data_;
 		}
 
