@@ -815,6 +815,7 @@ void KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const
 	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
 }
 
+typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<0, 0, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, boost::fast_pool_allocator<boost::multiprecision::limb_type, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>>> newgene_cpp_int;
 void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 {
 
@@ -840,9 +841,14 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	// choice of branches (each branch corresponding to a
 	// window of discrete values), including no-replacement.
 	bool reverse_mode = false;
-	std::vector<boost::multiprecision::cpp_int> remaining;
-	std::vector<boost::multiprecision::cpp_int>::iterator remainingPtr;
-	std::set<boost::multiprecision::cpp_int> tmp_random_numbers;
+	//std::vector<boost::multiprecision::cpp_int> remaining;
+	//std::vector<boost::multiprecision::cpp_int>::iterator remainingPtr;
+	//std::set<boost::multiprecision::cpp_int> tmp_random_numbers;
+	std::vector<newgene_cpp_int> * remaining_ = new std::vector<newgene_cpp_int>; // let pointer drop off stack without deleting; let boost pool manage
+	std::vector<newgene_cpp_int> & remaining = *remaining_;
+	std::vector<newgene_cpp_int>::iterator remainingPtr;
+	std::set<newgene_cpp_int> * tmp_random_numbers_ = new std::set<newgene_cpp_int>;
+	std::set<newgene_cpp_int> & tmp_random_numbers = *tmp_random_numbers_;
 
 	ProgressBarMeter meter(messager, "Generated %1% out of %2% random numbers", how_many);
 	while (tmp_random_numbers.size() < static_cast<size_t>(how_many))
@@ -3430,6 +3436,7 @@ void KadSampler::Clear()
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branches::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(boost::multiprecision::limb_type)>();
 
 	messager.SetPerformanceLabel("");
 
