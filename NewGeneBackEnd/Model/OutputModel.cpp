@@ -440,6 +440,18 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// ******************************************************************************************* //
 	// ******************************************************************************************* //
 
+	// Memory management!
+	// The following class is defined to use a Boost memory pool.
+	// This single data structure is responsible for holding the "leaf-most" nodes
+	// during the K-ad generation process, and there can easily be millions, scattered through the heap.
+	// The memory pool requires that these all lie in a single block, at odds with the scattered nature of creation of these nodes.
+	// We therefore CREATE an instance of this class once, before creating the KadSampler instance,
+	// at a time when memory is available, and then request it to store something,
+	// which triggers initial instantiation of a very large global pool for all instances of this class
+	// that will be shared by the KadSampler.
+	fast_short_to_int_map dummy_memory_instantiator;
+	dummy_memory_instantiator[0] = 0; // Will trigger allocation of a huge block of global storage for use by all other instances of this class.
+
 	KadSampler * allWeightings_ = new KadSampler(messager); // SEE NOTE!  Do not delete this object!
 	KadSampler & allWeightings = *allWeightings_;
 	BOOST_SCOPE_EXIT(&allWeightings, &model, &input_model)

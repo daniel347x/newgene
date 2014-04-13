@@ -23,7 +23,7 @@ template<typename K, typename V, class Comp_ = std::less<K>>
 using FastMap = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>>;
 
 template<typename K, typename V, class Comp_ = std::less<K>>
-using FastMap4096 = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex, 1048576, 33554432>>;
+using FastMap4096 = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex, 67108864, 67108864>>;
 
 //template<typename K, typename V, class Comp_ = std::less<K>>
 //using FastMap = std::map<K, V, Comp_, NewGeneMemoryPoolAllocator<std::pair<K const, V>>>;
