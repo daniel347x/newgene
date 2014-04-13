@@ -401,7 +401,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.UpdateStatusBarText((boost::format("Generating output to file %1%") % boost::filesystem::path(setting_path_to_kad_output).filename()).str().c_str(), this);
 
 	messager.AppendKadStatusText("Beginning generation of K-ad output.", this);
-	messager.AppendKadStatusText("Initializing...", this);
 
 
 
@@ -490,7 +489,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Build a schema object, one per variable group with selected data,
 		// intended for internal use by the K-ad algorithm (i.e., converted from the raw format used in the database into a handy set of schema instances)
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Building schema objects to represent metadata for selected variable groups...")).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Building schema objects...")).str().c_str(), this);
 		PopulateSchemaForRawDataTables(allWeightings);
 
 		if (failed || CheckCancelled()) { return; }
@@ -502,8 +501,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// From the schema for the selected columns for the primary variable group,
 		// create a temporary table to store just the selected columns over just the selected time range.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for primary variable group data (variable group: %1%)...") %
-									  Table_VG_CATEGORY::GetVgDisplayText(top_level_vg)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Create empty table for variable group \"%1%\")...") %
+									  Table_VG_CATEGORY::GetVgDisplayTextShort(top_level_vg)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
 		if (failed || CheckCancelled()) { return; }
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
@@ -515,7 +514,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// From the schema for the selected columns for the primary variable group,
 		// load the selected columns of raw data into the temporary table created with the same schema.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Load selected columns for primary variable group into internal table...")).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Load selected columns of raw monadic data...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 		if (failed || CheckCancelled())
@@ -559,7 +558,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// This will be used by the child variable groups when they are merged in.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((
-										 boost::format("For each branch node, create a cache of all primary leaf nodes, and create a lookup cache that indexes all possible child branch/leaf combinations (for all child variable groups) that match against the given primary branch and leaves...")).str().c_str(),
+										 boost::format("Build cache of monads...")).str().c_str(),
 									 this);
 		allWeightings.ResetBranchCaches(has_child_groups);
 		if (failed || CheckCancelled()) { return; }
@@ -567,14 +566,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		// Calculate the number of possible K-ad combinations for each branch, given the leaves available.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Calculate the total number of K-ad combinations...")).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Calculate number of K-adic combinations...")).str().c_str(), this);
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
 		// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Total number of (granulated) K-adic combinations for the given choice of K: %1%") % boost::lexical_cast<std::string>
+		messager.AppendKadStatusText((boost::format("Number of (granulated) K-adic combinations: %1%") % boost::lexical_cast<std::string>
 									  (allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
 		if (random_sampling)
 		{
@@ -583,7 +582,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Give text feedback that the sampler is entering random sampling mode
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Entering random sampling mode...")).str().c_str(), this);
-			messager.AppendKadStatusText((boost::format("Number of desired random samples selected: %1% ") % boost::lexical_cast<std::string>
+			messager.AppendKadStatusText((boost::format("Number of random samples selected: %1% ") % boost::lexical_cast<std::string>
 										  (random_sampling_number_rows).c_str()).str().c_str(), this);
 
 			// ********************************************************************************************************************************************************* //
@@ -596,16 +595,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			std::int64_t samples = random_sampling_number_rows;
 			if (boost::multiprecision::cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
 			{
-				messager.AppendKadStatusText((
-												 boost::format("Because the number of requested random samples, %1%, is is greater than the number of available K-ads, %2%, the number of random samples will be decreased to match the number of K-ads.")
-												 % boost::lexical_cast<std::string>(random_sampling_number_rows).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
+				messager.AppendKadStatusText((boost::format("Decreasing the number of random samples to match the number of total K-adic combinations.")).str().c_str(), this);
 				samples = allWeightings.weighting.getWeighting().convert_to<int>();
 			}
 
 			// ********************************************************************************************************************************************************* //
 			// Generate and store the desired number of random numbers - one random number per output row is stored here
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Generating %1% random numbers between 1 and %2% to be used to select random rows ...") % boost::lexical_cast<std::string>
+			messager.AppendKadStatusText((boost::format("Generating %1% random numbers between 1 and %2%...") % boost::lexical_cast<std::string>
 										  (samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
 			allWeightings.PrepareRandomNumbers(samples);
 			if (failed || CheckCancelled()) { return; }
@@ -614,18 +611,18 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Select the random rows now and stash in memory
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Selecting %1% randomly selected K-ad combinations from the raw data (out of %2% total possible combinations) ...") %
-										  boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
+			messager.AppendKadStatusText((boost::format("Selecting %1% random K-adic combinations...") % boost::lexical_cast<std::string>(samples).c_str()).str().c_str(), this);
 			allWeightings.PrepareRandomSamples(K);
-			messager.SetPerformanceLabel((boost::format("Clearing cache of random numbers...")).str().c_str());
 
 			// Do not clear random numbers!  Deallocation requires ~5-10 seconds for 1-2M on a solid CPU, but takes ~10-20MB memory.
 			// For now - prioritize speed over memory.  Leave the memory in place and allow the Boost memory pool to clear at the end.
 			// Note that when Boost Pool is enhanced to support class-level pools, THEN we'll be able to get the best of both worlds
 			// and just clear the pool right here (in an instant).
 			//allWeightings.ClearRandomNumbers(); // This function will not only "clear()" the vector, but "swap()" it with an empty vector to actually force deallocation - a major C++ gotcha!
+			//messager.SetPerformanceLabel((boost::format("Clearing cache of random numbers...")).str().c_str());
+			
 			messager.SetPerformanceLabel("");
-			messager.AppendKadStatusText((boost::format("Completed pre-populating randomly selected rows.")).str(), this);
+			messager.AppendKadStatusText((boost::format("Completed selection of random K-adic combinations.")).str(), this);
 
 		}
 		else
@@ -634,16 +631,16 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Give text feedback that the sampler is entering full sampling mode
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-ad combinations will be generated.") % boost::lexical_cast<std::string>
+			messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-adic combinations will be generated.") % boost::lexical_cast<std::string>
 										  (allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
 
 			// ********************************************************************************************************************************************************* //
 			// Generate all K-ad combinations now
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Generating all %1% K-ad combinations from the raw data ...") % boost::lexical_cast<std::string>
+			messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % boost::lexical_cast<std::string>
 										  (allWeightings.weighting.getWeighting()).c_str()).str(), this);
 			allWeightings.PrepareFullSamples(K);
-			messager.AppendKadStatusText((boost::format("Completed generating full selection of K-ad combinations.")).str(), this);
+			messager.AppendKadStatusText((boost::format("Completed generating full selection of K-adic combinations.")).str(), this);
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -667,7 +664,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		// Create the schema for the output
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Creating output column set information...")).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Creating output schema...")).str().c_str(), this);
 		random_sampling_schema = KadSamplerBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 
 		if (failed || CheckCancelled()) { return; }
@@ -707,10 +704,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// No need to rebuild any of the leaf caches if there are no non-primary variable groups;
 			// hence this belongs in this block.
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Rebuild cache of all primary leaf nodes for each branch node...")).str().c_str(), this);
+			messager.AppendKadStatusText((boost::format("Rebuild cache...")).str().c_str(), this);
 			allWeightings.ResetBranchCaches(false); // just update the primary "leaves" vector - not the child leaf lookup cache
 			if (failed || CheckCancelled()) { return; }
-			messager.AppendKadStatusText((boost::format("Completed building cache.")).str().c_str(), this);
 
 		}
 
@@ -745,7 +741,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText((boost::format("Consolidating adjacent rows...")).str(), this);
 			ConsolidateData(random_sampling, allWeightings);
 			if (failed || CheckCancelled()) { return; }
-			messager.AppendKadStatusText((boost::format("Completed consolidating adjacent rows.")).str().c_str(), this);
 
 		}
 
@@ -6197,8 +6192,6 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	allWeightings.consolidated_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
 	MergedTimeSliceRow::RHS_wins = false;
 	saved_historic_rows.clear();
-
-	SpitAllWeightings(allWeightings, "smallset");
 
 }
 

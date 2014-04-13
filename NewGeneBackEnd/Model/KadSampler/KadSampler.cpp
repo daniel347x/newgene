@@ -1751,11 +1751,11 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
 	{
 
-		branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 		branch.ResetLeafCache();
 
 		if (reset_child_dmu_lookup)
 		{
+			branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 			for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
 			{
 				branch.ConstructChildCombinationCache(allWeightings, c, true, false);
