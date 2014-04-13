@@ -1713,7 +1713,8 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 				// is *now* spent inserting into the "Boost memory-pool backed" hits[-1].
 				// This is terrible performance, so we must use a std::set.
 				//branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
-				branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow &>(*iter)));
+				//branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow &>(*iter)));
+				branch.hits_consolidated.emplace_back(*iter);
 
 				// Even after the std::move, above, the Boost memory pool deallocation of the space for the object itself
 				// is requiring 90%+ of the time for the "consolidating rows" routine.
@@ -1807,6 +1808,7 @@ BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
 BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
 	: primary_leaves(std::move(rhs.primary_leaves))
 	, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
+	, child_indices_into_raw_data_(new fast__short__to__fast_short_to_int_map__loaded)
 	, child_indices_into_raw_data(*child_indices_into_raw_data_)
 {
 	// WE NEED THIS COPY.  We have only created it, above, but not copied from RHS
@@ -1844,6 +1846,7 @@ BranchOutputRow::~BranchOutputRow()
 {
 	// DO NOT DELETE THE POINTER child_indices_into_raw_data_!!!!!!!!!!!!
 	// Let the Boost memory pool do it
+	delete child_indices_into_raw_data_;
 }
 
 //#ifdef _DEBUG

@@ -1214,6 +1214,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 		{
 			// Do not delete other_top_level_indices_into_raw_data_!!!!!!!!!!!!!!!!!
 			// Let the Boost memory pool do it
+			delete other_top_level_indices_into_raw_data_;
 		}
 
 		std::int32_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
@@ -1329,7 +1330,7 @@ typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_r
 typedef FastMap<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
 typedef FastMap<std::int64_t, fast_branch_output_row_vector> fast__int64__to__fast_branch_output_row_vector;
 
-typedef FastMap<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
+typedef FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 
 // ******************************************************************************************************************************************************************** //
 // Output data to XML for debugging
@@ -1687,7 +1688,7 @@ void SpitBranch(std::string & sdata, Branch const & branch);
 // (Only one, since currently only one primary top-level variable group is supported)
 //
 //typedef FastSet<Branch> Branches;
-typedef FastSet<Branch> Branches;
+typedef FastSetFlat<Branch> Branches;
 //
 // ******************************************************************************************************** //
 // ******************************************************************************************************** //
