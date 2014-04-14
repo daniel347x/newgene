@@ -235,9 +235,10 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					boost::format msg("UOA '%1%' successfully deleted.");
-					msg % boost::to_upper_copy(uoa_to_delete_display_text);
-					messager.ShowMessageBox(msg.str());
+					// User request: do not display the following confirmation dialog.  It is redundant.
+					//boost::format msg("UOA '%1%' successfully deleted.");
+					//msg % boost::to_upper_copy(uoa_to_delete_display_text);
+					//messager.ShowMessageBox(msg.str());
 
 					executor.success();
 

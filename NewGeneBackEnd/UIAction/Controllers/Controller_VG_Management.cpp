@@ -225,9 +225,10 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					boost::format msg("VG '%1%' successfully deleted.");
-					msg % Table_VG_CATEGORY::GetVgDisplayText(vg);
-					messager.ShowMessageBox(msg.str());
+					// User request: do not display the following confirmation dialog.  It is redundant.
+					//boost::format msg("VG '%1%' successfully deleted.");
+					//msg % Table_VG_CATEGORY::GetVgDisplayText(vg);
+					//messager.ShowMessageBox(msg.str());
 
 					executor.success();
 

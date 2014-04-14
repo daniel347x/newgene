@@ -239,6 +239,8 @@ class ProgressBarMeter
 
 			messager.StartProgressBar(0, 100);
 			messager.UpdateProgressBarValue(0);
+			update_every_how_often = max_value.convert_to<std::int64_t>() / 100; // If we are using the progress bar in this way, it's because the user chose "output full samples" in which case the number of total rows will need to fit in a 64-bit integer
+			if (update_every_how_often == 0) ++update_every_how_often;
 
 		}
 

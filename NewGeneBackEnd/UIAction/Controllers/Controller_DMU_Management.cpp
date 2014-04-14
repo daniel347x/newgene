@@ -230,9 +230,10 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 
-				boost::format msg("DMU category '%1%' successfully deleted.");
-				msg % boost::to_upper_copy(dmu_to_delete_code);
-				messager.ShowMessageBox(msg.str());
+				// User request: do not display the following confirmation dialog.  It is redundant.
+				//boost::format msg("DMU category '%1%' successfully deleted.");
+				//msg % boost::to_upper_copy(dmu_to_delete_code);
+				//messager.ShowMessageBox(msg.str());
 
 				executor.success();
 
