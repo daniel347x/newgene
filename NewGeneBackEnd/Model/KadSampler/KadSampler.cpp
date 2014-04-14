@@ -844,10 +844,10 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	//std::vector<boost::multiprecision::cpp_int> remaining;
 	//std::vector<boost::multiprecision::cpp_int>::iterator remainingPtr;
 	//std::set<boost::multiprecision::cpp_int> tmp_random_numbers;
-	std::vector<newgene_cpp_int> * remaining_ = new std::vector<newgene_cpp_int>; // let pointer drop off stack without deleting; let boost pool manage
+	std::vector<newgene_cpp_int> * remaining_ = new FastVector<newgene_cpp_int>; // let pointer drop off stack without deleting; let boost pool manage
 	std::vector<newgene_cpp_int> & remaining = *remaining_;
 	std::vector<newgene_cpp_int>::iterator remainingPtr;
-	std::set<newgene_cpp_int> * tmp_random_numbers_ = new std::set<newgene_cpp_int>;
+	std::set<newgene_cpp_int> * tmp_random_numbers_ = new FastSet<newgene_cpp_int>;
 	std::set<newgene_cpp_int> & tmp_random_numbers = *tmp_random_numbers_;
 
 	ProgressBarMeter meter(messager, "Generated %1% out of %2% random numbers", how_many);
@@ -3409,12 +3409,12 @@ void KadSampler::Clear()
 	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>(); 
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector_huge::value_type)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeavesVector::value_type)>();
-	  
+	purge_pool<boost::pool_allocator_tag, sizeof(newgene_cpp_int)>();
+
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__mergedtimeslicerow_set::value_type)>();
@@ -3437,6 +3437,7 @@ void KadSampler::Clear()
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branches::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(boost::multiprecision::limb_type)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(newgene_cpp_int)>();
 
 	messager.SetPerformanceLabel("");
 
