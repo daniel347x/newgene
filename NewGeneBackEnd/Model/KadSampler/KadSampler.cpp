@@ -844,11 +844,11 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	//std::vector<boost::multiprecision::cpp_int> remaining;
 	//std::vector<boost::multiprecision::cpp_int>::iterator remainingPtr;
 	//std::set<boost::multiprecision::cpp_int> tmp_random_numbers;
-	std::vector<newgene_cpp_int> * remaining_ = new FastVector<newgene_cpp_int>; // let pointer drop off stack without deleting; let boost pool manage
-	std::vector<newgene_cpp_int> & remaining = *remaining_;
+	auto remaining_ = new FastVector<newgene_cpp_int>; // let pointer drop off stack without deleting; let boost pool manage
+	auto & remaining = *remaining_;
 	std::vector<newgene_cpp_int>::iterator remainingPtr;
-	std::set<newgene_cpp_int> * tmp_random_numbers_ = new FastSet<newgene_cpp_int>;
-	std::set<newgene_cpp_int> & tmp_random_numbers = *tmp_random_numbers_;
+	auto tmp_random_numbers_ = new FastSet<newgene_cpp_int>;
+	auto & tmp_random_numbers = *tmp_random_numbers_;
 
 	ProgressBarMeter meter(messager, "Generated %1% out of %2% random numbers", how_many);
 	while (tmp_random_numbers.size() < static_cast<size_t>(how_many))
