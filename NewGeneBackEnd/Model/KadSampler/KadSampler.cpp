@@ -1827,7 +1827,7 @@ BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
 
 BranchOutputRow::~BranchOutputRow()
 {
-	delete child_indices_into_raw_data_;
+	BranchOutputRowPool::free(child_indices_into_raw_data_);
 }
 
 //#ifdef _DEBUG

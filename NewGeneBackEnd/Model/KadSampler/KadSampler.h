@@ -1196,7 +1196,7 @@ public:
 
 	~PrimaryKeysGroupingMultiplicityGreaterThanOne()
 	{
-		delete other_top_level_indices_into_raw_data_;
+		LeafPool::free(other_top_level_indices_into_raw_data_);
 	}
 
 	std::int32_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
