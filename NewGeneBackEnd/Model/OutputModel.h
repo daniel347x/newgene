@@ -615,21 +615,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 					return cancelled; // opportunity for further checking here
 				}
 
-				// Progress bar variables and functions
-				void DetermineNumberStages();
-				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_incoming_rows;
-				std::map<WidgetInstanceIdentifier, int> multiplicities;
-				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_primary_merged_rows;
-				std::int64_t rough_progress_range;
-				std::int64_t rough_progress_increment_one_percent;
-				std::int64_t total_number_primary_rows;
-				int current_progress_stage;
-				int total_progress_stages;
-				int progress_increment_per_stage;
-				std::string setting_path_to_kad_output;
-				int current_progress_value;
-				std::int64_t ms_elapsed;
-
 				// Save the SQL and column sets corresponding to each primary and child variable group in global data structures
 				//
 				// "primary_variable_group_column_sets":
@@ -654,14 +639,11 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// This is the final result of the K-ad generator, in a form presentable as-is
 				// to the end user.
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
-				SqlAndColumnSets primary_group_final_results;
-				SqlAndColumnSets intermediate_merging_of_primary_groups_column_sets;
 				SqlAndColumnSets merging_of_children_column_sets;
 				SqlAndColumnSet random_sampling_schema;
-				SqlAndColumnSet primary_group_merged_results;
-				SqlAndColumnSet all_merged_results_unformatted;
-				SqlAndColumnSet child_merge_final_result;
 				SqlAndColumnSet final_result;
+
+				std::string setting_path_to_kad_output;
 
 				// ********************************************************************* //
 				// the_map is:

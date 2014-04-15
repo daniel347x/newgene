@@ -865,24 +865,15 @@ public:
 	static int how_many_weightings;
 
 	Weighting()
-		: weightingPtr{ new boost::multiprecision::cpp_int }
-	, weighting_range_startPtr{ new boost::multiprecision::cpp_int }
-	, weighting_range_endPtr{ new boost::multiprecision::cpp_int }
-	, weighting{ *weightingPtr }
-	, weighting_range_start{ *weighting_range_startPtr }
-	, weighting_range_end{ *weighting_range_endPtr }
 	{
 		++how_many_weightings;
 		InternalSetWeighting();
 	}
 
 	Weighting(Weighting const & rhs)
-		: weightingPtr{ new boost::multiprecision::cpp_int{ rhs.weighting } }
-	, weighting_range_startPtr{ new boost::multiprecision::cpp_int{ rhs.weighting_range_start } }
-	, weighting_range_endPtr{ new boost::multiprecision::cpp_int{ rhs.weighting_range_end } }
-	, weighting{ *weightingPtr }
-	, weighting_range_start{ *weighting_range_startPtr }
-	, weighting_range_end{ *weighting_range_endPtr }
+	: weighting{ rhs.weighting }
+	, weighting_range_start{ rhs.weighting_range_start }
+	, weighting_range_end{ rhs.weighting_range_end }
 	{
 		++how_many_weightings;
 		InternalSetWeighting();
@@ -906,78 +897,65 @@ public:
 		return *this;
 	}
 
-	void setWeighting(boost::multiprecision::cpp_int const & weighting_)
+	void setWeighting(newgene_cpp_int const & weighting_)
 	{
 		weighting = weighting_;
 		weighting_range_end = weighting_range_start + weighting - 1;
 		InternalSetWeighting();
 	}
 
-	void setWeightingRangeStart(boost::multiprecision::cpp_int const & weighting_range_start_)
+	void setWeightingRangeStart(newgene_cpp_int const & weighting_range_start_)
 	{
 		weighting_range_start = weighting_range_start_;
 		weighting_range_end = weighting_range_start + weighting - 1;
 		InternalSetWeighting();
 	}
 
-	void addWeighting(boost::multiprecision::cpp_int const & weighting_to_add)
+	void addWeighting(newgene_cpp_int const & weighting_to_add)
 	{
 		weighting += weighting_to_add;
 		InternalSetWeighting();
 	}
 
-	boost::multiprecision::cpp_int getWeighting() const
+	std::string getWeightingString() const
+	{
+		return boost::lexical_cast<std::string>(weighting);
+	}
+
+	newgene_cpp_int const & getWeighting() const
 	{
 		return weighting;
 	}
 
-	boost::multiprecision::cpp_int getWeightingRangeStart() const
+	newgene_cpp_int const & getWeightingRangeStart() const
 	{
 		return weighting_range_start;
 	}
 
-	boost::multiprecision::cpp_int getWeightingRangeEnd() const
+	newgene_cpp_int const & getWeightingRangeEnd() const
 	{
 		return weighting_range_end;
 	}
 
-	void ClearWeighting() const
-	{
-		// For use in conjunction with Boost Pool, a bulk memory pool,
-		// because we will never delete the objects that own Weighting instances,
-		// so we must explicitly delete these from the outside.
-		//
-		// This function should only be called when we KNOW that we will
-		// never need this weighting instance ever again.
-		// Obviously the "weighting" references will become dangling references
-		// after this function exits.
-		weightingPtr.reset();
-		weighting_range_startPtr.reset();
-		weighting_range_endPtr.reset();
-	}
-
 private:
 
-	mutable std::unique_ptr<boost::multiprecision::cpp_int> weightingPtr;
-	mutable std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_startPtr;
-	mutable std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_endPtr;
-	boost::multiprecision::cpp_int & weighting;
-	boost::multiprecision::cpp_int & weighting_range_start;
-	boost::multiprecision::cpp_int & weighting_range_end;
-#		ifdef _DEBUG
+	newgene_cpp_int weighting;
+	newgene_cpp_int weighting_range_start;
+	newgene_cpp_int weighting_range_end;
+#	ifdef _DEBUG
 	std::string weighting_string;
 	std::string weighting_range_start_string;
 	std::string weighting_range_end_string;
-#		endif
+#	endif
 
 	void InternalSetWeighting()
 	{
 		weighting_range_end = weighting_range_start + weighting - 1;
-#			ifdef _DEBUG
+#		ifdef _DEBUG
 		weighting_string = weighting.str();
 		weighting_range_start_string = weighting_range_start.str();
 		weighting_range_end_string = weighting_range_end.str();
-#			endif
+#		endif
 	}
 
 };
@@ -1146,6 +1124,10 @@ public:
 
 };
 
+struct newgene_leaf_tag {};
+typedef boost::singleton_pool<newgene_leaf_tag, sizeof(fast_short_to_int_map), boost::default_user_allocator_malloc_free>
+LeafPool;
+
 // "Leaf"
 class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 {
@@ -1155,21 +1137,21 @@ public:
 	PrimaryKeysGroupingMultiplicityGreaterThanOne()
 		: PrimaryKeysGrouping{ DMUInstanceDataVector() }
 		, index_into_raw_data{ 0 }
-		, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+		, other_top_level_indices_into_raw_data_(reinterpret_cast<fast_short_to_int_map *>(LeafPool::malloc()))
 		, other_top_level_indices_into_raw_data(*other_top_level_indices_into_raw_data_)
 	{}
 
 	PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0)
 		: PrimaryKeysGrouping(dmuInstanceDataVector)
 		, index_into_raw_data{ index_into_raw_data_ }
-		, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+		, other_top_level_indices_into_raw_data_(reinterpret_cast<fast_short_to_int_map *>(LeafPool::malloc()))
 		, other_top_level_indices_into_raw_data{ *other_top_level_indices_into_raw_data_ }
 	{}
 
 	PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
 		: PrimaryKeysGrouping(rhs)
 		, index_into_raw_data{ rhs.index_into_raw_data }
-		, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+		, other_top_level_indices_into_raw_data_(reinterpret_cast<fast_short_to_int_map *>(LeafPool::malloc()))
 		, other_top_level_indices_into_raw_data{ *other_top_level_indices_into_raw_data_ }
 	{
 		other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
@@ -1178,7 +1160,7 @@ public:
 	PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
 		: PrimaryKeysGrouping(std::move(rhs))
 		, index_into_raw_data{ rhs.index_into_raw_data }
-		, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+		, other_top_level_indices_into_raw_data_(reinterpret_cast<fast_short_to_int_map *>(LeafPool::malloc()))
 		, other_top_level_indices_into_raw_data{ *other_top_level_indices_into_raw_data_ }
 	{
 		other_top_level_indices_into_raw_data = std::move(rhs.other_top_level_indices_into_raw_data);
@@ -1213,7 +1195,6 @@ public:
 	~PrimaryKeysGroupingMultiplicityGreaterThanOne()
 	{
 		delete other_top_level_indices_into_raw_data_;
-		other_top_level_indices_into_raw_data_ = nullptr;
 	}
 
 	std::int32_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
@@ -1226,6 +1207,10 @@ public:
 		other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
 
 };
+
+struct newgene_branchoutputrow_tag {};
+typedef boost::singleton_pool<newgene_branchoutputrow_tag, sizeof(fast__short__to__fast_short_to_int_map__loaded), boost::default_user_allocator_malloc_free>
+BranchOutputRowPool;
 
 class BranchOutputRow
 {
@@ -1358,14 +1343,10 @@ public:
 
 	PrimaryKeysGroupingMultiplicityOne()
 		: PrimaryKeysGrouping{ DMUInstanceDataVector() }
-	, number_branch_combinationsPtr{ new boost::multiprecision::cpp_int }
-	, number_branch_combinations{ *number_branch_combinationsPtr }
 	{}
 
 	PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
 		: PrimaryKeysGrouping(dmuInstanceDataVector)
-		, number_branch_combinationsPtr{ new boost::multiprecision::cpp_int }
-	, number_branch_combinations{ *number_branch_combinationsPtr }
 	{
 	}
 
@@ -1374,11 +1355,9 @@ public:
 		, weighting{ rhs.weighting }
 	, hits{ rhs.hits }
 	, remaining{ rhs.remaining }
-	, number_branch_combinationsPtr{ new boost::multiprecision::cpp_int{ rhs.number_branch_combinations } }
-	, number_branch_combinations{ *number_branch_combinationsPtr }
+	, number_branch_combinations{ rhs.number_branch_combinations }
 	, leaves{ rhs.leaves }
 	, leaves_cache{ rhs.leaves_cache }
-	, consolidated_hits_end_index{ rhs.consolidated_hits_end_index }
 	{
 	}
 
@@ -1397,7 +1376,6 @@ public:
 		leaves = rhs.leaves;
 		leaves_cache = rhs.leaves_cache;
 		hits_consolidated = rhs.hits_consolidated;
-		consolidated_hits_end_index = rhs.consolidated_hits_end_index;
 		return *this;
 	}
 
@@ -1412,11 +1390,10 @@ public:
 		weighting = rhs.weighting;
 		hits = std::move(rhs.hits);
 		remaining = std::move(rhs.remaining);
-		number_branch_combinations = rhs.number_branch_combinations;
+		number_branch_combinations = std::move(rhs.number_branch_combinations);
 		leaves = std::move(rhs.leaves);
 		leaves_cache = std::move(rhs.leaves_cache);
 		hits_consolidated = std::move(rhs.hits_consolidated);
-		consolidated_hits_end_index = rhs.consolidated_hits_end_index;
 		return *this;
 	}
 
@@ -1457,8 +1434,6 @@ public:
 	//
 	mutable fast__int64__to__fast_branch_output_row_set hits;
 	mutable fast_branch_output_row_vector_huge hits_consolidated;
-	mutable fast_branch_output_row_vector_huge::iterator consolidated_hits_end_index; // We use this to avoid deleting duplicates at the end, which is a performance bottleneck
-	//mutable std_branch_output_row_vector hits_consolidated;
 	//
 	// ******************************************************************************************************** //
 	// ******************************************************************************************************** //
@@ -1671,8 +1646,7 @@ public:
 
 public:
 
-	mutable std::unique_ptr<boost::multiprecision::cpp_int> number_branch_combinationsPtr;
-	boost::multiprecision::cpp_int & number_branch_combinations;
+	mutable newgene_cpp_int number_branch_combinations;
 
 };
 
@@ -2130,13 +2104,7 @@ public:
 	void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf = false) const;
 	void getLeafUsage(size_t & usage, Leaf const & leaf) const;
 	void getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const;
-	void ClearWeightingsAndRemainingBranchJunk(); // only for use when we will never touch this object again.  For use with Boost memory pool.
 	void Clear(); // ditto
-	void ClearRandomNumbers()
-	{
-		// random_numbers.clear() does not usually deallocate!!!
-		FastVector<boost::multiprecision::cpp_int>().swap(random_numbers);
-	}
 
 protected:
 
@@ -2161,7 +2129,7 @@ protected:
 	bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number,
 		VARIABLE_GROUP_MERGE_MODE const merge_mode);
 
-	void GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch);
+	void GenerateOutputRow(newgene_cpp_int random_number, int const K, Branch const & branch);
 	void GenerateAllOutputRows(int const K, Branch const & branch);
 
 	static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_, TimeSlices::value_type const & map_entry_)
@@ -2174,8 +2142,7 @@ protected:
 
 	}
 
-	FastVector<boost::multiprecision::cpp_int> random_numbers;
-	std::vector<boost::multiprecision::cpp_int>::const_iterator random_number_iterator; // unused for now
+	FastVector<newgene_cpp_int> random_numbers;
 
 private:
 
@@ -2183,13 +2150,13 @@ private:
 	bool IncrementPosition(int const K, std::vector<int> & position, Branch const & branch);
 	int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Branch const & branch);
 
-	boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K);
+	newgene_cpp_int BinomialCoefficient(int const N, int const K);
 
 public:
 
 	InstanceDataVector create_output_row_visitor_global_data_cache;
-
-	std::unique_ptr<boost::multiprecision::cpp_int> number_rows_generatedPtr;
+	newgene_cpp_int number_rows_generated;
+	FastVector<newgene_cpp_int>::const_iterator random_number_iterator;
 
 };
 

@@ -11,7 +11,10 @@
 #	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
 #	include <boost/multiprecision/cpp_dec_float.hpp>
+#	include <boost/pool/pool_alloc.hpp>
 #endif 
+
+typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<0, 0, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, boost::fast_pool_allocator<boost::multiprecision::limb_type, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>>> newgene_cpp_int;
 
 enum MESSAGER_MESSAGE_ENUM
 {
@@ -223,7 +226,7 @@ class ProgressBarMeter
 
 		}
 
-		ProgressBarMeter(Messager & messager_, std::string const & progress_message, boost::multiprecision::cpp_int const & max_value)
+		ProgressBarMeter(Messager & messager_, std::string const & progress_message, newgene_cpp_int const & max_value)
 			: messager(messager_)
 			, msg{ progress_message }
 			, progress_bar_max_value{ 0 }
@@ -276,7 +279,7 @@ class ProgressBarMeter
 
 		}
 
-		void UpdateProgressBarValue(std::int32_t cropped_current_value, boost::multiprecision::cpp_int const & current_value)
+		void UpdateProgressBarValue(std::int32_t cropped_current_value, newgene_cpp_int const & current_value)
 		{
 
 			// This version of the function is only called by the routine that actually generates output rows.

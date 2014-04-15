@@ -172,16 +172,8 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, messager(messager_)
 	, failed(false)
 	, overwrite_if_output_file_already_exists(false)
-	, rough_progress_range(0)
-	, rough_progress_increment_one_percent(0)
-	, total_number_primary_rows(0)
-	, current_progress_stage(0)
-	, total_progress_stages(0)
-	, progress_increment_per_stage(0)
-	, current_progress_value(0)
 	, delete_tables(true)
 	, debug_ordering(false)
-	, ms_elapsed(0)
 	, consolidate_rows(true)
 	, random_sampling_number_rows(1)
 	, random_sampling(false)
@@ -224,7 +216,7 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 	});
 
-	std::for_each(primary_group_final_results.begin(), primary_group_final_results.end(), [this](SqlAndColumnSet & sql_and_column_set)
+	std::for_each(merging_of_children_column_sets.begin(), merging_of_children_column_sets.end(), [this](SqlAndColumnSet & sql_and_column_set)
 	{
 
 		std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [this](SQLExecutor & sql_executor)
@@ -236,26 +228,7 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 	});
 
-	std::for_each(intermediate_merging_of_primary_groups_column_sets.begin(), intermediate_merging_of_primary_groups_column_sets.end(), [this](SqlAndColumnSet & sql_and_column_set)
-	{
-
-		std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [this](SQLExecutor & sql_executor)
-		{
-
-			sql_executor.Empty();
-
-		});
-
-	});
-
-	std::for_each(all_merged_results_unformatted.first.begin(), all_merged_results_unformatted.first.end(), [this](SQLExecutor & sql_executor)
-	{
-
-		sql_executor.Empty();
-
-	});
-
-	std::for_each(child_merge_final_result.first.begin(), child_merge_final_result.first.end(), [this](SQLExecutor & sql_executor)
+	std::for_each(random_sampling_schema.first.begin(), random_sampling_schema.first.end(), [this](SQLExecutor & sql_executor)
 	{
 
 		sql_executor.Empty();
@@ -397,7 +370,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	current_progress_stage = 0;
 	messager.UpdateStatusBarText((boost::format("Generating output to file %1%") % boost::filesystem::path(setting_path_to_kad_output).filename()).str().c_str(), this);
 
 	messager.AppendKadStatusText("Beginning generation of K-ad output.", this);
@@ -466,6 +438,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
+
+		// Do not delete!  That would trigger a cascade of deletes on all owned containers,
+		// hanging NewGene for minutes for a ~1,000,000 row run.
+		// Instead, allow the Boost memory pool to dump the memory en-bulk in the "Clear()" routine, above
 		//delete allWeightings_;
 	} BOOST_SCOPE_EXIT_END
 
@@ -573,8 +549,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Number of (granulated) K-adic combinations: %1%") % boost::lexical_cast<std::string>
-									  (allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Number of (granulated) K-adic combinations: %1%") %  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
 		if (random_sampling)
 		{
 
@@ -593,7 +568,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// they will want to be able to remain in random sampling mode even at the 100% sampling level
 			// ********************************************************************************************************************************************************* //
 			std::int64_t samples = random_sampling_number_rows;
-			if (boost::multiprecision::cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
+			if (newgene_cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
 			{ 
 				messager.AppendKadStatusText((boost::format("Decreasing the number of random samples to match the number of total K-adic combinations.")).str().c_str(), this);
 				samples = allWeightings.weighting.getWeighting().convert_to<int>();
@@ -603,7 +578,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Generate and store the desired number of random numbers - one random number per output row is stored here
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Generating %1% random numbers between 1 and %2%...") % boost::lexical_cast<std::string>
-										  (samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str()).str(), this);
+										  (samples).c_str() % allWeightings.weighting.getWeightingString().c_str()).str(), this);
 			allWeightings.PrepareRandomNumbers(samples);
 			if (failed || CheckCancelled()) { return; }
 			messager.AppendKadStatusText((boost::format("Done generating random numbers.")).str().c_str(), this);
@@ -631,14 +606,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Give text feedback that the sampler is entering full sampling mode
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-adic combinations will be generated.") % boost::lexical_cast<std::string>
-										  (allWeightings.weighting.getWeighting()).c_str()).str().c_str(), this);
+			messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-adic combinations will be generated.") % allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
 
 			// ********************************************************************************************************************************************************* //
 			// Generate all K-ad combinations now
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % boost::lexical_cast<std::string>
-										  (allWeightings.weighting.getWeighting()).c_str()).str(), this);
+			messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % allWeightings.weighting.getWeightingString().c_str()).str(), this);
 			allWeightings.PrepareFullSamples(K);
 			messager.AppendKadStatusText((boost::format("Completed generating full selection of K-adic combinations.")).str(), this);
 			if (failed || CheckCancelled()) { return; }
@@ -842,12 +815,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	done = true;
 
-}
-
-void OutputModel::OutputGenerator::DetermineNumberStages()
-{
-
-	return;
 }
 
 void OutputModel::OutputGenerator::SavedRowData::Clear()

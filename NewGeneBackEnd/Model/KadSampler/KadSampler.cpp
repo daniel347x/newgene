@@ -25,12 +25,11 @@ std::string create_output_row_visitor::row_in_process;
 int Weighting::how_many_weightings = 0;
 
 KadSampler::KadSampler(Messager & messager_)
-	: insert_random_sample_stmt(nullptr)
-	, numberChildVariableGroups(0)
-	, time_granularity(TIME_GRANULARITY__NONE)
-	, random_rows_added(0)
-	, messager(messager_)
-	, number_rows_generatedPtr{ new boost::multiprecision::cpp_int }
+: insert_random_sample_stmt(nullptr)
+, numberChildVariableGroups(0)
+, time_granularity(TIME_GRANULARITY__NONE)
+, random_rows_added(0)
+, messager(messager_)
 {
 }
 
@@ -40,8 +39,8 @@ KadSampler::~KadSampler()
 }
 
 std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf,
-		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling,
-		TimeSlices::iterator mapIterator_, bool const useIterator)
+	int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling,
+	TimeSlices::iterator mapIterator_, bool const useIterator)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
@@ -196,7 +195,7 @@ std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranch
 		// it could lie either inside the map element, at the right edge of the map element,
 		// or past the right edge of the map element.
 		bool no_more_time_slice = HandleTimeSliceNormalCase(added, branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode, AvgMsperUnit, consolidate_rows,
-								  random_sampling);
+			random_sampling);
 
 		if (no_more_time_slice)
 		{
@@ -253,7 +252,7 @@ std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranch
 //   of the map entry
 // - An iterator to the next map entry.
 bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr,
-		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+	int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	bool added_new = false;
@@ -319,9 +318,9 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 			// The remainder of the new time slice (at the right) is now in the variable "newTimeSliceLeaf" and ready for the next iteration.
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.getEnd(), new_left_slice);
-			
+
 			added_new = MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_number, merge_mode);
-			
+
 			mapElementPtr = ++mapElementPtr;
 
 		}
@@ -408,7 +407,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 
 // breaks an existing map entry into two pieces and returns an iterator to both
 void KadSampler::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr,
-								  TimeSlices::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+	TimeSlices::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
@@ -435,7 +434,7 @@ void KadSampler::SliceMapEntry(TimeSlices::iterator const & existingMapElementPt
 
 // breaks an existing map entry into three pieces and returns an iterator to the middle piece
 void KadSampler::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right,
-								  TimeSlices::iterator & newMapElementMiddlePtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+	TimeSlices::iterator & newMapElementMiddlePtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
@@ -474,7 +473,7 @@ void KadSampler::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const
 
 // Merge time slice data into a map element
 bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number,
-		VARIABLE_GROUP_MERGE_MODE const merge_mode)
+	VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
 	// ******************************************************************************************************************************** //
@@ -535,160 +534,160 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 		switch (merge_mode)
 		{
 
-			case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
-				{
+		case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
+		{
 
-					// *********************************************************************************** //
-					// This is where multiple rows with duplicated primary keys
-					// and overlapping time range will be wiped out.
-					// ... Only one row with given primary keys and time range is allowed
-					// ... (the first one - emplace does nothing if the entry already exists).
-					// ... (Note that the leaf points to a specific row of secondary data.)
-					// *********************************************************************************** //
-					auto branchPtr = branches.find(branch);
+												   // *********************************************************************************** //
+												   // This is where multiple rows with duplicated primary keys
+												   // and overlapping time range will be wiped out.
+												   // ... Only one row with given primary keys and time range is allowed
+												   // ... (the first one - emplace does nothing if the entry already exists).
+												   // ... (Note that the leaf points to a specific row of secondary data.)
+												   // *********************************************************************************** //
+												   auto branchPtr = branches.find(branch);
 
-					if (branchPtr == branches.cend())
-					{
-						auto inserted = branches.insert(branch);
-						branchPtr = inserted.first;
-					}
+												   if (branchPtr == branches.cend())
+												   {
+													   auto inserted = branches.insert(branch);
+													   branchPtr = inserted.first;
+												   }
 
-					branchPtr->InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
+												   branchPtr->InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
 
-					added = true;
+												   added = true;
 
-				}
-				break;
+		}
+			break;
 
-			case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
-				{
+		case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
+		{
 
-					// Let's take a peek and see if our branch is already present
+													 // Let's take a peek and see if our branch is already present
 
-					Branches::iterator branchPtr = branches.find(branch);
+													 Branches::iterator branchPtr = branches.find(branch);
 
-					if (branchPtr != branches.end())
-					{
+													 if (branchPtr != branches.end())
+													 {
 
-						// *********************************************************************************** //
-						// The incoming branch *does* already exist!
-						// We want to see if this branch contains the incoming leaf, or not.
-						// *********************************************************************************** //
+														 // *********************************************************************************** //
+														 // The incoming branch *does* already exist!
+														 // We want to see if this branch contains the incoming leaf, or not.
+														 // *********************************************************************************** //
 
-						Branch const & current_branch = *branchPtr;
+														 Branch const & current_branch = *branchPtr;
 
-						if (current_branch.doesLeafExist(timeSliceLeaf.second))
-						{
+														 if (current_branch.doesLeafExist(timeSliceLeaf.second))
+														 {
 
-							// This branch *does* contain the incoming leaf!
-							// Set the data in the leaf for this non-primary top-level variable group.
+															 // This branch *does* contain the incoming leaf!
+															 // Set the data in the leaf for this non-primary top-level variable group.
 
-							// Note that many different OUTPUT ROWS might reference this leaf;
-							// perhaps even multiple times within a single output row.  Fine!
+															 // Note that many different OUTPUT ROWS might reference this leaf;
+															 // perhaps even multiple times within a single output row.  Fine!
 
-							// pass the index over from the incoming leaf (which contains only the index for the current top-level variable group being merged in)
-							// into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
-							// (This active leaf may also have been called previously to set other top-level variable group rows.)
-							current_branch.setTopGroupIndexIntoRawData(timeSliceLeaf.second, variable_group_number, timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
+															 // pass the index over from the incoming leaf (which contains only the index for the current top-level variable group being merged in)
+															 // into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
+															 // (This active leaf may also have been called previously to set other top-level variable group rows.)
+															 current_branch.setTopGroupIndexIntoRawData(timeSliceLeaf.second, variable_group_number, timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
 
-							added = true;
+															 added = true;
 
-						}
+														 }
 
-					}
+													 }
 
-				}
-				break;
+		}
+			break;
 
-			case VARIABLE_GROUP_MERGE_MODE__CHILD:
-				{
+		case VARIABLE_GROUP_MERGE_MODE__CHILD:
+		{
 
-					// Construct the child's DMU keys, including leaf
-					ChildDMUInstanceDataVector dmu_keys;
-					dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
-					dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
+												 // Construct the child's DMU keys, including leaf
+												 ChildDMUInstanceDataVector dmu_keys;
+												 dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
+												 dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
 
-					// *********************************************************************************** //
-					// Loop through all BRANCHES for this variable group in this time slice.
-					// For each, we have a set of output rows.
-					// *********************************************************************************** //
+												 // *********************************************************************************** //
+												 // Loop through all BRANCHES for this variable group in this time slice.
+												 // For each, we have a set of output rows.
+												 // *********************************************************************************** //
 
-					for (auto branchesPtr = branches.begin(); branchesPtr != branches.end(); ++branchesPtr)
-					{
+												 for (auto branchesPtr = branches.begin(); branchesPtr != branches.end(); ++branchesPtr)
+												 {
 
-						Branch const & the_current_map_branch = *branchesPtr;
+													 Branch const & the_current_map_branch = *branchesPtr;
 
-						// *********************************************************************************** //
-						// "leaves_cache" is a vector cache containing the same leaves in the same order
-						// as the official "leaves" set containing the leaves for the current branch.
-						//
-						// Note that a call to "ResetBranchCaches()" previous to the high-level call to "HandleBranchAndLeaf()",
-						// in which we are nested, has already set the "leaves_cache" cache,
-						// and this cache is copied whenever any map entry changes.
-						// *********************************************************************************** //
+													 // *********************************************************************************** //
+													 // "leaves_cache" is a vector cache containing the same leaves in the same order
+													 // as the official "leaves" set containing the leaves for the current branch.
+													 //
+													 // Note that a call to "ResetBranchCaches()" previous to the high-level call to "HandleBranchAndLeaf()",
+													 // in which we are nested, has already set the "leaves_cache" cache,
+													 // and this cache is copied whenever any map entry changes.
+													 // *********************************************************************************** //
 
-						// The following cache will only be filled on the first pass
-						the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
+													 // The following cache will only be filled on the first pass
+													 the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
 
-						// *********************************************************************************** //
-						// We have an incoming child variable group branch and leaf.
-						// Find all matching output rows that contain the same DMU data on the matching columns.
-						// *********************************************************************************** //
-						// ... never use "consolidating rows" version here, because consolidation always happens after all rows are merged
-						auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.find(dmu_keys);
+													 // *********************************************************************************** //
+													 // We have an incoming child variable group branch and leaf.
+													 // Find all matching output rows that contain the same DMU data on the matching columns.
+													 // *********************************************************************************** //
+													 // ... never use "consolidating rows" version here, because consolidation always happens after all rows are merged
+													 auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.find(dmu_keys);
 
-						bool no_matches_for_this_child = false;
+													 bool no_matches_for_this_child = false;
 
-						if (matchingOutputRows == the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.cend())
-						{
-							no_matches_for_this_child = true;
-						}
+													 if (matchingOutputRows == the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.cend())
+													 {
+														 no_matches_for_this_child = true;
+													 }
 
-						// Loop through all matching output rows
-						if (!no_matches_for_this_child)
-						{
-							for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
-							{
+													 // Loop through all matching output rows
+													 if (!no_matches_for_this_child)
+													 {
+														 for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
+														 {
 
-								BranchOutputRow const & outputRow = *matchingOutputRowPtr->first;
-								fast_short_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
+															 BranchOutputRow const & outputRow = *matchingOutputRowPtr->first;
+															 fast_short_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
 
-								// matchingOutputChildLeaves is a vector
+															 // matchingOutputChildLeaves is a vector
 
-								// Loop through all matching output row child leaves
-								for (auto matchingOutputChildLeavesPtr = matchingOutputChildLeaves.cbegin(); matchingOutputChildLeavesPtr != matchingOutputChildLeaves.cend(); ++matchingOutputChildLeavesPtr)
-								{
+															 // Loop through all matching output row child leaves
+															 for (auto matchingOutputChildLeavesPtr = matchingOutputChildLeaves.cbegin(); matchingOutputChildLeavesPtr != matchingOutputChildLeaves.cend(); ++matchingOutputChildLeavesPtr)
+															 {
 
-									std::int16_t const & matching_child_leaf_index = *matchingOutputChildLeavesPtr;
+																 std::int16_t const & matching_child_leaf_index = *matchingOutputChildLeavesPtr;
 
-									auto const found = outputRow.child_indices_into_raw_data.find(variable_group_number);
+																 auto const found = outputRow.child_indices_into_raw_data.find(variable_group_number);
 
-									if (found == outputRow.child_indices_into_raw_data.cend())
-									{
-										outputRow.child_indices_into_raw_data[variable_group_number] = fast_short_to_int_map();
-									}
+																 if (found == outputRow.child_indices_into_raw_data.cend())
+																 {
+																	 outputRow.child_indices_into_raw_data[variable_group_number] = fast_short_to_int_map();
+																 }
 
-									auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
-									outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
+																 auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
+																 outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
 
-									added = true;
+																 added = true;
 
-								}
+															 }
 
-							}
+														 }
 
-						}
+													 }
 
-					}
+												 }
 
-				}
-				break;
+		}
+			break;
 
-			default:
-				{
+		default:
+		{
 
-				}
-				break;
+		}
+			break;
 
 		}
 
@@ -716,7 +715,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	});
 
 	// Now calculate the weightings
-	boost::multiprecision::cpp_int currentWeighting = 0;
+	newgene_cpp_int currentWeighting = 0;
 	std::int64_t branch_count = 0;
 	std::int64_t time_slice_count = 0;
 	ProgressBarMeter meter(messager, std::string("Weighting for %1% / %2% branches calculated"), total_branches);
@@ -778,10 +777,6 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 				branchWeighting.setWeightingRangeStart(currentWeighting);
 				currentWeighting += branchWeighting.getWeighting();
 
-				//boost::format msg("New weighting being added for branch: %1%");
-				//msg % boost::lexical_cast<std::string>(weighting.getWeighting());
-				//messager.AppendKadStatusText(msg.str(), nullptr);
-
 				variableGroupBranchesAndLeavesWeighting.addWeighting(branchWeighting.getWeighting());
 
 				meter.UpdateProgressBarValue(branch_count);
@@ -815,7 +810,14 @@ void KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const
 	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
 }
 
-typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<0, 0, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, boost::fast_pool_allocator<boost::multiprecision::limb_type, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>>> newgene_cpp_int;
+struct newgene_randomvector_tag {};
+typedef boost::singleton_pool<newgene_randomvector_tag, sizeof(FastVector<newgene_cpp_int>), boost::default_user_allocator_malloc_free>
+RandomVectorPool;
+
+struct newgene_randomset_tag {};
+typedef boost::singleton_pool<newgene_randomset_tag, sizeof(FastSet<newgene_cpp_int>), boost::default_user_allocator_malloc_free>
+RandomSetPool;
+
 void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 {
 
@@ -831,9 +833,8 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	ClearRandomNumbers();
 	boost::random::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
-	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> distribution(weighting.getWeightingRangeStart(), weighting.getWeightingRangeEnd());
+	boost::random::uniform_int_distribution<newgene_cpp_int> distribution(weighting.getWeightingRangeStart(), weighting.getWeightingRangeEnd());
 
 	// Check out this clean, simple approach:
 	// The available row samples are discretely numbered.
@@ -841,13 +842,10 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	// choice of branches (each branch corresponding to a
 	// window of discrete values), including no-replacement.
 	bool reverse_mode = false;
-	//std::vector<boost::multiprecision::cpp_int> remaining;
-	//std::vector<boost::multiprecision::cpp_int>::iterator remainingPtr;
-	//std::set<boost::multiprecision::cpp_int> tmp_random_numbers;
-	auto remaining_ = new FastVector<newgene_cpp_int>; // let pointer drop off stack without deleting; let boost pool manage
+	auto remaining_ = reinterpret_cast<FastVector<newgene_cpp_int>*>(RandomVectorPool::malloc()); // let pointer drop off stack without deleting; let boost pool manage
 	auto & remaining = *remaining_;
 	std::vector<newgene_cpp_int>::iterator remainingPtr;
-	auto tmp_random_numbers_ = new FastSet<newgene_cpp_int>;
+	auto tmp_random_numbers_ = reinterpret_cast<FastSet<newgene_cpp_int>*>(RandomSetPool::malloc());
 	auto & tmp_random_numbers = *tmp_random_numbers_;
 
 	ProgressBarMeter meter(messager, "Generated %1% out of %2% random numbers", how_many);
@@ -868,13 +866,13 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 			}
 
 		}
-		else if (boost::multiprecision::cpp_int(tmp_random_numbers.size()) > weighting.getWeighting() / 2)
+		else if (newgene_cpp_int(tmp_random_numbers.size()) > weighting.getWeighting() / 2)
 		{
 			// Over 50% of the available numbers are already consumed.
 			// It must be a "somewhat" small number of available numbers.
 
 			// Begin pulling numbers randomly from the remaining set available.
-			for (boost::multiprecision::cpp_int n = 0; n < weighting.getWeighting(); ++n)
+			for (newgene_cpp_int n = 0; n < weighting.getWeighting(); ++n)
 			{
 				if (tmp_random_numbers.count(n) == 0)
 				{
@@ -953,7 +951,7 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 
 		branch.remaining[which_time_unit].push_back(single_leaf_combination);
 
-		++(*number_rows_generatedPtr);
+		++number_rows_generated;
 
 	}
 
@@ -968,12 +966,12 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 	}
 
 	branch.hits[which_time_unit].insert(std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].begin()),
-										std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].end()));
+		std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].end()));
 	branch.remaining[which_time_unit].clear();
 
 }
 
-void KadSampler::GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch)
+void KadSampler::GenerateOutputRow(newgene_cpp_int random_number, int const K, Branch const & branch)
 {
 
 	random_number -= branch.weighting.getWeightingRangeStart();
@@ -982,7 +980,7 @@ void KadSampler::GenerateOutputRow(boost::multiprecision::cpp_int random_number,
 
 	if (time_granularity != TIME_GRANULARITY__NONE)
 	{
-		boost::multiprecision::cpp_int which_time_unit_ = random_number / branch.number_branch_combinations;
+		newgene_cpp_int which_time_unit_ = random_number / branch.number_branch_combinations;
 		which_time_unit = which_time_unit_.convert_to<std::int64_t>();
 	}
 	else
@@ -1015,8 +1013,8 @@ void KadSampler::GenerateOutputRow(boost::multiprecision::cpp_int random_number,
 	if (!skip)
 	{
 
-		BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) < branch.number_branch_combinations,
-						 "The number of hits is as large as the number of combinations for a branch.  Invalid!");
+		BOOST_ASSERT_MSG(newgene_cpp_int(branch.hits[which_time_unit].size()) < branch.number_branch_combinations,
+			"The number of hits is as large as the number of combinations for a branch.  Invalid!");
 
 		// skip any leaf combinations returned from previous random numbers - count will be 1 if previously hit for this time unit
 		// THIS is where random selection WITH REMOVAL is implemented (along with the fact that the random numbers generated are also with removal)
@@ -1025,7 +1023,7 @@ void KadSampler::GenerateOutputRow(boost::multiprecision::cpp_int random_number,
 
 			test_leaf_combination.Clear();
 
-			if (boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) > branch.number_branch_combinations / 2)
+			if (newgene_cpp_int(branch.hits[which_time_unit].size()) > branch.number_branch_combinations / 2)
 			{
 
 				// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
@@ -1126,7 +1124,7 @@ void KadSampler::GenerateOutputRow(boost::multiprecision::cpp_int random_number,
 void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch)
 {
 
-	boost::multiprecision::cpp_int total_added = 0;
+	newgene_cpp_int total_added = 0;
 
 	branch.remaining.clear();
 	std::vector<int> position;
@@ -1148,7 +1146,7 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 
 	}
 
-	(*number_rows_generatedPtr) += total_added;
+	number_rows_generated += total_added;
 
 }
 
@@ -1227,7 +1225,7 @@ int KadSampler::IncrementPositionManageSubK(int const K, int const subK_, std::v
 
 }
 
-boost::multiprecision::cpp_int KadSampler::BinomialCoefficient(int const N, int const K)
+newgene_cpp_int KadSampler::BinomialCoefficient(int const N, int const K)
 {
 
 	if (N == 0)
@@ -1242,17 +1240,17 @@ boost::multiprecision::cpp_int KadSampler::BinomialCoefficient(int const N, int 
 
 	// Goddamn boost::multiprecision under no circumstances will allow an integer calculation of the binomial coefficient
 
-	boost::multiprecision::cpp_int numerator { 1 };
-	boost::multiprecision::cpp_int denominator { 1 };
+	newgene_cpp_int numerator{ 1 };
+	newgene_cpp_int denominator{ 1 };
 
 	for (int n = N; n > N - K; --n)
 	{
-		numerator *= boost::multiprecision::cpp_int(n);
+		numerator *= newgene_cpp_int(n);
 	}
 
 	for (int n = 1; n <= K; ++n)
 	{
-		denominator *= boost::multiprecision::cpp_int(n);
+		denominator *= newgene_cpp_int(n);
 	}
 
 	return numerator / denominator;
@@ -1338,7 +1336,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 
 				// First in the "child DMU" vector are the child's BRANCH DMU values
 				std::for_each(allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cbegin(),
-							  allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+					allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
 					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the branch)
@@ -1346,57 +1344,57 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 					switch (childToPrimaryMapping.mapping)
 					{
 
-						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-							{
+					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
+					{
 
-								// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-								child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+																	 // The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+																	 child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
-							}
-							break;
+					}
+						break;
 
-						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-							{
+					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
+					{
 
-								// leaf_number tells us which leaf
-								// index tells us which index in that leaf
+																   // leaf_number tells us which leaf
+																   // index tells us which index in that leaf
 
-								// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+																   // The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
 
-								if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
-									(outputRow.primary_leaves_cache.size()))
-								{
-									branch_component_bad = true;
-									break;
-								}
+																   if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
+																	   (outputRow.primary_leaves_cache.size()))
+																   {
+																	   branch_component_bad = true;
+																	   break;
+																   }
 
-								if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
-									== 0)
-								{
-									// This is the K=1 case - the matching leaf of the *top-level* UOA
-									// has no primary keys.  This is a logic error, as we should never match
-									// a "leaf" in the top-level UOA in this case.
-									//
-									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
-									// in particular the following lines:
-									// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
-									// --> // {
-									// --> //     is_current_index_a_top_level_primary_group_branch = true;
-									// --> // }
+																   if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
+																	   == 0)
+																   {
+																	   // This is the K=1 case - the matching leaf of the *top-level* UOA
+																	   // has no primary keys.  This is a logic error, as we should never match
+																	   // a "leaf" in the top-level UOA in this case.
+																	   //
+																	   // To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
+																	   // in particular the following lines:
+																	   // --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+																	   // --> // {
+																	   // --> //     is_current_index_a_top_level_primary_group_branch = true;
+																	   // --> // }
 
-									boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
-									throw NewGeneException() << newgene_error_description(msg.str());
-								}
+																	   boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
+																	   throw NewGeneException() << newgene_error_description(msg.str());
+																   }
 
-								child_hit_vector_branch_components.push_back(DMUInstanceData(
-											leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+																   child_hit_vector_branch_components.push_back(DMUInstanceData(
+																	   leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
-							}
-							break;
+					}
+						break;
 
-						default:
-							{}
-							break;
+					default:
+					{}
+						break;
 
 					}
 
@@ -1417,7 +1415,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				child_hit_vector.clear();
 				child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector_branch_components.begin(), child_hit_vector_branch_components.end());
 				std::for_each(allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cbegin(),
-							  allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+					allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
 					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the leaf)
@@ -1425,66 +1423,66 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 					switch (childToPrimaryMapping.mapping)
 					{
 
-						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-							{
+					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
+					{
 
-								// The next DMU in the child leaf's DMU sequence maps to a branch in the top-level DMU sequence
-								child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+																	 // The next DMU in the child leaf's DMU sequence maps to a branch in the top-level DMU sequence
+																	 child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
-							}
-							break;
+					}
+						break;
 
-						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-							{
+					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
+					{
 
-								// leaf_number tells us which leaf
-								// index tells us which index in that leaf
+																   // leaf_number tells us which leaf
+																   // index tells us which index in that leaf
 
-								// The next DMU in the child leaf's DMU sequence maps to a leaf in the top-level DMU sequence
+																   // The next DMU in the child leaf's DMU sequence maps to a leaf in the top-level DMU sequence
 
-								if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
-									(outputRow.primary_leaves_cache.size()))
-								{
-									// The current child leaf maps to a top-level leaf that has no data.
-									// We therefore cannot match.
-									missing_top_level_leaf = true;
-									break;
-								}
+																   if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
+																	   (outputRow.primary_leaves_cache.size()))
+																   {
+																	   // The current child leaf maps to a top-level leaf that has no data.
+																	   // We therefore cannot match.
+																	   missing_top_level_leaf = true;
+																	   break;
+																   }
 
-								if (outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]
-									>= static_cast<int>(leaves_cache.size()))
-								{
-									boost::format msg("Logic error: Output rows saved with the branch point to leaf indexes that do not exist in the branch!");
-									throw NewGeneException() << newgene_error_description(msg.str());
-								}
+																   if (outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]
+																	   >= static_cast<int>(leaves_cache.size()))
+																   {
+																	   boost::format msg("Logic error: Output rows saved with the branch point to leaf indexes that do not exist in the branch!");
+																	   throw NewGeneException() << newgene_error_description(msg.str());
+																   }
 
-								if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
-									== 0)
-								{
-									// This is the K=1 case - the matching leaf of the *top-level* UOA
-									// has no primary keys.  This is a logic error, as we should never match
-									// a "leaf" in the top-level UOA in this case.
-									//
-									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
-									// in particular the following lines:
-									// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
-									// --> // {
-									// --> //     is_current_index_a_top_level_primary_group_branch = true;
-									// --> // }
+																   if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
+																	   == 0)
+																   {
+																	   // This is the K=1 case - the matching leaf of the *top-level* UOA
+																	   // has no primary keys.  This is a logic error, as we should never match
+																	   // a "leaf" in the top-level UOA in this case.
+																	   //
+																	   // To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
+																	   // in particular the following lines:
+																	   // --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+																	   // --> // {
+																	   // --> //     is_current_index_a_top_level_primary_group_branch = true;
+																	   // --> // }
 
-									boost::format msg("Logic error: attempting to match child leaf data to a leaf in the top-level unit of analysis when K=1");
-									throw NewGeneException() << newgene_error_description(msg.str());
-								}
+																	   boost::format msg("Logic error: attempting to match child leaf data to a leaf in the top-level unit of analysis when K=1");
+																	   throw NewGeneException() << newgene_error_description(msg.str());
+																   }
 
-								child_hit_vector.push_back(DMUInstanceData(
-															   leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+																   child_hit_vector.push_back(DMUInstanceData(
+																	   leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
-							}
-							break;
+					}
+						break;
 
-						default:
-							{}
-							break;
+					default:
+					{}
+						break;
 
 					}
 
@@ -1530,7 +1528,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 {
 
 	TimeSlices::const_iterator timeSlicePtr = timeSlices.cbegin();
-	boost::multiprecision::cpp_int currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
+	newgene_cpp_int currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
 
 	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% randomly selected rows"), static_cast<std::int32_t>(random_numbers.size()));
 	std::int32_t random_rows_generated = 0;
@@ -1542,7 +1540,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 			break;
 		}
 
-		boost::multiprecision::cpp_int const & random_number = *random_number_iterator;
+		newgene_cpp_int const & random_number = *random_number_iterator;
 
 		bool optimization = true;
 
@@ -1572,10 +1570,10 @@ void KadSampler::PrepareRandomSamples(int const K)
 			// no optimization - the random number could lie in any map element
 
 			BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0
-							 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
+				&& weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
 
 			TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](TimeSlices::value_type const & timeSliceData,
-					boost::multiprecision::cpp_int const & test_random_number)
+				newgene_cpp_int const & test_random_number)
 			{
 				VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
 
@@ -1606,7 +1604,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 
 		// Pick a branch randomly (with weight!)
 		Branches::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch,
-											   boost::multiprecision::cpp_int const & test_random_number)
+			newgene_cpp_int const & test_random_number)
 		{
 			if (testBranch.weighting.getWeightingRangeEnd() < test_random_number)
 			{
@@ -1633,7 +1631,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 void KadSampler::PrepareFullSamples(int const K)
 {
 
-	(*number_rows_generatedPtr) = 0;
+	number_rows_generated = 0;
 	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% K-ad combinations"), weighting.getWeighting());
 	std::int32_t cropped_current_iteration = 0;
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
@@ -1653,7 +1651,7 @@ void KadSampler::PrepareFullSamples(int const K)
 		});
 
 		++cropped_current_iteration;
-		meter.UpdateProgressBarValue(cropped_current_iteration, *number_rows_generatedPtr);
+		meter.UpdateProgressBarValue(cropped_current_iteration, number_rows_generated);
 		if (cropped_current_iteration > meter.update_every_how_often)
 		{
 			cropped_current_iteration = 0;
@@ -1770,13 +1768,13 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 }
 
 BranchOutputRow::BranchOutputRow()
-: child_indices_into_raw_data_(new fast__short__to__fast_short_to_int_map__loaded)
+: child_indices_into_raw_data_(reinterpret_cast<fast__short__to__fast_short_to_int_map__loaded*>(BranchOutputRowPool::malloc()))
 , child_indices_into_raw_data(*child_indices_into_raw_data_)
 {
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
-: child_indices_into_raw_data_(new fast__short__to__fast_short_to_int_map__loaded)
+: child_indices_into_raw_data_(reinterpret_cast<fast__short__to__fast_short_to_int_map__loaded*>(BranchOutputRowPool::malloc()))
 , child_indices_into_raw_data(*child_indices_into_raw_data_)
 , primary_leaves(rhs.primary_leaves)
 {
@@ -1786,10 +1784,10 @@ BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
-	: primary_leaves(std::move(rhs.primary_leaves))
-	, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
-	, child_indices_into_raw_data_(new fast__short__to__fast_short_to_int_map__loaded)
-	, child_indices_into_raw_data(*child_indices_into_raw_data_)
+: primary_leaves(std::move(rhs.primary_leaves))
+, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
+, child_indices_into_raw_data_(reinterpret_cast<fast__short__to__fast_short_to_int_map__loaded*>(BranchOutputRowPool::malloc()))
+, child_indices_into_raw_data(*child_indices_into_raw_data_)
 {
 	// WE NEED THIS COPY.  We have only created it, above, but not copied from RHS
 	child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
@@ -1977,7 +1975,7 @@ void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set c
 }
 
 template<typename T>
-void SpitSetOfOutputRows(std::string & sdata, T const & setOfRows) 
+void SpitSetOfOutputRows(std::string & sdata, T const & setOfRows)
 {
 	sdata += "<SET_OF_ROWS>";
 
@@ -2102,7 +2100,7 @@ void SpitLeaf(std::string & sdata, Leaf const & leaf)
 	sdata += "</LEAF_DMU_DATALIST>";
 	sdata += "<OTHER_NON_PRIMARY_TOP_LEVEL_INDICES__ONE_PER_LEAF__POINTING_INTO_DATA_CACHE>";
 	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(),
-				  leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map::value_type const & leafindicesintorawdata)
+		leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map::value_type const & leafindicesintorawdata)
 	{
 		sdata += "<VARIABLE_GROUP>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
@@ -2167,7 +2165,7 @@ void SpitWeighting(std::string & sdata, Weighting const & weighting)
 	sdata += "</WEIGHTING_END>";
 
 	sdata += "<WEIGHTING_VALUE>";
-	sdata += weighting.getWeighting().str();
+	sdata += weighting.getWeightingString();
 	sdata += "</WEIGHTING_VALUE>";
 }
 
@@ -2183,7 +2181,7 @@ void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMappi
 
 	sdata += "<leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf>";
 	sdata += boost::lexical_cast<std::string>
-			 (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf);
+		(childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf);
 	sdata += "</leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf>";
 
 }
@@ -2227,8 +2225,8 @@ void SpitAllWeightings(KadSampler const & allWeightings, std::string const & fil
 
 	*sdata += "<childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
 	std::for_each(allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cbegin(),
-				  allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cend(), [&](decltype(
-							  allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1)::value_type const & oneChildGroup)
+		allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cend(), [&](decltype(
+		allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1)::value_type const & oneChildGroup)
 	{
 		*sdata += "<child_group>";
 
@@ -2262,7 +2260,7 @@ void SpitAllWeightings(KadSampler const & allWeightings, std::string const & fil
 		sdata_.clear();
 
 		std::for_each(allWeightings.mappings_from_child_branch_to_primary.cbegin(),
-					  allWeightings.mappings_from_child_branch_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_branch_to_primary)::value_type const & oneChildGroupBranchMappings)
+			allWeightings.mappings_from_child_branch_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_branch_to_primary)::value_type const & oneChildGroupBranchMappings)
 		{
 			if (oneChildGroupBranchMappings.first == c)
 			{
@@ -2284,7 +2282,7 @@ void SpitAllWeightings(KadSampler const & allWeightings, std::string const & fil
 		*sdata += "<LEAF_MAPPINGS>";
 
 		std::for_each(allWeightings.mappings_from_child_leaf_to_primary.cbegin(),
-					  allWeightings.mappings_from_child_leaf_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_leaf_to_primary)::value_type const & oneChildGroupLeafMappings)
+			allWeightings.mappings_from_child_leaf_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_leaf_to_primary)::value_type const & oneChildGroupLeafMappings)
 		{
 			if (oneChildGroupLeafMappings.first == c)
 			{
@@ -2458,7 +2456,7 @@ void SpitLeaves(std::string & sdata, Branch const & branch)
 //#endif
 
 void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice,
-		std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+	std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	// ********************************************************************************************** //
@@ -3268,47 +3266,6 @@ void KadSampler::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to
 	}
 }
 
-// only for use when we will never touch this object again.  For use with Boost memory pool.
-void KadSampler::ClearWeightingsAndRemainingBranchJunk()
-{
-	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
-	{
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
-		variableGroupTimeSliceData.weighting.ClearWeighting();
-		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
-		{
-			variableGroupBranchesAndLeaves.weighting.ClearWeighting();
-			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
-			{
-
-				// Due to optimization and use of branch.hits_consolidated, the sole case of a regular,
-				// non-Boost memory pool data structure (besides the cpp_int structures),
-				// we must manually delete it here.
-				// // No! The data structure has been switched back to the boost memory pool and changed to a vector,
-				// // in an attempt to get the optimization to work.
-				// Actually, yes.
-				// Actually, no.
-				//branch.hits_consolidated.clear();
-
-				branch.weighting.ClearWeighting();
-				branch.number_branch_combinationsPtr.reset(); // The one cpp_int that is not part of a Weighting instance
-				for (auto const & leaf : branch.leaves)
-				{
-					delete leaf.other_top_level_indices_into_raw_data_;
-					leaf.other_top_level_indices_into_raw_data_ = nullptr;
-				}
-
-			});
-		});
-	});
-	weighting.ClearWeighting();
-	number_rows_generatedPtr.reset();
-
-	ClearRandomNumbers();
-
-}
-
 template <typename TAG, int SIZE>
 void purge_pool()
 {
@@ -3336,16 +3293,16 @@ void purge_pool()
 	// This is a negligible operation if there is no pool at the given size.
 
 	// Smallest possible size of the internal node in bytes, followed by additional byte guesses up to 48 additional bytes
-	boost::singleton_pool < TAG, SIZE + 0,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 1,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 2,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 3,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 4,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 5,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 6,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 7,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 8,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 9,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 0, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 1, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 2, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 3, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 4, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 5, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 6, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 7, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 8, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 9, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 10, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 11, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 12, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
@@ -3399,9 +3356,7 @@ void KadSampler::Clear()
 	{
 		sqlite3_finalize(insert_random_sample_stmt);
 		insert_random_sample_stmt = nullptr;
-	} 
-
-	ClearWeightingsAndRemainingBranchJunk();
+	}
 
 	purge_pool<boost::pool_allocator_tag, sizeof(InstanceDataVector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(InstanceData)>();
@@ -3411,15 +3366,15 @@ void KadSampler::Clear()
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_int_vector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_leaf_vector::value_type)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>(); 
+	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector_huge::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeavesVector::value_type)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(newgene_cpp_int)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(boost::multiprecision::limb_type)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(newgene_cpp_int)>();
 
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();
@@ -3444,6 +3399,11 @@ void KadSampler::Clear()
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(boost::multiprecision::limb_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(newgene_cpp_int)>();
+
+	LeafPool::purge_memory();
+	BranchOutputRowPool::purge_memory();
+	RandomVectorPool::purge_memory();
+	RandomSetPool::purge_memory();
 
 	messager.SetPerformanceLabel("");
 
