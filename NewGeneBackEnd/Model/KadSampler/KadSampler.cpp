@@ -844,13 +844,13 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	bool reverse_mode = false;
 
 	void * ptr = RandomVectorPool::malloc();
-	auto remaining_ = new(ptr)FastVector<newgene_cpp_int>(reinterpret_cast<FastVector<newgene_cpp_int>const&>(*ptr)); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
+	auto remaining_ = new(ptr)FastVector(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
 	auto & remaining = *remaining_;
 
 	FastVector<newgene_cpp_int>::iterator remainingPtr = remaining.begin();
 
 	ptr = RandomSetPool::malloc();
-	auto tmp_random_numbers_ = new(ptr)FastSet<newgene_cpp_int>(reinterpret_cast<FastVector<newgene_cpp_int>const&>(*ptr)); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
+	auto tmp_random_numbers_ = new(ptr)FastSet(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
 	auto & tmp_random_numbers = *tmp_random_numbers_;
 
 	ProgressBarMeter meter(messager, "Generated %1% out of %2% random numbers", how_many);
@@ -1773,13 +1773,13 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 }
 
 BranchOutputRow::BranchOutputRow()
-: child_indices_into_raw_data_(new(BranchOutputRowPool::malloc())fast__short__to__fast_short_to_int_map__loaded(*child_indices_into_raw_data_))
+: child_indices_into_raw_data_(new(BranchOutputRowPool::malloc())fast__short__to__fast_short_to_int_map__loaded())
 , child_indices_into_raw_data(*child_indices_into_raw_data_)
 {
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
-: child_indices_into_raw_data_(new(BranchOutputRowPool::malloc())fast__short__to__fast_short_to_int_map__loaded(*child_indices_into_raw_data_))
+: child_indices_into_raw_data_(new(BranchOutputRowPool::malloc())fast__short__to__fast_short_to_int_map__loaded())
 , child_indices_into_raw_data(*child_indices_into_raw_data_)
 , primary_leaves(rhs.primary_leaves)
 {
@@ -1791,7 +1791,7 @@ BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
 BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
 : primary_leaves(std::move(rhs.primary_leaves))
 , primary_leaves_cache(std::move(rhs.primary_leaves_cache))
-, child_indices_into_raw_data_(new(BranchOutputRowPool::malloc())fast__short__to__fast_short_to_int_map__loaded(*child_indices_into_raw_data_))
+, child_indices_into_raw_data_(new(BranchOutputRowPool::malloc())fast__short__to__fast_short_to_int_map__loaded())
 , child_indices_into_raw_data(*child_indices_into_raw_data_)
 {
 	// WE NEED THIS COPY.  We have only created it, above, but not copied from RHS
