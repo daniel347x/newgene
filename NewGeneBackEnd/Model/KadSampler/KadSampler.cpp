@@ -842,10 +842,15 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	// choice of branches (each branch corresponding to a
 	// window of discrete values), including no-replacement.
 	bool reverse_mode = false;
-	auto remaining_ = new(RandomVectorPool::malloc())FastVector<newgene_cpp_int>(*remaining_); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
+
+	void * ptr = RandomVectorPool::malloc();
+	auto remaining_ = new(ptr)FastVector<newgene_cpp_int>(reinterpret_cast<FastVector<newgene_cpp_int>const&>(*ptr)); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
 	auto & remaining = *remaining_;
-	std::vector<newgene_cpp_int>::iterator remainingPtr;
-	auto tmp_random_numbers_ = new(RandomSetPool::malloc())FastSet<newgene_cpp_int>(*tmp_random_numbers_); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
+
+	FastVector<newgene_cpp_int>::iterator remainingPtr = remaining.begin();
+
+	ptr = RandomSetPool::malloc();
+	auto tmp_random_numbers_ = new(ptr)FastSet<newgene_cpp_int>(reinterpret_cast<FastVector<newgene_cpp_int>const&>(*ptr)); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
 	auto & tmp_random_numbers = *tmp_random_numbers_;
 
 	ProgressBarMeter meter(messager, "Generated %1% out of %2% random numbers", how_many);
