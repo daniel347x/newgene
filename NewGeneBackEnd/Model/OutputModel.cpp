@@ -595,7 +595,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// and just clear the pool right here (in an instant).
 			//allWeightings.ClearRandomNumbers(); // This function will not only "clear()" the vector, but "swap()" it with an empty vector to actually force deallocation - a major C++ gotcha!
 			//messager.SetPerformanceLabel((boost::format("Clearing cache of random numbers...")).str().c_str());
-			
+			//
+			// NewGene has been enhanced to use a Boost pool for the random numbers, so we can now purge the pool in an instant.
+			RandomVectorPool::purge_memory();
+			RandomSetPool::purge_memory();
+
 			messager.SetPerformanceLabel("");
 			messager.AppendKadStatusText((boost::format("Completed selection of random K-adic combinations.")).str(), this);
 
