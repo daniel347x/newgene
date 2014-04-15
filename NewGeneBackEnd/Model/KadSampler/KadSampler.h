@@ -1125,7 +1125,7 @@ public:
 };
 
 struct newgene_leaf_tag {};
-typedef boost::singleton_pool<newgene_leaf_tag, sizeof(fast_short_to_int_map), boost::default_user_allocator_malloc_free>
+typedef boost::singleton_pool<newgene_leaf_tag, sizeof(fast_short_to_int_map)>
 LeafPool;
 
 // "Leaf"
@@ -1211,7 +1211,7 @@ public:
 };
 
 struct newgene_branchoutputrow_tag {};
-typedef boost::singleton_pool<newgene_branchoutputrow_tag, sizeof(fast__short__to__fast_short_to_int_map__loaded), boost::default_user_allocator_malloc_free>
+typedef boost::singleton_pool<newgene_branchoutputrow_tag, sizeof(fast__short__to__fast_short_to_int_map__loaded)>
 BranchOutputRowPool;
 
 class BranchOutputRow
