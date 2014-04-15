@@ -810,14 +810,6 @@ void KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const
 	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
 }
 
-struct newgene_randomvector_tag {};
-typedef boost::singleton_pool<newgene_randomvector_tag, sizeof(FastVector<newgene_cpp_int>)>
-RandomVectorPool;
-
-struct newgene_randomset_tag {};
-typedef boost::singleton_pool<newgene_randomset_tag, sizeof(FastSet<newgene_cpp_int>)>
-RandomSetPool;
-
 void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 {
 

@@ -45,6 +45,14 @@ typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
 
 typedef FastMap<std::int16_t, DataCache> fast_short_to_data_cache_map;
 
+struct newgene_randomvector_tag {};
+typedef boost::singleton_pool<newgene_randomvector_tag, sizeof(FastVector<newgene_cpp_int>)>
+RandomVectorPool;
+
+struct newgene_randomset_tag {};
+typedef boost::singleton_pool<newgene_randomset_tag, sizeof(FastSet<newgene_cpp_int>)>
+RandomSetPool;
+
 class KadSampler;
 
 class TimeSlice
