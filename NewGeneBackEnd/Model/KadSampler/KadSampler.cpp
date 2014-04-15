@@ -3293,6 +3293,11 @@ void KadSampler::ClearWeightingsAndRemainingBranchJunk()
 
 				branch.weighting.ClearWeighting();
 				branch.number_branch_combinationsPtr.reset(); // The one cpp_int that is not part of a Weighting instance
+				for (auto const & leaf : branch.leaves)
+				{
+					delete leaf.other_top_level_indices_into_raw_data_;
+					leaf.other_top_level_indices_into_raw_data_ = nullptr;
+				}
 
 			});
 		});
@@ -3414,6 +3419,7 @@ void KadSampler::Clear()
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeavesVector::value_type)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(newgene_cpp_int)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(boost::multiprecision::limb_type)>();
 
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();

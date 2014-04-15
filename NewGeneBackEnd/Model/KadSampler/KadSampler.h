@@ -1154,22 +1154,22 @@ public:
 
 	PrimaryKeysGroupingMultiplicityGreaterThanOne()
 		: PrimaryKeysGrouping{ DMUInstanceDataVector() }
-	, index_into_raw_data{ 0 }
-	, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+		, index_into_raw_data{ 0 }
+		, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
 		, other_top_level_indices_into_raw_data(*other_top_level_indices_into_raw_data_)
 	{}
 
 	PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0)
 		: PrimaryKeysGrouping(dmuInstanceDataVector)
 		, index_into_raw_data{ index_into_raw_data_ }
-	, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+		, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
 		, other_top_level_indices_into_raw_data{ *other_top_level_indices_into_raw_data_ }
 	{}
 
 	PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
 		: PrimaryKeysGrouping(rhs)
 		, index_into_raw_data{ rhs.index_into_raw_data }
-	, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+		, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
 		, other_top_level_indices_into_raw_data{ *other_top_level_indices_into_raw_data_ }
 	{
 		other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
@@ -1178,7 +1178,7 @@ public:
 	PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
 		: PrimaryKeysGrouping(std::move(rhs))
 		, index_into_raw_data{ rhs.index_into_raw_data }
-	, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
+		, other_top_level_indices_into_raw_data_(new fast_short_to_int_map)
 		, other_top_level_indices_into_raw_data{ *other_top_level_indices_into_raw_data_ }
 	{
 		other_top_level_indices_into_raw_data = std::move(rhs.other_top_level_indices_into_raw_data);
@@ -1213,6 +1213,7 @@ public:
 	~PrimaryKeysGroupingMultiplicityGreaterThanOne()
 	{
 		delete other_top_level_indices_into_raw_data_;
+		other_top_level_indices_into_raw_data_ = nullptr;
 	}
 
 	std::int32_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
@@ -2134,7 +2135,7 @@ public:
 	void ClearRandomNumbers()
 	{
 		// random_numbers.clear() does not usually deallocate!!!
-		std::vector<boost::multiprecision::cpp_int>().swap(random_numbers);
+		FastVector<boost::multiprecision::cpp_int>().swap(random_numbers);
 	}
 
 protected:
