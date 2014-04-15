@@ -844,13 +844,13 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	bool reverse_mode = false;
 
 	void * ptr = RandomVectorPool::malloc();
-	auto remaining_ = new(ptr)FastVector(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
+	auto remaining_ = new(ptr)FastVector<newgene_cpp_int>(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
 	auto & remaining = *remaining_;
 
 	FastVector<newgene_cpp_int>::iterator remainingPtr = remaining.begin();
 
 	ptr = RandomSetPool::malloc();
-	auto tmp_random_numbers_ = new(ptr)FastSet(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
+	auto tmp_random_numbers_ = new(ptr)FastSet<newgene_cpp_int>(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
 	auto & tmp_random_numbers = *tmp_random_numbers_;
 
 	ProgressBarMeter meter(messager, "Generated %1% out of %2% random numbers", how_many);
