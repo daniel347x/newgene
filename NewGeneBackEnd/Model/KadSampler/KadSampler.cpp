@@ -3377,8 +3377,6 @@ void KadSampler::Clear()
 	purge_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeavesVector::value_type)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(boost::multiprecision::limb_type)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(newgene_cpp_int)>();
 
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();
@@ -3401,8 +3399,9 @@ void KadSampler::Clear()
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branches::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(boost::multiprecision::limb_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(newgene_cpp_int)>();
+
+	purge_pool<newgene_cpp_int_tag, sizeof(boost::multiprecision::limb_type)>();
+	purge_pool<newgene_cpp_int_tag, sizeof(newgene_cpp_int)>();
 
 	LeafPool::purge_memory();
 	BranchOutputRowPool::purge_memory();
