@@ -10,12 +10,12 @@
 #include <memory>
 #include <tuple>
 #include <cstdint>
-#include <atomic> 
+#include <atomic>
 #include <mutex>
 #include <fstream>
 #include <set>
 #include <string>
-#include <list> 
+#include <list>
 #include "./KadSampler/KadSampler.h"
 
 class PrimaryKeySequence
@@ -574,7 +574,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count);
 
 				void KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings);
-				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch,
+				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, std::fstream & output_file,
+										 Branch const & branch,
 										 KadSampler & allWeightings, std::int64_t & rows_written);
 				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(KadSampler & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
 
@@ -759,13 +760,13 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// and "child" or "secondary" variable groups, which simply add additional
 				// columns of output variables, but do not add to the multiplicity of the
 				// DMU categories, which are obtained from the primary variable groups.
-				std::vector<ColumnsInTempView> primary_variable_groups_column_info; 
+				std::vector<ColumnsInTempView> primary_variable_groups_column_info;
 				std::vector<ColumnsInTempView> secondary_variable_groups_column_info;
 
 				// Basic variables used throughout different functions of this Generator
 				OutputModel * model;
 				InputModel * input_model;
-				OutputProject & project; 
+				OutputProject & project;
 				Messager & messager;
 				sqlite3 * db;
 				sqlite3_stmt * stmt_result; // An overall statement handle that is used only to iterate through the final result of various temporary tables

@@ -480,7 +480,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText((boost::format("Create empty table for variable group \"%1%\")...") %
 									  Table_VG_CATEGORY::GetVgDisplayTextShort(top_level_vg)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
+
 		if (failed || CheckCancelled()) { return; }
+
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		primary_group_column_sets.push_back(selected_raw_data_table_schema);
@@ -493,6 +495,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText((boost::format("Load selected columns of raw monadic data...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
+
 		if (failed || CheckCancelled())
 		{
 			std::string errorsOut;
@@ -535,6 +538,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Build cache of monads...")).str().c_str(), this);
 		allWeightings.ResetBranchCaches(has_child_groups);
+
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
@@ -542,12 +546,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Calculate number of K-adic combinations...")).str().c_str(), this);
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
+
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
 		// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Number of (granulated) K-adic combinations: %1%") %  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+
 		if (random_sampling)
 		{
 
@@ -566,8 +572,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// they will want to be able to remain in random sampling mode even at the 100% sampling level
 			// ********************************************************************************************************************************************************* //
 			std::int64_t samples = random_sampling_number_rows;
+
 			if (newgene_cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
-			{ 
+			{
 				messager.AppendKadStatusText((boost::format("Decreasing the number of random samples to match the number of total K-adic combinations.")).str().c_str(), this);
 				samples = allWeightings.weighting.getWeighting().convert_to<int>();
 			}
@@ -578,7 +585,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText((boost::format("Generating %1% random numbers between 1 and %2%...") % boost::lexical_cast<std::string>
 										  (samples).c_str() % allWeightings.weighting.getWeightingString().c_str()).str(), this);
 			allWeightings.PrepareRandomNumbers(samples);
+
 			if (failed || CheckCancelled()) { return; }
+
 			messager.AppendKadStatusText((boost::format("Done generating random numbers.")).str().c_str(), this);
 
 			// ********************************************************************************************************************************************************* //
@@ -608,7 +617,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Give text feedback that the sampler is entering full sampling mode
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-adic combinations will be generated.") % allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+			messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-adic combinations will be generated.") %
+										  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
 
 			// ********************************************************************************************************************************************************* //
 			// Generate all K-ad combinations now
@@ -616,6 +626,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % allWeightings.weighting.getWeightingString().c_str()).str(), this);
 			allWeightings.PrepareFullSamples(K);
 			messager.AppendKadStatusText((boost::format("Completed generating full selection of K-adic combinations.")).str(), this);
+
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -632,6 +643,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// disk-based management during K-ad generation
 			// ********************************************************************************************************************************************************* //
 			KadSamplerCreateOutputTable();
+
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -654,7 +666,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Merging secondary variable group data...")).str(), this);
 			KadSamplerFillDataForChildGroups(allWeightings);
+
 			if (failed || CheckCancelled()) { return; }
+
 			boost::format mytxt2("Completed merging secondary groups.");
 			messager.AppendKadStatusText(mytxt2.str(), this);
 
@@ -681,6 +695,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Rebuild cache...")).str().c_str(), this);
 			allWeightings.ResetBranchCaches(false); // just update the primary "leaves" vector - not the child leaf lookup cache
+
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -715,6 +730,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Consolidating adjacent rows...")).str(), this);
 			ConsolidateData(random_sampling, allWeightings);
+
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -745,6 +761,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
 		KadSamplerWriteResultsToFileOrScreen(allWeightings);
+
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
@@ -901,6 +918,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 		if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 		{
 			add_as_primary_key_column = true;
+
 			if (one_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 			{
 				add_as_primary_key_with_multiplicity_greater_than_1 = true;
@@ -2248,7 +2266,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 	int highest_multiplicity = 1;
 	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[top_level_vg_index];
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 	{
 
 		if (raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > highest_multiplicity)
@@ -5010,8 +5028,9 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// create a temporary table to store just the selected columns over just the selected time range.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Create empty table for variable group \"%1%\")...") %
-			Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
+									  Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_group_raw_data_columns, current_top_level_vg_index);
+
 		if (failed || CheckCancelled()) { return; }
 
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
@@ -5026,6 +5045,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		messager.AppendKadStatusText((boost::format("Load selected columns of given variable group data...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
+
 		if (failed || CheckCancelled() || errorMessages.size() > 0)
 		{
 			std::string errorsOut;
@@ -5217,6 +5237,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		messager.AppendKadStatusText((boost::format("Load selected columns of given variable group data...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
+
 		if (failed || CheckCancelled() || errorMessages.size() > 0)
 		{
 			std::string errorsOut;
@@ -5236,6 +5257,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 			SetFailureErrorMessage(errorsOut);
 			return;
 		}
+
 		++current_child_vg_index;
 
 	});
@@ -5587,6 +5609,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 			TimeSlice const & the_slice = timeSlice.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
 			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+
 			// See equivalent loop, below, for some comments
 			if (previousTimeSlice.DoesOverlap(the_slice))
 			{
@@ -5626,6 +5649,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					});
 				});
 			}
+
 			previousTimeSlice = the_slice;
 		});
 	}
@@ -5966,7 +5990,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 		// (equal to the width of the time granularity associated with the unit of analysis),
 		// except possibly for the first piece and last piece within the time slice, which might be fractional.
 		// ************************************************************************************************************************ //
-		auto loop_through_time_units = [&](TimeSlice const & timeSlice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)> & c)
+		auto loop_through_time_units = [&](TimeSlice const & timeSlice, fast_branch_output_row_set const & output_rows_for_this_full_time_slice,
+										   boost::function<void(std::int64_t const, std::int64_t const)> & c)
 		{
 			// Just do the calculation of how many total time units are overlapped by the current time slice.
 			// This is the same calculation that is used below.
@@ -5975,6 +6000,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 			std::int64_t const time_start = timeSlice.getStart();
 			std::int64_t const time_end = timeSlice.getEnd();
 			std::int64_t current_time_start = time_start;
+
 			while (current_time_start < time_end)
 			{
 				std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
@@ -5984,6 +6010,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 				c(current_time_start, time_to_use_for_end);
 
 				if (time_start_aligned_higher > time_end) { time_to_use_for_end = time_end; }
+
 				current_time_start = time_to_use_for_end;
 			}
 		};
@@ -5995,11 +6022,13 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 			TimeSlice const & timeSlice = timeSliceData.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
 			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+
 			if (variableGroupBranchesAndLeavesVector.size() > 1)
 			{
 				boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
 			Branches const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 			std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](Branch const & branch)
@@ -6035,7 +6064,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						fast_branch_output_row_set const & output_rows_for_this_full_time_slice = branch.hits[-1];
 
 						// granulated output, full sampling
-						loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start, std::int64_t const time_to_use_for_end)
+						loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start,
+												std::int64_t const time_to_use_for_end)
 						{
 							size_t number_rows_this_time_slice = output_rows_for_this_full_time_slice.size();
 							total_number_output_rows += static_cast<std::int64_t>(number_rows_this_time_slice);
@@ -6237,7 +6267,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 							// *********************************************************************************** //
 
 							fast_branch_output_row_set const & output_rows_for_this_full_time_slice = time_unit_hit.second;
-							loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start, std::int64_t const time_to_use_for_end)
+							loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start,
+													std::int64_t const time_to_use_for_end)
 							{
 								TimeSlice current_slice(current_time_start, time_to_use_for_end);
 								OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
