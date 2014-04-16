@@ -6363,7 +6363,7 @@ void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTi
 	// ************************************************************************************************************* //
 	// Now actually perform the consolidation across time units within individual time slices
 	// ************************************************************************************************************* //
-	ProgressBarMeter meter(messager, std::string("%1% / %2% rows consolidated"), total_rows);
+	ProgressBarMeter meter(messager, std::string("Preparing internal time slice rows for consolidation: %1% / %2%"), total_rows);
 	std::int64_t current_rows = 0;
 	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 	{

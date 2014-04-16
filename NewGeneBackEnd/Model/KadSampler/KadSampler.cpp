@@ -1629,7 +1629,7 @@ void KadSampler::PrepareFullSamples(int const K)
 {
 
 	number_rows_generated = 0;
-	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% K-ad combinations"), weighting.getWeighting());
+	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% K-adic combinations"), weighting.getWeighting());
 	std::int32_t cropped_current_iteration = 0;
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
