@@ -4028,6 +4028,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		this_->CloseObtainData();
 	} BOOST_SCOPE_EXIT_END
 
+	std::int64_t rowsToRead = ObtainCount(variable_group_selected_columns_schema);
+
 	ObtainData(variable_group_selected_columns_schema, true);
 
 	if (failed || CheckCancelled())
@@ -4037,6 +4039,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 	SavedRowData sorting_row_of_data;
 
+	ProgressBarMeter meter(messager, std::string("%1% / %2% rows of raw monadic data loaded"), rowsToRead);
 	while (StepData())
 	{
 
@@ -4354,6 +4357,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		}
 
 		++current_rows_stepped;
+		meter.UpdateProgressBarValue(current_rows_stepped);
 
 		if (bad)
 		{

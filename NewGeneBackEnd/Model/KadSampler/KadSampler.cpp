@@ -763,7 +763,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 				branch.number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
 
-				if (K <= numberLeaves)
+				if (K <= numberLeaves && numberLeaves > 0)
 				{
 					branch.number_branch_combinations = BinomialCoefficient(numberLeaves, K);
 				}
