@@ -2198,7 +2198,11 @@ void purge_pool()
 	// This is a negligible operation if there is no pool at the given size.
 
 	// Smallest possible size of the internal node in bytes, followed by additional byte guesses up to 48 additional bytes
-	boost::singleton_pool < TAG, SIZE + 0, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE - 20, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE - 16, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE - 12, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE - 8, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE - 4, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 1, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 2, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
 	boost::singleton_pool < TAG, SIZE + 3, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
