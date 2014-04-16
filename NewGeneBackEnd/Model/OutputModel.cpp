@@ -5090,7 +5090,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// create a temporary table to store just the selected columns over just the selected time range.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Create empty table for variable group \"%1%\")...") %
-									  Table_VG_CATEGORY::GetVgDisplayText(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
+									  Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(child_variable_group_raw_data_columns, current_child_vg_index);
 
 		if (failed || CheckCancelled()) { return; }
