@@ -533,9 +533,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// that map to any corresponding combination of primary branch + leaves for the given primary branch.
 		// This will be used by the child variable groups when they are merged in.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((
-										 boost::format("Build cache of monads...")).str().c_str(),
-									 this);
+		messager.AppendKadStatusText((boost::format("Build cache of monads...")).str().c_str(), this);
 		allWeightings.ResetBranchCaches(has_child_groups);
 		if (failed || CheckCancelled()) { return; }
 
@@ -5011,8 +5009,8 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// From the schema for the selected columns for the non-primary top-level variable group,
 		// create a temporary table to store just the selected columns over just the selected time range.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for non-primary top-level variable group data (variable group: %1%)...") %
-									  Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Create empty table for variable group \"%1%\")...") %
+			Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_group_raw_data_columns, current_top_level_vg_index);
 		if (failed || CheckCancelled()) { return; }
 
@@ -5025,7 +5023,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// From the schema for the selected columns for the non-primary top-level variable group,
 		// load the selected columns of raw data into the temporary table created with the same schema.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Load selected columns for non-primary top-level variable group into internal table...")).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Load selected columns of given variable group data...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
 		if (failed || CheckCancelled() || errorMessages.size() > 0)
@@ -5067,7 +5065,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// From the schema for the selected columns for the child variable group,
 		// create a temporary table to store just the selected columns over just the selected time range.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Create an empty internal table to store selected columns for child variable group data (variable group: %1%)...") %
+		messager.AppendKadStatusText((boost::format("Create empty table for variable group \"%1%\")...") %
 									  Table_VG_CATEGORY::GetVgDisplayText(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(child_variable_group_raw_data_columns, current_child_vg_index);
 
@@ -5216,7 +5214,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// From the schema for the selected columns for the child variable group,
 		// load the selected columns of raw data into the temporary table created with the same schema.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Load selected columns for child variable group into internal table...")).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Load selected columns of given variable group data...")).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
 		if (failed || CheckCancelled() || errorMessages.size() > 0)
