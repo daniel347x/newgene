@@ -649,7 +649,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 							for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
 							{
 
-								BranchOutputRow const & outputRow = *matchingOutputRowPtr->first;
+								BranchOutputRow<hits_tag> const & outputRow = *matchingOutputRowPtr->first;
 								fast_short_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
 
 								// matchingOutputChildLeaves is a vector
@@ -664,7 +664,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 									if (found == outputRow.child_indices_into_raw_data.cend())
 									{
-										outputRow.child_indices_into_raw_data[variable_group_number] = fast_short_to_int_map();
+										outputRow.child_indices_into_raw_data[variable_group_number] = fast_short_to_int_map__loaded<hits_tag>();
 									}
 
 									auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
@@ -936,7 +936,7 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 
 	static int saved_range = -1;
 
-	BranchOutputRow single_leaf_combination;
+	BranchOutputRow<remaining_tag> single_leaf_combination;
 
 	bool skip = false;
 
@@ -965,8 +965,8 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 		PopulateAllLeafCombinations(which_time_unit, K, branch);
 	}
 
-	branch.hits[which_time_unit].insert(std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].begin()),
-										std::move_iterator<fast_branch_output_row_vector::iterator>(branch.remaining[which_time_unit].end()));
+	branch.hits[which_time_unit].insert(std::move_iterator<fast_branch_output_row_vector<remaining_tag>::iterator>(branch.remaining[which_time_unit].begin()),
+		std::move_iterator<fast_branch_output_row_vector<remaining_tag>::iterator>(branch.remaining[which_time_unit].end()));
 	branch.remaining[which_time_unit].clear();
 
 }
@@ -991,7 +991,7 @@ void KadSampler::GenerateOutputRow(newgene_cpp_int random_number, int const K, B
 	static int saved_range = -1;
 	static std::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
 
-	BranchOutputRow test_leaf_combination;
+	BranchOutputRow<remaining_tag> test_leaf_combination;
 
 	bool skip = false;
 
@@ -1153,7 +1153,7 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 void KadSampler::AddPositionToRemaining(std::int64_t const & which_time_unit, std::vector<int> const & position, Branch const & branch)
 {
 
-	BranchOutputRow new_remaining;
+	BranchOutputRow<remaining_tag> new_remaining;
 	std::for_each(position.cbegin(), position.cend(), [&](int const position_index)
 	{
 		new_remaining.Insert(position_index);
@@ -1324,7 +1324,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				// We have a new hit we're dealing with
 				// ******************************************************************************************************** //
 
-				BranchOutputRow const & outputRow = *outputRowPtr;
+				BranchOutputRow<hits_tag> const & outputRow = *outputRowPtr;
 
 				child_hit_vector_branch_components.clear();
 
@@ -1493,18 +1493,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 					{
 						if (!missing_top_level_leaf)
 						{
-							if (!is_consolidating)
-							{
-								// Regular mode
-								helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
-							}
-							else
-							{
-								// Final "consolidating rows" stage only - Currently will never be hit,
-								// but saved in case we need it in the future.
-								// see comments above and/or elsewhere.
-								helper_lookup__from_child_key_set__to_matching_output_rows_consolidating[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
-							}
+							helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 						}
 
 						++current_child_leaf_number;
@@ -1706,7 +1695,7 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 				// is *now* spent inserting into the "Boost memory-pool backed" hits[-1].
 				// This is terrible performance, so we must use a std::set.
 				//branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
-				branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow &>(*iter)));
+				branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow<hits_tag> &>(*iter)));
 				//branch.hits_consolidated.emplace_back(*iter);
 
 				// Even after the std::move, above, the Boost memory pool deallocation of the space for the object itself
@@ -1921,7 +1910,7 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	sdata += "</HITS>";
 
 	sdata += "<CONSOLIDATED_HIT>";
-	SpitHit(sdata, -1, branch.hits_consolidated);
+	SpitHit<fast_branch_output_row_vector_huge<hits_consolidated_tag>, hits_consolidated_tag>(sdata, -1, branch.hits_consolidated);
 	sdata += "</CONSOLIDATED_HIT>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
@@ -2504,7 +2493,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 
 	std::int64_t originalWidth = originalTimeSlice.WidthForWeighting(AvgMsperUnit);
 
-	fast__int64__to__fast_branch_output_row_set new_hits;
+	fast__int64__to__fast_branch_output_row_set<remaining_tag> new_hits;
 	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = branches_and_leaves;
 	std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 	{
@@ -2547,7 +2536,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 			long double hit_total_distance_so_far = 0.0;
 			std::int64_t hit_number = 0;
 			std::int64_t total_hits = hits.size();
-			std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set::value_type const & hit)
+			std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<hits_tag>::value_type const & hit)
 			{
 
 				// ************************************************************** //
@@ -2605,21 +2594,24 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 					{
 						if (rightOverlaps)
 						{
-							new_hits[hit_number - 1] = hit.second;
+							new_hits[hit_number - 1].clear();
+							new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
 						}
 					}
 					else if (useLeft)
 					{
 						if (leftOverlaps)
 						{
-							new_hits[hit_number - 1] = hit.second;
+							new_hits[hit_number - 1].clear();
+							new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
 						}
 					}
 					else if (useMiddle)
 					{
 						if (middleOverlaps)
 						{
-							new_hits[hit_number - 1] = hit.second;
+							new_hits[hit_number - 1].clear();
+							new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
 						}
 					}
 
@@ -2674,14 +2666,16 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 					{
 						if (matches_right)
 						{
-							new_hits[hit_time_index - (originalWidth - rightRounded)] = hit.second;
+							new_hits[hit_time_index - (originalWidth - rightRounded)].clear();
+							new_hits[hit_time_index - (originalWidth - rightRounded)].insert(hit.second.cbegin(), hit.second.cend());
 						}
 					}
 					else if (useLeft)
 					{
 						if (matches_left)
 						{
-							new_hits[hit_time_index] = hit.second;
+							new_hits[hit_time_index].clear();
+							new_hits[hit_time_index].insert(hit.second.cbegin(), hit.second.cend());
 						}
 					}
 					else if (useMiddle)
@@ -2690,15 +2684,18 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 						{
 							if (left_was_zero)
 							{
-								new_hits[hit_time_index] = hit.second;
+								new_hits[hit_time_index].clear();
+								new_hits[hit_time_index].insert(hit.second.cbegin(), hit.second.cend());
 							}
 							else if (right_was_zero)
 							{
-								new_hits[hit_time_index - (originalWidth - middleRounded)] = hit.second;
+								new_hits[hit_time_index - (originalWidth - middleRounded)].clear();
+								new_hits[hit_time_index - (originalWidth - middleRounded)].insert(hit.second.cbegin(), hit.second.cend());
 							}
 							else
 							{
-								new_hits[hit_time_index - leftRounded] = hit.second;
+								new_hits[hit_time_index - leftRounded].clear();
+								new_hits[hit_time_index - leftRounded].insert(hit.second.cbegin(), hit.second.cend());
 							}
 						}
 					}
@@ -2713,9 +2710,10 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 			}
 
 			hits.clear();
-			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](fast__int64__to__fast_branch_output_row_set::value_type const & new_hit)
+			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const & new_hit)
 			{
-				hits[new_hit.first] = new_hit.second;
+				hits[new_hit.first].clear();
+				hits[new_hit.first].insert(new_hit.second.cbegin(), new_hit.second.cend());
 			});
 
 			current_branch.ValidateOutputRowLeafIndexes();
@@ -2958,48 +2956,6 @@ void KadSampler::getMySize() const
 
 }
 
-void KadSampler::getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const
-{
-	usage += sizeof(outputRow);
-
-	// primary_leaves is a set
-	auto const & primary_leaves = outputRow.primary_leaves;
-	mySize.numberMapNodes += primary_leaves.size();
-
-	// primary_leaves_cache is a vector
-	auto const & primary_leaves_cache = outputRow.primary_leaves_cache;
-
-	// child_indices_into_raw_data is a map
-	auto const & child_indices_into_raw_data = outputRow.child_indices_into_raw_data;
-	mySize.numberMapNodes += child_indices_into_raw_data.size();
-
-	for (auto const & primary_leaf : primary_leaves)
-	{
-		usage += sizeof(primary_leaf);
-	}
-
-	for (auto const & primary_leaf : primary_leaves_cache)
-	{
-		usage += sizeof(primary_leaf);
-	}
-
-	for (auto const & single_child_indices_into_raw_data : child_indices_into_raw_data)
-	{
-		usage += sizeof(single_child_indices_into_raw_data.first);
-		usage += sizeof(single_child_indices_into_raw_data.second);
-
-		// the_child_lookup_map is a map from POD to POD
-		auto const & the_child_lookup_map = single_child_indices_into_raw_data.second;
-		mySize.numberMapNodes += the_child_lookup_map.size();
-
-		for (auto const & the_child_lookup_map_entry : the_child_lookup_map)
-		{
-			usage += sizeof(the_child_lookup_map_entry.first);
-			usage += sizeof(the_child_lookup_map_entry.second);
-		}
-	}
-}
-
 void KadSampler::getLeafUsage(size_t & usage, Leaf const & leaf) const
 {
 	//usage += sizeof(leaf);
@@ -3073,46 +3029,84 @@ void KadSampler::Clear()
 		insert_random_sample_stmt = nullptr;
 	}
 
-	purge_pool<boost::pool_allocator_tag, sizeof(InstanceDataVector::value_type)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(InstanceDataVector::value_type const)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(InstanceData)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_short_vector::value_type)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_vector_childtoprimarymapping::value_type)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_short_vector::value_type const)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_vector_childtoprimarymapping::value_type const)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(int)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_int_vector::value_type)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_leaf_vector::value_type)>();
+
+	purge_pool<hits_tag, sizeof(fast_int_vector<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_int_vector<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_int_vector<hits_consolidated_tag>::value_type const)>();
+
+	purge_pool<hits_tag, sizeof(BranchOutputRow<hits_tag>)>();
+	purge_pool<remaining_tag, sizeof(BranchOutputRow<remaining_tag>)>();
+	purge_pool<hits_consolidated_tag, sizeof(BranchOutputRow<hits_consolidated_tag>)>();
+
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_leaf_vector::value_type const)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector::value_type)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_branch_output_row_vector_huge::value_type)>();
+
+	purge_pool<hits_tag, sizeof(fast_branch_output_row_vector<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_branch_output_row_vector<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_vector<hits_consolidated_tag>::value_type const)>();
+
+	purge_pool<hits_tag, sizeof(fast_branch_output_row_vector_huge<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_branch_output_row_vector_huge<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_vector_huge<hits_consolidated_tag>::value_type const)>();
+
 	purge_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeavesVector::value_type)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeavesVector::value_type const)>();
 
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_set::value_type)>();
+	purge_pool<hits_tag, sizeof(fast_int_set<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_int_set<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_int_set<hits_consolidated_tag>::value_type const)>();
+
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__mergedtimeslicerow_set::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map__loaded::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__short__to__fast_short_to_int_map__loaded::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_vector::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaves::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(DataCache::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_data_cache_map::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_short_map::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_childtoprimarymappingvector::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branches::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__mergedtimeslicerow_set::value_type const)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map::value_type const)>();
 
-	purge_pool<newgene_cpp_int_tag, sizeof(boost::multiprecision::limb_type)>();
+	purge_pool<hits_tag, sizeof(fast_short_to_int_map__loaded<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_short_to_int_map__loaded<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_short_to_int_map__loaded<hits_consolidated_tag>::value_type const)>();
+
+	purge_pool<hits_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<hits_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<hits_tag>::mapped_type> const)>();
+	purge_pool<remaining_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<remaining_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<remaining_tag>::mapped_type> const)>();
+	purge_pool<hits_consolidated_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<hits_consolidated_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<hits_consolidated_tag>::mapped_type> const)>();
+
+	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<hits_consolidated_tag>::value_type const)>();
+
+	purge_pool<hits_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<hits_consolidated_tag>::value_type const)>();
+
+	purge_pool<hits_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<hits_consolidated_tag>::value_type const)>();
+
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaves::value_type const)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(DataCache::value_type const)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_data_cache_map::value_type const)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_short_map::value_type const)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_childtoprimarymappingvector::value_type const)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branches::value_type const)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type const)>();
+
+	purge_pool<newgene_cpp_int_tag, sizeof(boost::multiprecision::limb_type const)>();
 	purge_pool<newgene_cpp_int_tag, sizeof(newgene_cpp_int)>();
-	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_set::value_type)>();
-	purge_pool<hits_tag, sizeof(fast_branch_output_row_set::value_type)>();
+
+	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
+
+	purge_pool<hits_tag, sizeof(fast_branch_output_row_set<hits_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_branch_output_row_set<remaining_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
 
 	RandomVectorPool::purge_memory();
 	RandomSetPool::purge_memory();

@@ -1221,18 +1221,30 @@ class BranchOutputRow
 
 		template <typename MEMORY_TAG_RHS>
 		BranchOutputRow(BranchOutputRow<MEMORY_TAG_RHS> const & rhs)
-			: child_indices_into_raw_data(rhs.child_indices_into_raw_data.cbegin(), rhs.child_indices_into_raw_data.cend())
-			, primary_leaves(rhs.primary_leaves)
+			: primary_leaves(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend())
 		{
+			for (auto & rhs_map : rhs.child_indices_into_raw_data)
+			{
+				child_indices_into_raw_data[rhs_map.first].insert(rhs_map.second.cbegin(), rhs_map.second.cend());
+			}
 			SaveCache();
 		}
 
 		template <typename MEMORY_TAG_RHS>
 		BranchOutputRow(BranchOutputRow<MEMORY_TAG_RHS> && rhs)
-			: primary_leaves(std::move(rhs.primary_leaves))
-			, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
-			, child_indices_into_raw_data(std::move_iterator(rhs.child_indices_into_raw_data.begin()), std::move_iterator(rhs.child_indices_into_raw_data.end()))
+
+			// No need to use a move iterator - these are just ints, and the move syntax is tedious because of the need for const_cast and move_iterator, resulting in no benefit because these are just int's
+			//: primary_leaves(std::move_iterator(rhs.primary_leaves.begin()), std::move_iterator(rhs.primary_leaves.end()))
+			: primary_leaves(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend())
+
+			// ditto
+			//, primary_leaves_cache(std::move_iterator(rhs.primary_leaves_cache.begin()), std::move_iterator(rhs.primary_leaves_cache.end()))
+			, primary_leaves_cache(rhs.primary_leaves_cache.cbegin(), rhs.primary_leaves_cache.cend())
 		{
+			for (auto & rhs_map : rhs.child_indices_into_raw_data)
+			{
+				child_indices_into_raw_data[rhs_map.first].insert(std::move_iterator<decltype(rhs_map.second)::iterator>(rhs_map.second.begin()), std::move_iterator<decltype(rhs_map.second)::iterator>(rhs_map.second.end()));
+			}
 			//SaveCache(); // already moved from rhs
 		}
 
@@ -1244,7 +1256,8 @@ class BranchOutputRow
 				return *this;
 			}
 
-			primary_leaves = rhs.primary_leaves;
+			primary_leaves.clear();
+			primary_leaves.insert(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend());
 			child_indices_into_raw_data.clear();
 			std::copy(rhs.child_indices_into_raw_data.cbegin(), rhs.child_indices_into_raw_data.cend(), child_indices_into_raw_data.begin());
 			SaveCache();
@@ -1259,9 +1272,14 @@ class BranchOutputRow
 				return *this;
 			}
 
-			primary_leaves = std::move(rhs.primary_leaves);
+			primary_leaves.clear();
+			
+			// Set of int's: no need to do a move, which requires tedious const_cast and move_iterator syntax and won't result in any benefit because they're just integers being moved
+			//primary_leaves.insert(std::move_iterator<decltype(rhs.primary_leaves)::iterator>(rhs.primary_leaves.begin()), std::move_iterator<decltype(rhs.primary_leaves)::iterator>(rhs.primary_leaves.end()));
+			primary_leaves.insert(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend());
+
 			child_indices_into_raw_data.clear();
-			std::move(std::move_iterator(rhs.child_indices_into_raw_data.begin()), std::move_iterator(rhs.child_indices_into_raw_data.end()), child_indices_into_raw_data.begin());
+			std::move(std::move_iterator<decltype(rhs.child_indices_into_raw_data)::iterator>(rhs.child_indices_into_raw_data.begin()), std::move_iterator<decltype(rhs.child_indices_into_raw_data)::iterator>(rhs.child_indices_into_raw_data.end()), child_indices_into_raw_data.begin());
 			SaveCache();
 			return *this;
 		}
@@ -1371,7 +1389,7 @@ using fast__int64__to__fast_branch_output_row_vector = FastMap<std::int64_t, fas
 template <typename MEMORY_TAG>
 using fast__lookup__from_child_dmu_set__to__output_rows = FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>>;
 
-template<typename T>
+template<typename T, typename MEMORY_TAG>
 void SpitSetOfOutputRows(std::string & sdata, T const & setOfRows)
 {
 	sdata += "<SET_OF_ROWS>";
@@ -1381,7 +1399,7 @@ void SpitSetOfOutputRows(std::string & sdata, T const & setOfRows)
 	sdata += "</SET_OF_ROWS_MAP_ITSELF>";
 
 	int index = 0;
-	std::for_each(setOfRows.cbegin(), setOfRows.cend(), [&](BranchOutputRow const & row)
+	std::for_each(setOfRows.cbegin(), setOfRows.cend(), [&](BranchOutputRow<MEMORY_TAG> const & row)
 	{
 		sdata += "<SINGLE_ROW>";
 
@@ -1397,21 +1415,21 @@ void SpitSetOfOutputRows(std::string & sdata, T const & setOfRows)
 	sdata += "</SET_OF_ROWS>";
 }
 
-template<typename T>
+template<typename T, typename MEMORY_TAG>
 void SpitHit(std::string & sdata, std::int64_t const time_unit, T const & hit)
 {
 
 	sdata += "<TIME_UNIT>";
 
 	sdata += "<TIME_UNIT_MAP_ITSELF>";
-	sdata += boost::lexical_cast<std::string>(sizeof(std::pair<std::int64_t const, fast_branch_output_row_set>));
+	sdata += boost::lexical_cast<std::string>(sizeof(std::pair<std::int64_t const, MEMORY_TAG>));
 	sdata += "</TIME_UNIT_MAP_ITSELF>";
 
 	sdata += "<TIME_UNIT_INDEX>";
 	sdata += boost::lexical_cast<std::string>(time_unit);
 	sdata += "</TIME_UNIT_INDEX>";
 	sdata += "<OUTPUT_ROWS>";
-	SpitSetOfOutputRows(sdata, hit);
+	SpitSetOfOutputRows<decltype(hit), MEMORY_TAG>(sdata, hit);
 	sdata += "</OUTPUT_ROWS>";
 
 	sdata += "</TIME_UNIT>";
@@ -1441,7 +1459,7 @@ void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set<M
 
 	std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<MEMORY_TAG>::value_type const & hitsEntry)
 	{
-		SpitHit(sdata, hitsEntry.first, hitsEntry.second);
+		SpitHit<decltype(hitsEntry.second), MEMORY_TAG>(sdata, hitsEntry.first, hitsEntry.second);
 	});
 
 	sdata += "</TIME_UNITS>";
@@ -1469,7 +1487,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow<MEMORY_TAG> const & row)
 	sdata += "<CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
 	sdata += boost::lexical_cast<std::string>(sizeof(row.child_indices_into_raw_data));
 	sdata += "</CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
-	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map__loaded::value_type const & childindices)
+	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map__loaded<MEMORY_TAG>::value_type const & childindices)
 	{
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA>";
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA_OBJECT_ITSELF>";
@@ -1734,12 +1752,12 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// when it writes the given row to the output.
 		// **************************************************************************************** //
 		// **************************************************************************************** //
-		mutable fast__lookup__from_child_dmu_set__to__output_rows helper_lookup__from_child_key_set__to_matching_output_rows;
+		mutable fast__lookup__from_child_dmu_set__to__output_rows<hits_tag> helper_lookup__from_child_key_set__to_matching_output_rows;
 
-		// Cache for use with "consolidating rows" phase, if it is every necessary!
+		// Cache for use with "consolidating rows" phase, if it is ever necessary!
 		// Currently, this will never be filled, because we have no need to perform the lookup after rows have been consolidated,
 		// and the profiler shows a major hit during the consolidating of rows in managing this cache, so disable it.
-		mutable fast__lookup__from_child_dmu_set__to__output_rows helper_lookup__from_child_key_set__to_matching_output_rows_consolidating;
+		mutable fast__lookup__from_child_dmu_set__to__output_rows<hits_consolidated_tag> helper_lookup__from_child_key_set__to_matching_output_rows_consolidating;
 
 		void ConstructChildCombinationCache(KadSampler & allWeightings, int const variable_group_number, bool const force,
 											bool const is_consolidating = false) const; // Populate the above data structure
@@ -1829,8 +1847,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 #			ifdef _DEBUG
 			std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hitsEntry)
 			{
-				fast_branch_output_row_set const & hits = hitsEntry.second;
-				std::for_each(hits.cbegin(), hits.cend(), [&](BranchOutputRow const & outputRow)
+				auto const & hits = hitsEntry.second;
+				std::for_each(hits.cbegin(), hits.cend(), [&](BranchOutputRow<hits_tag> const & outputRow)
 				{
 					std::for_each(outputRow.primary_leaves.cbegin(), outputRow.primary_leaves.cend(), [&](int const & index_into_leaf_cache)
 					{
@@ -2311,7 +2329,50 @@ class KadSampler
 		void getDataCacheUsage(size_t & usage, DataCache const & dataCache) const;
 		void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf = false) const;
 		void getLeafUsage(size_t & usage, Leaf const & leaf) const;
-		void getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const;
+
+		template <typename MEMORY_TAG>
+		void getSizeOutputRow(size_t & usage, BranchOutputRow<MEMORY_TAG> const & outputRow) const
+		{
+			usage += sizeof(outputRow);
+
+			// primary_leaves is a set
+			auto const & primary_leaves = outputRow.primary_leaves;
+			mySize.numberMapNodes += primary_leaves.size();
+
+			// primary_leaves_cache is a vector
+			auto const & primary_leaves_cache = outputRow.primary_leaves_cache;
+
+			// child_indices_into_raw_data is a map
+			auto const & child_indices_into_raw_data = outputRow.child_indices_into_raw_data;
+			mySize.numberMapNodes += child_indices_into_raw_data.size();
+
+			for (auto const & primary_leaf : primary_leaves)
+			{
+				usage += sizeof(primary_leaf);
+			}
+
+			for (auto const & primary_leaf : primary_leaves_cache)
+			{
+				usage += sizeof(primary_leaf);
+			}
+
+			for (auto const & single_child_indices_into_raw_data : child_indices_into_raw_data)
+			{
+				usage += sizeof(single_child_indices_into_raw_data.first);
+				usage += sizeof(single_child_indices_into_raw_data.second);
+
+				// the_child_lookup_map is a map from POD to POD
+				auto const & the_child_lookup_map = single_child_indices_into_raw_data.second;
+				mySize.numberMapNodes += the_child_lookup_map.size();
+
+				for (auto const & the_child_lookup_map_entry : the_child_lookup_map)
+				{
+					usage += sizeof(the_child_lookup_map_entry.first);
+					usage += sizeof(the_child_lookup_map_entry.second);
+				}
+			}
+		}
+
 		void Clear(); // ditto
 
 	protected:
