@@ -608,6 +608,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			RandomSetPool::purge_memory();
 			purge_pool<newgene_cpp_int_tag, sizeof(boost::multiprecision::limb_type)>();
 			purge_pool<newgene_cpp_int_tag, sizeof(newgene_cpp_int)>();
+			allWeightings.PurgeRemaining();
 
 			messager.SetPerformanceLabel("");
 			messager.AppendKadStatusText((boost::format("Completed selection of random K-adic combinations.")).str(), this);

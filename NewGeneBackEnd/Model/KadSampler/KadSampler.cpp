@@ -3034,59 +3034,16 @@ void KadSampler::Clear()
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_short_vector::value_type const)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_vector_childtoprimarymapping::value_type const)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(int)>();
-
-	purge_pool<hits_tag, sizeof(fast_int_vector<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_int_vector<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_int_vector<hits_consolidated_tag>::value_type const)>();
-
-	purge_pool<hits_tag, sizeof(BranchOutputRow<hits_tag>)>();
-	purge_pool<remaining_tag, sizeof(BranchOutputRow<remaining_tag>)>();
-	purge_pool<hits_consolidated_tag, sizeof(BranchOutputRow<hits_consolidated_tag>)>();
-
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_leaf_vector::value_type const)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>();
-
-	purge_pool<hits_tag, sizeof(fast_branch_output_row_vector<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_branch_output_row_vector<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_vector<hits_consolidated_tag>::value_type const)>();
-
-	purge_pool<hits_tag, sizeof(fast_branch_output_row_vector_huge<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_branch_output_row_vector_huge<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_vector_huge<hits_consolidated_tag>::value_type const)>();
-
 	purge_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeavesVector::value_type const)>();
 
-	purge_pool<hits_tag, sizeof(fast_int_set<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_int_set<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_int_set<hits_consolidated_tag>::value_type const)>();
-
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__mergedtimeslicerow_set::value_type const)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map::value_type const)>();
-
-	purge_pool<hits_tag, sizeof(fast_short_to_int_map__loaded<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_short_to_int_map__loaded<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_short_to_int_map__loaded<hits_consolidated_tag>::value_type const)>();
-
-	purge_pool<hits_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<hits_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<hits_tag>::mapped_type> const)>();
-	purge_pool<remaining_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<remaining_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<remaining_tag>::mapped_type> const)>();
-	purge_pool<hits_consolidated_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<hits_consolidated_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<hits_consolidated_tag>::mapped_type> const)>();
-
-	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<hits_consolidated_tag>::value_type const)>();
-
-	purge_pool<hits_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<hits_consolidated_tag>::value_type const)>();
-
-	purge_pool<hits_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<hits_consolidated_tag>::value_type const)>();
-
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaves::value_type const)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(DataCache::value_type const)>();
@@ -3100,17 +3057,61 @@ void KadSampler::Clear()
 	purge_pool<newgene_cpp_int_tag, sizeof(boost::multiprecision::limb_type const)>();
 	purge_pool<newgene_cpp_int_tag, sizeof(newgene_cpp_int)>();
 
-	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
-
-	purge_pool<hits_tag, sizeof(fast_branch_output_row_set<hits_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_branch_output_row_set<remaining_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
-
 	RandomVectorPool::purge_memory();
 	RandomSetPool::purge_memory();
 
+	PurgeHits();
+	PurgeHitsConsolidated();
+	PurgeRemaining();
+
 	messager.SetPerformanceLabel("");
 
+}
+
+void KadSampler::PurgeHits()
+{
+	purge_pool<hits_tag, sizeof(fast_short_to_int_map__loaded<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<hits_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<hits_tag>::mapped_type> const)>();
+	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast_int_set<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast_branch_output_row_vector_huge<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast_branch_output_row_vector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(BranchOutputRow<hits_tag>)>();
+	purge_pool<hits_tag, sizeof(fast_int_vector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast_branch_output_row_set<hits_tag>::value_type const)>();
+}
+
+void KadSampler::PurgeHitsConsolidated()
+{
+	purge_pool<hits_consolidated_tag, sizeof(fast_short_to_int_map__loaded<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<hits_consolidated_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<hits_consolidated_tag>::mapped_type> const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_int_set<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_vector_huge<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_vector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(BranchOutputRow<hits_consolidated_tag>)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_int_vector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
+}
+
+void KadSampler::PurgeRemaining()
+{
+	purge_pool<remaining_tag, sizeof(fast_short_to_int_map__loaded<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<remaining_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<remaining_tag>::mapped_type> const)>();
+	purge_pool<remaining_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_int_set<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_branch_output_row_vector_huge<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_branch_output_row_vector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(BranchOutputRow<remaining_tag>)>();
+	purge_pool<remaining_tag, sizeof(fast_int_vector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_branch_output_row_set<remaining_tag>::value_type const)>();
 }

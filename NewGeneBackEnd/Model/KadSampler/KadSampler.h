@@ -1243,8 +1243,28 @@ class BranchOutputRow
 		{
 			for (auto & rhs_map : rhs.child_indices_into_raw_data)
 			{
-				child_indices_into_raw_data[rhs_map.first].insert(std::move_iterator<decltype(rhs_map.second)::iterator>(rhs_map.second.begin()), std::move_iterator<decltype(rhs_map.second)::iterator>(rhs_map.second.end()));
+				for (auto & rhs_vec : rhs_map.second)
+				{
+					// move does nothing here, since it's an int, but if we could, we would...
+					// this is the best that can be done for disparate types
+					child_indices_into_raw_data[rhs_map.first][rhs_vec.first] = std::move(rhs_vec.second);
+				}
 			}
+			//SaveCache(); // already moved from rhs
+		}
+
+		// specialize for own type
+		BranchOutputRow(BranchOutputRow<MEMORY_TAG> && rhs)
+
+			// No need to use a move iterator - these are just ints, and the move syntax is tedious because of the need for const_cast and move_iterator, resulting in no benefit because these are just int's
+			//: primary_leaves(std::move_iterator(rhs.primary_leaves.begin()), std::move_iterator(rhs.primary_leaves.end()))
+			: primary_leaves(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend())
+
+			// ditto
+			//, primary_leaves_cache(std::move_iterator(rhs.primary_leaves_cache.begin()), std::move_iterator(rhs.primary_leaves_cache.end()))
+			, primary_leaves_cache(rhs.primary_leaves_cache.cbegin(), rhs.primary_leaves_cache.cend())
+		{
+			child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
 			//SaveCache(); // already moved from rhs
 		}
 
@@ -1279,7 +1299,35 @@ class BranchOutputRow
 			primary_leaves.insert(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend());
 
 			child_indices_into_raw_data.clear();
-			std::move(std::move_iterator<decltype(rhs.child_indices_into_raw_data)::iterator>(rhs.child_indices_into_raw_data.begin()), std::move_iterator<decltype(rhs.child_indices_into_raw_data)::iterator>(rhs.child_indices_into_raw_data.end()), child_indices_into_raw_data.begin());
+			for (auto & rhs_map : rhs.child_indices_into_raw_data)
+			{
+				for (auto & rhs_vec : rhs_map.second)
+				{
+					// move does nothing here, since it's an int, but if we could, we would...
+					// this is the best that can be done for disparate types
+					child_indices_into_raw_data[rhs_map.first][rhs_vec.first] = std::move(rhs_vec.second);
+				}
+			}
+			SaveCache();
+			return *this;
+		}
+
+		// Specialize for own type
+		BranchOutputRow & operator=(BranchOutputRow<MEMORY_TAG> && rhs)
+		{
+			if (this == &rhs)
+			{
+				return *this;
+			}
+
+			primary_leaves.clear();
+
+			// Set of int's: no need to do a move, which requires tedious const_cast and move_iterator syntax and won't result in any benefit because they're just integers being moved
+			//primary_leaves.insert(std::move_iterator<decltype(rhs.primary_leaves)::iterator>(rhs.primary_leaves.begin()), std::move_iterator<decltype(rhs.primary_leaves)::iterator>(rhs.primary_leaves.end()));
+			primary_leaves.insert(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend());
+
+			child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
+
 			SaveCache();
 			return *this;
 		}
@@ -2374,6 +2422,12 @@ class KadSampler
 		}
 
 		void Clear(); // ditto
+
+		void PurgeRemaining();
+
+		void PurgeHitsConsolidated();
+
+		void PurgeHits();
 
 	protected:
 
