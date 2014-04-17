@@ -34,15 +34,20 @@ typedef InstanceDataVector ChildDMUInstanceDataVector;
 typedef InstanceDataVector SecondaryInstanceDataVector;
 
 typedef FastVector<std::int16_t> fast_short_vector;
+
 template <typename MEMORY_TAG>
-typedef FastVectorMemoryTag<int, MEMORY_TAG> fast_int_vector;
+using fast_int_vector = FastVectorMemoryTag<int, MEMORY_TAG>;
+
 template <typename MEMORY_TAG>
-typedef FastSetMemoryTag<int, MEMORY_TAG> fast_int_set;
+using fast_int_set = FastSetMemoryTag<int, MEMORY_TAG>;
+
 typedef FastMap<std::int16_t, std::int32_t> fast_short_to_int_map;
+
 template <typename MEMORY_TAG>
-typedef FastMapMemoryTag<std::int16_t, std::int32_t, MEMORY_TAG> fast_short_to_int_map__loaded; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
+using fast_short_to_int_map__loaded = FastMapMemoryTag<std::int16_t, std::int32_t, MEMORY_TAG>; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
+
 template <typename MEMORY_TAG>
-typedef FastMapMemoryTag<std::int16_t, fast_short_to_int_map__loaded<MEMORY_TAG>, MEMORY_TAG> fast__short__to__fast_short_to_int_map__loaded;
+using fast__short__to__fast_short_to_int_map__loaded = FastMapMemoryTag<std::int16_t, fast_short_to_int_map__loaded<MEMORY_TAG>, MEMORY_TAG>;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
 typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
