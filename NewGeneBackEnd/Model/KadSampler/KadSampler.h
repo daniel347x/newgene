@@ -2153,7 +2153,7 @@ class KadSampler
 
 		}
 
-		FastVector<newgene_cpp_int> random_numbers;
+		FastVectorCppInt<newgene_cpp_int> random_numbers;
 
 	private:
 
