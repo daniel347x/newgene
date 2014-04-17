@@ -1350,16 +1350,26 @@ typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 typedef FastVector<Leaf> fast_leaf_vector;
 typedef FastSet<Leaf> Leaves;
 
-typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;
-typedef FastVector<BranchOutputRow> fast_branch_output_row_vector_huge; // no difference at this point because code pre-allocates full size, so extra template param was removed
-typedef FastSetHits<BranchOutputRow> fast_branch_output_row_set;
+template <typename MEMORY_TAG>
+using fast_branch_output_row_vector = FastVector<BranchOutputRow<MEMORY_TAG>>;
 
-typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
+template <typename MEMORY_TAG>
+using fast_branch_output_row_vector_huge = FastVector<BranchOutputRow<MEMORY_TAG>>; // no difference at this point because code pre-allocates full size, so extra template param was removed
 
-typedef FastMapHits<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
-typedef FastMap<std::int64_t, fast_branch_output_row_vector> fast__int64__to__fast_branch_output_row_vector;
+template <typename MEMORY_TAG>
+using fast_branch_output_row_set = FastSetHits<BranchOutputRow<MEMORY_TAG>>;
 
-typedef FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
+template <typename MEMORY_TAG>
+using fast_branch_output_row_ptr__to__fast_short_vector = FastMap<BranchOutputRow<MEMORY_TAG> const *, fast_short_vector>;
+
+template <typename MEMORY_TAG>
+using fast__int64__to__fast_branch_output_row_set = FastMapHits<std::int64_t, fast_branch_output_row_set<MEMORY_TAG>>;
+
+template <typename MEMORY_TAG>
+using fast__int64__to__fast_branch_output_row_vector = FastMap<std::int64_t, fast_branch_output_row_vector<MEMORY_TAG>>;
+
+template <typename MEMORY_TAG>
+using fast__lookup__from_child_dmu_set__to__output_rows = FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>>;
 
 // ******************************************************************************************************************************************************************** //
 // Output data to XML for debugging
