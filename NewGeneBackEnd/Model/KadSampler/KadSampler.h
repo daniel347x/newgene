@@ -2167,7 +2167,7 @@ class KadSampler
 
 		InstanceDataVector create_output_row_visitor_global_data_cache;
 		newgene_cpp_int number_rows_generated;
-		FastVector<newgene_cpp_int>::const_iterator random_number_iterator;
+		FastVectorCppInt<newgene_cpp_int>::const_iterator random_number_iterator;
 
 };
 
