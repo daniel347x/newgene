@@ -1221,7 +1221,7 @@ class BranchOutputRow
 
 		template <typename MEMORY_TAG_RHS>
 		BranchOutputRow(BranchOutputRow<MEMORY_TAG_RHS> const & rhs)
-			, child_indices_into_raw_data(rhs.child_indices_into_raw_data.cbegin(), rhs.child_indices_into_raw_data.cend())
+			: child_indices_into_raw_data(rhs.child_indices_into_raw_data.cbegin(), rhs.child_indices_into_raw_data.cend())
 			, primary_leaves(rhs.primary_leaves)
 		{
 			SaveCache();
