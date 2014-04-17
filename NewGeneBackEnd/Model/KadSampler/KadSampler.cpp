@@ -1770,55 +1770,6 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 	});
 }
 
-BranchOutputRow::BranchOutputRow()
-{
-}
-
-BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
-	, child_indices_into_raw_data(rhs.child_indices_into_raw_data)
-	, primary_leaves(rhs.primary_leaves)
-{
-	SaveCache();
-}
-
-BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
-	: primary_leaves(std::move(rhs.primary_leaves))
-	, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
-	, child_indices_into_raw_data(std::move(rhs.child_indices_into_raw_data))
-{
-	//SaveCache(); // already moved from rhs
-}
-
-BranchOutputRow & BranchOutputRow::operator=(BranchOutputRow const & rhs)
-{
-	if (this == &rhs)
-	{
-		return *this;
-	}
-
-	primary_leaves = rhs.primary_leaves;
-	child_indices_into_raw_data = rhs.child_indices_into_raw_data;
-	SaveCache();
-	return *this;
-}
-
-BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
-{
-	if (this == &rhs)
-	{
-		return *this;
-	}
-
-	primary_leaves = std::move(rhs.primary_leaves);
-	child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
-	SaveCache();
-	return *this;
-}
-
-BranchOutputRow::~BranchOutputRow()
-{
-}
-
 //#ifdef _DEBUG
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 {

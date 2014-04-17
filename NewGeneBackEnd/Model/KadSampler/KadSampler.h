@@ -38,10 +38,11 @@ template <typename MEMORY_TAG>
 typedef FastVectorMemoryTag<int, MEMORY_TAG> fast_int_vector;
 template <typename MEMORY_TAG>
 typedef FastSetMemoryTag<int, MEMORY_TAG> fast_int_set;
-typedef FastMapLoaded<std::int16_t, std::int32_t> fast_short_to_int_map;
-typedef FastMapLoaded<std::int16_t, std::int32_t>
-fast_short_to_int_map__loaded; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
-typedef FastMapLoaded<std::int16_t, fast_short_to_int_map__loaded> fast__short__to__fast_short_to_int_map__loaded;
+typedef FastMap<std::int16_t, std::int32_t> fast_short_to_int_map;
+template <typename MEMORY_TAG>
+typedef FastMapMemoryTag<std::int16_t, std::int32_t, MEMORY_TAG> fast_short_to_int_map__loaded; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
+template <typename MEMORY_TAG>
+typedef FastMapMemoryTag<std::int16_t, fast_short_to_int_map__loaded<MEMORY_TAG>, MEMORY_TAG> fast__short__to__fast_short_to_int_map__loaded;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
 typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
@@ -1211,26 +1212,72 @@ class BranchOutputRow
 
 	public:
 
-		BranchOutputRow();
-		BranchOutputRow(BranchOutputRow const & rhs);
-		BranchOutputRow(BranchOutputRow && rhs);
-		BranchOutputRow & operator=(BranchOutputRow const & rhs);
-		BranchOutputRow & operator=(BranchOutputRow && rhs);
+		BranchOutputRow() {}
+
+		template <typename MEMORY_TAG_RHS>
+		BranchOutputRow(BranchOutputRow<MEMORY_TAG_RHS> const & rhs)
+			, child_indices_into_raw_data(rhs.child_indices_into_raw_data.cbegin(), rhs.child_indices_into_raw_data.cend())
+			, primary_leaves(rhs.primary_leaves)
+		{
+			SaveCache();
+		}
+
+		template <typename MEMORY_TAG_RHS>
+		BranchOutputRow(BranchOutputRow<MEMORY_TAG_RHS> && rhs)
+			: primary_leaves(std::move(rhs.primary_leaves))
+			, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
+			, child_indices_into_raw_data(std::move_iterator(rhs.child_indices_into_raw_data.begin()), std::move_iterator(rhs.child_indices_into_raw_data.end()))
+		{
+			//SaveCache(); // already moved from rhs
+		}
+
+		template <typename MEMORY_TAG_RHS>
+		BranchOutputRow & operator=(BranchOutputRow<MEMORY_TAG_RHS> const & rhs)
+		{
+			if (this == &rhs)
+			{
+				return *this;
+			}
+
+			primary_leaves = rhs.primary_leaves;
+			child_indices_into_raw_data.clear();
+			std::copy(rhs.child_indices_into_raw_data.cbegin(), rhs.child_indices_into_raw_data.cend(), child_indices_into_raw_data.begin());
+			SaveCache();
+			return *this;
+		}
+
+		template <typename MEMORY_TAG_RHS>
+		BranchOutputRow & operator=(BranchOutputRow<MEMORY_TAG_RHS> && rhs)
+		{
+			if (this == &rhs)
+			{
+				return *this;
+			}
+
+			primary_leaves = std::move(rhs.primary_leaves);
+			child_indices_into_raw_data.clear();
+			std::move(std::move_iterator(rhs.child_indices_into_raw_data.begin()), std::move_iterator(rhs.child_indices_into_raw_data.end()), child_indices_into_raw_data.begin());
+			SaveCache();
+			return *this;
+		}
 
 		// Destructor to debug
-		~BranchOutputRow();
+		~BranchOutputRow(); {}
 
-		bool operator==(BranchOutputRow const & rhs) const
+		template <typename MEMORY_TAG_RHS>
+		bool operator==(BranchOutputRow<MEMORY_TAG_RHS> const & rhs) const
 		{
 			return (!(*this < rhs) && !(rhs < *this));
 		}
 
-		bool operator!=(BranchOutputRow const & rhs) const
+		template <typename MEMORY_TAG_RHS>
+		bool operator!=(BranchOutputRow<MEMORY_TAG_RHS> const & rhs) const
 		{
 			return (!(*this == rhs));
 		}
 
-		bool operator<(BranchOutputRow const & rhs) const
+		template <typename MEMORY_TAG_RHS>
+		bool operator<(BranchOutputRow<MEMORY_TAG_RHS> const & rhs) const
 		{
 			return primary_leaves < rhs.primary_leaves;
 		}
@@ -1281,7 +1328,7 @@ class BranchOutputRow
 		// Map from child variable group ID to:
 		// Map from child leaf index to:
 		// index into child variable group's raw data cache (stored in the AllWeightings instance)
-		mutable fast__short__to__fast_short_to_int_map__loaded child_indices_into_raw_data;
+		mutable fast__short__to__fast_short_to_int_map__loaded<MEMORY_TAG> child_indices_into_raw_data;
 
 	private:
 
