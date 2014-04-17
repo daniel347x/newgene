@@ -1267,7 +1267,7 @@ class BranchOutputRow
 		}
 
 		// Destructor to debug
-		~BranchOutputRow(); {}
+		~BranchOutputRow() {}
 
 		template <typename MEMORY_TAG_RHS>
 		bool operator==(BranchOutputRow<MEMORY_TAG_RHS> const & rhs) const
