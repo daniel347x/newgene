@@ -1771,29 +1771,21 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 }
 
 BranchOutputRow::BranchOutputRow()
-	: child_indices_into_raw_data_(new(BranchOutputRowPool::malloc())fast__short__to__fast_short_to_int_map__loaded())
-	, child_indices_into_raw_data(*child_indices_into_raw_data_)
 {
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
-	: child_indices_into_raw_data_(new(BranchOutputRowPool::malloc())fast__short__to__fast_short_to_int_map__loaded())
-	, child_indices_into_raw_data(*child_indices_into_raw_data_)
+	, child_indices_into_raw_data(rhs.child_indices_into_raw_data)
 	, primary_leaves(rhs.primary_leaves)
 {
-	// WE NEED THIS COPY.  We have only created it, above, but not copied from RHS
-	child_indices_into_raw_data = rhs.child_indices_into_raw_data;
 	SaveCache();
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
 	: primary_leaves(std::move(rhs.primary_leaves))
 	, primary_leaves_cache(std::move(rhs.primary_leaves_cache))
-	, child_indices_into_raw_data_(new(BranchOutputRowPool::malloc())fast__short__to__fast_short_to_int_map__loaded())
-	, child_indices_into_raw_data(*child_indices_into_raw_data_)
+	, child_indices_into_raw_data(std::move(rhs.child_indices_into_raw_data))
 {
-	// WE NEED THIS COPY.  We have only created it, above, but not copied from RHS
-	child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
 	//SaveCache(); // already moved from rhs
 }
 
@@ -1825,7 +1817,6 @@ BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
 
 BranchOutputRow::~BranchOutputRow()
 {
-	BranchOutputRowPool::free(child_indices_into_raw_data_);
 }
 
 //#ifdef _DEBUG
@@ -3306,8 +3297,6 @@ void KadSampler::Clear()
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map__loaded::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__short__to__fast_short_to_int_map__loaded::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_branch_output_row_set::value_type)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_set::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_vector::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows::value_type)>();
@@ -3323,9 +3312,9 @@ void KadSampler::Clear()
 
 	purge_pool<newgene_cpp_int_tag, sizeof(boost::multiprecision::limb_type)>();
 	purge_pool<newgene_cpp_int_tag, sizeof(newgene_cpp_int)>();
+	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_set::value_type)>();
+	purge_pool<hits_tag, sizeof(fast_branch_output_row_set::value_type)>();
 
-	LeafPool::purge_memory();
-	BranchOutputRowPool::purge_memory();
 	RandomVectorPool::purge_memory();
 	RandomSetPool::purge_memory();
 

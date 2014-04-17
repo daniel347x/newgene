@@ -34,8 +34,10 @@ typedef InstanceDataVector ChildDMUInstanceDataVector;
 typedef InstanceDataVector SecondaryInstanceDataVector;
 
 typedef FastVector<std::int16_t> fast_short_vector;
-typedef FastVector<int> fast_int_vector;
-typedef FastSet<int> fast_int_set;
+template <typename MEMORY_TAG>
+typedef FastVectorMemoryTag<int, MEMORY_TAG> fast_int_vector;
+template <typename MEMORY_TAG>
+typedef FastSetMemoryTag<int, MEMORY_TAG> fast_int_set;
 typedef FastMapLoaded<std::int16_t, std::int32_t> fast_short_to_int_map;
 typedef FastMapLoaded<std::int16_t, std::int32_t>
 fast_short_to_int_map__loaded; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
@@ -1133,10 +1135,6 @@ class size_of_visitor : public boost::static_visitor<size_t>
 
 };
 
-struct newgene_leaf_tag {};
-typedef boost::singleton_pool<newgene_leaf_tag, sizeof(fast_short_to_int_map)>
-LeafPool;
-
 // "Leaf"
 class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 {
@@ -1146,35 +1144,27 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 		PrimaryKeysGroupingMultiplicityGreaterThanOne()
 			: PrimaryKeysGrouping { DMUInstanceDataVector() }
 		, index_into_raw_data { 0 }
-		, other_top_level_indices_into_raw_data_ { new(LeafPool::malloc())fast_short_to_int_map() }
-		, other_top_level_indices_into_raw_data(*other_top_level_indices_into_raw_data_)
 		{
 		}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data { index_into_raw_data_ }
-		, other_top_level_indices_into_raw_data_ { new(LeafPool::malloc())fast_short_to_int_map() }
-		, other_top_level_indices_into_raw_data { *other_top_level_indices_into_raw_data_ }
 		{
 		}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
 			, index_into_raw_data { rhs.index_into_raw_data }
-		, other_top_level_indices_into_raw_data_ { new(LeafPool::malloc())fast_short_to_int_map() }
-		, other_top_level_indices_into_raw_data { *other_top_level_indices_into_raw_data_ }
+			, other_top_level_indices_into_raw_data { rhs.other_top_level_indices_into_raw_data }
 		{
-			other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
 		}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
 			: PrimaryKeysGrouping(std::move(rhs))
 			, index_into_raw_data { rhs.index_into_raw_data }
-		, other_top_level_indices_into_raw_data_ { new(LeafPool::malloc())fast_short_to_int_map() }
-		, other_top_level_indices_into_raw_data { *other_top_level_indices_into_raw_data_ }
+			, other_top_level_indices_into_raw_data { std::move(rhs.other_top_level_indices_into_raw_data) }
 		{
-			other_top_level_indices_into_raw_data = std::move(rhs.other_top_level_indices_into_raw_data);
 		}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne & operator=(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
@@ -1205,24 +1195,17 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 		~PrimaryKeysGroupingMultiplicityGreaterThanOne()
 		{
-			LeafPool::free(other_top_level_indices_into_raw_data_);
 		}
 
 		std::int32_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
 
 		// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
-		mutable fast_short_to_int_map *
-		other_top_level_indices_into_raw_data_; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
-
-		mutable fast_short_to_int_map &
+		mutable fast_short_to_int_map
 		other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
 
 };
 
-struct newgene_branchoutputrow_tag {};
-typedef boost::singleton_pool<newgene_branchoutputrow_tag, sizeof(fast__short__to__fast_short_to_int_map__loaded)>
-BranchOutputRowPool;
-
+template <typename MEMORY_TAG>
 class BranchOutputRow
 {
 
@@ -1289,17 +1272,16 @@ class BranchOutputRow
 		// the non-primary top-level variable groups,
 		// and all child variable groups.
 		// ******************************************************************* //
-		fast_int_set primary_leaves;
+		fast_int_set<MEMORY_TAG> primary_leaves;
 
 	public:
 
-		fast_int_vector primary_leaves_cache; // for optimized lookup only
+		fast_int_vector<MEMORY_TAG> primary_leaves_cache; // for optimized lookup only
 
 		// Map from child variable group ID to:
 		// Map from child leaf index to:
 		// index into child variable group's raw data cache (stored in the AllWeightings instance)
-		mutable fast__short__to__fast_short_to_int_map__loaded * child_indices_into_raw_data_;
-		mutable fast__short__to__fast_short_to_int_map__loaded & child_indices_into_raw_data;
+		mutable fast__short__to__fast_short_to_int_map__loaded child_indices_into_raw_data;
 
 	private:
 
@@ -1318,11 +1300,11 @@ typedef FastSet<Leaf> Leaves;
 
 typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;
 typedef FastVector<BranchOutputRow> fast_branch_output_row_vector_huge; // no difference at this point because code pre-allocates full size, so extra template param was removed
-typedef FastSet<BranchOutputRow> fast_branch_output_row_set;
+typedef FastSetHits<BranchOutputRow> fast_branch_output_row_set;
 
 typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
 
-typedef FastMap<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
+typedef FastMapHits<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
 typedef FastMap<std::int64_t, fast_branch_output_row_vector> fast__int64__to__fast_branch_output_row_vector;
 
 typedef FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
