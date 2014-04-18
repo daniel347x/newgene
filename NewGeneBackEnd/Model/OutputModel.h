@@ -990,7 +990,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 				// because "other_top_level_indices_into_raw_data" is populated
 				// regardless of whether "primary_keys" is populated for the leaf.
 				std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(),
-					leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map::value_type const & top_level_vg_and_data_index)
+					leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & top_level_vg_and_data_index)
 				{
 					int const vg_number = top_level_vg_and_data_index.first;
 
@@ -1095,7 +1095,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 				}
 
 				auto const & leaf_number_to_data_index = leaf_index_mappings.second;
-				std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](fast_short_to_int_map::value_type const & leaf_index_mapping)
+				std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & leaf_index_mapping)
 				{
 
 					int const leaf_number = leaf_index_mapping.first;

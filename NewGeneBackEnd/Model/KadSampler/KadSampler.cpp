@@ -650,7 +650,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 							{
 
 								BranchOutputRow<hits_tag> const & outputRow = *matchingOutputRowPtr->first;
-								fast_short_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
+								auto const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
 
 								// matchingOutputChildLeaves is a vector
 
@@ -836,15 +836,14 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	bool reverse_mode = false;
 
 	void * ptr = RandomVectorPool::malloc();
-	auto remaining_ = new(ptr)
-	FastVectorCppInt<newgene_cpp_int>(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
+	auto remaining_ = new(ptr)FastVectorCppInt(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
 	auto & remaining = *remaining_;
 
-	FastVectorCppInt<newgene_cpp_int>::iterator remainingPtr = remaining.begin();
+	FastVectorCppInt::iterator remainingPtr = remaining.begin();
 
 	ptr = RandomSetPool::malloc();
 	auto tmp_random_numbers_ = new(ptr)
-	FastSetCppInt<newgene_cpp_int>(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
+	FastSetCppInt(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
 	auto & tmp_random_numbers = *tmp_random_numbers_;
 
 	ProgressBarMeter meter(messager, "Generated %1% out of %2% random numbers", how_many);
@@ -1871,6 +1870,7 @@ void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & da
 	sdata += "</DATA_CACHES>";
 }
 
+template<typename MEMORY_TAG>
 void SpitLeaf(std::string & sdata, Leaf const & leaf)
 {
 	sdata += "<LEAF>";
@@ -1882,7 +1882,7 @@ void SpitLeaf(std::string & sdata, Leaf const & leaf)
 	sdata += "</LEAF_DMU_DATALIST>";
 	sdata += "<OTHER_NON_PRIMARY_TOP_LEVEL_INDICES__ONE_PER_LEAF__POINTING_INTO_DATA_CACHE>";
 	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(),
-				  leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map::value_type const & leafindicesintorawdata)
+		leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & leafindicesintorawdata)
 	{
 		sdata += "<VARIABLE_GROUP>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
@@ -3031,7 +3031,7 @@ void KadSampler::Clear()
 
 	purge_pool<boost::pool_allocator_tag, sizeof(InstanceDataVector::value_type const)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(InstanceData)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_short_vector::value_type const)>();
+	purge_pool<boost::pool_allocator_tag, sizeof(fast_short_vector<boost::pool_allocator_tag>::value_type const)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_vector_childtoprimarymapping::value_type const)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(int)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(fast_leaf_vector::value_type const)>();
@@ -3043,7 +3043,7 @@ void KadSampler::Clear()
 
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__mergedtimeslicerow_set::value_type const)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map::value_type const)>();
+	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map<boost::fast_pool_allocator_tag>::value_type const)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaves::value_type const)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(DataCache::value_type const)>();

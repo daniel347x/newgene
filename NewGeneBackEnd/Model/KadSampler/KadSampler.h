@@ -23,17 +23,18 @@
 
 typedef std::basic_string<char, std::char_traits<char>, boost::pool_allocator<char>> fast_string;
 
-typedef FastMap<std::int16_t, std::int16_t> fast_short_to_short_map;
+typedef FastMapMemoryTag<std::int16_t, std::int16_t, boost::fast_pool_allocator_tag> fast_short_to_short_map;
 typedef boost::variant<std::int32_t, double, fast_string> InstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> DMUInstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> SecondaryInstanceData;
 
-typedef FastVector<InstanceData> InstanceDataVector;
+typedef FastVectorMemoryTag<InstanceData, boost::pool_allocator_tag> InstanceDataVector;
 typedef InstanceDataVector DMUInstanceDataVector;
 typedef InstanceDataVector ChildDMUInstanceDataVector;
 typedef InstanceDataVector SecondaryInstanceDataVector;
 
-typedef FastVector<std::int16_t> fast_short_vector;
+template <typename MEMORY_TAG>
+using fast_short_vector = FastVectorMemoryTag<std::int16_t, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
 using fast_int_vector = FastVectorMemoryTag<int, MEMORY_TAG>;
@@ -41,7 +42,8 @@ using fast_int_vector = FastVectorMemoryTag<int, MEMORY_TAG>;
 template <typename MEMORY_TAG>
 using fast_int_set = FastSetMemoryTag<int, MEMORY_TAG>;
 
-typedef FastMap<std::int16_t, std::int32_t> fast_short_to_int_map;
+template <typename MEMORY_TAG>
+using fast_short_to_int_map = FastMapMemoryTag<std::int16_t, std::int32_t, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
 using fast_short_to_int_map__loaded = FastMapMemoryTag<std::int16_t, std::int32_t, MEMORY_TAG>; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
@@ -50,16 +52,16 @@ template <typename MEMORY_TAG>
 using fast__short__to__fast_short_to_int_map__loaded = FastMapMemoryTag<std::int16_t, fast_short_to_int_map__loaded<MEMORY_TAG>, MEMORY_TAG>;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
-typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
+typedef FastMapMemoryTag<std::int32_t, SecondaryInstanceDataVector, boost::fast_pool_allocator_tag> DataCache;
 
-typedef FastMap<std::int16_t, DataCache> fast_short_to_data_cache_map;
+typedef FastMapMemoryTag<std::int16_t, DataCache, boost::fast_pool_allocator_tag> fast_short_to_data_cache_map;
 
 struct newgene_randomvector_tag {};
-typedef boost::singleton_pool<newgene_randomvector_tag, sizeof(FastVector<newgene_cpp_int>)>
+typedef boost::singleton_pool<newgene_randomvector_tag, sizeof(FastVectorCppInt)>
 RandomVectorPool;
 
 struct newgene_randomset_tag {};
-typedef boost::singleton_pool<newgene_randomset_tag, sizeof(FastSet<newgene_cpp_int>)>
+typedef boost::singleton_pool<newgene_randomset_tag, sizeof(FastSetCppInt)>
 RandomSetPool;
 
 class KadSampler;
@@ -1017,8 +1019,8 @@ struct ChildToPrimaryMapping
 	}
 };
 
-typedef FastVector<ChildToPrimaryMapping> fast_vector_childtoprimarymapping;
-typedef FastMap<int, fast_vector_childtoprimarymapping> fast_int_to_childtoprimarymappingvector;
+typedef FastVectorMemoryTag<ChildToPrimaryMapping, boost::pool_allocator_tag> fast_vector_childtoprimarymapping;
+typedef FastMapMemoryTag<int, fast_vector_childtoprimarymapping, boost::fast_pool_allocator_tag> fast_int_to_childtoprimarymappingvector;
 
 enum VARIABLE_GROUP_MERGE_MODE
 {
@@ -1206,7 +1208,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 		std::int32_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
 
 		// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
-		mutable fast_short_to_int_map
+		mutable fast_short_to_int_map<boost::fast_pool_allocator_tag>
 		other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
 
 };
@@ -1295,7 +1297,6 @@ class BranchOutputRow
 			primary_leaves.clear();
 			
 			// Set of int's: no need to do a move, which requires tedious const_cast and move_iterator syntax and won't result in any benefit because they're just integers being moved
-			//primary_leaves.insert(std::move_iterator<decltype(rhs.primary_leaves)::iterator>(rhs.primary_leaves.begin()), std::move_iterator<decltype(rhs.primary_leaves)::iterator>(rhs.primary_leaves.end()));
 			primary_leaves.insert(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend());
 
 			child_indices_into_raw_data.clear();
@@ -1323,7 +1324,6 @@ class BranchOutputRow
 			primary_leaves.clear();
 
 			// Set of int's: no need to do a move, which requires tedious const_cast and move_iterator syntax and won't result in any benefit because they're just integers being moved
-			//primary_leaves.insert(std::move_iterator<decltype(rhs.primary_leaves)::iterator>(rhs.primary_leaves.begin()), std::move_iterator<decltype(rhs.primary_leaves)::iterator>(rhs.primary_leaves.end()));
 			primary_leaves.insert(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend());
 
 			child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
@@ -1413,26 +1413,26 @@ class BranchOutputRow
 
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 
-typedef FastVector<Leaf> fast_leaf_vector;
-typedef FastSet<Leaf> Leaves;
+typedef FastVectorMemoryTag<Leaf, boost::pool_allocator_tag> fast_leaf_vector;
+typedef FastSetMemoryTag<Leaf, boost::fast_pool_allocator_tag> Leaves;
 
 template <typename MEMORY_TAG>
-using fast_branch_output_row_vector = FastVector<BranchOutputRow<MEMORY_TAG>>;
+using fast_branch_output_row_vector = FastVectorMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast_branch_output_row_vector_huge = FastVector<BranchOutputRow<MEMORY_TAG>>; // no difference at this point because code pre-allocates full size, so extra template param was removed
+using fast_branch_output_row_vector_huge = FastVectorMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast_branch_output_row_set = FastSetHits<BranchOutputRow<MEMORY_TAG>>;
+using fast_branch_output_row_set = FastSetMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast_branch_output_row_ptr__to__fast_short_vector = FastMap<BranchOutputRow<MEMORY_TAG> const *, fast_short_vector>;
+using fast_branch_output_row_ptr__to__fast_short_vector = FastMapMemoryTag<BranchOutputRow<MEMORY_TAG> const *, fast_short_vector<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast__int64__to__fast_branch_output_row_set = FastMapHits<std::int64_t, fast_branch_output_row_set<MEMORY_TAG>>;
+using fast__int64__to__fast_branch_output_row_set = FastMapMemoryTag<std::int64_t, fast_branch_output_row_set<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast__int64__to__fast_branch_output_row_vector = FastMap<std::int64_t, fast_branch_output_row_vector<MEMORY_TAG>>;
+using fast__int64__to__fast_branch_output_row_vector = FastMapMemoryTag<std::int64_t, fast_branch_output_row_vector<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
 using fast__lookup__from_child_dmu_set__to__output_rows = FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>>;
@@ -1492,7 +1492,7 @@ void SpitAllWeightings(KadSampler const & allWeightings, std::string const & fil
 // SpitAllWeightings() is the important one... just use that for debugging.
 // Internally, it calls the functions below.
 // ******************************************************************************************************************************************************************** //
-void SpitKeys(std::string & sdata, FastVector<DMUInstanceData> const & dmu_keys);
+void SpitKeys(std::string & sdata, FastVectorMemoryTag<DMUInstanceData, boost::pool_allocator_tag> const & dmu_keys);
 void SpitDataCache(std::string & sdata, DataCache const & dataCache);
 void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & dataCaches);
 
@@ -1544,7 +1544,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow<MEMORY_TAG> const & row)
 		sdata += "<VARIABLE_GROUP_NUMBER>";
 		sdata += boost::lexical_cast<std::string>(childindices.first);
 		sdata += "</VARIABLE_GROUP_NUMBER>";
-		std::for_each(childindices.second.cbegin(), childindices.second.cend(), [&](fast_short_to_int_map::value_type const & childleaves)
+		std::for_each(childindices.second.cbegin(), childindices.second.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & childleaves)
 		{
 			sdata += "<SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW>";
 			sdata += "<SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW_OBJECT_ITSELF>";
@@ -1967,7 +1967,7 @@ class VariableGroupBranchesAndLeaves
 
 };
 
-typedef FastVector<VariableGroupBranchesAndLeaves> VariableGroupBranchesAndLeavesVector;
+typedef FastVectorMemoryTag<VariableGroupBranchesAndLeaves, boost::pool_allocator_tag> VariableGroupBranchesAndLeavesVector;
 
 class VariableGroupTimeSliceData
 {
@@ -1983,7 +1983,7 @@ class VariableGroupTimeSliceData
 
 };
 
-typedef FastMap<TimeSlice, VariableGroupTimeSliceData> TimeSlices;
+typedef FastMapMemoryTag<TimeSlice, VariableGroupTimeSliceData, boost::fast_pool_allocator_tag> TimeSlices;
 
 typedef std::pair<TimeSlice, Leaf> TimeSliceLeaf;
 
@@ -2235,7 +2235,7 @@ class SortMergedRowsByTimeThenKeys
 
 };
 
-typedef FastSet<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> fast__mergedtimeslicerow_set;
+typedef FastSetMemoryTag<MergedTimeSliceRow, boost::fast_pool_allocator_tag, SortMergedRowsByTimeThenKeys> fast__mergedtimeslicerow_set;
 
 class KadSampler
 {
@@ -2422,11 +2422,8 @@ class KadSampler
 		}
 
 		void Clear(); // ditto
-
 		void PurgeRemaining();
-
 		void PurgeHitsConsolidated();
-
 		void PurgeHits();
 
 	protected:
@@ -2465,7 +2462,7 @@ class KadSampler
 
 		}
 
-		FastVectorCppInt<newgene_cpp_int> random_numbers;
+		FastVectorCppInt random_numbers;
 
 	private:
 
@@ -2479,7 +2476,7 @@ class KadSampler
 
 		InstanceDataVector create_output_row_visitor_global_data_cache;
 		newgene_cpp_int number_rows_generated;
-		FastVectorCppInt<newgene_cpp_int>::const_iterator random_number_iterator;
+		FastVectorCppInt::const_iterator random_number_iterator;
 
 };
 
