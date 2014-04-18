@@ -1631,7 +1631,6 @@ void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__
 	sdata += "</LIST_OF_CHILD_KEYLISTS_THAT_MATCH_SOMETHING_IN_THIS_BRANCH>";
 }
 
-void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
 void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
@@ -1708,7 +1707,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				sdata += boost::lexical_cast<std::string>(index);
 				sdata += "</LEAF_NUMBER>";
 				sdata += "<LEAF_DATA>";
-				SpitLeaf(sdata, leaf);
+				SpitLeaf<boost::fast_pool_allocator_tag>(sdata, leaf);
 				sdata += "</LEAF_DATA>";
 				++index;
 				sdata += "</LEAF>";
