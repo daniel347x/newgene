@@ -110,6 +110,9 @@ bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
 	{
 		boost::format msg( "Exception thrown: %1%" );
 		msg % e.what();
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
 		QApplication::exit( -1 );
 		return false;
 	}
