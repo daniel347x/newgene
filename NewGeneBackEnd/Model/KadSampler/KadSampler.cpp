@@ -638,18 +638,23 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 						// *********************************************************************************** //
 
 						// The following cache will only be filled on the first pass
-						the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
+						//the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
 
 						// *********************************************************************************** //
 						// We have an incoming child variable group branch and leaf.
 						// Find all matching output rows that contain the same DMU data on the matching columns.
 						// *********************************************************************************** //
 						// ... never use "consolidating rows" version here, because consolidation always happens after all rows are merged
-						auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.find(dmu_keys);
+						if (the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
+						{
+							boost::format msg("Null child DMU key lookup cache.");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+						auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->find(dmu_keys);
 
 						bool no_matches_for_this_child = false;
 
-						if (matchingOutputRows == the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.cend())
+						if (matchingOutputRows == the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend())
 						{
 							no_matches_for_this_child = true;
 						}
@@ -1275,8 +1280,52 @@ newgene_cpp_int KadSampler::BinomialCoefficient(int const N, int const K)
 
 }
 
+void KadSampler::ClearBranchCaches()
+{
+
+	//ProgressBarMeter meter(messager, "Processed %1% of %2% time slices", timeSlices.size());
+
+	std::int64_t current_loop_iteration = 0;
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type  & timeSliceData)
+	{
+
+		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = timeSliceData.second.branches_and_leaves;
+
+		// For now, assume only one variable group
+		if (variableGroupBranchesAndLeavesVector.size() > 1)
+		{
+			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+		Branches<hits_tag> & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+
+		std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
+		{
+
+			// Do not delete!  Let the Boost Pool system handle this memory
+			branch.helper_lookup__from_child_key_set__to_matching_output_rows = nullptr;
+
+		});
+
+		++current_loop_iteration;
+
+		//meter.UpdateProgressBarValue(current_loop_iteration);
+
+	});
+
+	PurgeTags<child_dmu_lookup_tag>();
+
+}
+
 void KadSampler::ResetBranchCaches(int const child_variable_group_number, bool const reset_child_dmu_lookup)
 {
+
+	if (reset_child_dmu_lookup)
+	{
+		ClearBranchCaches();
+	}
 
 	ProgressBarMeter meter(messager, "Processed %1% of %2% time slices", timeSlices.size());
 	std::int64_t current_loop_iteration = 0;
@@ -1313,12 +1362,27 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 	//  for a single output row.)
 	// ************************************************************************************************************************************************** //
 
-	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
+	if (force || helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 	{
 
 		// The cache has yet to be filled, or we are specifically being requested to refresh it
 
-		helper_lookup__from_child_key_set__to_matching_output_rows.clear();
+		if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
+		{
+			// This scenario occurs before a child variable group is being merged.
+			// To save memory, the cache from any previous child variable group merges
+			// is discarded (elsewhere) from the Memory Pool, and recreated here.
+			helper_lookup__from_child_key_set__to_matching_output_rows = new fast__lookup__from_child_dmu_set__to__output_rows<child_dmu_lookup_tag>;
+		}
+		else
+		{
+			// This scenario occurs when PruneTimeUnits is being called,
+			// i.e., a time slice is being split apart, merged, or consolidated,
+			// so the child DMU lookup cache needs to be rebuilt,
+			// since BranchOutputRows have been copied into a new instance,
+			// invalidating all previous pointers.
+			helper_lookup__from_child_key_set__to_matching_output_rows->clear();
+		}
 
 		// Optimization: Profiler shows large amount of time spent creating and destroying the following vectors
 		static ChildDMUInstanceDataVector<hits_tag> child_hit_vector_branch_components;
@@ -1517,7 +1581,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 					{
 						if (!missing_top_level_leaf)
 						{
-							helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
+							if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
+							{
+								boost::format msg("Null child DMU key lookup cache in merge.");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+							(*helper_lookup__from_child_key_set__to_matching_output_rows)[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 						}
 
 						++current_child_leaf_number;
@@ -1772,7 +1841,6 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 
 		if (reset_child_dmu_lookup)
 		{
-			branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 			branch.ConstructChildCombinationCache(allWeightings, allWeightings.current_child_variable_group_being_merged, true, false);
 		}
 
@@ -1860,7 +1928,7 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	sdata += "</CONSOLIDATED_HIT>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
-	SpitChildLookup(sdata, branch.helper_lookup__from_child_key_set__to_matching_output_rows);
+	SpitChildLookup(sdata, *(branch.helper_lookup__from_child_key_set__to_matching_output_rows);
 	sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
@@ -2968,132 +3036,11 @@ void KadSampler::Clear()
 	RandomVectorPool::purge_memory();
 	RandomSetPool::purge_memory();
 
-	PurgeHits();
-	PurgeHitsConsolidated();
-	PurgeRemaining();
+	PurgeTags<hits_tag>();
+	PurgeTags<hits_consolidated_tag>();
+	PurgeTags<remaining_tag>();
+	PurgeTags<child_dmu_lookup_tag>();
 
 	messager.SetPerformanceLabel("");
 
-}
-
-void KadSampler::PurgeHits()
-{
-	purge_pool<hits_tag, sizeof(fast_short_to_int_map__loaded<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<hits_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<hits_tag>::mapped_type> const)>();
-	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast_int_set<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast_branch_output_row_vector_huge<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast_branch_output_row_vector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(BranchOutputRow<hits_tag>)>();
-	purge_pool<hits_tag, sizeof(fast_int_vector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast_branch_output_row_set<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast_short_to_short_map<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(InstanceDataVector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(DMUInstanceDataVector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(ChildDMUInstanceDataVector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(SecondaryInstanceDataVector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(DataCache<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast_short_to_data_cache_map<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(InstanceData)>();
-	purge_pool<hits_tag, sizeof(fast_short_vector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast_vector_childtoprimarymapping<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(int)>();
-	purge_pool<hits_tag, sizeof(fast_leaf_vector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(Leaf)>();
-	purge_pool<hits_tag, sizeof(ChildToPrimaryMapping)>();
-	purge_pool<hits_tag, sizeof(MergedTimeSliceRow<hits_tag>)>();
-	purge_pool<hits_tag, sizeof(VariableGroupBranchesAndLeaves)>();
-	purge_pool<hits_tag, sizeof(VariableGroupBranchesAndLeavesVector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast__mergedtimeslicerow_set<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(fast_short_to_int_map<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(Leaves<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(Leaf)>();
-	purge_pool<hits_tag, sizeof(fast_int_to_childtoprimarymappingvector<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(Branch)>();
-	purge_pool<hits_tag, sizeof(Branches<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(TimeSlices<hits_tag>::value_type const)>();
-	purge_pool<hits_tag, sizeof(DataCache<hits_tag>::value_type const)>();
-}
-
-void KadSampler::PurgeHitsConsolidated()
-{
-	purge_pool<hits_consolidated_tag, sizeof(fast_short_to_int_map__loaded<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<hits_consolidated_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<hits_consolidated_tag>::mapped_type> const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_int_set<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_vector_huge<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_vector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(BranchOutputRow<hits_consolidated_tag>)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_int_vector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_short_to_short_map<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(InstanceDataVector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(DMUInstanceDataVector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(ChildDMUInstanceDataVector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(SecondaryInstanceDataVector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(InstanceData)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_short_vector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_vector_childtoprimarymapping<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(int)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_leaf_vector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(Leaf)>();
-	purge_pool<hits_consolidated_tag, sizeof(ChildToPrimaryMapping)>();
-	purge_pool<hits_consolidated_tag, sizeof(MergedTimeSliceRow<hits_consolidated_tag>)>();
-	purge_pool<hits_consolidated_tag, sizeof(VariableGroupBranchesAndLeaves)>();
-	purge_pool<hits_consolidated_tag, sizeof(VariableGroupBranchesAndLeavesVector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast__mergedtimeslicerow_set<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_short_to_int_map<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(Leaves<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(Leaf)>();
-	purge_pool<hits_consolidated_tag, sizeof(fast_int_to_childtoprimarymappingvector<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(Branch)>();
-	purge_pool<hits_consolidated_tag, sizeof(Branches<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(TimeSlices<hits_consolidated_tag>::value_type const)>();
-	purge_pool<hits_consolidated_tag, sizeof(DataCache<hits_consolidated_tag>::value_type const)>();
-}
-
-void KadSampler::PurgeRemaining()
-{
-	purge_pool<remaining_tag, sizeof(fast_short_to_int_map__loaded<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<remaining_tag>::key_type, fast__short__to__fast_short_to_int_map__loaded<remaining_tag>::mapped_type> const)>();
-	purge_pool<remaining_tag, sizeof(fast__int64__to__fast_branch_output_row_vector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_int_set<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_branch_output_row_vector_huge<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_branch_output_row_vector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(BranchOutputRow<remaining_tag>)>();
-	purge_pool<remaining_tag, sizeof(fast_int_vector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_branch_output_row_set<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_short_to_short_map<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(InstanceDataVector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(DMUInstanceDataVector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(ChildDMUInstanceDataVector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(SecondaryInstanceDataVector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(InstanceData)>();
-	purge_pool<remaining_tag, sizeof(fast_short_vector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_vector_childtoprimarymapping<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(int)>();
-	purge_pool<remaining_tag, sizeof(fast_leaf_vector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(Leaf)>();
-	purge_pool<remaining_tag, sizeof(ChildToPrimaryMapping)>();
-	purge_pool<remaining_tag, sizeof(MergedTimeSliceRow<remaining_tag>)>();
-	purge_pool<remaining_tag, sizeof(VariableGroupBranchesAndLeaves)>();
-	purge_pool<remaining_tag, sizeof(VariableGroupBranchesAndLeavesVector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast__mergedtimeslicerow_set<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(fast_short_to_int_map<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(Leaves<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(Leaf)>();
-	purge_pool<remaining_tag, sizeof(fast_int_to_childtoprimarymappingvector<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(Branch)>();
-	purge_pool<remaining_tag, sizeof(Branches<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(TimeSlices<remaining_tag>::value_type const)>();
-	purge_pool<remaining_tag, sizeof(DataCache<remaining_tag>::value_type const)>();
 }

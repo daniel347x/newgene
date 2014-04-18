@@ -21,7 +21,7 @@
 struct remaining_tag {};
 struct hits_tag {};
 struct hits_consolidated_tag {};
-
+struct child_dmu_lookup_tag {};
 
 // Vectors
 

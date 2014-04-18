@@ -1712,12 +1712,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			: PrimaryKeysGrouping{ DMUInstanceDataVector<hits_tag>() }
 			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
 			, remaining(*remaining_)
+			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
 			, remaining(*remaining_)
+			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 		{
 		}
 
@@ -1731,6 +1733,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, number_branch_combinations{ rhs.number_branch_combinations }
 			, leaves { rhs.leaves }
 			, leaves_cache { rhs.leaves_cache }
+			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 		{
 		}
 
@@ -1744,6 +1747,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, number_branch_combinations{ rhs.number_branch_combinations }
 			, leaves{ rhs.leaves }
 			, leaves_cache{ rhs.leaves_cache }
+			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 		{
 			// Confirm this is never called
 			boost::format msg("Branch rvalue constructor called!");
@@ -1765,6 +1769,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			leaves = rhs.leaves;
 			leaves_cache = rhs.leaves_cache;
 			hits_consolidated = rhs.hits_consolidated;
+			helper_lookup__from_child_key_set__to_matching_output_rows = nullptr;
 			return *this;
 		}
 
@@ -1790,6 +1795,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				leaves = std::move(rhs.leaves);
 				leaves_cache = std::move(rhs.leaves_cache);
 				hits_consolidated = std::move(rhs.hits_consolidated);
+				helper_lookup__from_child_key_set__to_matching_output_rows = nullptr;
 			}
 
 			return *this;
@@ -1925,7 +1931,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// when it writes the given row to the output.
 		// **************************************************************************************** //
 		// **************************************************************************************** //
-		mutable fast__lookup__from_child_dmu_set__to__output_rows<hits_tag> helper_lookup__from_child_key_set__to_matching_output_rows;
+		mutable fast__lookup__from_child_dmu_set__to__output_rows<child_dmu_lookup_tag> * helper_lookup__from_child_key_set__to_matching_output_rows;
 
 		// Cache for use with "consolidating rows" phase, if it is ever necessary!
 		// Currently, this will never be filled, because we have no need to perform the lookup after rows have been consolidated,
@@ -2411,17 +2417,17 @@ class KadSampler
 		{
 			SizeOfSampler()
 				: numberMapNodes { 0 }
-			, sizePod { 0 }
-			, sizeTimeSlices { 0 }
-			, sizeDataCache { 0 }
-			, sizeOtherTopLevelCache { 0 }
-			, sizeChildCache { 0 }
-			, sizeMappingsFromChildBranchToPrimary { 0 }
-			, sizeMappingFromChildLeafToPrimary { 0 }
-			, size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 { 0 }
-			, sizeConsolidatedRows { 0 }
-			, sizeRandomNumbers { 0 }
-			, totalSize { 0 }
+				, sizePod { 0 }
+				, sizeTimeSlices { 0 }
+				, sizeDataCache { 0 }
+				, sizeOtherTopLevelCache { 0 }
+				, sizeChildCache { 0 }
+				, sizeMappingsFromChildBranchToPrimary { 0 }
+				, sizeMappingFromChildLeafToPrimary { 0 }
+				, size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 { 0 }
+				, sizeConsolidatedRows { 0 }
+				, sizeRandomNumbers { 0 }
+				, totalSize { 0 }
 			{}
 
 			size_t numberMapNodes;
@@ -2527,6 +2533,7 @@ class KadSampler
 		void PrepareFullSamples(int const K);
 		bool RetrieveNextBranchAndLeaves(int const K);
 		void PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch);
+		void ClearBranchCaches();
 		void ResetBranchCaches(int const child_variable_group_number, bool const reset_child_dmu_lookup);
 		void ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t & current_rows, ProgressBarMeter & meter);
 		void getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector<hits_tag> const & childToBranchColumnMappings) const;
@@ -2594,9 +2601,49 @@ class KadSampler
 		}
 
 		void Clear(); // ditto
-		void PurgeRemaining();
-		void PurgeHitsConsolidated();
-		void PurgeHits();
+
+		template <typename TAG>
+		void KadSampler::PurgeTags()
+		{
+			purge_pool<TAG, sizeof(fast_short_to_int_map__loaded<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<TAG>::key_type, fast__short__to__fast_short_to_int_map__loaded<TAG>::mapped_type> const)>();
+			purge_pool<TAG, sizeof(fast__int64__to__fast_branch_output_row_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_int_set<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_branch_output_row_vector_huge<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_branch_output_row_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(BranchOutputRow<TAG>)>();
+			purge_pool<TAG, sizeof(fast_int_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast__int64__to__fast_branch_output_row_set<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_branch_output_row_set<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_short_to_short_map<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(InstanceDataVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(DMUInstanceDataVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(ChildDMUInstanceDataVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(SecondaryInstanceDataVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(DataCache<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_short_to_data_cache_map<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(InstanceData)>();
+			purge_pool<TAG, sizeof(fast_short_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_vector_childtoprimarymapping<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(int)>();
+			purge_pool<TAG, sizeof(fast_leaf_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(Leaf)>();
+			purge_pool<TAG, sizeof(ChildToPrimaryMapping)>();
+			purge_pool<TAG, sizeof(MergedTimeSliceRow<TAG>)>();
+			purge_pool<TAG, sizeof(VariableGroupBranchesAndLeaves)>();
+			purge_pool<TAG, sizeof(VariableGroupBranchesAndLeavesVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast__mergedtimeslicerow_set<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_short_to_int_map<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(Leaves<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(Leaf)>();
+			purge_pool<TAG, sizeof(fast_int_to_childtoprimarymappingvector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(Branch)>();
+			purge_pool<TAG, sizeof(Branches<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(TimeSlices<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(DataCache<TAG>::value_type const)>();
+		}
 
 	protected:
 
