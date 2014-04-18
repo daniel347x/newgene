@@ -1870,33 +1870,6 @@ void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & da
 	sdata += "</DATA_CACHES>";
 }
 
-template<typename MEMORY_TAG>
-void SpitLeaf(std::string & sdata, Leaf const & leaf)
-{
-	sdata += "<LEAF>";
-	sdata += "<INDEX_POINTING_TO_PRIMARY_VG_RAW_SECONDARY_DATA_FOR_THIS_LEAF>";
-	sdata += boost::lexical_cast<std::string>(leaf.index_into_raw_data);
-	sdata += "</INDEX_POINTING_TO_PRIMARY_VG_RAW_SECONDARY_DATA_FOR_THIS_LEAF>";
-	sdata += "<LEAF_DMU_DATALIST>";
-	SpitKeys(sdata, leaf.primary_keys);
-	sdata += "</LEAF_DMU_DATALIST>";
-	sdata += "<OTHER_NON_PRIMARY_TOP_LEVEL_INDICES__ONE_PER_LEAF__POINTING_INTO_DATA_CACHE>";
-	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(),
-		leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & leafindicesintorawdata)
-	{
-		sdata += "<VARIABLE_GROUP>";
-		sdata += "<VARIABLE_GROUP_NUMBER>";
-		sdata += boost::lexical_cast<std::string>(leafindicesintorawdata.first);
-		sdata += "</VARIABLE_GROUP_NUMBER>";
-		sdata += "<INDEX_POINTING_TO_SINGLE_LEAF_RAW_DATA>";
-		sdata += boost::lexical_cast<std::string>(leafindicesintorawdata.second);
-		sdata += "</INDEX_POINTING_TO_SINGLE_LEAF_RAW_DATA>";
-		sdata += "</VARIABLE_GROUP>";
-	});
-	sdata += "</OTHER_NON_PRIMARY_TOP_LEVEL_INDICES__ONE_PER_LEAF__POINTING_INTO_DATA_CACHE>";
-	sdata += "</LEAF>";
-}
-
 void SpitBranch(std::string & sdata, Branch const & branch)
 {
 	sdata += "<BRANCH>";
