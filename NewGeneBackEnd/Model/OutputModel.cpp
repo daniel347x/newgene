@@ -531,13 +531,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// the actual DMU data for the leaf, AND indexes into the non-primary top-level data cache
 		// for that data.
 		//
-		// Also, if there are any child groups, this function builds a child DMU key lookup map
-		// for that branch that maps all possible child branch + leaves
-		// that map to any corresponding combination of primary branch + leaves for the given primary branch.
-		// This will be used by the child variable groups when they are merged in.
+		// Do not build the child DMU key lookup cache here.
+		// Do that prior to loading each child variable group.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Build cache of monads...")).str().c_str(), this);
-		allWeightings.ResetBranchCaches(has_child_groups);
+		allWeightings.ResetBranchCaches(-1, false);
 
 		if (failed || CheckCancelled()) { return; }
 
@@ -698,8 +696,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// No need to rebuild any of the leaf caches if there are no non-primary variable groups;
 			// hence this belongs in this block.
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Rebuild cache...")).str().c_str(), this);
-			allWeightings.ResetBranchCaches(false); // just update the primary "leaves" vector - not the child leaf lookup cache
+			messager.AppendKadStatusText((boost::format("Build cache of monads...")).str().c_str(), this);
+			allWeightings.ResetBranchCaches(-1, false); // just update the primary "leaves" vector - not the child leaf lookup cache
 
 			if (failed || CheckCancelled()) { return; }
 
@@ -5089,6 +5087,9 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 	{
 
 		if (failed || CheckCancelled()) { return; }
+
+		messager.AppendKadStatusText((boost::format("Build cache of child variable group leaf lookup data...")).str().c_str(), this);
+		allWeightings.ResetBranchCaches(current_child_vg_index, true);
 
 		// ********************************************************************************************************************************************************* //
 		// From the schema for the selected columns for the child variable group,

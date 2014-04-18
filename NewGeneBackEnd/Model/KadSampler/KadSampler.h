@@ -2412,6 +2412,8 @@ class KadSampler
 		std::int64_t random_rows_added;
 		Messager & messager;
 
+		int current_child_variable_group_being_merged; // temporary helper variable
+
 		// final output in case of consolidated row output
 		fast__mergedtimeslicerow_set consolidated_rows;
 
@@ -2429,7 +2431,7 @@ class KadSampler
 		void PrepareFullSamples(int const K);
 		bool RetrieveNextBranchAndLeaves(int const K);
 		void PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch);
-		void ResetBranchCaches(bool const reset_child_dmu_lookup);
+		void ResetBranchCaches(int const child_variable_group_number, bool const reset_child_dmu_lookup);
 		void ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t & current_rows, ProgressBarMeter & meter);
 		void getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const;
 		void getDataCacheUsage(size_t & usage, DataCache const & dataCache) const;

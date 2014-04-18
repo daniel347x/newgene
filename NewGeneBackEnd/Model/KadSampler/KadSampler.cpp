@@ -30,6 +30,7 @@ KadSampler::KadSampler(Messager & messager_)
 	, time_granularity(TIME_GRANULARITY__NONE)
 	, random_rows_added(0)
 	, messager(messager_)
+	, current_child_variable_group_being_merged(-1)
 {
 }
 
@@ -480,7 +481,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 	// ******************************************************************************************************************************** //
 	//
 	// If we reach this function, the time slice of the leaf is guaranteed to match the time slice of the map element
-	// it is being merge into.
+	// it is being merged into.
 	// We do not check this here.
 	//
 	// ******************************************************************************************************************************** //
@@ -1264,11 +1265,13 @@ newgene_cpp_int KadSampler::BinomialCoefficient(int const N, int const K)
 
 }
 
-void KadSampler::ResetBranchCaches(bool const reset_child_dmu_lookup)
+void KadSampler::ResetBranchCaches(int const child_variable_group_number, bool const reset_child_dmu_lookup)
 {
 
 	ProgressBarMeter meter(messager, "Processed %1% of %2% time slices", timeSlices.size());
 	std::int64_t current_loop_iteration = 0;
+
+	current_child_variable_group_being_merged = child_variable_group_number;
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices::value_type  & timeSliceData)
 	{
 
@@ -1278,6 +1281,7 @@ void KadSampler::ResetBranchCaches(bool const reset_child_dmu_lookup)
 		meter.UpdateProgressBarValue(current_loop_iteration);
 
 	});
+	current_child_variable_group_being_merged = -1;
 
 }
 
@@ -1304,15 +1308,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 
 		// The cache has yet to be filled, or we are specifically being requested to refresh it
 
-		// Optimization! Profiler shows the large majority of the time during "consolidating rows" phase
-		// is spent clearing the following cache (de-allocation management in the Boost memory pool
-		// used to store the cache).
-		// So for the "consolidating rows" phase, we'll pay the *memory cost* of a new data structure
-		// in that scenario and not pay the price in time to clear the previous cache.
-		if (!is_consolidating)
-		{
-			helper_lookup__from_child_key_set__to_matching_output_rows.clear();
-		}
+		helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 
 		ChildDMUInstanceDataVector child_hit_vector_branch_components;
 		ChildDMUInstanceDataVector child_hit_vector;
@@ -1756,14 +1752,11 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 		if (reset_child_dmu_lookup)
 		{
 			branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
-
-			for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
-			{
-				branch.ConstructChildCombinationCache(allWeightings, c, true, false);
-			}
+			branch.ConstructChildCombinationCache(allWeightings, allWeightings.current_child_variable_group_being_merged, true, false);
 		}
 
 	});
+
 }
 
 //#ifdef _DEBUG
