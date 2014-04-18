@@ -1833,55 +1833,6 @@ void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 
 }
 
-void SpitKeys(std::string & sdata, DMUInstanceDataVector const & dmu_keys)
-{
-	int index = 0;
-	sdata += "<DATA_VALUES>";
-	std::for_each(dmu_keys.cbegin(), dmu_keys.cend(), [&](DMUInstanceData const & data)
-	{
-		sdata += "<DATA_VALUE>";
-		sdata += "<DATA_VALUE_INDEX>";
-		sdata += boost::lexical_cast<std::string>(index);
-		sdata += "</DATA_VALUE_INDEX>";
-		sdata += "<DATA>";
-		sdata += boost::lexical_cast<std::string>(data);
-		sdata += "</DATA>";
-		++index;
-		sdata += "</DATA_VALUE>";
-	});
-	sdata += "</DATA_VALUES>";
-}
-
-void SpitDataCache(std::string & sdata, DataCache const & dataCache)
-{
-	sdata += "<DATA_CACHE>";
-	std::for_each(dataCache.cbegin(), dataCache.cend(), [&](DataCache::value_type const & dataEntry)
-	{
-		sdata += "<DATA_CACHE_ELEMENT>";
-		sdata += "<INDEX_WITHIN_DATA_CACHE>";
-		sdata += boost::lexical_cast<std::string>(dataEntry.first);
-		sdata += "</INDEX_WITHIN_DATA_CACHE>";
-		sdata += "<DATA_VALUES_WITHIN_DATA_CACHE>";
-		SpitKeys(sdata, dataEntry.second);
-		sdata += "</DATA_VALUES_WITHIN_DATA_CACHE>";
-		sdata += "</DATA_CACHE_ELEMENT>";
-	});
-	sdata += "</DATA_CACHE>";
-}
-
-void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & dataCaches)
-{
-	sdata += "<DATA_CACHES>";
-	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](fast_short_to_data_cache_map::value_type const & dataEntry)
-	{
-		sdata += "<DATA_CACHE_NUMBER>";
-		sdata += boost::lexical_cast<std::string>(dataEntry.first);
-		sdata += "</DATA_CACHE_NUMBER>";
-		SpitDataCache(sdata, dataEntry.second);
-	});
-	sdata += "</DATA_CACHES>";
-}
-
 void SpitBranch(std::string & sdata, Branch const & branch)
 {
 	sdata += "<BRANCH>";
@@ -3014,33 +2965,10 @@ void KadSampler::Clear()
 		insert_random_sample_stmt = nullptr;
 	}
 
-	purge_pool<boost::pool_allocator_tag, sizeof(InstanceDataVector::value_type const)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(InstanceData)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_short_vector<boost::pool_allocator_tag>::value_type const)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_vector_childtoprimarymapping::value_type const)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(int)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(fast_leaf_vector::value_type const)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(Leaf)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>();
-	purge_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeavesVector::value_type const)>();
-
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(int)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast__mergedtimeslicerow_set::value_type const)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_int_map<boost::fast_pool_allocator_tag>::value_type const)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaves::value_type const)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(DataCache::value_type const)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_data_cache_map::value_type const)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_short_to_short_map::value_type const)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_childtoprimarymappingvector::value_type const)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branches::value_type const)>();
-	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type const)>();
-
 	purge_pool<newgene_cpp_int_tag, sizeof(boost::multiprecision::limb_type const)>();
 	purge_pool<newgene_cpp_int_tag, sizeof(newgene_cpp_int)>();
+	purge_pool<newgene_cpp_int_random_tag, sizeof(boost::multiprecision::limb_type const)>();
+	purge_pool<newgene_cpp_int_random_tag, sizeof(newgene_random_cpp_int)>();
 
 	RandomVectorPool::purge_memory();
 	RandomSetPool::purge_memory();
@@ -3067,6 +2995,32 @@ void KadSampler::PurgeHits()
 	purge_pool<hits_tag, sizeof(fast_int_vector<hits_tag>::value_type const)>();
 	purge_pool<hits_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_tag>::value_type const)>();
 	purge_pool<hits_tag, sizeof(fast_branch_output_row_set<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast_short_to_short_map<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(InstanceDataVector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(DMUInstanceDataVector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(ChildDMUInstanceDataVector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(SecondaryInstanceDataVector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(DataCache<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast_short_to_data_cache_map<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(InstanceData)>();
+	purge_pool<hits_tag, sizeof(fast_short_vector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast_vector_childtoprimarymapping<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(int)>();
+	purge_pool<hits_tag, sizeof(fast_leaf_vector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(Leaf)>();
+	purge_pool<hits_tag, sizeof(ChildToPrimaryMapping)>();
+	purge_pool<hits_tag, sizeof(MergedTimeSliceRow<hits_tag>)>();
+	purge_pool<hits_tag, sizeof(VariableGroupBranchesAndLeaves)>();
+	purge_pool<hits_tag, sizeof(VariableGroupBranchesAndLeavesVector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast__mergedtimeslicerow_set<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(fast_short_to_int_map<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(Leaves<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(Leaf)>();
+	purge_pool<hits_tag, sizeof(fast_int_to_childtoprimarymappingvector<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(Branch)>();
+	purge_pool<hits_tag, sizeof(Branches<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(TimeSlices<hits_tag>::value_type const)>();
+	purge_pool<hits_tag, sizeof(DataCache<hits_tag>::value_type const)>();
 }
 
 void KadSampler::PurgeHitsConsolidated()
@@ -3083,6 +3037,30 @@ void KadSampler::PurgeHitsConsolidated()
 	purge_pool<hits_consolidated_tag, sizeof(fast_int_vector<hits_consolidated_tag>::value_type const)>();
 	purge_pool<hits_consolidated_tag, sizeof(fast__int64__to__fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
 	purge_pool<hits_consolidated_tag, sizeof(fast_branch_output_row_set<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_short_to_short_map<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(InstanceDataVector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(DMUInstanceDataVector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(ChildDMUInstanceDataVector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(SecondaryInstanceDataVector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(InstanceData)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_short_vector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_vector_childtoprimarymapping<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(int)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_leaf_vector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(Leaf)>();
+	purge_pool<hits_consolidated_tag, sizeof(ChildToPrimaryMapping)>();
+	purge_pool<hits_consolidated_tag, sizeof(MergedTimeSliceRow<hits_consolidated_tag>)>();
+	purge_pool<hits_consolidated_tag, sizeof(VariableGroupBranchesAndLeaves)>();
+	purge_pool<hits_consolidated_tag, sizeof(VariableGroupBranchesAndLeavesVector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast__mergedtimeslicerow_set<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_short_to_int_map<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(Leaves<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(Leaf)>();
+	purge_pool<hits_consolidated_tag, sizeof(fast_int_to_childtoprimarymappingvector<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(Branch)>();
+	purge_pool<hits_consolidated_tag, sizeof(Branches<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(TimeSlices<hits_consolidated_tag>::value_type const)>();
+	purge_pool<hits_consolidated_tag, sizeof(DataCache<hits_consolidated_tag>::value_type const)>();
 }
 
 void KadSampler::PurgeRemaining()
@@ -3099,4 +3077,28 @@ void KadSampler::PurgeRemaining()
 	purge_pool<remaining_tag, sizeof(fast_int_vector<remaining_tag>::value_type const)>();
 	purge_pool<remaining_tag, sizeof(fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const)>();
 	purge_pool<remaining_tag, sizeof(fast_branch_output_row_set<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_short_to_short_map<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(InstanceDataVector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(DMUInstanceDataVector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(ChildDMUInstanceDataVector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(SecondaryInstanceDataVector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(InstanceData)>();
+	purge_pool<remaining_tag, sizeof(fast_short_vector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_vector_childtoprimarymapping<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(int)>();
+	purge_pool<remaining_tag, sizeof(fast_leaf_vector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(Leaf)>();
+	purge_pool<remaining_tag, sizeof(ChildToPrimaryMapping)>();
+	purge_pool<remaining_tag, sizeof(MergedTimeSliceRow<remaining_tag>)>();
+	purge_pool<remaining_tag, sizeof(VariableGroupBranchesAndLeaves)>();
+	purge_pool<remaining_tag, sizeof(VariableGroupBranchesAndLeavesVector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast__mergedtimeslicerow_set<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(fast_short_to_int_map<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(Leaves<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(Leaf)>();
+	purge_pool<remaining_tag, sizeof(fast_int_to_childtoprimarymappingvector<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(Branch)>();
+	purge_pool<remaining_tag, sizeof(Branches<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(TimeSlices<remaining_tag>::value_type const)>();
+	purge_pool<remaining_tag, sizeof(DataCache<remaining_tag>::value_type const)>();
 }

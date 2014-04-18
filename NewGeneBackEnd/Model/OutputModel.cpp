@@ -604,8 +604,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// NewGene has been enhanced to use a Boost pool for the random numbers, so we can now purge the pool in an instant.
 			RandomVectorPool::purge_memory();
 			RandomSetPool::purge_memory();
-			purge_pool<newgene_cpp_int_tag, sizeof(boost::multiprecision::limb_type)>();
-			purge_pool<newgene_cpp_int_tag, sizeof(newgene_cpp_int)>();
+			purge_pool<newgene_cpp_int_random_tag, sizeof(boost::multiprecision::limb_type)>();
+			purge_pool<newgene_cpp_int_random_tag, sizeof(newgene_cpp_int)>();
 
 			messager.SetPerformanceLabel("");
 			messager.AppendKadStatusText((boost::format("Completed selection of random K-adic combinations.")).str(), this);

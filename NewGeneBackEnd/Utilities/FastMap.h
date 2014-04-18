@@ -25,7 +25,7 @@ struct hits_consolidated_tag {};
 
 // Vectors
 
-typedef std::vector<newgene_cpp_int, boost::pool_allocator<newgene_cpp_int, boost::default_user_allocator_malloc_free, newgene_cpp_int_tag, boost::details::pool::null_mutex>> FastVectorCppInt;
+typedef std::vector<newgene_random_cpp_int, boost::pool_allocator<newgene_random_cpp_int, boost::default_user_allocator_malloc_free, newgene_cpp_int_random_tag, boost::details::pool::null_mutex>> FastVectorCppInt;
 
 template <typename K, typename MEMORY_TAG>
 using FastVectorMemoryTag = std::vector<K, boost::pool_allocator<K, boost::default_user_allocator_malloc_free, MEMORY_TAG, boost::details::pool::null_mutex>>;
@@ -41,20 +41,20 @@ using FastVectorMemoryTag = std::vector<K, boost::pool_allocator<K, boost::defau
 template<typename K, typename V, typename MEMORY_TAG, class Comp_ = std::less<K>>
 using FastMapMemoryTag = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K, V>, boost::default_user_allocator_malloc_free, MEMORY_TAG, boost::details::pool::null_mutex>>;
 
-template<typename K, typename V, class Comp_ = std::less<K>>
-using FastMapFlat =
-boost::container::flat_map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K, V>, boost::default_user_allocator_malloc_free, boost::fast_pool_allocator_tag, boost::details::pool::null_mutex>>;
+//template<typename K, typename V, class Comp_ = std::less<K>>
+//using FastMapFlat =
+//boost::container::flat_map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K, V>, boost::default_user_allocator_malloc_free, boost::fast_pool_allocator_tag, boost::details::pool::null_mutex>>;
 
 
 
 // Sets
 
-typedef std::set<newgene_cpp_int, std::less<newgene_cpp_int>, boost::fast_pool_allocator<newgene_cpp_int, boost::default_user_allocator_malloc_free, newgene_cpp_int_tag, boost::details::pool::null_mutex>> FastSetCppInt;
+typedef std::set<newgene_random_cpp_int, std::less<newgene_cpp_int>, boost::fast_pool_allocator<newgene_cpp_int, boost::default_user_allocator_malloc_free, newgene_cpp_int_random_tag, boost::details::pool::null_mutex>> FastSetCppInt;
 
 template<typename K, typename MEMORY_TAG, class Comp_ = std::less<K>>
 using FastSetMemoryTag = std::set<K, Comp_, boost::fast_pool_allocator<K, boost::default_user_allocator_malloc_free, MEMORY_TAG, boost::details::pool::null_mutex>>;
 
-template<typename K, class Comp_ = std::less<K>>
-using FastSetFlat = boost::container::flat_set<K, Comp_, boost::fast_pool_allocator<K, boost::default_user_allocator_malloc_free, boost::fast_pool_allocator_tag, boost::details::pool::null_mutex>>;
+//template<typename K, class Comp_ = std::less<K>>
+//using FastSetFlat = boost::container::flat_set<K, Comp_, boost::fast_pool_allocator<K, boost::default_user_allocator_malloc_free, boost::fast_pool_allocator_tag, boost::details::pool::null_mutex>>;
 
 #endif

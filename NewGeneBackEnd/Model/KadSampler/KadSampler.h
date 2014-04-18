@@ -23,15 +23,25 @@
 
 typedef std::basic_string<char, std::char_traits<char>, boost::pool_allocator<char>> fast_string;
 
-typedef FastMapMemoryTag<std::int16_t, std::int16_t, boost::fast_pool_allocator_tag> fast_short_to_short_map;
+template <typename MEMORY_TAG>
+using fast_short_to_short_map = FastMapMemoryTag<std::int16_t, std::int16_t, MEMORY_TAG>;
+
 typedef boost::variant<std::int32_t, double, fast_string> InstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> DMUInstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> SecondaryInstanceData;
 
-typedef FastVectorMemoryTag<InstanceData, boost::pool_allocator_tag> InstanceDataVector;
-typedef InstanceDataVector DMUInstanceDataVector;
-typedef InstanceDataVector ChildDMUInstanceDataVector;
-typedef InstanceDataVector SecondaryInstanceDataVector;
+template <typename MEMORY_TAG>
+using InstanceDataVector = FastVectorMemoryTag<InstanceData, MEMORY_TAG>;
+
+template <typename MEMORY_TAG>
+using DMUInstanceDataVector  = InstanceDataVector<MEMORY_TAG>;
+
+template <typename MEMORY_TAG>
+using ChildDMUInstanceDataVector = InstanceDataVector<MEMORY_TAG>;
+
+template <typename MEMORY_TAG>
+using SecondaryInstanceDataVector = InstanceDataVector<MEMORY_TAG>;
+
 
 template <typename MEMORY_TAG>
 using fast_short_vector = FastVectorMemoryTag<std::int16_t, MEMORY_TAG>;
@@ -52,9 +62,11 @@ template <typename MEMORY_TAG>
 using fast__short__to__fast_short_to_int_map__loaded = FastMapMemoryTag<std::int16_t, fast_short_to_int_map__loaded<MEMORY_TAG>, MEMORY_TAG>;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
-typedef FastMapMemoryTag<std::int32_t, SecondaryInstanceDataVector, boost::fast_pool_allocator_tag> DataCache;
+template <typename MEMORY_TAG>
+using DataCache = FastMapMemoryTag<std::int32_t, SecondaryInstanceDataVector<MEMORY_TAG>, MEMORY_TAG>;
 
-typedef FastMapMemoryTag<std::int16_t, DataCache, boost::fast_pool_allocator_tag> fast_short_to_data_cache_map;
+template <typename MEMORY_TAG>
+using fast_short_to_data_cache_map = FastMapMemoryTag<std::int16_t, DataCache<MEMORY_TAG>, MEMORY_TAG>;
 
 struct newgene_randomvector_tag {};
 typedef boost::singleton_pool<newgene_randomvector_tag, sizeof(FastVectorCppInt)>
@@ -1019,8 +1031,11 @@ struct ChildToPrimaryMapping
 	}
 };
 
-typedef FastVectorMemoryTag<ChildToPrimaryMapping, boost::pool_allocator_tag> fast_vector_childtoprimarymapping;
-typedef FastMapMemoryTag<int, fast_vector_childtoprimarymapping, boost::fast_pool_allocator_tag> fast_int_to_childtoprimarymappingvector;
+template <typename MEMORY_TAG>
+using fast_vector_childtoprimarymapping = FastVectorMemoryTag<ChildToPrimaryMapping<MEMORY_TAG>, MEMORY_TAG>;
+
+template <typename MEMORY_TAG>
+using fast_int_to_childtoprimarymappingvector = FastMapMemoryTag<int, fast_vector_childtoprimarymapping<MEMORY_TAG>, MEMORY_TAG>;
 
 enum VARIABLE_GROUP_MERGE_MODE
 {
@@ -1208,7 +1223,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 		std::int32_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
 
 		// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
-		mutable fast_short_to_int_map<boost::fast_pool_allocator_tag>
+		mutable fast_short_to_int_map<hits_tag>
 		other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
 
 };
@@ -1413,8 +1428,11 @@ class BranchOutputRow
 
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 
-typedef FastVectorMemoryTag<Leaf, boost::pool_allocator_tag> fast_leaf_vector;
-typedef FastSetMemoryTag<Leaf, boost::fast_pool_allocator_tag> Leaves;
+template <typename MEMORY_TAG>
+using fast_leaf_vector = FastVectorMemoryTag<Leaf, MEMORY_TAG>;
+
+template <typename MEMORY_TAG>
+using Leaves = FastSetMemoryTag<Leaf, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
 using fast_branch_output_row_vector = FastVectorMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
@@ -1435,7 +1453,7 @@ template <typename MEMORY_TAG>
 using fast__int64__to__fast_branch_output_row_vector = FastMapMemoryTag<std::int64_t, fast_branch_output_row_vector<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast__lookup__from_child_dmu_set__to__output_rows = FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>>;
+using fast__lookup__from_child_dmu_set__to__output_rows = FastMapMemoryTag<ChildDMUInstanceDataVector<MEMORY_TAG>, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>, MEMORY_TAG>;
 
 template<typename MEMORY_TAG>
 void SpitLeaf(std::string & sdata, Leaf const & leaf)
@@ -1519,9 +1537,58 @@ void SpitAllWeightings(KadSampler const & allWeightings, std::string const & fil
 // SpitAllWeightings() is the important one... just use that for debugging.
 // Internally, it calls the functions below.
 // ******************************************************************************************************************************************************************** //
-void SpitKeys(std::string & sdata, FastVectorMemoryTag<DMUInstanceData, boost::pool_allocator_tag> const & dmu_keys);
-void SpitDataCache(std::string & sdata, DataCache const & dataCache);
-void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & dataCaches);
+
+template <typename MEMORY_TAG>
+void SpitKeys(std::string & sdata, DMUInstanceDataVector<MEMORY_TAG> const & dmu_keys)
+{
+	int index = 0;
+	sdata += "<DATA_VALUES>";
+	std::for_each(dmu_keys.cbegin(), dmu_keys.cend(), [&](DMUInstanceData const & data)
+	{
+		sdata += "<DATA_VALUE>";
+		sdata += "<DATA_VALUE_INDEX>";
+		sdata += boost::lexical_cast<std::string>(index);
+		sdata += "</DATA_VALUE_INDEX>";
+		sdata += "<DATA>";
+		sdata += boost::lexical_cast<std::string>(data);
+		sdata += "</DATA>";
+		++index;
+		sdata += "</DATA_VALUE>";
+	});
+	sdata += "</DATA_VALUES>";
+}
+
+template <typename MEMORY_TAG>
+void SpitDataCache(std::string & sdata, DataCache<MEMORY_TAG> const & dataCache)
+{
+	sdata += "<DATA_CACHE>";
+	std::for_each(dataCache.cbegin(), dataCache.cend(), [&](DataCache::value_type const & dataEntry)
+	{
+		sdata += "<DATA_CACHE_ELEMENT>";
+		sdata += "<INDEX_WITHIN_DATA_CACHE>";
+		sdata += boost::lexical_cast<std::string>(dataEntry.first);
+		sdata += "</INDEX_WITHIN_DATA_CACHE>";
+		sdata += "<DATA_VALUES_WITHIN_DATA_CACHE>";
+		SpitKeys(sdata, dataEntry.second);
+		sdata += "</DATA_VALUES_WITHIN_DATA_CACHE>";
+		sdata += "</DATA_CACHE_ELEMENT>";
+	});
+	sdata += "</DATA_CACHE>";
+}
+
+template <typename MEMORY_TAG>
+void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map<MEMORY_TAG> const & dataCaches)
+{
+	sdata += "<DATA_CACHES>";
+	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](fast_short_to_data_cache_map::value_type const & dataEntry)
+	{
+		sdata += "<DATA_CACHE_NUMBER>";
+		sdata += boost::lexical_cast<std::string>(dataEntry.first);
+		sdata += "</DATA_CACHE_NUMBER>";
+		SpitDataCache(sdata, dataEntry.second);
+	});
+	sdata += "</DATA_CACHES>";
+}
 
 template<typename MEMORY_TAG>
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set<MEMORY_TAG> const & hits)
@@ -1738,7 +1805,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				sdata += boost::lexical_cast<std::string>(index);
 				sdata += "</LEAF_NUMBER>";
 				sdata += "<LEAF_DATA>";
-				SpitLeaf<boost::fast_pool_allocator_tag>(sdata, leaf);
+				SpitLeaf(sdata, leaf);
 				sdata += "</LEAF_DATA>";
 				++index;
 				sdata += "</LEAF>";
@@ -1917,7 +1984,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 	private:
 	public: // debugging access
 
-		mutable Leaves leaves;
+		mutable Leaves<hits_tag> leaves;
 
 	private:
 	public: // debugging access
@@ -1944,7 +2011,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Cache the leaves for this branch.  This is a CACHE only.
 		// The official location of the leaves are contained in the AllWeightings instance.
 		// This cache stores only the subset of leaves
-		mutable fast_leaf_vector leaves_cache;
+		mutable fast_leaf_vector<hits_tag> leaves_cache;
 
 	public:
 
@@ -1992,8 +2059,9 @@ void SpitBranch(std::string & sdata, Branch const & branch);
 // ******************************************************************************************************** //
 // (Only one, since currently only one primary top-level variable group is supported)
 //
-//typedef FastSet<Branch> Branches;
-typedef FastSetFlat<Branch> Branches;
+
+template <typename MEMORY_TAG>
+using Branches = FastSetMemoryTag<Branch, MEMORY_TAG>;
 //
 // ******************************************************************************************************** //
 // ******************************************************************************************************** //
@@ -2010,7 +2078,7 @@ class VariableGroupBranchesAndLeaves
 		{}
 
 		int variable_group_number; // unused: Always the single primary top-level variable group identifier
-		Branches branches;
+		Branches<hits_tag> branches;
 		Weighting weighting; // sum over all branches and leaves
 
 		bool operator==(int const & rhs) const
@@ -2025,14 +2093,15 @@ class VariableGroupBranchesAndLeaves
 
 };
 
-typedef FastVectorMemoryTag<VariableGroupBranchesAndLeaves, boost::pool_allocator_tag> VariableGroupBranchesAndLeavesVector;
+template <typename MEMORY_TAG>
+using VariableGroupBranchesAndLeavesVector = FastVectorMemoryTag<VariableGroupBranchesAndLeaves, MEMORY_TAG>;
 
 class VariableGroupTimeSliceData
 {
 
 	public:
 
-		VariableGroupBranchesAndLeavesVector branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves in all variable groups
 
 		void ResetBranchCachesSingleTimeSlice(KadSampler & allWeightings, bool const reset_child_dmu_lookup);
@@ -2041,7 +2110,8 @@ class VariableGroupTimeSliceData
 
 };
 
-typedef FastMapMemoryTag<TimeSlice, VariableGroupTimeSliceData, boost::fast_pool_allocator_tag> TimeSlices;
+template <typename MEMORY_TAG>
+using TimeSlices = FastMapMemoryTag<TimeSlice, VariableGroupTimeSliceData, MEMORY_TAG>;
 
 typedef std::pair<TimeSlice, Leaf> TimeSliceLeaf;
 
@@ -2157,6 +2227,7 @@ class create_output_row_visitor : public boost::static_visitor<>
 
 };
 
+template <typename MEMORY_TAG>
 class MergedTimeSliceRow
 {
 
@@ -2166,13 +2237,13 @@ class MergedTimeSliceRow
 			: empty(true)
 		{}
 
-		MergedTimeSliceRow(TimeSlice const & ts, InstanceDataVector const & row)
+		MergedTimeSliceRow(TimeSlice const & ts, InstanceDataVector<MEMORY_TAG> const & row)
 			: time_slice(ts)
 			, output_row(row)
 			, empty(false)
 		{}
 
-		MergedTimeSliceRow(MergedTimeSliceRow const & rhs)
+		MergedTimeSliceRow(MergedTimeSliceRow<MEMORY_TAG> const & rhs)
 		{
 			// The optimizing compiler sometimes
 			// re-uses an existing object instead
@@ -2203,12 +2274,12 @@ class MergedTimeSliceRow
 			RHS_wins = oldRHSWins;
 		}
 
-		bool operator<(MergedTimeSliceRow const & rhs) const
+		bool operator<(MergedTimeSliceRow<MEMORY_TAG> const & rhs) const
 		{
 			return (output_row < rhs.output_row);
 		}
 
-		MergedTimeSliceRow & operator=(MergedTimeSliceRow const & rhs)
+		MergedTimeSliceRow<MEMORY_TAG> & operator=(MergedTimeSliceRow<MEMORY_TAG> const & rhs)
 		{
 			if (this == &rhs)
 			{
@@ -2257,7 +2328,7 @@ class MergedTimeSliceRow
 		}
 
 		TimeSlice time_slice;
-		InstanceDataVector output_row;
+		InstanceDataVector<MEMORY_TAG> output_row;
 
 		static bool RHS_wins; // controls how operator=() should behave.  Note: Only required because release-mode optimizer utilizes operator=() instead of ctor
 
@@ -2293,7 +2364,8 @@ class SortMergedRowsByTimeThenKeys
 
 };
 
-typedef FastSetMemoryTag<MergedTimeSliceRow, boost::fast_pool_allocator_tag, SortMergedRowsByTimeThenKeys> fast__mergedtimeslicerow_set;
+template <typename MEMORY_TAG>
+using fast__mergedtimeslicerow_set = FastSetMemoryTag<MergedTimeSliceRow, MEMORY_TAG, SortMergedRowsByTimeThenKeys>;
 
 class KadSampler
 {

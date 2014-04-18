@@ -17,7 +17,11 @@
 struct newgene_cpp_int_tag 
 {};
 
+struct newgene_cpp_int_random_tag
+{};
+
 typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<0, 0, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, boost::fast_pool_allocator<boost::multiprecision::limb_type, boost::default_user_allocator_malloc_free, newgene_cpp_int_tag, boost::details::pool::null_mutex>>> newgene_cpp_int;
+typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<0, 0, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, boost::fast_pool_allocator<boost::multiprecision::limb_type, boost::default_user_allocator_malloc_free, newgene_cpp_int_random_tag, boost::details::pool::null_mutex>>> newgene_random_cpp_int;
 
 enum MESSAGER_MESSAGE_ENUM
 {
