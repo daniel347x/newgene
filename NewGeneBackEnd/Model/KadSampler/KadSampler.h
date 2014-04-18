@@ -1032,7 +1032,7 @@ struct ChildToPrimaryMapping
 };
 
 template <typename MEMORY_TAG>
-using fast_vector_childtoprimarymapping = FastVectorMemoryTag<ChildToPrimaryMapping<MEMORY_TAG>, MEMORY_TAG>;
+using fast_vector_childtoprimarymapping = FastVectorMemoryTag<ChildToPrimaryMapping, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
 using fast_int_to_childtoprimarymappingvector = FastMapMemoryTag<int, fast_vector_childtoprimarymapping<MEMORY_TAG>, MEMORY_TAG>;
@@ -1050,7 +1050,7 @@ class PrimaryKeysGrouping
 
 	public:
 
-		PrimaryKeysGrouping(DMUInstanceDataVector const & dmuInstanceDataVector)
+		PrimaryKeysGrouping(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector)
 			: primary_keys(dmuInstanceDataVector)
 		{}
 
@@ -1080,7 +1080,7 @@ class PrimaryKeysGrouping
 			return *this;
 		}
 
-		DMUInstanceDataVector primary_keys;
+		DMUInstanceDataVector<hits_tag> primary_keys;
 
 		bool operator<(PrimaryKeysGrouping const & rhs) const
 		{
@@ -1165,12 +1165,12 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 	public:
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne()
-			: PrimaryKeysGrouping { DMUInstanceDataVector() }
+			: PrimaryKeysGrouping { DMUInstanceDataVector<hits_tag>() }
 		, index_into_raw_data { 0 }
 		{
 		}
 
-		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0)
+		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data { index_into_raw_data_ }
 		{
@@ -1562,7 +1562,7 @@ template <typename MEMORY_TAG>
 void SpitDataCache(std::string & sdata, DataCache<MEMORY_TAG> const & dataCache)
 {
 	sdata += "<DATA_CACHE>";
-	std::for_each(dataCache.cbegin(), dataCache.cend(), [&](DataCache::value_type const & dataEntry)
+	std::for_each(dataCache.cbegin(), dataCache.cend(), [&](DataCache<hits_tag>::value_type const & dataEntry)
 	{
 		sdata += "<DATA_CACHE_ELEMENT>";
 		sdata += "<INDEX_WITHIN_DATA_CACHE>";
@@ -1580,7 +1580,7 @@ template <typename MEMORY_TAG>
 void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map<MEMORY_TAG> const & dataCaches)
 {
 	sdata += "<DATA_CACHES>";
-	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](fast_short_to_data_cache_map::value_type const & dataEntry)
+	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](fast_short_to_data_cache_map<MEMORY_TAG>::value_type const & dataEntry)
 	{
 		sdata += "<DATA_CACHE_NUMBER>";
 		sdata += boost::lexical_cast<std::string>(dataEntry.first);
@@ -1709,12 +1709,12 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 	public:
 
 		PrimaryKeysGroupingMultiplicityOne()
-			: PrimaryKeysGrouping { DMUInstanceDataVector() }
+			: PrimaryKeysGrouping{ DMUInstanceDataVector<hits_tag>() }
 			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
 			, remaining(*remaining_)
 		{}
 
-		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
+		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
 			, remaining(*remaining_)
@@ -1805,7 +1805,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				sdata += boost::lexical_cast<std::string>(index);
 				sdata += "</LEAF_NUMBER>";
 				sdata += "<LEAF_DATA>";
-				SpitLeaf(sdata, leaf);
+				SpitLeaf<hits_tag>(sdata, leaf);
 				sdata += "</LEAF_DATA>";
 				++index;
 				sdata += "</LEAF>";
@@ -2219,13 +2219,15 @@ class create_output_row_visitor : public boost::static_visitor<>
 
 		static std::string row_in_process;
 		static std::fstream * output_file;
-		static InstanceDataVector * data;
+		static InstanceDataVector<hits_tag> * data;
 		static int * bind_index;
 		static sqlite3_stmt * insert_stmt;
 		static int mode;
 		bool & first;
 
 };
+
+extern bool MergedTimeSliceRow_RHS_wins;
 
 template <typename MEMORY_TAG>
 class MergedTimeSliceRow
@@ -2237,11 +2239,13 @@ class MergedTimeSliceRow
 			: empty(true)
 		{}
 
-		MergedTimeSliceRow(TimeSlice const & ts, InstanceDataVector<MEMORY_TAG> const & row)
+		template <typename MEMORY_TAG_RHS>
+		MergedTimeSliceRow(TimeSlice const & ts, InstanceDataVector<MEMORY_TAG_RHS> const & row)
 			: time_slice(ts)
-			, output_row(row)
 			, empty(false)
-		{}
+		{
+			output_row.insert(output_row.begin(), row.cbegin(), row.cend());
+		}
 
 		MergedTimeSliceRow(MergedTimeSliceRow<MEMORY_TAG> const & rhs)
 		{
@@ -2268,28 +2272,49 @@ class MergedTimeSliceRow
 			// were it to become important.
 			// For now - only a single output project
 			// work queue thread will ever access this function.
-			bool oldRHSWins = RHS_wins;
-			RHS_wins = true;
+			bool oldRHSWins = MergedTimeSliceRow_RHS_wins;
+			MergedTimeSliceRow_RHS_wins = true;
 			*this = rhs;
-			RHS_wins = oldRHSWins;
+			MergedTimeSliceRow_RHS_wins = oldRHSWins;
 		}
 
-		bool operator<(MergedTimeSliceRow<MEMORY_TAG> const & rhs) const
+		template <typename MEMORY_TAG_RHS>
+		bool operator<(MergedTimeSliceRow<MEMORY_TAG_RHS> const & rhs) const
 		{
-			return (output_row < rhs.output_row);
+			size_t lhs_size = output_row.size();
+			size_t rhs_size = rhs.output_row.size();
+			size_t min_size = std::min(lhs_size, rhs_size);
+			for (size_t n = 0; n < min_size; ++n)
+			{
+				if (output_row[n] < rhs.output_row[n])
+				{
+					return true;
+				}
+				else
+				if (rhs.output_row[n] < output_row[n])
+				{
+					return false;
+				}
+			}
+			if (lhs_size < rhs_size)
+			{
+				return true;
+			}
+			return false;
 		}
 
-		MergedTimeSliceRow<MEMORY_TAG> & operator=(MergedTimeSliceRow<MEMORY_TAG> const & rhs)
+		template <typename MEMORY_TAG_RHS>
+		MergedTimeSliceRow<MEMORY_TAG> & operator=(MergedTimeSliceRow<MEMORY_TAG_RHS> const & rhs)
 		{
 			if (this == &rhs)
 			{
 				return *this;
 			}
 
-			if (RHS_wins)
+			if (MergedTimeSliceRow_RHS_wins)
 			{
 				time_slice = rhs.time_slice;
-				output_row = rhs.output_row;
+				output_row.insert(output_row.begin(), rhs.output_row.cbegin(), rhs.output_row.cend());
 				empty = rhs.empty;
 				return *this;
 			}
@@ -2304,7 +2329,7 @@ class MergedTimeSliceRow
 				}
 
 				time_slice = rhs.time_slice;
-				output_row = rhs.output_row;
+				output_row.insert(output_row.begin(), rhs.output_row.cbegin(), rhs.output_row.cend());
 				empty = rhs.empty;
 
 				return *this;
@@ -2330,20 +2355,19 @@ class MergedTimeSliceRow
 		TimeSlice time_slice;
 		InstanceDataVector<MEMORY_TAG> output_row;
 
-		static bool RHS_wins; // controls how operator=() should behave.  Note: Only required because release-mode optimizer utilizes operator=() instead of ctor
-
 	private:
 
 		bool empty; // When we merge, should we automatically set ourselves to the other?  Used to support default ctors for STL containers
 
 };
 
+template <typename MEMORY_TAG>
 class SortMergedRowsByTimeThenKeys
 {
 
 	public:
 
-		bool operator()(MergedTimeSliceRow const & lhs, MergedTimeSliceRow const & rhs)
+		bool operator()(MergedTimeSliceRow<MEMORY_TAG> const & lhs, MergedTimeSliceRow<MEMORY_TAG> const & rhs)
 		{
 
 			if (lhs.time_slice < rhs.time_slice)
@@ -2365,7 +2389,7 @@ class SortMergedRowsByTimeThenKeys
 };
 
 template <typename MEMORY_TAG>
-using fast__mergedtimeslicerow_set = FastSetMemoryTag<MergedTimeSliceRow, MEMORY_TAG, SortMergedRowsByTimeThenKeys>;
+using fast__mergedtimeslicerow_set = FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG>, MEMORY_TAG, SortMergedRowsByTimeThenKeys<MEMORY_TAG>>;
 
 class KadSampler
 {
@@ -2378,7 +2402,7 @@ class KadSampler
 	public:
 
 		// The main time slice data
-		TimeSlices timeSlices;
+		TimeSlices<hits_tag> timeSlices;
 		Weighting weighting; // sum over all time slices
 
 	public:
@@ -2471,14 +2495,14 @@ class KadSampler
 		void getMySize() const;
 
 		// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
-		DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
-		fast_short_to_data_cache_map otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
-		fast_short_to_data_cache_map childCache; // Ditto, but for child variable groups
+		DataCache<hits_tag> dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
+		fast_short_to_data_cache_map<hits_tag> otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
+		fast_short_to_data_cache_map<hits_tag> childCache; // Ditto, but for child variable groups
 
 		// For each child variable group, a vector of mapping from the child key columns to the top-level key columns
-		fast_int_to_childtoprimarymappingvector mappings_from_child_branch_to_primary;
-		fast_int_to_childtoprimarymappingvector mappings_from_child_leaf_to_primary;
-		fast_short_to_short_map childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
+		fast_int_to_childtoprimarymappingvector<hits_tag> mappings_from_child_branch_to_primary;
+		fast_int_to_childtoprimarymappingvector<hits_tag> mappings_from_child_leaf_to_primary;
+		fast_short_to_short_map<hits_tag> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 		int numberChildVariableGroups;
 		TIME_GRANULARITY time_granularity;
 		std::int64_t random_rows_added;
@@ -2487,16 +2511,16 @@ class KadSampler
 		int current_child_variable_group_being_merged; // temporary helper variable
 
 		// final output in case of consolidated row output
-		fast__mergedtimeslicerow_set consolidated_rows;
+		fast__mergedtimeslicerow_set<hits_consolidated_tag> consolidated_rows;
 
 	public:
 
 		sqlite3_stmt * insert_random_sample_stmt;
 
 		// Returns "added", "continue handling slice", and "next map iterator"
-		std::tuple<bool, bool, TimeSlices::iterator> HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number,
+		std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number,
 				VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling,
-				TimeSlices::iterator mapIterator_ = TimeSlices::iterator(), bool const useIterator = false);
+				TimeSlices<hits_tag>::iterator mapIterator_ = TimeSlices<hits_tag>::iterator(), bool const useIterator = false);
 		void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
 		void PrepareRandomNumbers(std::int64_t how_many);
 		void PrepareRandomSamples(int const K);
@@ -2505,9 +2529,25 @@ class KadSampler
 		void PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch);
 		void ResetBranchCaches(int const child_variable_group_number, bool const reset_child_dmu_lookup);
 		void ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t & current_rows, ProgressBarMeter & meter);
-		void getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const;
-		void getDataCacheUsage(size_t & usage, DataCache const & dataCache) const;
-		void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf = false) const;
+		void getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector<hits_tag> const & childToBranchColumnMappings) const;
+		void getDataCacheUsage(size_t & usage, DataCache<hits_tag> const & dataCache) const;
+
+		template <typename MEMORY_TAG>
+		void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector<MEMORY_TAG> const & instanceDataVector, bool const includeSelf) const
+		{
+			if (includeSelf)
+			{
+				usage += sizeof(instanceDataVector);
+			}
+
+			for (auto const & instanceData : instanceDataVector)
+			{
+				// Boost Variant is stack-based
+				usage += sizeof(instanceData);
+				//usage += boost::apply_visitor(size_of_visitor(), instanceData);
+			}
+		}
+
 		void getLeafUsage(size_t & usage, Leaf const & leaf) const;
 
 		template <typename MEMORY_TAG>
@@ -2560,17 +2600,17 @@ class KadSampler
 
 	protected:
 
-		bool HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number,
+		bool HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
 									   VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
 
 		void AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf);
 
 		// Breaks an existing map entry into two pieces and returns an iterator to both.
-		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr,
-						   TimeSlices::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
+		void SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices<hits_tag>::iterator & newMapElementLeftPtr,
+			TimeSlices<hits_tag>::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
 
 		// Breaks an existing map entry into three pieces and returns an iterator to the middle piece.
-		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr,
+		void SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices<hits_tag>::iterator & newMapElementMiddlePtr,
 						   std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
 
 		// Slices off the left part of the "incoming_slice" TimeSliceLeaf and returns it in the "new_left_slice" TimeSliceLeaf.
@@ -2578,13 +2618,13 @@ class KadSampler
 		void SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice);
 
 		// Merge time slice data into a map element
-		bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number,
+		bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
 									   VARIABLE_GROUP_MERGE_MODE const merge_mode);
 
 		void GenerateRandomKad(newgene_cpp_int random_number, int const K, Branch const & branch);
 		void GenerateAllOutputRows(int const K, Branch const & branch);
 
-		static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_, TimeSlices::value_type const & map_entry_)
+		static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_, TimeSlices<hits_tag>::value_type const & map_entry_)
 		{
 
 			TimeSlice const & new_time_slice = new_time_slice_.first;
@@ -2606,7 +2646,7 @@ class KadSampler
 
 	public:
 
-		InstanceDataVector create_output_row_visitor_global_data_cache;
+		InstanceDataVector<hits_tag> create_output_row_visitor_global_data_cache;
 		newgene_cpp_int number_rows_generated;
 		FastVectorCppInt::const_iterator random_number_iterator;
 

@@ -16,10 +16,10 @@
 
 std::fstream * create_output_row_visitor::output_file = nullptr;
 int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor::CREATE_ROW_MODE__NONE);
-InstanceDataVector * create_output_row_visitor::data = nullptr;
+InstanceDataVector<hits_tag> * create_output_row_visitor::data = nullptr;
 int * create_output_row_visitor::bind_index = nullptr;
 sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
-bool MergedTimeSliceRow::RHS_wins = false;
+bool MergedTimeSliceRow_RHS_wins = false;
 std::string create_output_row_visitor::row_in_process;
 
 int Weighting::how_many_weightings = 0;
@@ -39,9 +39,9 @@ KadSampler::~KadSampler()
 	// Never called: This is how we utilize the Boost memory pool
 }
 
-std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf,
+std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf,
 		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling,
-		TimeSlices::iterator mapIterator_, bool const useIterator)
+		TimeSlices<hits_tag>::iterator mapIterator_, bool const useIterator)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
@@ -58,12 +58,12 @@ std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranch
 
 	// determine which case we are in terms of the relationship of the incoming new 'timeSliceLeaf'
 	// so that we know whether/how to break up either the new 'rhs' time slice
-	// or the potentially overlapping existing time slices in the 'timeSlices' map
+	// or the potentially overlapping existing time slices in the 'TimeSlices<hits_tag>' map
 
 	// Save beginning, one past end time slices in the existing map for reference
-	TimeSlices::iterator existing_start_slice = timeSlices.begin();
-	TimeSlices::iterator existing_one_past_end_slice = timeSlices.end();
-	TimeSlices::iterator mapIterator;
+	TimeSlices<hits_tag>::iterator existing_start_slice = timeSlices.begin();
+	TimeSlices<hits_tag>::iterator existing_one_past_end_slice = timeSlices.end();
+	TimeSlices<hits_tag>::iterator mapIterator;
 
 	if (useIterator)
 	{
@@ -76,7 +76,7 @@ std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranch
 	{
 		if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 		{
-			// No entries in the 'timeSlices' map yet
+			// No entries in the 'TimeSlices<hits_tag>' map yet
 			// Add the entire new time slice as the first entry in the map
 			AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
 		}
@@ -101,7 +101,7 @@ std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranch
 			mapIterator = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &KadSampler::is_map_entry_end_time_greater_than_new_time_slice_start_time);
 		}
 
-		TimeSlices::iterator startMapSlicePtr = mapIterator;
+		TimeSlices<hits_tag>::iterator startMapSlicePtr = mapIterator;
 		bool start_of_new_slice_is_past_end_of_map = false;
 
 		if (startMapSlicePtr == existing_one_past_end_slice)
@@ -252,7 +252,7 @@ std::tuple<bool, bool, TimeSlices::iterator> KadSampler::HandleIncomingNewBranch
 // - The portion of the incoming slice that extends past the right edge
 //   of the map entry
 // - An iterator to the next map entry.
-bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr,
+bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr,
 		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
@@ -261,9 +261,9 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
 	TimeSlice const & mapElement = mapElementPtr->first;
 
-	TimeSlices::iterator newMapElementLeftPtr;
-	TimeSlices::iterator newMapElementMiddlePtr;
-	TimeSlices::iterator newMapElementRightPtr;
+	TimeSlices<hits_tag>::iterator newMapElementLeftPtr;
+	TimeSlices<hits_tag>::iterator newMapElementMiddlePtr;
+	TimeSlices<hits_tag>::iterator newMapElementRightPtr;
 
 	TimeSliceLeaf new_left_slice;
 
@@ -407,8 +407,8 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 }
 
 // breaks an existing map entry into two pieces and returns an iterator to both
-void KadSampler::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr,
-							   TimeSlices::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+void KadSampler::SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices<hits_tag>::iterator & newMapElementLeftPtr,
+							   TimeSlices<hits_tag>::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
@@ -434,8 +434,8 @@ void KadSampler::SliceMapEntry(TimeSlices::iterator const & existingMapElementPt
 }
 
 // breaks an existing map entry into three pieces and returns an iterator to the middle piece
-void KadSampler::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right,
-							   TimeSlices::iterator & newMapElementMiddlePtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+void KadSampler::SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right,
+							   TimeSlices<hits_tag>::iterator & newMapElementMiddlePtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
@@ -473,7 +473,7 @@ void KadSampler::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const
 }
 
 // Merge time slice data into a map element
-bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number,
+bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
 		VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
@@ -490,11 +490,11 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 	bool added = false;
 
 	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second;
-	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 	// Note: Currently, only one primary top-level variable group is supported.
 	// It will be the "begin()" element, if it exists.
-	VariableGroupBranchesAndLeavesVector::iterator VariableGroupBranchesAndLeavesPtr = variableGroupBranchesAndLeavesVector.begin();
+	VariableGroupBranchesAndLeavesVector<hits_tag>::iterator VariableGroupBranchesAndLeavesPtr = variableGroupBranchesAndLeavesVector.begin();
 
 	if (VariableGroupBranchesAndLeavesPtr == variableGroupBranchesAndLeavesVector.end())
 	{
@@ -507,7 +507,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 		if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 		{
 			VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_number);
-			Branches & newBranchesAndLeaves = newVariableGroupBranch.branches;
+			Branches<hits_tag> & newBranchesAndLeaves = newVariableGroupBranch.branches;
 			branch.InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
 			newBranchesAndLeaves.insert(branch);
 			variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
@@ -530,7 +530,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 		// In any case, retrieve the existing set of branches.
 
 		VariableGroupBranchesAndLeaves & variableGroupBranch = *VariableGroupBranchesAndLeavesPtr;
-		Branches & branches = variableGroupBranch.branches;
+		Branches<hits_tag> & branches = variableGroupBranch.branches;
 
 		switch (merge_mode)
 		{
@@ -565,7 +565,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 					// Let's take a peek and see if our branch is already present
 
-					Branches::iterator branchPtr = branches.find(branch);
+					Branches<hits_tag>::iterator branchPtr = branches.find(branch);
 
 					if (branchPtr != branches.end())
 					{
@@ -604,7 +604,17 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 				{
 
 					// Construct the child's DMU keys, including leaf
-					ChildDMUInstanceDataVector dmu_keys;
+
+					// Optimization
+					static ChildDMUInstanceDataVector<hits_tag> dmu_keys;
+					static bool first = true;
+					if (first)
+					{
+						dmu_keys.reserve(1000); // Big enough to cover 99.9% of end-user cases
+					}
+					dmu_keys.clear();
+					first = false;
+
 					dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
 					dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
 
@@ -703,14 +713,14 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 	// first, calculate the number of branches that need to have weightings calculated
 	std::int64_t total_branches = 0;
-	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices::value_type & timeSliceEntry)
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type & timeSliceEntry)
 	{
 		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
-		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 		Weighting & variableGroupTimeSliceDataWeighting = variableGroupTimeSliceData.weighting;
 		std::for_each(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
 		{
-			Branches & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+			Branches<hits_tag> & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 			total_branches += static_cast<std::int64_t>(branchesAndLeaves.size());
 		});
 	});
@@ -720,14 +730,14 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	std::int64_t branch_count = 0;
 	std::int64_t time_slice_count = 0;
 	ProgressBarMeter meter(messager, std::string("Weighting for %1% / %2% branches calculated"), total_branches);
-	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices::value_type & timeSliceEntry)
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type & timeSliceEntry)
 	{
 
 		++time_slice_count;
 
 		TimeSlice const & timeSlice = timeSliceEntry.first;
 		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
-		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 		Weighting & variableGroupTimeSliceDataWeighting = variableGroupTimeSliceData.weighting;
 
 		if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -743,7 +753,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 		std::for_each(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
 		{
 
-			Branches & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+			Branches<hits_tag> & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 			Weighting & variableGroupBranchesAndLeavesWeighting = variableGroupBranchesAndLeaves.weighting;
 			variableGroupBranchesAndLeavesWeighting.setWeightingRangeStart(currentWeighting);
 
@@ -801,9 +811,9 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 void KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)
 {
 	VariableGroupTimeSliceData variableGroupTimeSliceData;
-	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 	VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_number);
-	Branches & newBranchesAndLeaves = newVariableGroupBranch.branches;
+	Branches<hits_tag> & newBranchesAndLeaves = newVariableGroupBranch.branches;
 	newBranchesAndLeaves.insert(branch);
 	Branch const & current_branch = *(newBranchesAndLeaves.find(branch));
 	current_branch.InsertLeaf(newTimeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
@@ -1272,7 +1282,7 @@ void KadSampler::ResetBranchCaches(int const child_variable_group_number, bool c
 	std::int64_t current_loop_iteration = 0;
 
 	current_child_variable_group_being_merged = child_variable_group_number;
-	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices::value_type  & timeSliceData)
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type  & timeSliceData)
 	{
 
 		timeSliceData.second.ResetBranchCachesSingleTimeSlice(*this, reset_child_dmu_lookup);
@@ -1311,8 +1321,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 		helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 
 		// Optimization: Profiler shows large amount of time spent creating and destroying the following vectors
-		static ChildDMUInstanceDataVector child_hit_vector_branch_components;
-		static ChildDMUInstanceDataVector child_hit_vector;
+		static ChildDMUInstanceDataVector<hits_tag> child_hit_vector_branch_components;
+		static ChildDMUInstanceDataVector<hits_tag> child_hit_vector;
 		static bool first = true;
 		if (first)
 		{
@@ -1530,7 +1540,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 void KadSampler::PrepareRandomSamples(int const K)
 {
 
-	TimeSlices::const_iterator timeSlicePtr = timeSlices.cbegin();
+	TimeSlices<hits_tag>::const_iterator timeSlicePtr = timeSlices.cbegin();
 	newgene_cpp_int currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
 
 	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% randomly selected rows"), static_cast<std::int32_t>(random_numbers.size()));
@@ -1576,7 +1586,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 			BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0
 							 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
 
-			TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](TimeSlices::value_type const & timeSliceData,
+			TimeSlices<hits_tag>::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](TimeSlices<hits_tag>::value_type const & timeSliceData,
 					newgene_cpp_int const & test_random_number)
 			{
 				VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
@@ -1593,7 +1603,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 
 		TimeSlice const & timeSlice = timeSlicePtr->first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 		// For now, assume only one variable group
 		if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -1604,10 +1614,10 @@ void KadSampler::PrepareRandomSamples(int const K)
 
 		VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
 
-		Branches const & branches = variableGroupBranchesAndLeaves.branches;
+		Branches<hits_tag> const & branches = variableGroupBranchesAndLeaves.branches;
 
 		// Pick a branch randomly (with weight!)
-		Branches::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch,
+		Branches<hits_tag>::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch,
 											   newgene_cpp_int const & test_random_number)
 		{
 			if (testBranch.weighting.getWeightingRangeEnd() < test_random_number)
@@ -1643,7 +1653,7 @@ void KadSampler::PrepareFullSamples(int const K)
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{
@@ -1743,7 +1753,7 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & allWeightings, bool const reset_child_dmu_lookup)
 {
 
-	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = branches_and_leaves;
+	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = branches_and_leaves;
 
 	// For now, assume only one variable group
 	if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -1753,7 +1763,7 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 	}
 
 	VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-	Branches & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+	Branches<hits_tag> & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 
 	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
 	{
@@ -2070,7 +2080,7 @@ void SpitAllWeightings(KadSampler const & allWeightings, std::string const & fil
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 
 		file_.write(sdata_.c_str(), sdata_.size());
 		sdata_.clear();
@@ -2430,7 +2440,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	std::int64_t originalWidth = originalTimeSlice.WidthForWeighting(AvgMsperUnit);
 
 	fast__int64__to__fast_branch_output_row_set<remaining_tag> new_hits;
-	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = branches_and_leaves;
+	VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = branches_and_leaves;
 	std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 	{
 
@@ -2749,7 +2759,7 @@ void KadSampler::getMySize() const
 
 	mySize.totalSize += mySize.sizeChildCache;
 
-	// timeSlices
+	// TimeSlices<hits_tag>
 	mySize.sizeTimeSlices += sizeof(timeSlices);
 
 	for (auto const & timeSlice : timeSlices)
@@ -2768,7 +2778,7 @@ void KadSampler::getMySize() const
 			mySize.sizeTimeSlices += sizeof(variableGroupBranchesAndLeaves);
 
 			// branches is a set
-			Branches const & branches = variableGroupBranchesAndLeaves.branches;
+			Branches<hits_tag> const & branches = variableGroupBranchesAndLeaves.branches;
 
 			mySize.numberMapNodes += branches.size();
 
@@ -2826,7 +2836,7 @@ void KadSampler::getMySize() const
 					auto const & childDMUInstanceDataVector = child_lookup_from_child_data_to_rows.first;
 					auto const & outputRowsToChildDataMap = child_lookup_from_child_data_to_rows.second;
 
-					getInstanceDataVectorUsage(mySize.sizeTimeSlices, childDMUInstanceDataVector);
+					getInstanceDataVectorUsage(mySize.sizeTimeSlices, childDMUInstanceDataVector, false);
 
 					mySize.numberMapNodes += outputRowsToChildDataMap.size();
 
@@ -2896,7 +2906,7 @@ void KadSampler::getLeafUsage(size_t & usage, Leaf const & leaf) const
 {
 	//usage += sizeof(leaf);
 
-	getInstanceDataVectorUsage(usage, leaf.primary_keys);
+	getInstanceDataVectorUsage(usage, leaf.primary_keys, false);
 
 	auto const & other_top_level_indices_into_raw_data = leaf.other_top_level_indices_into_raw_data;
 
@@ -2907,22 +2917,7 @@ void KadSampler::getLeafUsage(size_t & usage, Leaf const & leaf) const
 	}
 }
 
-void KadSampler::getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf) const
-{
-	if (includeSelf)
-	{
-		usage += sizeof(instanceDataVector);
-	}
-
-	for (auto const & instanceData : instanceDataVector)
-	{
-		// Boost Variant is stack-based
-		usage += sizeof(instanceData);
-		//usage += boost::apply_visitor(size_of_visitor(), instanceData);
-	}
-}
-
-void KadSampler::getDataCacheUsage(size_t & usage, DataCache const & dataCache) const
+void KadSampler::getDataCacheUsage(size_t & usage, DataCache<hits_tag> const & dataCache) const
 {
 	mySize.numberMapNodes += dataCache.size();
 
@@ -2930,11 +2925,11 @@ void KadSampler::getDataCacheUsage(size_t & usage, DataCache const & dataCache) 
 	{
 		usage += sizeof(rowIdToData.first);
 		usage += sizeof(rowIdToData.second);
-		getInstanceDataVectorUsage(usage, rowIdToData.second);
+		getInstanceDataVectorUsage(usage, rowIdToData.second, false);
 	}
 }
 
-void KadSampler::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const
+void KadSampler::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector<hits_tag> const & childToBranchColumnMappings) const
 {
 	mySize.numberMapNodes += childToBranchColumnMappings.size();
 

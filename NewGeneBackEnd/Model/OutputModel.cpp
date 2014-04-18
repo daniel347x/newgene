@@ -4064,7 +4064,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		}
 
 		// Construct Leaf
-		DMUInstanceDataVector dmus_leaf;
+		DMUInstanceDataVector<hits_tag> dmus_leaf;
+
 		bool bad = false;
 		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(),
 					  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
@@ -4114,7 +4115,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		});
 
 		// Construct Branch
-		DMUInstanceDataVector dmus_branch;
+		DMUInstanceDataVector<hits_tag> dmus_branch;
+
 		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cbegin(),
 					  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 		{
@@ -4166,7 +4168,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		// Note that this is stored in a cache.
 		// In the future, this cache can be enhanced to become an intelligent LIFO memory/disk cache
 		// to support huge input datasets.
-		DMUInstanceDataVector secondary_data;
+		DMUInstanceDataVector<hits_tag> secondary_data;
+
 		std::for_each(sorting_row_of_data.indices_of_secondary_key_columns.cbegin(),
 					  sorting_row_of_data.indices_of_secondary_key_columns.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 		{
@@ -4231,13 +4234,13 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 						bool call_again = false;
 						bool added = false;
 						bool first = true;
-						TimeSlices::iterator mapIterator;
+						TimeSlices<hits_tag>::iterator mapIterator;
 						auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
 
 						while (first || call_again)
 						{
 							first = false;
-							std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
+							std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
 									AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
 							bool added_recurse = std::get<0>(ret);
 
@@ -4272,13 +4275,13 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 						bool call_again = false;
 						bool added = false;
 						bool first = true;
-						TimeSlices::iterator mapIterator;
+						TimeSlices<hits_tag>::iterator mapIterator;
 						auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
 
 						while (first || call_again)
 						{
 							first = false;
-							std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
+							std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
 									AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
 							bool added_recurse = std::get<0>(ret);
 
@@ -4320,13 +4323,13 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 						bool call_again = false;
 						bool added = false;
 						bool first = true;
-						TimeSlices::iterator mapIterator;
+						TimeSlices<hits_tag>::iterator mapIterator;
 						auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
 
 						while (first || call_again)
 						{
 							first = false;
-							std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
+							std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
 									AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
 							bool added_recurse = std::get<0>(ret);
 
@@ -4853,7 +4856,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(KadSampler & all
 
 	PrepareInsertStatement(allWeightings.insert_random_sample_stmt, random_sampling_columns);
 
-	std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices::value_type const & timeSliceData)
+	std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices<hits_tag>::value_type const & timeSliceData)
 	{
 
 		if (failed || CheckCancelled())
@@ -4864,7 +4867,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(KadSampler & all
 		TimeSlice const & timeSlice = timeSliceData.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
 
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 		// For now, assume only one variable group
 		if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -4874,7 +4877,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(KadSampler & all
 		}
 
 		VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-		Branches const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+		Branches<hits_tag> const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 
 		std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](Branch const & branch)
 		{
@@ -5284,8 +5287,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 		ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(allWeightings);
 	}
 
-	std::set<MergedTimeSliceRow> saved_historic_rows;
-	std::set<MergedTimeSliceRow> ongoing_merged_rows;
+	std::set<MergedTimeSliceRow<hits_consolidated_tag>> saved_historic_rows;
+	std::set<MergedTimeSliceRow<hits_consolidated_tag>> ongoing_merged_rows;
 
 	// ***************************************************************************************************** //
 	// First, calculate the number of rows that must be processed, for use by the progress bar
@@ -5298,7 +5301,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 		{
 			TimeSlice const & the_slice = timeSlice.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 			// See equivalent loop, below, for some comments
 			if (previousTimeSlice.DoesOverlap(the_slice))
@@ -5359,7 +5362,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 			TimeSlice const & the_slice = timeSlice.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 			if (previousTimeSlice.DoesOverlap(the_slice))
 			{
@@ -5377,7 +5380,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					{
 
 						// Here is a single branch and its leaves, corresponding to the primary variable group and the current time slice.
-						std::set<MergedTimeSliceRow> incoming;
+						std::set<MergedTimeSliceRow<hits_consolidated_tag>> incoming;
 
 						// ***************************************************************************************************** //
 						// All data within a single branch is guaranteed to have been consolidated into index -1.
@@ -5390,7 +5393,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 						// so the above block that consolidates to index -1 is not necessary.
 						// ***************************************************************************************************** //
 
-						MergedTimeSliceRow::RHS_wins = true; // optimizer might call copy constructor, which calls operator=(), during "emplace"
+						MergedTimeSliceRow_RHS_wins = true; // optimizer might call copy constructor, which calls operator=(), during "emplace"
 
 						if (random_sampling)
 						{
@@ -5398,7 +5401,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 							auto & incoming_rows = branch.hits_consolidated;
 							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
 							{
-								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
+								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation<hits_consolidated_tag>(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
 								meter.UpdateProgressBarValue(orig_row_count);
 							});
 						}
@@ -5408,16 +5411,16 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 							auto const & incoming_rows = branch.hits[-1];
 							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
 							{
-								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
+								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation<hits_consolidated_tag>(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
 								meter.UpdateProgressBarValue(orig_row_count);
 							});
 						}
 
-						MergedTimeSliceRow::RHS_wins = false;
+						MergedTimeSliceRow_RHS_wins = false;
 
-						std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
-						std::vector<MergedTimeSliceRow> only_previous(ongoing_merged_rows.size());
-						std::vector<MergedTimeSliceRow> only_new(incoming.size());
+						std::vector<MergedTimeSliceRow<hits_consolidated_tag>> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
+						std::vector<MergedTimeSliceRow<hits_consolidated_tag>> only_previous(ongoing_merged_rows.size());
+						std::vector<MergedTimeSliceRow<hits_consolidated_tag>> only_new(incoming.size());
 
 						// ************************************************************************************************************************************************************** //
 						// Find out which rows match just in terms of DATA (not time) between the incoming, and the previous, sets of rows
@@ -5443,7 +5446,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 						// contain the time slices from the "ongoing_merged_rows" container,
 						// guaranteeing that these time slices, which may start at different places for different rows
 						// although they all *end* at the start of the new time slice, are saved.
-						std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow & merged_row)
+						std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow<hits_consolidated_tag> & merged_row)
 						{
 							merged_row.time_slice.setEnd(the_slice.getEnd());
 						});
@@ -5454,7 +5457,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 						ongoing_merged_rows.clear();
 
 
-						MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
+						MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 
 						// Set ongoing to "intersection"
 						ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
@@ -5467,7 +5470,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 						// The rows that existed previously, but do not match, now must be set aside and saved.
 						saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
 
-						MergedTimeSliceRow::RHS_wins = false;
+						MergedTimeSliceRow_RHS_wins = false;
 
 					});
 
@@ -5490,7 +5493,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 					{
 
-						MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
+						MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 
 						if (random_sampling)
 						{
@@ -5501,13 +5504,13 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
 								meter.UpdateProgressBarValue(orig_row_count);
 							});
-							MergedTimeSliceRow::RHS_wins = false;
+							MergedTimeSliceRow_RHS_wins = false;
 						}
 						else
 						{
 							// In this case, full sampling, the rows were already added to branch.hits[-1] in consolidated fashion within each branch
 							auto const & incoming_rows = branch.hits[-1];
-							MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
+							MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
 							{
 								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
@@ -5515,7 +5518,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 							});
 						}
 
-						MergedTimeSliceRow::RHS_wins = false;
+						MergedTimeSliceRow_RHS_wins = false;
 
 					});
 
@@ -5530,17 +5533,17 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	}
 
 	// Empty out the current ongoing rows; we've hit the end
-	MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
+	MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 	saved_historic_rows.insert(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend());
-	MergedTimeSliceRow::RHS_wins = false;
+	MergedTimeSliceRow_RHS_wins = false;
 	ongoing_merged_rows.clear();
 
 	// Order the rows how we want them - first by time, then by keys
 
 	allWeightings.consolidated_rows.clear();
-	MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
+	MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 	allWeightings.consolidated_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
-	MergedTimeSliceRow::RHS_wins = false;
+	MergedTimeSliceRow_RHS_wins = false;
 	saved_historic_rows.clear();
 
 }
@@ -5707,11 +5710,11 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		// Do a first pass to calculate the number of output rows that will be generated
 		// ... this is for the progress bar
-		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices::value_type const & timeSliceData)
+		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices<hits_tag>::value_type const & timeSliceData)
 		{
 			TimeSlice const & timeSlice = timeSliceData.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
-			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 			if (variableGroupBranchesAndLeavesVector.size() > 1)
 			{
@@ -5720,7 +5723,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 			}
 
 			VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-			Branches const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+			Branches<hits_tag> const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 			std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](Branch const & branch)
 			{
 
@@ -5769,7 +5772,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 		int which_time_slice = 0;
 
 		ProgressBarMeter meter(messager, std::string("%1% / %2% rows written to output file"), total_number_output_rows);
-		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices::value_type const & timeSliceData)
+		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices<hits_tag>::value_type const & timeSliceData)
 		{
 
 			++which_time_slice;
@@ -5782,7 +5785,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 			TimeSlice const & timeSlice = timeSliceData.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
 
-			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 			// For now, assume only one variable group
 			if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -5792,7 +5795,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 			}
 
 			VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-			Branches const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+			Branches<hits_tag> const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 
 			std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](Branch const & branch)
 			{
@@ -6017,7 +6020,7 @@ void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTi
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{
@@ -6046,7 +6049,7 @@ void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTi
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{

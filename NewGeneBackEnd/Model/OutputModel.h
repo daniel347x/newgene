@@ -574,9 +574,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ConsolidateData(bool const random_sampling, KadSampler & allWeightings);
 				void ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(KadSampler & allWeightings);
 
-				template <typename MEMORY_TAG>
-				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch, BranchOutputRow<MEMORY_TAG> const & incoming_row,
-						std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count);
+				template <typename MEMORY_TAG_OUTPUT_ROW, typename MEMORY_TAG_SET_OF_ROWS>
+				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch,
+					BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, std::set<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count);
 
 				void KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings);
 
@@ -910,7 +910,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 		// because it came from the same row of input data that the branch+leaf (or branch, for K=1) did.
 		if (leaf.index_into_raw_data > 0) // index_into_raw_data is 1-based because it corresponds to SQLite's automatically-generated "rowid" column.
 		{
-			SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
+			SecondaryInstanceDataVector<hits_tag> const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
 			std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 			{
 				boost::apply_visitor(create_output_row_visitor(first), data);
@@ -1009,8 +1009,8 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 						// *********************************************************************** //
 						int const vg_number = top_level_vg_and_data_index.first;
 						std::int32_t const & data_index = top_level_vg_and_data_index.second;
-						DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
-						SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
+						DataCache<hits_tag> & data_cache = allWeightings.otherTopLevelCache[vg_number];
+						SecondaryInstanceDataVector<hits_tag> const & secondary_data_vector = data_cache[data_index];
 						std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 						{
 							boost::apply_visitor(create_output_row_visitor(first), data);
@@ -1113,8 +1113,8 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 					// This is the desired variable group and multiplicity
 
 					std::int32_t const & data_index = leaf_index_mapping.second;
-					DataCache & data_cache = allWeightings.childCache[vg_number];
-					SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
+					DataCache<hits_tag> & data_cache = allWeightings.childCache[vg_number];
+					SecondaryInstanceDataVector<hits_tag> & secondary_data_vector = data_cache[data_index];
 
 					if (!secondary_data_vector.empty())
 					{
@@ -1162,9 +1162,9 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 	}
 }
 
-template <typename MEMORY_TAG>
+template <typename MEMORY_TAG_OUTPUT_ROW, typename MEMORY_TAG_SET_OF_ROWS>
 void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch,
-	BranchOutputRow<MEMORY_TAG> const & incoming_row, std::set<MergedTimeSliceRow> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count)
+	BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, std::set<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count)
 {
 	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
 	allWeightings.create_output_row_visitor_global_data_cache.clear();
