@@ -1232,28 +1232,28 @@ class BranchOutputRow
 			SaveCache();
 		}
 
-		template <typename MEMORY_TAG_RHS>
-		BranchOutputRow(BranchOutputRow<MEMORY_TAG_RHS> && rhs)
+		//template <typename MEMORY_TAG_RHS>
+		//BranchOutputRow(BranchOutputRow<MEMORY_TAG_RHS> && rhs)
 
-			// No need to use a move iterator - these are just ints, and the move syntax is tedious because of the need for const_cast and move_iterator, resulting in no benefit because these are just int's
-			//: primary_leaves(std::move_iterator(rhs.primary_leaves.begin()), std::move_iterator(rhs.primary_leaves.end()))
-			: primary_leaves(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend())
+		//	// No need to use a move iterator - these are just ints, and the move syntax is tedious because of the need for const_cast and move_iterator, resulting in no benefit because these are just int's
+		//	//: primary_leaves(std::move_iterator(rhs.primary_leaves.begin()), std::move_iterator(rhs.primary_leaves.end()))
+		//	: primary_leaves(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend())
 
-			// ditto
-			//, primary_leaves_cache(std::move_iterator(rhs.primary_leaves_cache.begin()), std::move_iterator(rhs.primary_leaves_cache.end()))
-			, primary_leaves_cache(rhs.primary_leaves_cache.cbegin(), rhs.primary_leaves_cache.cend())
-		{
-			for (auto & rhs_map : rhs.child_indices_into_raw_data)
-			{
-				for (auto & rhs_vec : rhs_map.second)
-				{
-					// move does nothing here, since it's an int, but if we could, we would...
-					// this is the best that can be done for disparate types
-					child_indices_into_raw_data[rhs_map.first][rhs_vec.first] = std::move(rhs_vec.second);
-				}
-			}
-			//SaveCache(); // already moved from rhs
-		}
+		//	// ditto
+		//	//, primary_leaves_cache(std::move_iterator(rhs.primary_leaves_cache.begin()), std::move_iterator(rhs.primary_leaves_cache.end()))
+		//	, primary_leaves_cache(rhs.primary_leaves_cache.cbegin(), rhs.primary_leaves_cache.cend())
+		//{
+		//	for (auto & rhs_map : rhs.child_indices_into_raw_data)
+		//	{
+		//		for (auto & rhs_vec : rhs_map.second)
+		//		{
+		//			// move does nothing here, since it's an int, but if we could, we would...
+		//			// this is the best that can be done for disparate types
+		//			child_indices_into_raw_data[rhs_map.first][rhs_vec.first] = std::move(rhs_vec.second);
+		//		}
+		//	}
+		//	//SaveCache(); // already moved from rhs
+		//}
 
 		// specialize for own type
 		BranchOutputRow(BranchOutputRow<MEMORY_TAG> && rhs)

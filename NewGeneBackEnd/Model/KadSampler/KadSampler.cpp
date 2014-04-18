@@ -964,8 +964,7 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 		PopulateAllLeafCombinations(which_time_unit, K, branch);
 	}
 
-	branch.hits[which_time_unit].insert(std::move_iterator<fast_branch_output_row_vector<remaining_tag>::iterator>(branch.remaining[which_time_unit].begin()),
-		std::move_iterator<fast_branch_output_row_vector<remaining_tag>::iterator>(branch.remaining[which_time_unit].end()));
+	branch.hits[which_time_unit].insert(branch.remaining[which_time_unit].begin(), branch.remaining[which_time_unit].end());
 	branch.remaining[which_time_unit].clear();
 
 }
@@ -1094,28 +1093,34 @@ void KadSampler::GenerateOutputRow(newgene_cpp_int random_number, int const K, B
 	// this is handled by storing a map of every *time unut* (corresponding to the primary variable group)
 	// and all leaf combinations that have been hit for that time unit.
 
-	static size_t bytes_allocated = 0;
 	auto insert_result = branch.hits[which_time_unit].insert(test_leaf_combination);
 	bool inserted = insert_result.second;
+
+#	ifdef _DEBUG
+	static size_t bytes_allocated = 0;
+#	endif
 
 	if (inserted)
 	{
 		++random_rows_added;
 
+#		ifdef _DEBUG
 		if (false)
 		{
 			bytes_allocated += sizeof(test_leaf_combination);
 
 			if (random_rows_added % 10000 == 0)
 			{
-				std::string sdata;
+				std::string sizedata;
 				getMySize();
-				mySize.spitSizes(sdata);
+				mySize.spitSizes(sizedata);
 				boost::format mytxt("%1% calls that inserted an output row; %2% bytes allocated in this way.  Size of AllWeightings: %3%");
-				mytxt % random_rows_added % bytes_allocated % sdata;
+				mytxt % random_rows_added % bytes_allocated % sizedata;
 				messager.AppendKadStatusText(mytxt.str(), nullptr);
 			}
 		}
+#		endif
+
 	}
 
 }
