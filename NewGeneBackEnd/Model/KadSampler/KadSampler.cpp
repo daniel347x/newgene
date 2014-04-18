@@ -928,10 +928,10 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 {
 
-	std::int64_t which_time_unit = -1;  // -1 means "full sampling for branch" - no need to break down into time units (which have identical full sets)
+	std::int64_t which_time_unit_full_sampling__MINUS_ONE = -1;  // -1 means "full sampling for branch" - no need to break down into time units (which have identical full sets)
 
-	branch.hits[which_time_unit].clear();
-	branch.remaining[which_time_unit].clear();
+	branch.hits[which_time_unit_full_sampling__MINUS_ONE].clear();
+	branch.remaining[which_time_unit_full_sampling__MINUS_ONE].clear();
 
 	static int saved_range = -1;
 
@@ -948,7 +948,7 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 			single_leaf_combination.Insert(n);
 		}
 
-		branch.remaining[which_time_unit].push_back(single_leaf_combination);
+		branch.remaining[which_time_unit_full_sampling__MINUS_ONE].push_back(single_leaf_combination);
 
 		++number_rows_generated;
 
@@ -961,15 +961,17 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 
 	if (!skip)
 	{
-		PopulateAllLeafCombinations(which_time_unit, K, branch);
+		PopulateAllLeafCombinations(which_time_unit_full_sampling__MINUS_ONE, K, branch);
 	}
 
-	branch.hits[which_time_unit].insert(branch.remaining[which_time_unit].begin(), branch.remaining[which_time_unit].end());
-	branch.remaining[which_time_unit].clear();
+	branch.hits[which_time_unit_full_sampling__MINUS_ONE].insert(branch.remaining[which_time_unit_full_sampling__MINUS_ONE].begin(), branch.remaining[which_time_unit_full_sampling__MINUS_ONE].end());
+	
+	// No! Will be cleared by the memory pool en-bulk after generation of output rows
+	//branch.remaining[which_time_unit].clear();
 
 }
 
-void KadSampler::GenerateOutputRow(newgene_cpp_int random_number, int const K, Branch const & branch)
+void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, Branch const & branch)
 {
 
 	random_number -= branch.weighting.getWeightingRangeStart();
@@ -1048,6 +1050,7 @@ void KadSampler::GenerateOutputRow(newgene_cpp_int random_number, int const K, B
 
 				std::vector<int> remaining_leaves;
 
+				// "remaining_leaves" is initialized to include ALL leaves
 				for (int n = 0; n < branch.numberLeaves(); ++n)
 				{
 					remaining_leaves.push_back(n);
@@ -1130,7 +1133,7 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 
 	newgene_cpp_int total_added = 0;
 
-	branch.remaining.clear();
+	branch.remaining[which_time_unit].clear();
 	std::vector<int> position;
 
 	for (int n = 0; n < K; ++n)
@@ -1611,7 +1614,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 		const Branch & new_branch = *branchesPtr;
 
 		// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
-		GenerateOutputRow(random_number, K, new_branch);
+		GenerateRandomKad(random_number, K, new_branch);
 
 		++random_number_iterator;
 

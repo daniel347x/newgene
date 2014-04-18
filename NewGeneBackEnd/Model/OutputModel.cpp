@@ -608,7 +608,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			RandomSetPool::purge_memory();
 			purge_pool<newgene_cpp_int_tag, sizeof(boost::multiprecision::limb_type)>();
 			purge_pool<newgene_cpp_int_tag, sizeof(newgene_cpp_int)>();
-			allWeightings.PurgeRemaining();
 
 			messager.SetPerformanceLabel("");
 			messager.AppendKadStatusText((boost::format("Completed selection of random K-adic combinations.")).str(), this);
@@ -633,6 +632,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			if (failed || CheckCancelled()) { return; }
 
 		}
+
+		// "remaining_tag" memory pool is used both by random sampler, and by full sampler
+		allWeightings.PurgeRemaining();
 
 		if (false)
 		{

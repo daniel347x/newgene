@@ -1653,12 +1653,26 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
 			, weighting { rhs.weighting }
-		, hits { rhs.hits }
-		, remaining { rhs.remaining }
+			, hits { rhs.hits }
+			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
 		, number_branch_combinations { rhs.number_branch_combinations }
 		, leaves { rhs.leaves }
 		, leaves_cache { rhs.leaves_cache }
 		{
+		}
+
+		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne && rhs)
+			: PrimaryKeysGrouping(rhs)
+			, weighting{ rhs.weighting }
+			, hits{ rhs.hits }
+			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
+		, number_branch_combinations{ rhs.number_branch_combinations }
+		, leaves{ rhs.leaves }
+		, leaves_cache{ rhs.leaves_cache }
+		{
+			// Confirm this is never called
+			boost::format msg("Branch rvalue constructor called!");
+			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 
 		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const & rhs)
@@ -1671,7 +1685,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			PrimaryKeysGrouping::operator=(rhs);
 			weighting = rhs.weighting;
 			hits = rhs.hits;
-			remaining = rhs.remaining;
+			//remaining = rhs.remaining; // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
 			number_branch_combinations = rhs.number_branch_combinations;
 			leaves = rhs.leaves;
 			leaves_cache = rhs.leaves_cache;
@@ -1681,6 +1695,11 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const && rhs)
 		{
+
+			// Confirm this is never called
+			boost::format msg("Branch rvalue assignment operator called!");
+			throw NewGeneException() << newgene_error_description(msg.str());
+
 			if (&rhs == this)
 			{
 				return *this;
@@ -1689,7 +1708,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			PrimaryKeysGrouping::operator=(std::move(rhs));
 			weighting = rhs.weighting;
 			hits = std::move(rhs.hits);
-			remaining = std::move(rhs.remaining);
+			//remaining = std::move(rhs.remaining); // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
 			number_branch_combinations = std::move(rhs.number_branch_combinations);
 			leaves = std::move(rhs.leaves);
 			leaves_cache = std::move(rhs.leaves_cache);
@@ -2475,7 +2494,7 @@ class KadSampler
 		bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number,
 									   VARIABLE_GROUP_MERGE_MODE const merge_mode);
 
-		void GenerateOutputRow(newgene_cpp_int random_number, int const K, Branch const & branch);
+		void GenerateRandomKad(newgene_cpp_int random_number, int const K, Branch const & branch);
 		void GenerateAllOutputRows(int const K, Branch const & branch);
 
 		static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_, TimeSlices::value_type const & map_entry_)
