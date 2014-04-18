@@ -605,15 +605,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 					// Construct the child's DMU keys, including leaf
 
-					// Optimization
-					static ChildDMUInstanceDataVector<hits_tag> dmu_keys;
-					static bool first = true;
-					if (first)
-					{
-						dmu_keys.reserve(1000); // Big enough to cover 99.9% of end-user cases
-					}
-					dmu_keys.clear();
-					first = false;
+					ChildDMUInstanceDataVector<hits_tag> dmu_keys;
 
 					dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
 					dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());

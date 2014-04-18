@@ -5092,9 +5092,6 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 
 		if (failed || CheckCancelled()) { return; }
 
-		messager.AppendKadStatusText((boost::format("Build cache of child variable group leaf lookup data...")).str().c_str(), this);
-		allWeightings.ResetBranchCaches(current_child_vg_index, true);
-
 		// ********************************************************************************************************************************************************* //
 		// From the schema for the selected columns for the child variable group,
 		// create a temporary table to store just the selected columns over just the selected time range.
@@ -5231,6 +5228,16 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		}
 
 		if (failed || CheckCancelled()) { return; }
+
+
+		// **************************************************************************************** //
+		// Clear the child DMU -> primary DMU lookup cache,
+		// which is shared between child variable groups to save memory,
+		// and which must be purged and re-populated prior to merging in the next
+		// child variable group.
+		// **************************************************************************************** //
+		messager.AppendKadStatusText((boost::format("Build cache of child variable group leaf lookup data...")).str().c_str(), this);
+		allWeightings.ResetBranchCaches(current_child_vg_index, true);
 
 		// **************************************************************************************** //
 		// We here loop through child variable group raw data
