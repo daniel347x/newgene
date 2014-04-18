@@ -1643,10 +1643,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne()
 			: PrimaryKeysGrouping { DMUInstanceDataVector() }
+			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
+			, remaining(*remaining_)
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
+			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
+			, remaining(*remaining_)
 		{
 		}
 
@@ -1655,9 +1659,11 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, weighting { rhs.weighting }
 			, hits { rhs.hits }
 			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
-		, number_branch_combinations { rhs.number_branch_combinations }
-		, leaves { rhs.leaves }
-		, leaves_cache { rhs.leaves_cache }
+			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
+			, remaining(*remaining_)
+			, number_branch_combinations{ rhs.number_branch_combinations }
+			, leaves { rhs.leaves }
+			, leaves_cache { rhs.leaves_cache }
 		{
 		}
 
@@ -1666,9 +1672,11 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, weighting{ rhs.weighting }
 			, hits{ rhs.hits }
 			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
-		, number_branch_combinations{ rhs.number_branch_combinations }
-		, leaves{ rhs.leaves }
-		, leaves_cache{ rhs.leaves_cache }
+			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
+			, remaining(*remaining_)
+			, number_branch_combinations{ rhs.number_branch_combinations }
+			, leaves{ rhs.leaves }
+			, leaves_cache{ rhs.leaves_cache }
 		{
 			// Confirm this is never called
 			boost::format msg("Branch rvalue constructor called!");
@@ -1700,19 +1708,23 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			boost::format msg("Branch rvalue assignment operator called!");
 			throw NewGeneException() << newgene_error_description(msg.str());
 
-			if (&rhs == this)
+			if (false)
 			{
-				return *this;
+				if (&rhs == this)
+				{
+					return *this;
+				}
+
+				PrimaryKeysGrouping::operator=(std::move(rhs));
+				weighting = rhs.weighting;
+				hits = std::move(rhs.hits);
+				//remaining = std::move(rhs.remaining); // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
+				number_branch_combinations = std::move(rhs.number_branch_combinations);
+				leaves = std::move(rhs.leaves);
+				leaves_cache = std::move(rhs.leaves_cache);
+				hits_consolidated = std::move(rhs.hits_consolidated);
 			}
 
-			PrimaryKeysGrouping::operator=(std::move(rhs));
-			weighting = rhs.weighting;
-			hits = std::move(rhs.hits);
-			//remaining = std::move(rhs.remaining); // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
-			number_branch_combinations = std::move(rhs.number_branch_combinations);
-			leaves = std::move(rhs.leaves);
-			leaves_cache = std::move(rhs.leaves_cache);
-			hits_consolidated = std::move(rhs.hits_consolidated);
 			return *this;
 		}
 
@@ -1759,7 +1771,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 
 		// Used for optimization purposes only during random sampling construction of output rows
-		mutable fast__int64__to__fast_branch_output_row_vector<remaining_tag> remaining;
+		mutable fast__int64__to__fast_branch_output_row_vector<remaining_tag> * remaining_; // Let the Boost pool manage this
+		mutable fast__int64__to__fast_branch_output_row_vector<remaining_tag> & remaining;
 
 		// **************************************************************************************** //
 		// **************************************************************************************** //
