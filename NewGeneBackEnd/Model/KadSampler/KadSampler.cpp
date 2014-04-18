@@ -1387,18 +1387,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 			helper_lookup__from_child_key_set__to_matching_output_rows->clear();
 		}
 
-		// Optimization: Profiler shows large amount of time spent creating and destroying the following vectors
-		static ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector_branch_components;
-		static ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector;
-		static bool first = true;
-		if (first)
-		{
-			child_hit_vector_branch_components.reserve(1000); // reserve enough to cover 99.9% of user cases
-			child_hit_vector.reserve(1000);
-		}
-		first = false;
-		child_hit_vector_branch_components.clear();
-		child_hit_vector.clear();
+		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector_branch_components;
+		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector;
 
 		std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & time_unit_output_rows)
 		{
