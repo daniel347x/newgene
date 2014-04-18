@@ -650,18 +650,21 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 							boost::format msg("Null child DMU key lookup cache.");
 							throw NewGeneException() << newgene_error_description(msg.str());
 						}
-						auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->find(dmu_keys);
 
-						bool no_matches_for_this_child = false;
+						// Different memory pools may be used, templatized on the memory pool,
+						// so a simple "find" will not compile.
+						//auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->find(dmu_keys);
 
-						if (matchingOutputRows == the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend())
+						// Also, std::binary_search only returns true or false, not an iterator to the match, if any,
+						// so this must be followed up by std::lower_bound if there is a match, which does.
+						bool found = std::binary_search(the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), dmu_keys);
+
+						if (found)
 						{
-							no_matches_for_this_child = true;
-						}
 
-						// Loop through all matching output rows
-						if (!no_matches_for_this_child)
-						{
+							auto const & matchingOutputRows = std::lower_bound(the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), dmu_keys);
+
+							// Loop through all matching output rows
 							for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
 							{
 
@@ -1385,8 +1388,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 		}
 
 		// Optimization: Profiler shows large amount of time spent creating and destroying the following vectors
-		static ChildDMUInstanceDataVector<hits_tag> child_hit_vector_branch_components;
-		static ChildDMUInstanceDataVector<hits_tag> child_hit_vector;
+		static ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector_branch_components;
+		static ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector;
 		static bool first = true;
 		if (first)
 		{
@@ -1928,7 +1931,7 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	sdata += "</CONSOLIDATED_HIT>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
-	SpitChildLookup(sdata, *(branch.helper_lookup__from_child_key_set__to_matching_output_rows);
+	SpitChildLookup(sdata, *(branch.helper_lookup__from_child_key_set__to_matching_output_rows));
 	sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
@@ -2893,35 +2896,40 @@ void KadSampler::getMySize() const
 					getLeafUsage(mySize.sizeTimeSlices, leaf);
 				}
 
-				// helper_lookup__from_child_key_set__to_matching_output_rows is a map
-				mySize.numberMapNodes += helper_lookup__from_child_key_set__to_matching_output_rows.size();
-
-				for (auto const & child_lookup_from_child_data_to_rows : helper_lookup__from_child_key_set__to_matching_output_rows)
+				if (helper_lookup__from_child_key_set__to_matching_output_rows != nullptr)
 				{
-					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.first);
-					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.second);
 
-					auto const & childDMUInstanceDataVector = child_lookup_from_child_data_to_rows.first;
-					auto const & outputRowsToChildDataMap = child_lookup_from_child_data_to_rows.second;
+					// helper_lookup__from_child_key_set__to_matching_output_rows is a map
+					mySize.numberMapNodes += helper_lookup__from_child_key_set__to_matching_output_rows->size();
 
-					getInstanceDataVectorUsage(mySize.sizeTimeSlices, childDMUInstanceDataVector, false);
-
-					mySize.numberMapNodes += outputRowsToChildDataMap.size();
-
-					for (auto const & outputRowToChildDataMap : outputRowsToChildDataMap)
+					for (auto const & child_lookup_from_child_data_to_rows : *helper_lookup__from_child_key_set__to_matching_output_rows)
 					{
-						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.first);
-						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.second);
+						mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.first);
+						mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.second);
 
-						// child_leaf_indices is a vector
-						auto const & child_leaf_indices = outputRowToChildDataMap.second;
+						auto const & childDMUInstanceDataVector = child_lookup_from_child_data_to_rows.first;
+						auto const & outputRowsToChildDataMap = child_lookup_from_child_data_to_rows.second;
 
-						for (auto const & child_leaf_index : child_leaf_indices)
+						getInstanceDataVectorUsage(mySize.sizeTimeSlices, childDMUInstanceDataVector, false);
+
+						mySize.numberMapNodes += outputRowsToChildDataMap.size();
+
+						for (auto const & outputRowToChildDataMap : outputRowsToChildDataMap)
 						{
-							// POD
-							mySize.sizeTimeSlices += sizeof(child_leaf_index);
+							mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.first);
+							mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.second);
+
+							// child_leaf_indices is a vector
+							auto const & child_leaf_indices = outputRowToChildDataMap.second;
+
+							for (auto const & child_leaf_index : child_leaf_indices)
+							{
+								// POD
+								mySize.sizeTimeSlices += sizeof(child_leaf_index);
+							}
 						}
 					}
+
 				}
 
 				// remaining is a map

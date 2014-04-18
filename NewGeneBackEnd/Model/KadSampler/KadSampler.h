@@ -42,7 +42,6 @@ using ChildDMUInstanceDataVector = InstanceDataVector<MEMORY_TAG>;
 template <typename MEMORY_TAG>
 using SecondaryInstanceDataVector = InstanceDataVector<MEMORY_TAG>;
 
-
 template <typename MEMORY_TAG>
 using fast_short_vector = FastVectorMemoryTag<std::int16_t, MEMORY_TAG>;
 
@@ -1443,8 +1442,17 @@ using fast_branch_output_row_vector_huge = FastVectorMemoryTag<BranchOutputRow<M
 template <typename MEMORY_TAG>
 using fast_branch_output_row_set = FastSetMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
 
+// ************************************************************************************************************************************************************************* //
+// ************************************************************************************************************************************************************************* //
+// Warning and notice!
+// "BranchOutputRow<child_dmu_lookup_tag> const *" is used as a key value in the data structure, below,
+// rather than MEMORY_TAG.
+// The reason is that this is a POINTER to such a location in memory.
+// The POINTER itself is part of a map node which WILL be stored in the memory pool indicated by MEMORY_TAG.
+// ************************************************************************************************************************************************************************* //
+// ************************************************************************************************************************************************************************* //
 template <typename MEMORY_TAG>
-using fast_branch_output_row_ptr__to__fast_short_vector = FastMapMemoryTag<BranchOutputRow<MEMORY_TAG> const *, fast_short_vector<MEMORY_TAG>, MEMORY_TAG>;
+using fast_branch_output_row_ptr__to__fast_short_vector = FastMapMemoryTag<BranchOutputRow<hits_tag> const *, fast_short_vector<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
 using fast__int64__to__fast_branch_output_row_set = FastMapMemoryTag<std::int64_t, fast_branch_output_row_set<MEMORY_TAG>, MEMORY_TAG>;
@@ -1454,6 +1462,94 @@ using fast__int64__to__fast_branch_output_row_vector = FastMapMemoryTag<std::int
 
 template <typename MEMORY_TAG>
 using fast__lookup__from_child_dmu_set__to__output_rows = FastMapMemoryTag<ChildDMUInstanceDataVector<MEMORY_TAG>, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>, MEMORY_TAG>;
+
+// Supports using a separate, templatized memory pool "child_dmu_lookup_tag" to store the performance-intensive-on-delete
+// "helper_lookup__from_child_key_set__to_matching_output_rows" data structure,
+// while allowing binary_search on the ChildDMUInstanceDataVector<MEMORY_TAG> key of the map
+// against a ChildDMUInstanceDataVector<MEMORY_TAG> from a different memory pool.
+// The only way to support this is to provide an operator<() available for std::binary_search,
+// which must accept the full std::map::value_type as arguments (i.e., a std::pair<K const, V>),
+// even though all we are using to do the comparison is simply the key.
+template <typename MEMORY_TAG_LHS, typename MEMORY_TAG_RHS>
+bool operator<(std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_LHS>> const & lhs, std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_RHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_RHS>> const & rhs)
+{
+	size_t lhs_size = lhs.first.size();
+	size_t rhs_size = rhs.first.size();
+	size_t min_size = std::min(lhs_size, rhs_size);
+	for (size_t n = 0; n < min_size; ++n)
+	{
+		if (lhs.first[n] < rhs.first[n])
+		{
+			return true;
+		}
+		else
+		if (rhs.first[n] < lhs.first[n])
+		{
+			return false;
+		}
+	}
+	if (lhs_size < rhs_size)
+	{
+		return true;
+	}
+	return false;
+}
+
+// We also need operator<() not just to compare two MAP elements in the existing helper_lookup__from_child_key_set__to_matching_output_rows map,
+// but ALSO to compare a test ChildDMUInstanceDataVector<MEMORY_TAG> on the left or right against such a map element for use in std::binary_search.
+// See comments above.
+template <typename MEMORY_TAG_LHS, typename MEMORY_TAG_RHS>
+bool operator<(std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_LHS>> const & lhs, ChildDMUInstanceDataVector<MEMORY_TAG_RHS> const & rhs)
+{
+	size_t lhs_size = lhs.first.size();
+	size_t rhs_size = rhs.size();
+	size_t min_size = std::min(lhs_size, rhs_size);
+	for (size_t n = 0; n < min_size; ++n)
+	{
+		if (lhs.first[n] < rhs[n])
+		{
+			return true;
+		}
+		else
+		if (rhs[n] < lhs.first[n])
+		{
+			return false;
+		}
+	}
+	if (lhs_size < rhs_size)
+	{
+		return true;
+	}
+	return false;
+}
+
+// We also need operator<() not just to compare two MAP elements in the existing helper_lookup__from_child_key_set__to_matching_output_rows map,
+// but ALSO to compare a test ChildDMUInstanceDataVector<MEMORY_TAG> on the left or right against such a map element for use in std::binary_search.
+// See comments above.
+template <typename MEMORY_TAG_LHS, typename MEMORY_TAG_RHS>
+bool operator<(ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const & lhs, std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_RHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_RHS>> const & rhs)
+{
+	size_t lhs_size = lhs.size();
+	size_t rhs_size = rhs.first.size();
+	size_t min_size = std::min(lhs_size, rhs_size);
+	for (size_t n = 0; n < min_size; ++n)
+	{
+		if (lhs[n] < rhs.first[n])
+		{
+			return true;
+		}
+		else
+		if (rhs.first[n] < lhs[n])
+		{
+			return false;
+		}
+	}
+	if (lhs_size < rhs_size)
+	{
+		return true;
+	}
+	return false;
+}
 
 template<typename MEMORY_TAG>
 void SpitLeaf(std::string & sdata, Leaf const & leaf)
@@ -2603,7 +2699,7 @@ class KadSampler
 		void Clear(); // ditto
 
 		template <typename TAG>
-		void KadSampler::PurgeTags()
+		void PurgeTags()
 		{
 			purge_pool<TAG, sizeof(fast_short_to_int_map__loaded<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<TAG>::key_type, fast__short__to__fast_short_to_int_map__loaded<TAG>::mapped_type> const)>();

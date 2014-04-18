@@ -632,7 +632,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 
 		// "remaining_tag" memory pool is used both by random sampler, and by full sampler
-		allWeightings.PurgeRemaining();
+		allWeightings.PurgeTags<remaining_tag>();
 
 		if (false)
 		{
@@ -697,6 +697,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// hence this belongs in this block.
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Build cache of monads...")).str().c_str(), this);
+			allWeightings.ClearBranchCaches();
 			allWeightings.ResetBranchCaches(-1, false); // just update the primary "leaves" vector - not the child leaf lookup cache
 
 			if (failed || CheckCancelled()) { return; }
