@@ -2738,7 +2738,19 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 	auto dmu_count_comparator = std::function<bool(std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const &, std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const &)>([](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & lhs, std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & rhs) -> bool
 	{
 		// Customized comparison that simply counts the number of DMU's
-		return lhs.second.size() < rhs.second.size();
+		if (lhs.second.size() < rhs.second.size())
+		{
+			return true;
+		}
+		else
+		if (lhs.second.size() > rhs.second.size())
+		{
+			return false;
+		}
+		// Same size.  So, to make sure all elements are considered distinct, do a text comparison of the UOA name.
+		// The order does not matter.
+		return *lhs.first.uuid < *rhs.first.uuid;
+
 	});
 
 	std::set<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>, decltype(dmu_count_comparator)> UOASet(dmu_count_comparator);
