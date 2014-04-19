@@ -372,9 +372,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	messager.UpdateStatusBarText((boost::format("Generating output to file %1%") % boost::filesystem::path(setting_path_to_kad_output).filename()).str().c_str(), this);
 
-	messager.AppendKadStatusText("Beginning generation of K-ad output.", this);
-
-
 
 	// ******************************************************************************************* //
 	// ******************************************************************************************* //
@@ -488,7 +485,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Load raw data for primary variable group %1% over the selected time range...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Load raw data for primary variable group \"%1%\" over the selected time range...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[top_level_vg_index].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 
@@ -530,7 +527,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Do not build the child DMU key lookup cache here.
 		// Do that prior to loading each child variable group.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Build cache of available monads for variable group %1%...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Build cache of available monads for variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[top_level_vg_index].first)).str().c_str(), this);
 		allWeightings.ResetBranchCaches(-1, false);
 		if (failed || CheckCancelled()) { return; }
 
@@ -554,7 +551,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Give text feedback that the sampler is entering random sampling mode
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-			messager.AppendKadStatusText((boost::format("Entering random sampling mode...")).str().c_str(), this);
+			messager.AppendKadStatusText((boost::format("Entering random sampling mode")).str().c_str(), this);
 			messager.AppendKadStatusText((boost::format("Number of random samples selected: %1% ") % boost::lexical_cast<std::string>
 										  (random_sampling_number_rows).c_str()).str().c_str(), this);
 
@@ -657,8 +654,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Populate (merge) *BOTH* child variable groups *AND* non-primary top-level variable groups
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-			messager.AppendKadStatusText((boost::format("Merging secondary variable group data...")).str(), this);
 			KadSamplerFillDataForChildGroups(allWeightings);
 			if (failed || CheckCancelled()) { return; }
 
@@ -5037,7 +5032,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// load the selected columns of raw data into the temporary table created with the same schema.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Merge variable group %1%...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Merge variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
 
@@ -5218,7 +5213,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// child variable group.
 		// **************************************************************************************** //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Build cache to prepare for merge of child variable group %1%...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Build cache to prepare for merge of child variable group \"%1%...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		allWeightings.ResetBranchCaches(current_child_vg_index, true);
 
 		// **************************************************************************************** //
@@ -5237,7 +5232,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// From the schema for the selected columns for the child variable group,
 		// load the selected columns of raw data into the temporary table created with the same schema.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Merge child variable group %1%...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Merge child variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
 

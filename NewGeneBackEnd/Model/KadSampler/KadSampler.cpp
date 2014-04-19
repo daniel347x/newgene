@@ -802,10 +802,6 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 	});
 
-	boost::format msg("%1% time slices and %2% branches");
-	msg % time_slice_count % branch_count;
-	messager.AppendKadStatusText(msg.str(), nullptr);
-
 }
 
 void KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)
