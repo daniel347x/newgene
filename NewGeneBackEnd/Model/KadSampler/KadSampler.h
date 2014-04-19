@@ -2416,6 +2416,16 @@ class MergedTimeSliceRow
 		}
 
 		template <typename MEMORY_TAG_RHS>
+		MergedTimeSliceRow(MergedTimeSliceRow<MEMORY_TAG_RHS> const & rhs)
+		{
+			// Ditto comments in above ctor
+			bool oldRHSWins = MergedTimeSliceRow_RHS_wins;
+			MergedTimeSliceRow_RHS_wins = true;
+			*this = rhs;
+			MergedTimeSliceRow_RHS_wins = oldRHSWins;
+		}
+
+		template <typename MEMORY_TAG_RHS>
 		bool operator<(MergedTimeSliceRow<MEMORY_TAG_RHS> const & rhs) const
 		{
 			size_t lhs_size = output_row.size();
