@@ -596,7 +596,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			RandomSetPool::purge_memory();
 			purge_pool<newgene_cpp_int_random_tag, sizeof(boost::multiprecision::limb_type)>();
 			purge_pool<newgene_cpp_int_random_tag, sizeof(newgene_cpp_int)>();
-
+			allWeightings.ClearRemaining();
 			messager.SetPerformanceLabel("");
 
 		}
@@ -5296,7 +5296,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 		ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(allWeightings);
 	}
 
-	std::set<MergedTimeSliceRow<hits_consolidated_tag>> saved_historic_rows;
+	std::set<MergedTimeSliceRow<saved_historic_rows_tag>> saved_historic_rows;
 	std::set<MergedTimeSliceRow<hits_consolidated_tag>> ongoing_merged_rows;
 
 	// ***************************************************************************************************** //
@@ -5553,7 +5553,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 	allWeightings.consolidated_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
 	MergedTimeSliceRow_RHS_wins = false;
-	saved_historic_rows.clear();
+
+	allWeightings.PurgeTags<saved_historic_rows_tag>();
 
 }
 

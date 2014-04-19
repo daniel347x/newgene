@@ -1444,8 +1444,20 @@ using fast_leaf_vector = FastVectorMemoryTag<Leaf, MEMORY_TAG>;
 template <typename MEMORY_TAG>
 using Leaves = FastSetMemoryTag<Leaf, MEMORY_TAG>;
 
+// ************************************************************************************************************************************************************************* //
+// Special-case!
+// The following is ONLY used by Branch::remaining to optimize random selection of rows when the number of random numbers approaches the total number of branch combinations.
+// And in some scenarios, the use of Boost Pool is horrendous.
+// So, in this case, use the standard allocator.
+// Beware if the following data type is ever used for anything else!!!
+// ************************************************************************************************************************************************************************* //
+//
+// No - actually, we will use the Boost Pool here...
+//
 template <typename MEMORY_TAG>
-using fast_branch_output_row_vector = FastVectorMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
+using fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining = FastVectorMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
+//template <typename MEMORY_TAG>
+//using fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining = std::vector<BranchOutputRow<MEMORY_TAG>>;
 
 template <typename MEMORY_TAG>
 using fast_branch_output_row_vector_huge = FastVectorMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
@@ -1469,7 +1481,7 @@ template <typename MEMORY_TAG>
 using fast__int64__to__fast_branch_output_row_set = FastMapMemoryTag<std::int64_t, fast_branch_output_row_set<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast__int64__to__fast_branch_output_row_vector = FastMapMemoryTag<std::int64_t, fast_branch_output_row_vector<MEMORY_TAG>, MEMORY_TAG>;
+using fast__int64__to__fast_branch_output_row_vector = FastMapMemoryTag<std::int64_t, fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
 using fast__lookup__from_child_dmu_set__to__output_rows = FastMapMemoryTag<ChildDMUInstanceDataVector<MEMORY_TAG>, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>, MEMORY_TAG>;
@@ -2721,6 +2733,8 @@ class KadSampler
 
 		void Clear(); // ditto
 
+		void ClearRemaining();
+
 		template <typename TAG>
 		void PurgeTags()
 		{
@@ -2731,7 +2745,7 @@ class KadSampler
 			purge_pool<TAG, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(fast_int_set<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(fast_branch_output_row_vector_huge<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_branch_output_row_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(BranchOutputRow<TAG>)>();
 			purge_pool<TAG, sizeof(fast_int_vector<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(fast__int64__to__fast_branch_output_row_set<TAG>::value_type const)>();

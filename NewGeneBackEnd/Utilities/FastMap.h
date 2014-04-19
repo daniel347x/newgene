@@ -21,6 +21,7 @@
 struct remaining_tag {};
 struct hits_tag {};
 struct hits_consolidated_tag {};
+struct saved_historic_rows_tag {};
 struct child_dmu_lookup_tag {};
 
 // Vectors
@@ -29,7 +30,6 @@ typedef std::vector<newgene_random_cpp_int, boost::pool_allocator<newgene_random
 
 template <typename K, typename MEMORY_TAG>
 using FastVectorMemoryTag = std::vector<K, boost::pool_allocator<K, boost::default_user_allocator_malloc_free, MEMORY_TAG, boost::details::pool::null_mutex>>;
-
 
 
 

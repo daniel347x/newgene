@@ -1141,7 +1141,6 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 	newgene_cpp_int total_added = 0;
 
 	branch.remaining[which_time_unit].clear();
-	branch.remaining[which_time_unit].reserve(branch.number_branch_combinations.convert_to<std::int64_t>());
 	std::vector<int> position;
 
 	for (int n = 0; n < K; ++n)
@@ -3079,9 +3078,26 @@ void KadSampler::Clear()
 	PurgeTags<boost::fast_pool_allocator_tag>();
 	PurgeTags<hits_tag>();
 	PurgeTags<hits_consolidated_tag>();
+	PurgeTags<saved_historic_rows_tag>();
 	PurgeTags<remaining_tag>();
 	PurgeTags<child_dmu_lookup_tag>();
 
 	messager.SetPerformanceLabel("");
 
+	ClearRemaining();
+}
+
+void KadSampler::ClearRemaining()
+{
+	PurgeTags<remaining_tag>();
+	//std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type  & timeSliceData)
+	//{
+	//	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = timeSliceData.second.branches_and_leaves;
+	//	VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+	//	Branches<hits_tag> & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
+	//	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
+	//	{
+	//		fast__int64__to__fast_branch_output_row_vector<remaining_tag>().swap(branch.remaining);
+	//	});
+	//});
 }
