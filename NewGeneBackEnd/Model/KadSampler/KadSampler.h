@@ -75,6 +75,9 @@ struct newgene_randomset_tag {};
 typedef boost::singleton_pool<newgene_randomset_tag, sizeof(FastSetCppInt)>
 RandomSetPool;
 
+template <typename TOPLEVEL_POOL_TAG>
+using TopLevelObjectsPool = boost::singleton_pool<TOPLEVEL_POOL_TAG, sizeof(TOPLEVEL_POOL_TAG::type)>;
+
 class KadSampler;
 
 class TimeSlice
@@ -990,6 +993,14 @@ class Weighting
 
 };
 
+template<typename TOPLEVEL_POOL_TAG>
+typename TOPLEVEL_POOL_TAG::type * InstantiateUsingTopLevelObjectsPool()
+{
+	void * ptr = TopLevelObjectsPool<TOPLEVEL_POOL_TAG>::malloc();
+	auto typed_ptr = new(ptr)(typename TOPLEVEL_POOL_TAG::type)();
+	return typed_ptr;
+}
+
 enum CHILD_TO_PRIMARY_MAPPING
 {
 	CHILD_TO_PRIMARY_MAPPING__UNKNOWN
@@ -1798,6 +1809,18 @@ void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
 void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
 
+template <typename MEMORY_TAG>
+struct tag__fast__int64__to__fast_branch_output_row_vector
+{
+	typedef fast__int64__to__fast_branch_output_row_vector<MEMORY_TAG> type;
+};
+
+template <typename MEMORY_TAG>
+struct tag__fast__lookup__from_child_dmu_set__to__output_rows
+{
+	typedef fast__lookup__from_child_dmu_set__to__output_rows<MEMORY_TAG> type;
+};
+
 // "Branch"
 class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 {
@@ -1806,17 +1829,17 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne()
 			: PrimaryKeysGrouping{ DMUInstanceDataVector<hits_tag>() }
-			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
+			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>())
 			, remaining(*remaining_)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
-			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
+			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>())
 			, remaining(*remaining_)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
-		{
+			{
 		}
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
@@ -1824,7 +1847,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, weighting { rhs.weighting }
 			, hits { rhs.hits }
 			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
-			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
+			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>())
 			, remaining(*remaining_)
 			, number_branch_combinations{ rhs.number_branch_combinations }
 			, leaves { rhs.leaves }
@@ -1838,7 +1861,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, weighting{ rhs.weighting }
 			, hits{ rhs.hits }
 			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
-			, remaining_(new fast__int64__to__fast_branch_output_row_vector<remaining_tag>())
+			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>())
 			, remaining(*remaining_)
 			, number_branch_combinations{ rhs.number_branch_combinations }
 			, leaves{ rhs.leaves }
@@ -2724,6 +2747,7 @@ class KadSampler
 			purge_pool<TAG, sizeof(fast_short_vector<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(fast_vector_childtoprimarymapping<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(int)>();
+			purge_pool<TAG, sizeof(char)>();
 			purge_pool<TAG, sizeof(fast_leaf_vector<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(Leaf)>();
 			purge_pool<TAG, sizeof(ChildToPrimaryMapping)>();

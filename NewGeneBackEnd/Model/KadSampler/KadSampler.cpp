@@ -1363,7 +1363,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 			// This scenario occurs before a child variable group is being merged.
 			// To save memory, the cache from any previous child variable group merges
 			// is discarded (elsewhere) from the Memory Pool, and recreated here.
-			helper_lookup__from_child_key_set__to_matching_output_rows = new fast__lookup__from_child_dmu_set__to__output_rows<child_dmu_lookup_tag>;
+			helper_lookup__from_child_key_set__to_matching_output_rows = InstantiateUsingTopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<child_dmu_lookup_tag>>();
 		}
 		else
 		{
@@ -3031,6 +3031,22 @@ void KadSampler::Clear()
 	RandomVectorPool::purge_memory();
 	RandomSetPool::purge_memory();
 
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<boost::pool_allocator_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<boost::fast_pool_allocator_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<hits_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<hits_consolidated_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<child_dmu_lookup_tag>>::purge_memory();
+
+	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<boost::pool_allocator_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<boost::fast_pool_allocator_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<hits_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<hits_consolidated_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<remaining_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<child_dmu_lookup_tag>>::purge_memory();
+
+	PurgeTags<boost::pool_allocator_tag>();
+	PurgeTags<boost::fast_pool_allocator_tag>();
 	PurgeTags<hits_tag>();
 	PurgeTags<hits_consolidated_tag>();
 	PurgeTags<remaining_tag>();
