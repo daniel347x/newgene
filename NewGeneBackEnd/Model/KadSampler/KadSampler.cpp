@@ -1378,105 +1378,123 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector_branch_components;
 		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector;
 
+		// Some child leaves map, in part, to branch leaves of the top-level UOA.
+		// If there is no leaf data for these leaves (which can happen in the K>N case),
+		// there cannot possibly be a match for any of the child leaves for this output row.
+		// Set the following flag to capture this case.
+		bool branch_component_bad = false;
+
 		std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & time_unit_output_rows)
 		{
 
 			// ***************************************************************************************** //
-			// We have one time unit entry within this time slice.
+			// We have one time unit entry within this time slice for the given branch.
 			// We proceed to build the cache
 			// ***************************************************************************************** //
 
+			if (branch_component_bad)
+			{
+				// No luck for this output row for any child leaf.
+				// Try the next row.
+				return;
+			}
+
+			// All branch data is the same for each time unit.
+			bool first_time_in_branch = true;
 			for (auto outputRowPtr = time_unit_output_rows.second.cbegin(); outputRowPtr != time_unit_output_rows.second.cend(); ++outputRowPtr)
 			{
 
 				// ******************************************************************************************************** //
-				// We have a new hit we're dealing with
+				// We have a new hit we're dealing with.
+				// This is a single output row corresponding to:
+				// - A single time slice
+				// - A single primary (top-level) branch within that time slice
+				// - A single time unit within that time slice
+				// - A single output row in that time unit in that time slice for that top-level branch
+				//
+				// Now, from our own data (there is no child data yet), let's find all of the child data that
+				// *could* match on this row for the current child variable group under construction.
+				// (There could be more than one match of child data in this row.)
 				// ******************************************************************************************************** //
 
 				BranchOutputRow<hits_tag> const & outputRow = *outputRowPtr;
 
-				child_hit_vector_branch_components.clear();
-
-				// Some child leaves map, in part, to branch leaves of the top-level UOA.
-				// If there is no leaf data for these leaves (which can happen in the K>N case),
-				// there cannot possibly be a match for any of the child leaves for this output row.
-				// Set the following flag to capture this case.
-				bool branch_component_bad = false;
-
-				// First in the "child DMU" vector are the child's BRANCH DMU values
-				std::for_each(allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cbegin(),
-							  allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				if (first_time_in_branch)
 				{
 
-					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the branch)
+					child_hit_vector_branch_components.clear();
 
-					switch (childToPrimaryMapping.mapping)
+					// First in the "child DMU" metadata vector is the metadata for the child's BRANCH DMU's
+					std::for_each(allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cbegin(),
+						allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 					{
 
+						// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the branch)
+
+						switch (childToPrimaryMapping.mapping)
+						{
+
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-							{
+						{
 
-								// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-								child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+							child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
-							}
-							break;
+						}
+						break;
 
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
+						{
+
+							// leaf_number tells us which leaf
+							// index tells us which index in that leaf
+
+							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+
+							if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
+								(outputRow.primary_leaves_cache.size()))
 							{
-
-								// leaf_number tells us which leaf
-								// index tells us which index in that leaf
-
-								// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-
-								if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
-									(outputRow.primary_leaves_cache.size()))
-								{
-									branch_component_bad = true;
-									break;
-								}
-
-								if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
-									== 0)
-								{
-									// This is the K=1 case - the matching leaf of the *top-level* UOA
-									// has no primary keys.  This is a logic error, as we should never match
-									// a "leaf" in the top-level UOA in this case.
-									//
-									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
-									// in particular the following lines:
-									// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
-									// --> // {
-									// --> //     is_current_index_a_top_level_primary_group_branch = true;
-									// --> // }
-
-									boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
-									throw NewGeneException() << newgene_error_description(msg.str());
-								}
-
-								child_hit_vector_branch_components.push_back(DMUInstanceData(
-											leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
-
+								branch_component_bad = true;
+								break;
 							}
-							break;
+
+							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
+								== 0)
+							{
+								// This is the K=1 case - the matching leaf of the *top-level* UOA
+								// has no primary keys.  This is a logic error, as we should never match
+								// a "leaf" in the top-level UOA in this case.
+								//
+								// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
+								// in particular the following lines:
+								// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+								// --> // {
+								// --> //     is_current_index_a_top_level_primary_group_branch = true;
+								// --> // }
+
+								boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+
+							child_hit_vector_branch_components.push_back(DMUInstanceData(
+								leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+
+						}
+						break;
 
 						default:
-							{}
-							break;
+						{}
+						break;
 
-					}
+						}
 
-				});
+					});
 
-				if (branch_component_bad)
-				{
-					// No luck for this output row for any child leaf.
-					// Try the next row.
-					continue;
 				}
 
-				// Next in the "child DMU" vector are the child's LEAF DMU values
+				first_time_in_branch = false;
+
+				// In the "child DMU" metadata vector is the metadata for the child's LEAF DMU's
 				int child_leaf_index_crossing_multiple_child_leaves = 0;
 				int child_leaf_index_within_a_single_child_leaf = 0;
 				int current_child_leaf_number = 0;
@@ -1578,6 +1596,17 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 					}
 
 				});
+
+				// Cover the case where there are no leaf mappings, only branch
+				if (allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].size() == 0)
+				{
+					if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
+					{
+						boost::format msg("Null child DMU key lookup cache in merge.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+					(*helper_lookup__from_child_key_set__to_matching_output_rows)[child_hit_vector][&outputRow].push_back(0); // When there are no leaves, there is always one leaf of index 0
+				}
 
 			}
 
@@ -2766,7 +2795,7 @@ void KadSampler::getMySize() const
 	getChildToBranchColumnMappingsUsage(mySize.sizeMappingsFromChildBranchToPrimary, mappings_from_child_branch_to_primary);
 	mySize.totalSize += mySize.sizeMappingsFromChildBranchToPrimary;
 
-	// mappings_from_child_branch_to_primary
+	// mappings_from_child_leaf_to_primary
 	//mySize.sizeMappingFromChildLeafToPrimary += sizeof(mappings_from_child_leaf_to_primary);
 	getChildToBranchColumnMappingsUsage(mySize.sizeMappingFromChildLeafToPrimary, mappings_from_child_leaf_to_primary);
 	mySize.totalSize += mySize.sizeMappingFromChildLeafToPrimary;

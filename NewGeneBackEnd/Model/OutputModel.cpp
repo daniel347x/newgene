@@ -4317,7 +4317,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 						// pack the child data index into the main leaf for use in the function called below - because this leaf is TEMPORARY
 						// (this data will be unpacked from the temporary leaf and put into the proper place in the function called below)
-						Leaf leaf(dmus_leaf, static_cast<std::int16_t>(sorting_row_of_data.rowid));
+						Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid));
 						Branch branch(dmus_branch);
 
 						// ************************************************************************************************** //
@@ -5183,26 +5183,20 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 
 				if (is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
 				{
-					mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
 					allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH,
 							current_primary_branch_index));
 				}
 				else if (is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
 				{
-					mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
 					allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
 				}
 				else if (!is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
 				{
-					mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index,
-							current_primary_leaf_number));
 					allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF,
 							current_primary_internal_leaf_index, current_primary_leaf_number));
 				}
 				else if (!is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
 				{
-					mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index,
-							current_primary_leaf_number));
 					allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF,
 							current_primary_internal_leaf_index, current_primary_leaf_number));
 				}
@@ -5262,7 +5256,9 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Merge child variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
+		allWeightings.current_child_variable_group_being_merged = current_child_vg_index;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
+		allWeightings.current_child_variable_group_being_merged = -1;
 
 		if (failed || CheckCancelled() || errorMessages.size() > 0)
 		{

@@ -553,8 +553,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool has_non_primary_top_level_groups;
 				bool has_child_groups;
 				// For each child variable group, a vector of mapping from the child key columns to the top-level key columns
-				std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_branch_to_primary;
-				std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_leaf_to_primary;
 				std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 				int overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf;
 				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
