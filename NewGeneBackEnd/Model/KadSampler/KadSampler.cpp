@@ -1597,9 +1597,9 @@ void KadSampler::PrepareRandomSamples(int const K)
 	TimeSlices<hits_tag>::const_iterator timeSlicePtr = timeSlices.cbegin();
 	newgene_cpp_int currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
 
-	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% randomly selected rows"), static_cast<std::int32_t>(random_numbers.size()));
 	std::int32_t random_rows_generated = 0;
 
+	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% randomly selected K-adic combinations..."), static_cast<std::int32_t>(random_numbers.size()));
 	while (true)
 	{
 
@@ -2741,9 +2741,14 @@ void KadSampler::getMySize() const
 
 	// random_numbers
 	//mySize.sizeRandomNumbers += sizeof(random_numbers);
-	for (auto const & random_number : random_numbers)
+
+	// disable for now - random numbers are purged after use
+	if (false)
 	{
-		mySize.sizeRandomNumbers += sizeof(random_number);
+		for (auto const & random_number : random_numbers)
+		{
+			mySize.sizeRandomNumbers += sizeof(random_number);
+		}
 	}
 
 	mySize.totalSize += mySize.sizeRandomNumbers;
@@ -2914,23 +2919,27 @@ void KadSampler::getMySize() const
 
 				}
 
-				// remaining is a map
-				mySize.numberMapNodes += remaining.size();
-
-				for (auto const & remaining_rows : remaining)
+				// ditto ... "remaining" is purged immediately after use, so don't bother
+				if (false)
 				{
-					auto const & remaining_time_unit = remaining_rows.first;
-					auto const & remainingOutputRows = remaining_rows.second;
+					// remaining is a map
+					mySize.numberMapNodes += remaining.size();
 
-					// remainingOutputRows is a vector
-
-					mySize.sizeTimeSlices += sizeof(remaining_time_unit);
-					mySize.sizeTimeSlices += sizeof(remainingOutputRows);
-
-					for (auto const & outputRow : remainingOutputRows)
+					for (auto const & remaining_rows : remaining)
 					{
-						// outputRow is an object that is an instance of the BranchOutputRow class
-						getSizeOutputRow(mySize.sizeTimeSlices, outputRow);
+						auto const & remaining_time_unit = remaining_rows.first;
+						auto const & remainingOutputRows = remaining_rows.second;
+
+						// remainingOutputRows is a vector
+
+						mySize.sizeTimeSlices += sizeof(remaining_time_unit);
+						mySize.sizeTimeSlices += sizeof(remainingOutputRows);
+
+						for (auto const & outputRow : remainingOutputRows)
+						{
+							// outputRow is an object that is an instance of the BranchOutputRow class
+							getSizeOutputRow(mySize.sizeTimeSlices, outputRow);
+						}
 					}
 				}
 
