@@ -1141,6 +1141,7 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 	newgene_cpp_int total_added = 0;
 
 	branch.remaining[which_time_unit].clear();
+	branch.remaining[which_time_unit].reserve(branch.number_branch_combinations.convert_to<std::int64_t>());
 	std::vector<int> position;
 
 	for (int n = 0; n < K; ++n)
