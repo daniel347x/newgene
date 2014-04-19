@@ -2729,8 +2729,24 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 void OutputModel::OutputGenerator::PopulateDMUCounts()
 {
 
+	// Make sure the UOA's with the highest number of DMU's appear first
+	// ... so that the first UOA evaluated in the following function is a legitimate top-level UOA
+
+	// VS bug:
+	// Must wrap lambda in a std::function.
+	// See http://connect.microsoft.com/VisualStudio/feedback/details/727957/vc11-beta-compiler-fails-to-compile-lambda-key-comparer-for-maps-and-sets
+	auto dmu_count_comparator = std::function<bool(std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const &, std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const &)>([](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & lhs, std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & rhs) -> bool
+	{
+		// Customized comparison that simply counts the number of DMU's
+		return lhs.second.size() < rhs.second.size();
+	});
+
+	std::set<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>, decltype(dmu_count_comparator)> UOASet(dmu_count_comparator);
+
+	UOASet.insert(UOAs.cbegin(), UOAs.cend());
+
 	bool first = true;
-	std::for_each(UOAs.cbegin(), UOAs.cend(), [this, &first](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
+	std::for_each(UOASet.crbegin(), UOASet.crend(), [this, &first](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
 
 		if (failed || CheckCancelled())
