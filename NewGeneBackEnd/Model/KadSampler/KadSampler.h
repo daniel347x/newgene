@@ -2453,7 +2453,7 @@ class MergedTimeSliceRow
 		template <typename MEMORY_TAG_RHS>
 		MergedTimeSliceRow<MEMORY_TAG> & operator=(MergedTimeSliceRow<MEMORY_TAG_RHS> const & rhs)
 		{
-			if (this == &rhs)
+			if (reinterpret_cast<void*>(this) == reinterpret_cast<void*>(&rhs))
 			{
 				return *this;
 			}
