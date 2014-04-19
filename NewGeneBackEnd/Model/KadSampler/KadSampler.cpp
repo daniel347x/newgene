@@ -1175,7 +1175,7 @@ void KadSampler::AddPositionToRemaining(std::int64_t const & which_time_unit, st
 
 	if (branch.hits[which_time_unit].count(new_remaining) == 0)
 	{
-		branch.remaining[which_time_unit].push_back(new_remaining);
+		branch.remaining[which_time_unit].emplace_back(new_remaining);
 	}
 
 }
@@ -3066,6 +3066,7 @@ void KadSampler::Clear()
 	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<hits_consolidated_tag>>::purge_memory();
 	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>::purge_memory();
 	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<child_dmu_lookup_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<saved_historic_rows_tag>>::purge_memory();
 
 	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<boost::pool_allocator_tag>>::purge_memory();
 	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<boost::fast_pool_allocator_tag>>::purge_memory();
@@ -3073,6 +3074,15 @@ void KadSampler::Clear()
 	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<hits_consolidated_tag>>::purge_memory();
 	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<remaining_tag>>::purge_memory();
 	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<child_dmu_lookup_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<saved_historic_rows_tag>>::purge_memory();
+
+	TopLevelObjectsPool<tag__saved_historic_rows<boost::pool_allocator_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__saved_historic_rows<boost::fast_pool_allocator_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__saved_historic_rows<hits_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__saved_historic_rows<hits_consolidated_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__saved_historic_rows<remaining_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__saved_historic_rows<child_dmu_lookup_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>::purge_memory();
 
 	PurgeTags<boost::pool_allocator_tag>();
 	PurgeTags<boost::fast_pool_allocator_tag>();

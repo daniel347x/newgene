@@ -2517,6 +2517,12 @@ class MergedTimeSliceRow
 };
 
 template <typename MEMORY_TAG>
+struct tag__saved_historic_rows
+{
+	typedef std::set<MergedTimeSliceRow<MEMORY_TAG>> type;
+};
+
+template <typename MEMORY_TAG>
 class SortMergedRowsByTimeThenKeys
 {
 
