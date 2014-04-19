@@ -5296,7 +5296,12 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 		ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(allWeightings);
 	}
 
-	std::set<MergedTimeSliceRow<saved_historic_rows_tag>> saved_historic_rows;
+	// Create pointer to prevent automatic deletion.
+	// We are here using a Boost Pool to delete the memory in saved_historic_rows,
+	// because standard deletion through the pool takes forever.
+	std::set<MergedTimeSliceRow<saved_historic_rows_tag>> * saved_historic_rows_ = InstantiateUsingTopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>();
+	std::set<MergedTimeSliceRow<saved_historic_rows_tag>> & saved_historic_rows = *saved_historic_rows_;
+
 	std::set<MergedTimeSliceRow<hits_consolidated_tag>> ongoing_merged_rows;
 
 	// ***************************************************************************************************** //
