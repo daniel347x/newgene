@@ -2453,7 +2453,7 @@ class MergedTimeSliceRow
 		template <typename MEMORY_TAG_RHS>
 		MergedTimeSliceRow<MEMORY_TAG> & operator=(MergedTimeSliceRow<MEMORY_TAG_RHS> const & rhs)
 		{
-			if (reinterpret_cast<void*>(this) == reinterpret_cast<void*>(&rhs))
+			if ((void * const)(this) == (void * const)(&rhs))
 			{
 				return *this;
 			}
@@ -2482,10 +2482,20 @@ class MergedTimeSliceRow
 				return *this;
 			}
 
-			if (output_row != rhs.output_row)
+			if (output_row.size() != rhs.output_row.size())
 			{
 				boost::format msg("Logic error merging MergedTimeSliceRow!  The merge should only occur for rows with identical primary keys");
 				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
+			for (size_t n = 0; n < output_row.size(); ++n)
+			{
+				// See http://stackoverflow.com/a/1046317/368896 for why there is no != in Boost Variant
+				if (!(output_row[n] == rhs.output_row[n]))
+				{
+					boost::format msg("Logic error merging MergedTimeSliceRow!  The merge should only occur for rows with identical primary keys");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
 			}
 
 			if (rhs.empty)
@@ -2501,8 +2511,6 @@ class MergedTimeSliceRow
 
 		TimeSlice time_slice;
 		InstanceDataVector<MEMORY_TAG> output_row;
-
-	private:
 
 		bool empty; // When we merge, should we automatically set ourselves to the other?  Used to support default ctors for STL containers
 
