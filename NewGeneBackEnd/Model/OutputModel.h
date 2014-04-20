@@ -160,7 +160,7 @@ class ColumnsInTempView
 				std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
 				WidgetInstanceIdentifier variable_group_associated_with_current_inner_table; // The variable group associated with this column
 				WidgetInstanceIdentifier
-				uoa_associated_with_variable_group_associated_with_current_inner_table; // The unit of analysis associated with the variable group associated with this column
+				uoa_associated_with_current_variable_group; // The unit of analysis associated with the variable group associated with this column
 				COLUMN_TYPE column_type; // Primary key?  Secondary column (i.e., data, not a primary key)?  One of the two special DateTime columns?
 				WidgetInstanceIdentifier primary_key_dmu_category_identifier; // Empty if this column is not a primary key column
 
