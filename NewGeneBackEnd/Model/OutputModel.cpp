@@ -541,7 +541,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Total number of (granulated) K-adic combinations available for this run: %1%") %  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Total number of granulated K-adic combinations available for this run: %1%") %  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Total number of consolidated K-adic combinations available for this run: %1%") % allWeightings.weighting_consolidated.getWeightingString().c_str()).str().c_str(), this);
 
 		if (random_sampling)
 		{
@@ -580,7 +581,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Select the random rows now and stash in memory
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Selecting %1% random K-adic combinations from %2% available combinations...") % boost::lexical_cast<std::string>(samples).c_str() % allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+			messager.AppendKadStatusText((boost::format("Selecting %1% random K-adic combinations from %2% available granulated combinations...") % boost::lexical_cast<std::string>(samples).c_str() % allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
 			allWeightings.PrepareRandomSamples(K);
 
 			// Do not clear random numbers!  Deallocation requires ~5-10 seconds for 1-2M on a solid CPU, but takes ~10-20MB memory.
@@ -606,8 +607,16 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Give text feedback that the sampler is entering full sampling mode
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-			messager.AppendKadStatusText((boost::format("Entering full sampling mode.  All %1% K-adic combinations will be generated.") %
-										  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+			if (consolidate_rows)
+			{
+				messager.AppendKadStatusText((boost::format("Entering full sampling mode, consolidating primary rows.  All %1% K-adic combinations will be generated, and consolidated.") %
+					allWeightings.weighting_consolidated.getWeightingString().c_str()).str().c_str(), this);
+			}
+			else
+			{
+				messager.AppendKadStatusText((boost::format("Entering full sampling mode, with time granulation.  All %1% K-adic combinations will be generated.") %
+					allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+			}
 
 			// ********************************************************************************************************************************************************* //
 			// Generate all K-ad combinations now
