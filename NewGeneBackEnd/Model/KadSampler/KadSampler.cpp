@@ -2008,16 +2008,25 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	SpitHit<fast_branch_output_row_vector_huge<hits_consolidated_tag>, hits_consolidated_tag>(sdata, -1, branch.hits_consolidated);
 	sdata += "</CONSOLIDATED_HIT>";
 
-	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 	if (branch.helper_lookup__from_child_key_set__to_matching_output_rows != nullptr)
 	{
+		sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 		SpitChildLookup(sdata, *(branch.helper_lookup__from_child_key_set__to_matching_output_rows));
+		sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 	}
-	sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
+	else
+	{
+		sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH/>";
+	}
 
-	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
-	SpitChildLookup(sdata, branch.helper_lookup__from_child_key_set__to_matching_output_rows_consolidating);
-	sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
+	// Not yet tied into Boost memory pool infrastructure in same way - NewGene has never slowed down for lack of this yet
+	//
+	//if (branch.helper_lookup__from_child_key_set__to_matching_output_rows_consolidating != nullptr)
+	//{
+		sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
+		SpitChildLookup(sdata, branch.helper_lookup__from_child_key_set__to_matching_output_rows_consolidating);
+		sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
+	//}
 
 	sdata += "<ALL_THE_LEAVES_FOR_THIS_BRANCH>";
 	branch.SpitLeaves(sdata);
