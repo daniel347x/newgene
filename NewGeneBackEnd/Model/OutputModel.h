@@ -140,8 +140,7 @@ class ColumnsInTempView
 				};
 
 				ColumnInTempView()
-					: is_within_inner_table_corresponding_to_top_level_uoa(false)
-					, column_type(COLUMN_TYPE__UNKNOWN)
+					: column_type(COLUMN_TYPE__UNKNOWN)
 					, primary_key_index_within_total_kad_for_dmu_category(-1)
 					, primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category(-1)
 					, primary_key_index_within_primary_uoa_for_dmu_category(-1)
@@ -157,7 +156,6 @@ class ColumnsInTempView
 
 				}
 
-				bool is_within_inner_table_corresponding_to_top_level_uoa;
 				std::string column_name_in_temporary_table; // The name of the column in the temporary view (includes UUID)
 				std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
 				std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)

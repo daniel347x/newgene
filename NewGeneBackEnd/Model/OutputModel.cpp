@@ -1925,9 +1925,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 		new_column.column_name_in_temporary_table += "_";
 		new_column.column_name_in_temporary_table += newUUID(true);
-
-		new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
-
 		if (first)
 		{
 			first = false;
@@ -2048,7 +2045,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 		datetime_start_column.column_name_in_original_data_table = "";
-		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 
 		std::string datetime_end_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
@@ -2083,7 +2079,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 		datetime_end_column.column_name_in_original_data_table = "";
-		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 
 	}
@@ -2234,6 +2229,9 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 			for (auto const & column : columns_in_variable_group_view.columns_in_view)
 			{
 				if (column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				{
+					if (column.)
+				}
 			}
 		}
 
@@ -4454,7 +4452,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 			new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = 1;
 
@@ -4499,7 +4496,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 				new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 				new_column.column_name_in_temporary_table += "_";
 				new_column.column_name_in_temporary_table += newUUID(true);
-				new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 				new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 				new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
 				new_column.primary_key_index_within_total_kad_for_dmu_category =
@@ -4564,7 +4560,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
-					new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
 					new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = K;
@@ -4641,7 +4636,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
-					new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
 					new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = K;
@@ -4718,7 +4712,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
-					new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 					new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = the_child_multiplicity;
 
@@ -4764,7 +4757,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_start_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
-	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_start_column.column_name_in_original_data_table = "";
 
 	std::string datetime_end_col_name_no_uuid = "DATETIMEEND__TIME_SLICE";
@@ -4780,7 +4772,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_end_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
-	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_end_column.column_name_in_original_data_table = "";
 
 	result_columns.current_block_datetime_column_types = std::make_pair(
