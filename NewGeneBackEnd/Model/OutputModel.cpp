@@ -542,7 +542,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Total number of granulated K-adic combinations available for this run: %1%") %  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Total number of consolidated K-adic combinations available for this run: %1%") % allWeightings.weighting_consolidated.getWeightingString().c_str()).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Guaranteed upper limit for total number of *consolidated* K-adic combinations: %1% (a quick estimate, but guaranteed to be an upper limit)") % allWeightings.weighting_consolidated.getWeightingString().c_str()).str().c_str(), this);
 
 		if (random_sampling)
 		{
@@ -609,9 +609,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
 			if (consolidate_rows)
 			{
-				messager.AppendKadStatusText((boost::format("Entering full sampling mode, consolidating primary rows.  All %1% K-adic combinations will be generated, and consolidated.") %
-					allWeightings.weighting_consolidated.getWeightingString().c_str()).str().c_str(), this);
-				messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % allWeightings.weighting_consolidated.getWeightingString().c_str()).str(), this);
+				messager.AppendKadStatusText((boost::format("Entering full sampling mode, consolidating contiguous identical data.")).str().c_str(), this);
+				messager.AppendKadStatusText((boost::format("Generating all K-adic combinations (no more than %1% consolidated combinations, and probably less)...") % allWeightings.weighting_consolidated.getWeightingString().c_str()).str(), this);
 			}
 			else
 			{

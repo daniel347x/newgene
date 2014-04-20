@@ -87,10 +87,10 @@ class TimeSlice
 
 		TimeSlice()
 			: time_start { 0 }
-		, time_end { 0 }
-		, none { true }
-		, minus_infinity { true }
-		, plus_infinity { true }
+			, time_end { 0 }
+			, none { true }
+			, minus_infinity { true }
+			, plus_infinity { true }
 
 		{
 			CheckForAndSetNoTimeRangeGranularity();
@@ -99,10 +99,10 @@ class TimeSlice
 
 		TimeSlice(std::int64_t const time_start_, std::int64_t const time_end_)
 			: time_start { time_start_ }
-		, time_end { time_end_ }
-		, none { false }
-		, minus_infinity { false }
-		, plus_infinity { false }
+			, time_end { time_end_ }
+			, none { false }
+			, minus_infinity { false }
+			, plus_infinity { false }
 		{
 			CheckForAndSetNoTimeRangeGranularity();
 			Validate();
@@ -110,10 +110,10 @@ class TimeSlice
 
 		TimeSlice(TimeSlice const & rhs)
 			: time_start { rhs.time_start }
-		, time_end { rhs.time_end }
-		, none { rhs.none }
-		, minus_infinity { rhs.minus_infinity }
-		, plus_infinity { rhs.plus_infinity }
+			, time_end { rhs.time_end }
+			, none { rhs.none }
+			, minus_infinity { rhs.minus_infinity }
+			, plus_infinity { rhs.plus_infinity }
 		{
 			CheckForAndSetNoTimeRangeGranularity();
 			Validate();
@@ -2555,7 +2555,7 @@ struct tag__ongoing_consolidation_vector
 template <typename MEMORY_TAG>
 struct tag__calculate_consolidated_total_number_rows
 {
-	typedef FastSetMemoryTag<InstanceDataVector<MEMORY_TAG>, MEMORY_TAG> type;
+	typedef FastSetMemoryTag<InstanceDataVector<MEMORY_TAG>, MEMORY_TAG, boost::function<bool(InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs)>> type;
 };
 
 template <typename MEMORY_TAG>

@@ -748,10 +748,118 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	// In terms of memory allocation, because we are just storing a single entry in the set for ALL leaves for a given branch,
 	// i.e., for each MID we store only the total leaves for a given branch (not broken down into K-ad combinations),
 	// we expect this to be light on memory in almost all use cases.
+	//
+	// Also use a custom sort to ensure holes and subsets are handled properly.
+	//
+	// Place the following vector into the 'hits_tag' memory pool, NOT the 'calculate_consolidated_total_number_rows_tag' memory pool.
+	// That way, when this block exits, even though the 'calculate_consolidated_total_number_rows_tag' memory pool has been purged,
+	// the following vector will still be valid.
+	// (It will be purged when the 'hits_tag' memory pool is purged, which only happens once - at the end of the entire K-ad run.)
+	auto calculateTotalConsolidatedRowsSortFunction = boost::function<bool(InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs)>([&](InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs) -> bool
+	{
+		if (lhs.size() < 3 || rhs.size() < 3)
+		{
+			boost::format msg("Logic error: InstanceDataVector used to count the total number of consolidated rows has less than 3 columns (two time columns and at least one primary key column) in sort function.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		std::int64_t lhs_time_start = boost::lexical_cast<std::int64_t>(lhs[0]);
+		std::int64_t lhs_time_end = boost::lexical_cast<std::int64_t>(lhs[1]);
+		std::int64_t rhs_time_start = boost::lexical_cast<std::int64_t>(rhs[0]);
+		std::int64_t rhs_time_end = boost::lexical_cast<std::int64_t>(rhs[1]);
+
+		// check if time slices overlap
+		TimeSlice lhs_time_slice;
+		TimeSlice rhs_time_slice;
+
+		if (lhs_time_start == -1 || lhs_time_end == -1)
+		{
+			lhs_time_slice.Reshape(0, 0); // sets both ends to infinite
+			if (lhs_time_start != -1)
+			{
+				lhs_time_slice.setStart(lhs_time_start);
+			}
+			if (lhs_time_end != -1)
+			{
+				lhs_time_slice.setEnd(lhs_time_end);
+			}
+		}
+		else
+		{
+			lhs_time_slice.Reshape(lhs_time_start, lhs_time_end);
+		}
+
+		if (rhs_time_start == -1 || rhs_time_end == -1)
+		{
+			rhs_time_slice.Reshape(0, 0); // sets both ends to infinite
+			if (rhs_time_start != -1)
+			{
+				rhs_time_slice.setStart(rhs_time_start);
+			}
+			if (rhs_time_end != -1)
+			{
+				rhs_time_slice.setEnd(rhs_time_end);
+			}
+		}
+		else
+		{
+			rhs_time_slice.Reshape(rhs_time_start, rhs_time_end);
+		}
+
+		bool lhs_overlaps_rhs = lhs_time_slice.DoesOverlap(rhs_time_slice);
+
+		if (!lhs_overlaps_rhs)
+		{
+			// The rows do not overlap (or match on edge) in time.
+			// Return whether lhs is less than rhs as a time slice.
+			return lhs_time_slice < rhs_time_slice;
+		}
+
+		// The time slices overlap. 
+		// For this scenario, do a "simple" test - just see if the entire vector matches.
+		// If not, consider them not to match, even though
+		// in reality, some K-ad combinations here WILL be contiguous with previous time slices.
+		// This will result in overcounting, which we indicate to the user in the status text.
+		// The overcounting is necessary: The only way to count accurately, so far as I can see,
+		// is to perform the entire consolidation algorithm (which is both time-consuming and heavily memory-demanding).
+		// But, the current "overcounting" count will still, in most cases, result is a HUGELY smaller number
+		// than the "total K-adic combinations" count,
+		// and so will give a 'reasonable' upper limit count in many cases for the end user.
+
+		if (lhs.size() < rhs.size())
+		{
+			// If the size is smaller, consider lhs to be "less than"
+			return true;
+		}
+		else
+		if (rhs.size() < lhs.size())
+		{
+			// rhs is considered "less than" lhs
+			return false;
+		}
+
+		// ... sizes are the same.  Perform a lexographic comparison, skipping the two time fields.
+
+		for (int n = 2; n < lhs.size(); ++n)
+		{
+			if (lhs[n] < rhs[n])
+			{
+				return true;
+			}
+			else
+			if (rhs[n] < lhs[n])
+			{
+				return false;
+			}
+		}
+
+		// if we made it this far - lhs and rhs are the same.
+		return false;
+
+	});
 	weighting_consolidated.setWeighting(0);
 	weighting_consolidated.setWeightingRangeStart(0);
-	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag> * branches_and_leaves_set_ = InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows<calculate_consolidated_total_number_rows_tag>>();
-	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag> & branches_and_leaves_set = *branches_and_leaves_set_;
+	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag, decltype(calculateTotalConsolidatedRowsSortFunction)> * branches_and_leaves_set_ = InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows<calculate_consolidated_total_number_rows_tag>>();
+	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag, decltype(calculateTotalConsolidatedRowsSortFunction)> & branches_and_leaves_set = *branches_and_leaves_set_;
 	InstanceDataVector<calculate_consolidated_total_number_rows_tag> * temp_branches_and_leaves_ = InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows__instance_vector<calculate_consolidated_total_number_rows_tag>>();
 	InstanceDataVector<calculate_consolidated_total_number_rows_tag> & temp_branches_and_leaves = *temp_branches_and_leaves_;
 
@@ -791,8 +899,33 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 				++branch_count;
 
+				// Add row (if not present) for counting total UN-consolidated rows
 				auto const & leaves = branch.leaves;
 				temp_branches_and_leaves.clear();
+				if (timeSlice.startsAtNegativeInfinity())
+				{
+					// Bit of a hack: -1 ms will never appear
+					// in NewGene's supported time granularity,
+					// which is at its most granular 1 second (i.e., 1000 ms)
+					// ... so -1 represents "negative infinity"
+					temp_branches_and_leaves.emplace_back(-1);
+				}
+				else
+				{
+					temp_branches_and_leaves.emplace_back(timeSlice.getStart());
+				}
+				if (timeSlice.endsAtPlusInfinity())
+				{
+					// Bit of a hack: -1 ms will never appear
+					// in NewGene's supported time granularity,
+					// which is at its most granular 1 second (i.e., 1000 ms)
+					// ... so -1 represents "positive infinity"
+					temp_branches_and_leaves.emplace_back(-1);
+				}
+				else
+				{
+					temp_branches_and_leaves.emplace_back(timeSlice.getEnd());
+				}
 				temp_branches_and_leaves.insert(temp_branches_and_leaves.cbegin(), branch.primary_keys.cbegin(), branch.primary_keys.cend());
 				for (auto const & leaf : leaves)
 				{
@@ -853,6 +986,18 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 		{
 			number_branch_combinations = BinomialCoefficient(total_number_leaves, K);
 		}
+		std::string fields_str;
+		bool first = true;
+		for (auto const & field_val : branch_and_leaves_combo)
+		{
+			if (!first)
+			{
+				fields_str += ",";
+			}
+			first = false;
+			fields_str += boost::lexical_cast<std::string>(field_val);
+		}
+		std::string how_many_combos_str = boost::lexical_cast<std::string>(number_branch_combinations);
 		weighting_consolidated.addWeighting(number_branch_combinations);
 	}
 
