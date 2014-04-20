@@ -142,7 +142,7 @@ class ColumnsInTempView
 				ColumnInTempView()
 					: column_type(COLUMN_TYPE__UNKNOWN)
 					, primary_key_index_within_total_kad_for_dmu_category(-1)
-					, primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category(-1)
+					, primary_key_index__within_uoa_corresponding_to_current_variable_group(-1)
 					, primary_key_index_within_primary_uoa_for_dmu_category(-1)
 					, current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group(-1)
 					, total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group(-1)
@@ -178,7 +178,7 @@ class ColumnsInTempView
 				// than primary variable groups.
 				int primary_key_index_within_total_kad_for_dmu_category;
 
-				int primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category;
+				int primary_key_index__within_uoa_corresponding_to_current_variable_group;
 				int primary_key_index_within_primary_uoa_for_dmu_category;
 				int current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group;
 				int total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;

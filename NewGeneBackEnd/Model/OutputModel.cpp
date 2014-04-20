@@ -2230,7 +2230,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 			{
 				if (column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (column)
+					if (column.primary_key_index__within_uoa_corresponding_to_current_variable_group)
 				}
 			}
 		}
@@ -2672,7 +2672,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category =
 									primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_spin_control;
 
-								column_in_variable_group_data_table.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category =
+								column_in_variable_group_data_table.primary_key_index__within_uoa_corresponding_to_current_variable_group =
 									current_variable_group_primary_key_entry.sequence_number_within_dmu_category_for_this_variable_groups_uoa;
 
 								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category =
@@ -4494,7 +4494,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 				new_column.column_name_in_temporary_table += newUUID(true);
 				new_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = current_multiplicity;
 				new_column.primary_key_index_within_total_kad_for_dmu_category =
-					new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
+					new_column.primary_key_index__within_uoa_corresponding_to_current_variable_group
 					+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 
 			}
