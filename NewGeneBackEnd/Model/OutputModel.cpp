@@ -2679,7 +2679,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 									k_count__corresponding_to_top_level_uoa__and_current_dmu_category;
 
 								std::for_each(dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cbegin(),
-											  dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cend(), [this, &number_inner_tables, &column_in_variable_group_data_table,
+											  dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cend(), [this, &column_in_variable_group_data_table,
 													  &primary_key_entry__output__including_multiplicities](
 												  Table_UOA_Identifier::DMU_Plus_Count const & dmu_count)
 								{
