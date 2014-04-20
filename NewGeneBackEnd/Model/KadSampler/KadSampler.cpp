@@ -726,6 +726,31 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	});
 
 	// Now calculate the weightings
+	weighting.setWeighting(0);
+	weighting.setWeightingRangeStart(0);
+
+	// Also perform a special calculation -
+	// the total number of CONSOLIDATED rows.
+	// For this calculation, we must stash away into a temporary set (managed by the Boost memory pool because the standard allocator slows NewGene way down when exiting the function JUST calling the destructors of the elements of the set)
+	// all of the branch + leaves combinations so that they only appear ONCE, and then calculate the total number of combinations.
+	// This is because currently NewGene stores all data broken down by TIME SLICES, then internal to each time slice
+	// are the set of BRANCHES for that time slice, and then internal to each branch are the set of TIME UNITS for that time slice
+	// (each single time unit corresponds to the time granularity of the unit of analysis of the primary variable group;
+	//  i.e., day for COW, year for Maoz, etc.)
+	// ... with possibly a fraction of a time unit at either end of the time slice AFTER other variable groups have been merged in.
+	// Therefore, multiple contiguous TIME SLICES could have the same branch + leaf combinations,
+	// and these will be MERGED during consolidation.
+	// So, the current approach is simply to store all branch + leaves combinations in a set, which guarantees uniqueness,
+	// and then iterate through the set to calculate the total number of consolidated K-ad combinations.
+	// In terms of memory allocation, because we are just storing a single entry in the set for ALL leaves for a given branch,
+	// i.e., for each MID we store only the total leaves for a given branch (not broken down into K-ad combinations),
+	// we expect this to be light on memory in almost all use cases.
+	weighting_consolidated.setWeighting(0);
+	weighting_consolidated.setWeightingRangeStart(0);
+	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag> * branches_and_leaves_set_ = InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows<calculate_consolidated_total_number_rows_tag>>();
+	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag> & branches_and_leaves_set = *branches_and_leaves_set_;
+	InstanceDataVector<calculate_consolidated_total_number_rows_tag> temp_branches_and_leaves;
+
 	newgene_cpp_int currentWeighting = 0;
 	std::int64_t branch_count = 0;
 	std::int64_t time_slice_count = 0;
@@ -762,7 +787,14 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 				++branch_count;
 
-				//Leaves & leaves = branchAndLeaves.second;
+				auto const & leaves = branch.leaves;
+				temp_branches_and_leaves.clear();
+				temp_branches_and_leaves.insert(temp_branches_and_leaves.cbegin(), branch.primary_keys.cbegin(), branch.primary_keys.cend());
+				for (auto const & leaf : leaves)
+				{
+					temp_branches_and_leaves.insert(temp_branches_and_leaves.cend(), leaf.primary_keys.cbegin(), leaf.primary_keys.cend());
+				}
+				branches_and_leaves_set.insert(temp_branches_and_leaves);
 
 				Weighting & branchWeighting = branch.weighting;
 
@@ -781,6 +813,8 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 				// clear the hits cache
 				branch.hits.clear();
+
+
 
 				// Holes between time slices are handled here, as well as the standard case of no holes between time slices -
 				// There is no gap in the sequence of discretized weight values in branches.
@@ -801,6 +835,18 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 		weighting.addWeighting(variableGroupTimeSliceDataWeighting.getWeighting());
 
 	});
+
+	// Now count the number of *consolidated* K-ad combinations.
+	// See comments above.
+	int number_branch_fields = ;
+	for (auto const & branch_and_leaves_combo : branches_and_leaves_set)
+	{
+
+	}
+
+	InstanceDataVector<calculate_consolidated_total_number_rows_tag>().swap(temp_branches_and_leaves);
+	PurgeTags<calculate_consolidated_total_number_rows_tag>();
+	ClearTopLevelTag<tag__calculate_consolidated_total_number_rows>();
 
 }
 
@@ -2653,90 +2699,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 
 				}
 
-
-
-
-
-				if (false)
-				{
-					std::int64_t hit_time_index = hit.first;
-					std::int64_t hit_time_index_one_based = hit_time_index + 1;
-					bool matches_left = false;
-					bool matches_right = false;
-					bool matches_middle = false;
-
-					// Determine if matches left
-					if (hit_time_index_one_based <= leftRounded)
-					{
-						// matches left
-						matches_left = true;
-					}
-
-					// Determine if matches right
-					if (hit_time_index_one_based > originalWidth - rightRounded)
-					{
-						matches_right = true;
-					}
-
-					// Determine if matches middle
-					if (left_was_zero)
-					{
-						if (hit_time_index_one_based <= middleRounded)
-						{
-							matches_middle = true;
-						}
-					}
-					else if (right_was_zero)
-					{
-						if (hit_time_index_one_based > originalWidth - middleRounded)
-						{
-							matches_middle = true;
-						}
-					}
-					else if (hit_time_index_one_based > leftRounded && hit_time_index_one_based <= (originalWidth - rightRounded))
-					{
-						matches_middle = true;
-					}
-
-					if (useRight)
-					{
-						if (matches_right)
-						{
-							new_hits[hit_time_index - (originalWidth - rightRounded)].clear();
-							new_hits[hit_time_index - (originalWidth - rightRounded)].insert(hit.second.cbegin(), hit.second.cend());
-						}
-					}
-					else if (useLeft)
-					{
-						if (matches_left)
-						{
-							new_hits[hit_time_index].clear();
-							new_hits[hit_time_index].insert(hit.second.cbegin(), hit.second.cend());
-						}
-					}
-					else if (useMiddle)
-					{
-						if (matches_middle)
-						{
-							if (left_was_zero)
-							{
-								new_hits[hit_time_index].clear();
-								new_hits[hit_time_index].insert(hit.second.cbegin(), hit.second.cend());
-							}
-							else if (right_was_zero)
-							{
-								new_hits[hit_time_index - (originalWidth - middleRounded)].clear();
-								new_hits[hit_time_index - (originalWidth - middleRounded)].insert(hit.second.cbegin(), hit.second.cend());
-							}
-							else
-							{
-								new_hits[hit_time_index - leftRounded].clear();
-								new_hits[hit_time_index - leftRounded].insert(hit.second.cbegin(), hit.second.cend());
-							}
-						}
-					}
-				}
-
 			});
 
 
@@ -3079,6 +3041,7 @@ void KadSampler::Clear()
 	ClearTopLevelTag<tag__ongoing_consolidation_vector>();
 	ClearTopLevelTag<tag__ongoing_consolidation>();
 	ClearTopLevelTag<tag__ongoing_merged_rows>();
+	ClearTopLevelTag<tag__calculate_consolidated_total_number_rows>();
 
 	PurgeTags<boost::pool_allocator_tag>();
 	PurgeTags<boost::fast_pool_allocator_tag>();
@@ -3089,6 +3052,7 @@ void KadSampler::Clear()
 	PurgeTags<ongoing_merged_rows_tag>();
 	PurgeTags<remaining_tag>();
 	PurgeTags<child_dmu_lookup_tag>();
+	PurgeTags<calculate_consolidated_total_number_rows_tag>();
 
 	messager.SetPerformanceLabel("");
 

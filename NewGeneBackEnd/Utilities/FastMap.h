@@ -26,6 +26,7 @@ struct saved_historic_rows_tag {};
 struct ongoing_merged_rows_tag {};
 struct ongoing_consolidation_tag {};
 struct child_dmu_lookup_tag {};
+struct calculate_consolidated_total_number_rows_tag {};
 
 // Vectors
 

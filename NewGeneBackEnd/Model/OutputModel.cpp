@@ -181,7 +181,9 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, K(0)
 	, overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf(0)
 	, has_non_primary_top_level_groups { 0 }
-, has_child_groups { 0 }
+	, has_child_groups{ 0 }
+	, number_branch_columns{ 0 }
+	, number_primary_variable_group_single_leaf_columns{ 0 }
 {}
 
 OutputModel::OutputGenerator::~OutputGenerator()
@@ -527,14 +529,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Do not build the child DMU key lookup cache here.
 		// Do that prior to loading each child variable group.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Build cache of available monads for variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Build cache of available data for variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[top_level_vg_index].first)).str().c_str(), this);
 		allWeightings.ResetBranchCaches(-1, false);
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
 		// Calculate the number of possible K-ad combinations for each branch, given the leaves available.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
 		messager.AppendKadStatusText((boost::format("Calculate the total number of K-adic combinations for the given DMU selection/s...")).str().c_str(), this);
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 		if (failed || CheckCancelled()) { return; }
@@ -766,7 +767,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		input_model.VacuumDatabase();
 		messager.SetPerformanceLabel("");
 		messager.UpdateProgressBarValue(1000);
-		messager.UpdateStatusBarText((boost::format("Output successfully generated (%1%)") % boost::filesystem::path(setting_path_to_kad_output).filename().c_str()).str().c_str(), this);
+		messager.UpdateStatusBarText((boost::format("Output successfully generated (%1%)") % boost::filesystem::path(setting_path_to_kad_output).filename().string().c_str()).str().c_str(), this);
 		messager.AppendKadStatusText("Done.", this);
 
 	}
@@ -2049,7 +2050,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.column_name_in_original_data_table = "";
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
-		datetime_start_column.number_inner_tables_in_set = variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 
 		std::string datetime_end_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -2085,7 +2085,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.column_name_in_original_data_table = "";
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
-		datetime_end_column.number_inner_tables_in_set = variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 
 	}
 	else
@@ -2172,7 +2171,7 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 		});
 		boost::format msgTitle("Select top-level variable group");
 		boost::format
-		msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.  Please select one to use as the primary variable group for this run:");
+		msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.\nPlease select one to use as the primary variable group for this run:");
 
 		// 0-based
 		top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
@@ -2572,9 +2571,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 		// Populate primary key column data, for those columns that are primary keys.
 		// The logic is a bit tricky, but works... See comments above, and below, for context.
 
-		int number_inner_tables = 0;
 		std::for_each(sequence.primary_key_sequence_info.cbegin(),
-					  sequence.primary_key_sequence_info.cend(), [this, &number_inner_tables, &dmu_counts_corresponding_to_top_level_uoa,
+					  sequence.primary_key_sequence_info.cend(), [this, &dmu_counts_corresponding_to_top_level_uoa,
 							  &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table, &variables_in_group_primary_keys_metadata](
 						  PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry__output__including_multiplicities)
 		{
@@ -2614,7 +2612,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 			// You can see that each column therefore corresponds to possibly *multiple* variable groups,
 			// and correspondingly for each such VG one and the same column can be a member of a different inner table.
 			std::for_each(primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child.cbegin(),
-						  primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child.cend(), [this, &number_inner_tables,
+						  primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child.cend(), [this,
 								  &k_count__corresponding_to_top_level_uoa__and_current_dmu_category, &dmu_counts_corresponding_to_top_level_uoa,
 								  &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table,
 								  &primary_key_entry__output__including_multiplicities, &variables_in_group_primary_keys_metadata](
@@ -2661,16 +2659,22 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 								// the sequence number it's supposed to be within that total K-spin-count.
 
 								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry__output__including_multiplicities.dmu_category;
+
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category =
 									primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_spin_control;
+
 								column_in_variable_group_data_table.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category =
 									current_variable_group_primary_key_entry.sequence_number_within_dmu_category_for_this_variable_groups_uoa;
+
 								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category =
 									primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_primary_uoa;
+
 								column_in_variable_group_data_table.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg
 									= current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group;
+
 								column_in_variable_group_data_table.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group =
 									current_variable_group_primary_key_entry.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
+
 								column_in_variable_group_data_table.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category =
 									k_count__corresponding_to_top_level_uoa__and_current_dmu_category;
 
@@ -2679,22 +2683,17 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 													  &primary_key_entry__output__including_multiplicities](
 												  Table_UOA_Identifier::DMU_Plus_Count const & dmu_count)
 								{
+
 									if (dmu_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key_entry__output__including_multiplicities.dmu_category))
 									{
+
 										column_in_variable_group_data_table.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category = dmu_count.second;
+
 										WidgetInstanceIdentifier_Int_Pair Kad_Data = model->t_kad_count.getIdentifier(*primary_key_entry__output__including_multiplicities.dmu_category.uuid);
 										column_in_variable_group_data_table.total_k_spin_count_across_multiplicities_for_dmu_category = Kad_Data.second;
 
-										int test_total_number_inner_tables = Kad_Data.second / dmu_count.second;
-
-										// We hit this block for DIFFERENT DMU's.
-										// Only one of them has multiplicity > 1.
-										// That one wins.
-										if (test_total_number_inner_tables > number_inner_tables)
-										{
-											number_inner_tables = test_total_number_inner_tables;
-										}
 									}
+
 								});
 
 								// Now determine if this primary key field should be treated as numeric for sorting and ordering
@@ -2705,10 +2704,12 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 								{
 									if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, *primary_key_in_variable_group_metadata.longhand))
 									{
+
 										if (primary_key_in_variable_group_metadata.flags == "n")
 										{
 											column_in_variable_group_data_table.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key = true;
 										}
+
 									}
 								});
 							}
@@ -2718,8 +2719,6 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 				}
 			});
 		});
-
-		column_in_variable_group_data_table.number_inner_tables_in_set = number_inner_tables;
 
 	});
 
@@ -4050,7 +4049,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 	SavedRowData sorting_row_of_data;
 
-	ProgressBarMeter meter(messager, std::string("%1% / %2% rows of raw monadic data loaded"), rowsToRead);
+	ProgressBarMeter meter(messager, std::string("%1% / %2% rows of raw data loaded"), rowsToRead);
 	while (StepData())
 	{
 
@@ -4751,7 +4750,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
 	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = K;
-	datetime_start_column.number_inner_tables_in_set = K;
 	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_start_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
@@ -4768,7 +4766,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
 	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = K;
-	datetime_end_column.number_inner_tables_in_set = K;
 	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_end_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
@@ -5494,13 +5491,21 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 						// ************************************************************************************************************************************************************** //
 						// Find out which rows match just in terms of DATA (not time) between the incoming, and the previous, sets of rows
 						// ************************************************************************************************************************************************************** //
-						auto finalpos = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
-						auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
-						auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
+						{
 
-						intersection.resize(finalpos - intersection.begin());
-						only_previous.resize(finalpos_previous - only_previous.begin());
-						only_new.resize(finalpos_incoming - only_new.begin());
+							// Place into a block so that the iterators go off the stack
+							// before the memory pool is purged at the end of the enclosing block.
+							// Otherwise, the iterators are corrupt when they go out of scope.
+
+							auto finalpos = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
+							auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
+							auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
+
+							intersection.resize(finalpos - intersection.begin());
+							only_previous.resize(finalpos_previous - only_previous.begin());
+							only_new.resize(finalpos_incoming - only_new.begin());
+
+						}
 
 						// ************************************************************************************************************************************************************** //
 						// Any rows that match in terms of DATA are also known to be adjacent in TIME,

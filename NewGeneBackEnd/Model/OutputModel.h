@@ -163,7 +163,6 @@ class ColumnsInTempView
 					, primary_key_index_within_primary_uoa_for_dmu_category(-1)
 					, current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg(-1)
 					, current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set(-1)
-					, number_inner_tables_in_set(-1)
 					, total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group(-1)
 					, total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category(-1)
 					, total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category(-1)
@@ -202,7 +201,6 @@ class ColumnsInTempView
 				int primary_key_index_within_primary_uoa_for_dmu_category;
 				int current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg;
 				int current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
-				int number_inner_tables_in_set;
 				int total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
 				int total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 				int total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category;
@@ -587,6 +585,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				std::map<int, int> top_level_number_secondary_columns;
 				std::map<int, int> child_number_secondary_columns;
+
 				// Functions involved in different phases of generation
 				void PopulateSchemaForRawDataTables(KadSampler & allWeightings);
 				void PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
@@ -722,6 +721,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::string highest_multiplicity_primary_uoa_dmu_string_code;
 				bool any_primary_dmu_has_multiplicity_greater_than_1;
 				int which_primary_index_has_multiplicity_greater_than_1; // corresponds to the single DMU in the primary UOA whose outer multiplicity is greater than 1; if none have outer multiplicity greater than 1, this value will be set to -1.  Corresponds to the above "outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA" variable.
+				int number_branch_columns;
+				int number_primary_variable_group_single_leaf_columns;
 
 				// child_uoas__which_multiplicity_is_greater_than_1:
 				// Map of:

@@ -2553,6 +2553,12 @@ struct tag__ongoing_consolidation_vector
 };
 
 template <typename MEMORY_TAG>
+struct tag__calculate_consolidated_total_number_rows
+{
+	typedef FastSetMemoryTag<InstanceDataVector<MEMORY_TAG>, MEMORY_TAG> type;
+};
+
+template <typename MEMORY_TAG>
 class SortMergedRowsByTimeThenKeys
 {
 
@@ -2595,6 +2601,7 @@ class KadSampler
 		// The main time slice data
 		TimeSlices<hits_tag> timeSlices;
 		Weighting weighting; // sum over all time slices
+		Weighting weighting_consolidated; // weighting of consolidated output (not separated into time units that correspond to the time granularity of the primary variable group; i.e., if a COW MID lasts over 6 years for a given set of 3 countries for dyadic output, the contribution to weighting_consolidateed will be just 3 (the number of K-ads), rather than 3 * the number of days or years of the MID.  This is useful for full sampling mode where the data is consolidated.
 
 	public:
 
@@ -2847,7 +2854,7 @@ class KadSampler
 			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<child_dmu_lookup_tag>>::purge_memory();
 			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<saved_historic_rows_tag>>::purge_memory();
 			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<ongoing_merged_rows_tag>>::purge_memory();
-			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<saved_historic_rows_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<calculate_consolidated_total_number_rows_tag>>::purge_memory();
 		}
 
 	protected:
