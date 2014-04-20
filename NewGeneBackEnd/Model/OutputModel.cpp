@@ -5326,8 +5326,17 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					{
 						if (random_sampling)
 						{
-							auto & incoming_rows = branch.hits_consolidated;
-							total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+							if (allWeightings.time_granularity == TIME_GRANULARITY__NONE)
+							{
+								// Special case for random sampling: all data is in hits[-1], rather than hits_consolidated
+								auto const & incoming_rows = branch.hits[-1];
+								total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+							}
+							else
+							{
+								auto & incoming_rows = branch.hits_consolidated;
+								total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+							}
 						}
 						else
 						{
@@ -5345,8 +5354,17 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					{
 						if (random_sampling)
 						{
-							auto const & incoming_rows = branch.hits_consolidated;
-							total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+							if (allWeightings.time_granularity == TIME_GRANULARITY__NONE)
+							{
+								// Special case for random sampling: all data is in hits[-1], rather than hits_consolidated
+								auto const & incoming_rows = branch.hits[-1];
+								total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+							}
+							else
+							{
+								auto const & incoming_rows = branch.hits_consolidated;
+								total_row_count += static_cast<std::int64_t>(incoming_rows.size());
+							}
 						}
 						else
 						{
@@ -5411,16 +5429,36 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 						if (random_sampling)
 						{
-							// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
-							auto & incoming_rows = branch.hits_consolidated;
-							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
+
+							if (allWeightings.time_granularity == TIME_GRANULARITY__NONE)
 							{
-								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation<hits_consolidated_tag>(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
-								meter.UpdateProgressBarValue(orig_row_count);
-							});
+
+								// Special case for random sampling: all data is in hits[-1], rather than hits_consolidated
+								auto const & incoming_rows = branch.hits[-1];
+								std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
+								{
+									EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation<hits_consolidated_tag>(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
+									meter.UpdateProgressBarValue(orig_row_count);
+								});
+
+							}
+							else
+							{
+
+								// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
+								auto & incoming_rows = branch.hits_consolidated;
+								std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
+								{
+									EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation<hits_consolidated_tag>(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
+									meter.UpdateProgressBarValue(orig_row_count);
+								});
+
+							}
+
 						}
 						else
 						{
+
 							// In this case, full sampling, the rows were already added to branch.hits[-1] in consolidated fashion within each branch
 							auto const & incoming_rows = branch.hits[-1];
 							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
@@ -5428,6 +5466,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation<hits_consolidated_tag>(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
 								meter.UpdateProgressBarValue(orig_row_count);
 							});
+
 						}
 
 						MergedTimeSliceRow_RHS_wins = false;
@@ -5511,17 +5550,38 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 						if (random_sampling)
 						{
-							// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
-							auto const & incoming_rows = branch.hits_consolidated;
-							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_consolidated_tag> const & incoming_row)
+
+							if (allWeightings.time_granularity == TIME_GRANULARITY__NONE)
 							{
-								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
-								meter.UpdateProgressBarValue(orig_row_count);
-							});
-							MergedTimeSliceRow_RHS_wins = false;
+
+								// Special case for random sampling: all data is in hits[-1], rather than hits_consolidated
+								auto const & incoming_rows = branch.hits[-1];
+								MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
+								std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
+								{
+									EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
+									meter.UpdateProgressBarValue(orig_row_count);
+								});
+
+							}
+							else
+							{
+
+								// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
+								auto const & incoming_rows = branch.hits_consolidated;
+								std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_consolidated_tag> const & incoming_row)
+								{
+									EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
+									meter.UpdateProgressBarValue(orig_row_count);
+								});
+								MergedTimeSliceRow_RHS_wins = false;
+
+							}
+
 						}
 						else
 						{
+
 							// In this case, full sampling, the rows were already added to branch.hits[-1] in consolidated fashion within each branch
 							auto const & incoming_rows = branch.hits[-1];
 							MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
@@ -5530,6 +5590,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
 								meter.UpdateProgressBarValue(orig_row_count);
 							});
+
 						}
 
 						MergedTimeSliceRow_RHS_wins = false;
