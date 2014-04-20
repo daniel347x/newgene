@@ -158,7 +158,7 @@ class ColumnsInTempView
 				std::string column_name_in_temporary_table; // The name of the column in the temporary view (includes UUID)
 				std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
 				std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
-				WidgetInstanceIdentifier variable_group_associated_with_current_inner_table; // The variable group associated with this column
+				WidgetInstanceIdentifier current_variable_group; // The variable group associated with this column
 				WidgetInstanceIdentifier
 				uoa_associated_with_current_variable_group; // The unit of analysis associated with the variable group associated with this column
 				COLUMN_TYPE column_type; // Primary key?  Secondary column (i.e., data, not a primary key)?  One of the two special DateTime columns?

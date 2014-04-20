@@ -1928,7 +1928,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (first)
 		{
 			first = false;
-			variable_group_saved = new_column.variable_group_associated_with_current_inner_table;
+			variable_group_saved = new_column.current_variable_group;
 			uoa_saved = new_column.uoa_associated_with_current_variable_group;
 		}
 	});
@@ -2042,7 +2042,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 		datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
 		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
-		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
+		datetime_start_column.current_variable_group = variable_group_saved;
 		datetime_start_column.uoa_associated_with_current_variable_group = uoa_saved;
 		datetime_start_column.column_name_in_original_data_table = "";
 		datetime_start_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = 1;
@@ -2076,7 +2076,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 		datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
 		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
-		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
+		datetime_end_column.current_variable_group = variable_group_saved;
 		datetime_end_column.uoa_associated_with_current_variable_group = uoa_saved;
 		datetime_end_column.column_name_in_original_data_table = "";
 		datetime_end_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = 1;
@@ -2230,7 +2230,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 			{
 				if (column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (column.uoa_associated_with_current_variable_group)
+					if (column.current_variable_group)
 				}
 			}
 		}
@@ -2527,7 +2527,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 		column_in_variable_group_data_table.column_name_in_original_data_table = column_name_no_uuid;
 
-		column_in_variable_group_data_table.variable_group_associated_with_current_inner_table = the_variable_group.first;
+		column_in_variable_group_data_table.current_variable_group = the_variable_group.first;
 
 		column_in_variable_group_data_table.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = 1;
 
@@ -4748,7 +4748,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
 	datetime_start_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = K;
 	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
-	datetime_start_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
+	datetime_start_column.current_variable_group = WidgetInstanceIdentifier();
 	datetime_start_column.uoa_associated_with_current_variable_group = WidgetInstanceIdentifier();
 	datetime_start_column.column_name_in_original_data_table = "";
 
@@ -4763,7 +4763,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
 	datetime_end_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = K;
 	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
-	datetime_end_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
+	datetime_end_column.current_variable_group = WidgetInstanceIdentifier();
 	datetime_end_column.uoa_associated_with_current_variable_group = WidgetInstanceIdentifier();
 	datetime_end_column.column_name_in_original_data_table = "";
 
