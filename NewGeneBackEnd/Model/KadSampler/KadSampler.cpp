@@ -3072,43 +3072,19 @@ void KadSampler::Clear()
 	RandomVectorPool::purge_memory();
 	RandomSetPool::purge_memory();
 
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<boost::pool_allocator_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<boost::fast_pool_allocator_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<hits_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<hits_consolidated_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<child_dmu_lookup_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<saved_historic_rows_tag>>::purge_memory();
-
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<boost::pool_allocator_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<boost::fast_pool_allocator_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<hits_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<hits_consolidated_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<child_dmu_lookup_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<saved_historic_rows_tag>>::purge_memory();
-
-	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<boost::pool_allocator_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<boost::fast_pool_allocator_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<hits_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<hits_consolidated_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<remaining_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<child_dmu_lookup_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<saved_historic_rows_tag>>::purge_memory();
-
-	TopLevelObjectsPool<tag__saved_historic_rows<boost::pool_allocator_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__saved_historic_rows<boost::fast_pool_allocator_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__saved_historic_rows<hits_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__saved_historic_rows<hits_consolidated_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__saved_historic_rows<remaining_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__saved_historic_rows<child_dmu_lookup_tag>>::purge_memory();
-	TopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>::purge_memory();
+	ClearTopLevelTag<tag__fast__int64__to__fast_branch_output_row_vector>();
+	ClearTopLevelTag<tag__fast__int64__to__fast_branch_output_row_list>();
+	ClearTopLevelTag<tag__fast__lookup__from_child_dmu_set__to__output_rows>();
+	ClearTopLevelTag<tag__saved_historic_rows>();
+	ClearTopLevelTag<tag__ongoing_consolidation_vector>();
+	ClearTopLevelTag<tag__ongoing_consolidation>();
 
 	PurgeTags<boost::pool_allocator_tag>();
 	PurgeTags<boost::fast_pool_allocator_tag>();
 	PurgeTags<hits_tag>();
 	PurgeTags<hits_consolidated_tag>();
 	PurgeTags<saved_historic_rows_tag>();
+	PurgeTags<ongoing_consolidation_tag>();
 	PurgeTags<remaining_tag>();
 	PurgeTags<child_dmu_lookup_tag>();
 

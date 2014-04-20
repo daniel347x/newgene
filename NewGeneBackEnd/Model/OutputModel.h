@@ -574,7 +574,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				template <typename MEMORY_TAG_OUTPUT_ROW, typename MEMORY_TAG_SET_OF_ROWS>
 				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch,
-					BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, std::set<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count);
+					BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>, MEMORY_TAG_SET_OF_ROWS> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count);
 
 				void KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings);
 
@@ -1163,7 +1163,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 
 template <typename MEMORY_TAG_OUTPUT_ROW, typename MEMORY_TAG_SET_OF_ROWS>
 void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch,
-	BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, std::set<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count)
+	BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>, MEMORY_TAG_SET_OF_ROWS> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count)
 {
 	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
 	allWeightings.create_output_row_visitor_global_data_cache.clear();

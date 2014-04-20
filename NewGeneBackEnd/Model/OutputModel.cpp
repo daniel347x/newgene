@@ -5299,10 +5299,11 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	// Create pointer to prevent automatic deletion.
 	// We are here using a Boost Pool to delete the memory in saved_historic_rows,
 	// because standard deletion through the pool takes forever.
-	std::set<MergedTimeSliceRow<saved_historic_rows_tag>> * saved_historic_rows_ = InstantiateUsingTopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>();
-	std::set<MergedTimeSliceRow<saved_historic_rows_tag>> & saved_historic_rows = *saved_historic_rows_;
+	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> * saved_historic_rows_ = InstantiateUsingTopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>();
+	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> & saved_historic_rows = *saved_historic_rows_;
 
-	std::set<MergedTimeSliceRow<hits_consolidated_tag>> ongoing_merged_rows;
+	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> * ongoing_merged_rows_ = InstantiateUsingTopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>();
+	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> & ongoing_merged_rows = *ongoing_merged_rows_;
 
 	// ***************************************************************************************************** //
 	// First, calculate the number of rows that must be processed, for use by the progress bar
@@ -5412,7 +5413,12 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					{
 
 						// Here is a single branch and its leaves, corresponding to the primary variable group and the current time slice.
-						std::set<MergedTimeSliceRow<hits_consolidated_tag>> incoming;
+						// // std::set<MergedTimeSliceRow<saved_historic_rows_tag>> incoming;
+						// Create pointer to prevent automatic deletion.
+						// We are here using a Boost Pool to delete the memory in saved_historic_rows,
+						// because standard deletion through the pool takes forever.
+						FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * incoming_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation<ongoing_consolidation_tag>>();
+						FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & incoming = *incoming_;
 
 						// ***************************************************************************************************** //
 						// All data within a single branch is guaranteed to have been consolidated into index -1.
@@ -5471,9 +5477,18 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 						MergedTimeSliceRow_RHS_wins = false;
 
-						std::vector<MergedTimeSliceRow<hits_consolidated_tag>> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
-						std::vector<MergedTimeSliceRow<hits_consolidated_tag>> only_previous(ongoing_merged_rows.size());
-						std::vector<MergedTimeSliceRow<hits_consolidated_tag>> only_new(incoming.size());
+						// Ditto memory pool comments to "incoming", above
+						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * intersection_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
+						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_previous_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
+						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_new_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
+
+						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & intersection = *intersection_;
+						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & only_previous = *only_previous_;
+						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & only_new = *only_new_;
+
+						intersection.resize(std::max(ongoing_merged_rows.size(), incoming.size()));
+						only_previous.resize(ongoing_merged_rows.size());
+						only_new.resize(incoming.size());
 
 						// ************************************************************************************************************************************************************** //
 						// Find out which rows match just in terms of DATA (not time) between the incoming, and the previous, sets of rows
@@ -5499,7 +5514,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 						// contain the time slices from the "ongoing_merged_rows" container,
 						// guaranteeing that these time slices, which may start at different places for different rows
 						// although they all *end* at the start of the new time slice, are saved.
-						std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow<hits_consolidated_tag> & merged_row)
+						std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow<ongoing_consolidation_tag> & merged_row)
 						{
 							merged_row.time_slice.setEnd(the_slice.getEnd());
 						});
@@ -5524,6 +5539,10 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 						saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
 
 						MergedTimeSliceRow_RHS_wins = false;
+
+						allWeightings.PurgeTags<ongoing_consolidation_tag>();
+						allWeightings.ClearTopLevelTag<tag__ongoing_consolidation>();
+						allWeightings.ClearTopLevelTag<tag__ongoing_consolidation_vector>();
 
 					});
 
@@ -5621,6 +5640,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	MergedTimeSliceRow_RHS_wins = false;
 
 	allWeightings.PurgeTags<saved_historic_rows_tag>();
+	allWeightings.ClearTopLevelTag<tag__saved_historic_rows>();
 
 }
 

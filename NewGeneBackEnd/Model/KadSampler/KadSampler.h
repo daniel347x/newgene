@@ -2531,7 +2531,19 @@ class MergedTimeSliceRow
 template <typename MEMORY_TAG>
 struct tag__saved_historic_rows
 {
-	typedef std::set<MergedTimeSliceRow<MEMORY_TAG>> type;
+	typedef FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG>, MEMORY_TAG> type;
+};
+
+template <typename MEMORY_TAG>
+struct tag__ongoing_consolidation
+{
+	typedef FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG>, MEMORY_TAG> type;
+};
+
+template <typename MEMORY_TAG>
+struct tag__ongoing_consolidation_vector
+{
+	typedef FastVectorMemoryTag<MergedTimeSliceRow<MEMORY_TAG>, MEMORY_TAG> type;
 };
 
 template <typename MEMORY_TAG>
@@ -2769,6 +2781,8 @@ class KadSampler
 
 		void Clear(); // ditto
 
+		void ClearTopLevelTag();
+
 		void ClearRemaining();
 
 		template <typename TAG>
@@ -2814,6 +2828,19 @@ class KadSampler
 			purge_pool<TAG, sizeof(Branches<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(TimeSlices<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(DataCache<TAG>::value_type const)>();
+		}
+
+		template <template <typename MEMORY_TAG> class TOP_LEVEL_TAG_STRUCT>
+		void ClearTopLevelTag()
+		{
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<boost::pool_allocator_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<boost::fast_pool_allocator_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<hits_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<hits_consolidated_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<remaining_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<child_dmu_lookup_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<saved_historic_rows_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<ongoing_consolidation_tag>>::purge_memory();
 		}
 
 	protected:
