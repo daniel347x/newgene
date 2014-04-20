@@ -641,7 +641,8 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 						// ... never use "consolidating rows" version here, because consolidation always happens after all rows are merged
 						if (the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 						{
-							boost::format msg("Null child DMU key lookup cache.");
+							SpitAllWeightings(*this, "empty_child_lookup");
+;							boost::format msg("Null child DMU key lookup cache.");
 							throw NewGeneException() << newgene_error_description(msg.str());
 						}
 
@@ -2008,7 +2009,10 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	sdata += "</CONSOLIDATED_HIT>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
-	SpitChildLookup(sdata, *(branch.helper_lookup__from_child_key_set__to_matching_output_rows));
+	if (branch.helper_lookup__from_child_key_set__to_matching_output_rows != nullptr)
+	{
+		SpitChildLookup(sdata, *(branch.helper_lookup__from_child_key_set__to_matching_output_rows));
+	}
 	sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
