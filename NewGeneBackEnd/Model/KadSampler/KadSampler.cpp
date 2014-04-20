@@ -25,12 +25,14 @@ std::string create_output_row_visitor::row_in_process;
 int Weighting::how_many_weightings = 0;
 
 KadSampler::KadSampler(Messager & messager_)
-	: insert_random_sample_stmt(nullptr)
-	, numberChildVariableGroups(0)
-	, time_granularity(TIME_GRANULARITY__NONE)
-	, random_rows_added(0)
-	, messager(messager_)
-	, current_child_variable_group_being_merged(-1)
+	: insert_random_sample_stmt{ nullptr }
+	, numberChildVariableGroups{ 0 }
+	, time_granularity{ TIME_GRANULARITY__NONE }
+	, random_rows_added{ 0 }
+	, messager{ messager_ }
+	, current_child_variable_group_being_merged{ -1 }
+	, number_branch_columns{ 0 }
+	, number_primary_variable_group_single_leaf_columns{ 0 }
 {
 }
 
@@ -838,10 +840,18 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 	// Now count the number of *consolidated* K-ad combinations.
 	// See comments above.
-	int number_branch_fields = ;
 	for (auto const & branch_and_leaves_combo : branches_and_leaves_set)
 	{
-
+		// How many leaves?
+		size_t total_number_cols = branch_and_leaves_combo.size();
+		size_t total_number_leaf_cols = total_number_cols - number_branch_columns;
+		size_t total_number_leaves = total_number_leaf_cols / number_primary_variable_group_single_leaf_columns;
+		newgene_cpp_int number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
+		if (K <= total_number_leaves && total_number_leaves > 0)
+		{
+			number_branch_combinations = BinomialCoefficient(total_number_leaves, K);
+		}
+		weighting_consolidated.addWeighting(number_branch_combinations);
 	}
 
 	InstanceDataVector<calculate_consolidated_total_number_rows_tag>().swap(temp_branches_and_leaves);

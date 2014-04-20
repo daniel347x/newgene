@@ -701,8 +701,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::string highest_multiplicity_primary_uoa_dmu_string_code;
 				bool any_primary_dmu_has_multiplicity_greater_than_1;
 				int which_primary_index_has_multiplicity_greater_than_1; // corresponds to the single DMU in the primary UOA whose outer multiplicity is greater than 1; if none have outer multiplicity greater than 1, this value will be set to -1.  Corresponds to the above "outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA" variable.
-				int number_branch_columns;
-				int number_primary_variable_group_single_leaf_columns;
 
 				// child_uoas__which_multiplicity_is_greater_than_1:
 				// Map of:

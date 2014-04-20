@@ -2909,6 +2909,9 @@ class KadSampler
 		newgene_cpp_int number_rows_generated;
 		FastVectorCppInt::const_iterator random_number_iterator;
 
+		int number_branch_columns;
+		int number_primary_variable_group_single_leaf_columns;
+
 };
 
 template <typename TAG, int SIZE>

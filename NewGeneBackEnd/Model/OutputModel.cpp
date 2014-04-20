@@ -182,8 +182,6 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf(0)
 	, has_non_primary_top_level_groups { 0 }
 	, has_child_groups{ 0 }
-	, number_branch_columns{ 0 }
-	, number_primary_variable_group_single_leaf_columns{ 0 }
 {}
 
 OutputModel::OutputGenerator::~OutputGenerator()
@@ -2223,6 +2221,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 		PopulateSchemaForRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, primary_or_secondary_view_index);
 
 		// Store the number of branch & leaf columns for the primary variable group
+		allWeightings.number_branch_columns = 0;
+		allWeightings.number_primary_variable_group_single_leaf_columns = 0;
 		if (primary_or_secondary_view_index == top_level_vg_index)
 		{
 			ColumnsInTempView & columns_in_variable_group_view = primary_variable_groups_column_info.back();
@@ -2230,7 +2230,14 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 			{
 				if (column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (column.current_variable_group)
+					if (column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+					{
+						++allWeightings.number_branch_columns;
+					}
+					else
+					{
+						++allWeightings.number_primary_variable_group_single_leaf_columns;
+					}
 				}
 			}
 		}
