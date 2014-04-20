@@ -1046,8 +1046,20 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 				std::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_time_unit].size() - 1);
 				size_t which_remaining_leaf_combination = distribution(engine);
 
-				test_leaf_combination = branch.remaining[which_time_unit][which_remaining_leaf_combination];
-				auto remainingPtr = branch.remaining[which_time_unit].begin() + which_remaining_leaf_combination;
+				// Forced to use std::list, rather than std::vector,
+				// because performance of Boost Pool in populating the "remaining" data structure
+				// in some scenarios is horrible.
+				// In any case, due to the "erase", below, it's not clear that a vector is any better than a list, anyways
+
+				//test_leaf_combination = branch.remaining[which_time_unit][which_remaining_leaf_combination];
+				//auto remainingPtr = branch.remaining[which_time_unit].begin() + which_remaining_leaf_combination;
+
+				auto remainingPtr = branch.remaining[which_time_unit].begin();
+				for (size_t n = 0; n < which_remaining_leaf_combination; ++n)
+				{
+					++remainingPtr;
+				}
+				test_leaf_combination = *remainingPtr;
 
 				branch.remaining[which_time_unit].erase(remainingPtr);
 
@@ -3067,6 +3079,14 @@ void KadSampler::Clear()
 	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>::purge_memory();
 	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<child_dmu_lookup_tag>>::purge_memory();
 	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<saved_historic_rows_tag>>::purge_memory();
+
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<boost::pool_allocator_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<boost::fast_pool_allocator_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<hits_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<hits_consolidated_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<child_dmu_lookup_tag>>::purge_memory();
+	TopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<saved_historic_rows_tag>>::purge_memory();
 
 	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<boost::pool_allocator_tag>>::purge_memory();
 	TopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<boost::fast_pool_allocator_tag>>::purge_memory();

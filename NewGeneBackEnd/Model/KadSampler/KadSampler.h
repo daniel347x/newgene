@@ -1460,6 +1460,9 @@ using fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining
 //using fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining = std::vector<BranchOutputRow<MEMORY_TAG>>;
 
 template <typename MEMORY_TAG>
+using fast_branch_output_row_list_____currently_only_used_for_Branch_remaining = FastListMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
+
+template <typename MEMORY_TAG>
 using fast_branch_output_row_vector_huge = FastVectorMemoryTag<BranchOutputRow<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
@@ -1482,6 +1485,9 @@ using fast__int64__to__fast_branch_output_row_set = FastMapMemoryTag<std::int64_
 
 template <typename MEMORY_TAG>
 using fast__int64__to__fast_branch_output_row_vector = FastMapMemoryTag<std::int64_t, fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining<MEMORY_TAG>, MEMORY_TAG>;
+
+template <typename MEMORY_TAG>
+using fast__int64__to__fast_branch_output_row_list = FastMapMemoryTag<std::int64_t, fast_branch_output_row_list_____currently_only_used_for_Branch_remaining<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
 using fast__lookup__from_child_dmu_set__to__output_rows = FastMapMemoryTag<ChildDMUInstanceDataVector<MEMORY_TAG>, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>, MEMORY_TAG>;
@@ -1828,6 +1834,12 @@ struct tag__fast__int64__to__fast_branch_output_row_vector
 };
 
 template <typename MEMORY_TAG>
+struct tag__fast__int64__to__fast_branch_output_row_list
+{
+	typedef fast__int64__to__fast_branch_output_row_list<MEMORY_TAG> type;
+};
+
+template <typename MEMORY_TAG>
 struct tag__fast__lookup__from_child_dmu_set__to__output_rows
 {
 	typedef fast__lookup__from_child_dmu_set__to__output_rows<MEMORY_TAG> type;
@@ -1841,14 +1853,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne()
 			: PrimaryKeysGrouping{ DMUInstanceDataVector<hits_tag>() }
-			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>())
+			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
-			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>())
+			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 			{
@@ -1859,7 +1871,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, weighting { rhs.weighting }
 			, hits { rhs.hits }
 			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
-			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>())
+			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
 			, number_branch_combinations{ rhs.number_branch_combinations }
 			, leaves { rhs.leaves }
@@ -1873,7 +1885,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, weighting{ rhs.weighting }
 			, hits{ rhs.hits }
 			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
-			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_vector<remaining_tag>>())
+			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
 			, number_branch_combinations{ rhs.number_branch_combinations }
 			, leaves{ rhs.leaves }
@@ -1975,8 +1987,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 
 		// Used for optimization purposes only during random sampling construction of output rows
-		mutable fast__int64__to__fast_branch_output_row_vector<remaining_tag> * remaining_; // Let the Boost pool manage this
-		mutable fast__int64__to__fast_branch_output_row_vector<remaining_tag> & remaining;
+		mutable fast__int64__to__fast_branch_output_row_list<remaining_tag> * remaining_; // Let the Boost pool manage this
+		mutable fast__int64__to__fast_branch_output_row_list<remaining_tag> & remaining;
 
 		// **************************************************************************************** //
 		// **************************************************************************************** //
@@ -2765,6 +2777,7 @@ class KadSampler
 			purge_pool<TAG, sizeof(fast_short_to_int_map__loaded<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<TAG>::key_type, fast__short__to__fast_short_to_int_map__loaded<TAG>::mapped_type> const)>();
 			purge_pool<TAG, sizeof(fast__int64__to__fast_branch_output_row_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(fast__int64__to__fast_branch_output_row_list<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(fast_int_set<TAG>::value_type const)>();
