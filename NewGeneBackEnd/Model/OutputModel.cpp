@@ -611,17 +611,18 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			{
 				messager.AppendKadStatusText((boost::format("Entering full sampling mode, consolidating primary rows.  All %1% K-adic combinations will be generated, and consolidated.") %
 					allWeightings.weighting_consolidated.getWeightingString().c_str()).str().c_str(), this);
+				messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % allWeightings.weighting_consolidated.getWeightingString().c_str()).str(), this);
 			}
 			else
 			{
 				messager.AppendKadStatusText((boost::format("Entering full sampling mode, with time granulation.  All %1% K-adic combinations will be generated.") %
 					allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+				messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % allWeightings.weighting.getWeightingString().c_str()).str(), this);
 			}
 
 			// ********************************************************************************************************************************************************* //
 			// Generate all K-ad combinations now
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % allWeightings.weighting.getWeightingString().c_str()).str(), this);
 			allWeightings.PrepareFullSamples(K);
 			if (failed || CheckCancelled()) { return; }
 

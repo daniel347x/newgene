@@ -751,7 +751,8 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	weighting_consolidated.setWeightingRangeStart(0);
 	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag> * branches_and_leaves_set_ = InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows<calculate_consolidated_total_number_rows_tag>>();
 	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag> & branches_and_leaves_set = *branches_and_leaves_set_;
-	InstanceDataVector<calculate_consolidated_total_number_rows_tag> temp_branches_and_leaves;
+	InstanceDataVector<calculate_consolidated_total_number_rows_tag> * temp_branches_and_leaves_ = InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows__instance_vector<calculate_consolidated_total_number_rows_tag>>();
+	InstanceDataVector<calculate_consolidated_total_number_rows_tag> & temp_branches_and_leaves = *temp_branches_and_leaves_;
 
 	newgene_cpp_int currentWeighting = 0;
 	std::int64_t branch_count = 0;
@@ -845,7 +846,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 		// How many leaves?
 		size_t total_number_cols = branch_and_leaves_combo.size();
 		size_t total_number_leaf_cols = total_number_cols - number_branch_columns;
-		size_t total_number_leaves = total_number_leaf_cols / number_primary_variable_group_single_leaf_columns;
+		int total_number_leaves = static_cast<int>(total_number_leaf_cols) / number_primary_variable_group_single_leaf_columns;
 		newgene_cpp_int number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
 		if (K <= total_number_leaves && total_number_leaves > 0)
 		{
@@ -857,6 +858,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	InstanceDataVector<calculate_consolidated_total_number_rows_tag>().swap(temp_branches_and_leaves);
 	PurgeTags<calculate_consolidated_total_number_rows_tag>();
 	ClearTopLevelTag<tag__calculate_consolidated_total_number_rows>();
+	ClearTopLevelTag<tag__calculate_consolidated_total_number_rows__instance_vector>();
 
 }
 
@@ -3052,6 +3054,7 @@ void KadSampler::Clear()
 	ClearTopLevelTag<tag__ongoing_consolidation>();
 	ClearTopLevelTag<tag__ongoing_merged_rows>();
 	ClearTopLevelTag<tag__calculate_consolidated_total_number_rows>();
+	ClearTopLevelTag<tag__calculate_consolidated_total_number_rows__instance_vector>();
 
 	PurgeTags<boost::pool_allocator_tag>();
 	PurgeTags<boost::fast_pool_allocator_tag>();

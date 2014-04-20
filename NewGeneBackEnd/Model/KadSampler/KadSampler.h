@@ -976,18 +976,18 @@ class Weighting
 		newgene_cpp_int weighting_range_start;
 		newgene_cpp_int weighting_range_end;
 #	ifdef _DEBUG
-		std::string weighting_string;
-		std::string weighting_range_start_string;
-		std::string weighting_range_end_string;
+		//std::string weighting_string;
+		//std::string weighting_range_start_string;
+		//std::string weighting_range_end_string;
 #	endif
 
 		void InternalSetWeighting()
 		{
 			weighting_range_end = weighting_range_start + weighting - 1;
 #		ifdef _DEBUG
-			weighting_string = weighting.str();
-			weighting_range_start_string = weighting_range_start.str();
-			weighting_range_end_string = weighting_range_end.str();
+			//weighting_string = weighting.str();
+			//weighting_range_start_string = weighting_range_start.str();
+			//weighting_range_end_string = weighting_range_end.str();
 #		endif
 		}
 
@@ -2556,6 +2556,12 @@ template <typename MEMORY_TAG>
 struct tag__calculate_consolidated_total_number_rows
 {
 	typedef FastSetMemoryTag<InstanceDataVector<MEMORY_TAG>, MEMORY_TAG> type;
+};
+
+template <typename MEMORY_TAG>
+struct tag__calculate_consolidated_total_number_rows__instance_vector
+{
+	typedef InstanceDataVector<MEMORY_TAG> type;
 };
 
 template <typename MEMORY_TAG>
