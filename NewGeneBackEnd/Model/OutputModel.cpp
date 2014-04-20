@@ -784,7 +784,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
 		{
 			boost::format msg("Error: %1%");
-			msg % error_desc;
+			msg % (*error_desc).c_str();
 			SetFailureErrorMessage(msg.str());
 			failed = true;
 		}
