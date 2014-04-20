@@ -5302,8 +5302,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> * saved_historic_rows_ = InstantiateUsingTopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>();
 	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> & saved_historic_rows = *saved_historic_rows_;
 
-	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> * ongoing_merged_rows_ = InstantiateUsingTopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>();
-	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> & ongoing_merged_rows = *ongoing_merged_rows_;
+	FastSetMemoryTag<MergedTimeSliceRow<ongoing_merged_rows_tag>, ongoing_merged_rows_tag> * ongoing_merged_rows_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_merged_rows<ongoing_merged_rows_tag>>();
+	FastSetMemoryTag<MergedTimeSliceRow<ongoing_merged_rows_tag>, ongoing_merged_rows_tag> & ongoing_merged_rows = *ongoing_merged_rows_;
 
 	// ***************************************************************************************************** //
 	// First, calculate the number of rows that must be processed, for use by the progress bar
@@ -5630,12 +5630,17 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 	saved_historic_rows.insert(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend());
 	MergedTimeSliceRow_RHS_wins = false;
-	ongoing_merged_rows.clear();
+	
+	// Do not clear!! Let the Boost Pool management handle this, just below
+	//ongoing_merged_rows.clear();
+	allWeightings.PurgeTags<ongoing_merged_rows_tag>();
+	allWeightings.ClearTopLevelTag<tag__ongoing_merged_rows>();
+
+	allWeightings.consolidated_rows.clear(); // This should be empty anyways
 
 	// Order the rows how we want them - first by time, then by keys
 
-	allWeightings.consolidated_rows.clear();
-	MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
+	MergedTimeSliceRow_RHS_wins = true; // operator=() can be called from ctor during "insert"
 	allWeightings.consolidated_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
 	MergedTimeSliceRow_RHS_wins = false;
 

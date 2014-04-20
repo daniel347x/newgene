@@ -3078,6 +3078,7 @@ void KadSampler::Clear()
 	ClearTopLevelTag<tag__saved_historic_rows>();
 	ClearTopLevelTag<tag__ongoing_consolidation_vector>();
 	ClearTopLevelTag<tag__ongoing_consolidation>();
+	ClearTopLevelTag<tag__ongoing_merged_rows>();
 
 	PurgeTags<boost::pool_allocator_tag>();
 	PurgeTags<boost::fast_pool_allocator_tag>();
@@ -3085,6 +3086,7 @@ void KadSampler::Clear()
 	PurgeTags<hits_consolidated_tag>();
 	PurgeTags<saved_historic_rows_tag>();
 	PurgeTags<ongoing_consolidation_tag>();
+	PurgeTags<ongoing_merged_rows_tag>();
 	PurgeTags<remaining_tag>();
 	PurgeTags<child_dmu_lookup_tag>();
 

@@ -2535,6 +2535,12 @@ struct tag__saved_historic_rows
 };
 
 template <typename MEMORY_TAG>
+struct tag__ongoing_merged_rows
+{
+	typedef FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG>, MEMORY_TAG> type;
+};
+
+template <typename MEMORY_TAG>
 struct tag__ongoing_consolidation
 {
 	typedef FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG>, MEMORY_TAG> type;
@@ -2840,7 +2846,8 @@ class KadSampler
 			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<remaining_tag>>::purge_memory();
 			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<child_dmu_lookup_tag>>::purge_memory();
 			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<saved_historic_rows_tag>>::purge_memory();
-			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<ongoing_consolidation_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<ongoing_merged_rows_tag>>::purge_memory();
+			TopLevelObjectsPool<TOP_LEVEL_TAG_STRUCT<saved_historic_rows_tag>>::purge_memory();
 		}
 
 	protected:

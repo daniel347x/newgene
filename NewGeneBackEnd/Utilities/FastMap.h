@@ -23,6 +23,7 @@ struct remaining_tag {};
 struct hits_tag {};
 struct hits_consolidated_tag {};
 struct saved_historic_rows_tag {};
+struct ongoing_merged_rows_tag {};
 struct ongoing_consolidation_tag {};
 struct child_dmu_lookup_tag {};
 
