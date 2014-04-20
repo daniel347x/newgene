@@ -2045,7 +2045,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 		datetime_start_column.column_name_in_original_data_table = "";
-		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
+		datetime_start_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = 1;
 
 		std::string datetime_end_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -2079,7 +2079,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 		datetime_end_column.column_name_in_original_data_table = "";
-		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
+		datetime_end_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = 1;
 
 	}
 	else
@@ -2230,7 +2230,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 			{
 				if (column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (column.)
+					if (column)
 				}
 			}
 		}
@@ -2529,7 +2529,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 		column_in_variable_group_data_table.variable_group_associated_with_current_inner_table = the_variable_group.first;
 
-		column_in_variable_group_data_table.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
+		column_in_variable_group_data_table.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = 1;
 
 		if (!the_variable_group.first.identifier_parent)
 		{
@@ -2677,9 +2677,6 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category =
 									primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_primary_uoa;
-
-								column_in_variable_group_data_table.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg
-									= current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group;
 
 								column_in_variable_group_data_table.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group =
 									current_variable_group_primary_key_entry.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
@@ -4452,8 +4449,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
-			new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = 1;
+			new_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = 1;
 
 		}
 
@@ -4496,8 +4492,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 				new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 				new_column.column_name_in_temporary_table += "_";
 				new_column.column_name_in_temporary_table += newUUID(true);
-				new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
-				new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
+				new_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = current_multiplicity;
 				new_column.primary_key_index_within_total_kad_for_dmu_category =
 					new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
 					+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
@@ -4560,8 +4555,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
-					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
-					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
+					new_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = current_multiplicity;
 					new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = K;
 
 					if (make_secondary_datetime_column)
@@ -4636,8 +4630,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
-					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
-					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
+					new_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = current_multiplicity;
 					new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = K;
 
 					if (make_secondary_datetime_column)
@@ -4712,7 +4705,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
-					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
+					new_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = current_multiplicity;
 					new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = the_child_multiplicity;
 
 					if (make_secondary_datetime_column)
@@ -4753,7 +4746,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
 	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = K;
+	datetime_start_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = K;
 	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_start_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
@@ -4768,7 +4761,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
 	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = K;
+	datetime_end_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = K;
 	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_end_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
@@ -5717,7 +5710,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 		{
 			output_file << "_";
-			output_file << boost::lexical_cast<std::string>(unformatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
+			output_file << boost::lexical_cast<std::string>(unformatted_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group);
 		}
 
 	});
