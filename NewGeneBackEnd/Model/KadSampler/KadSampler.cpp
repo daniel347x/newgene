@@ -33,6 +33,7 @@ KadSampler::KadSampler(Messager & messager_)
 	, current_child_variable_group_being_merged{ -1 }
 	, number_branch_columns{ 0 }
 	, number_primary_variable_group_single_leaf_columns{ 0 }
+	, debuggingflag{ false }
 {
 }
 
@@ -641,7 +642,6 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 						// ... never use "consolidating rows" version here, because consolidation always happens after all rows are merged
 						if (the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 						{
-							SpitAllWeightings(*this, "empty_child_lookup");
 ;							boost::format msg("Null child DMU key lookup cache.");
 							throw NewGeneException() << newgene_error_description(msg.str());
 						}
@@ -1920,7 +1920,7 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 
 		branch.ResetLeafCache();
 
-		if (reset_child_dmu_lookup)
+		if (reset_child_dmu_lookup && allWeightings.current_child_variable_group_being_merged != -1)
 		{
 			branch.ConstructChildCombinationCache(allWeightings, allWeightings.current_child_variable_group_being_merged, true, false);
 		}
@@ -2439,6 +2439,9 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 		// because even with random sampling, after the sampling is complete,
 		// the user still has the option to display the results with
 		// rows consolidated, in which case this function, again, won't be called).
+
+		// But do reset the child DMU key lookup.  This will be needed regardless.
+		ResetBranchCachesSingleTimeSlice(allWeightings, true);
 		return;
 	}
 
