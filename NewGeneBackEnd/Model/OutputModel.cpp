@@ -642,7 +642,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Create the schema for the output
 		// ********************************************************************************************************************************************************* //
 		random_sampling_schema = KadSamplerBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
-
 		if (failed || CheckCancelled()) { return; }
 
 		final_result = random_sampling_schema;
@@ -4587,6 +4586,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 		if (primary_group_number == top_level_vg_index)
 		{
+			++primary_group_number;
 			return; // already handled - the primary top-level variable group's secondary data always goes first
 		}
 
@@ -5039,6 +5039,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 			// for NON-primary top-level variable groups,
 			// which are for the purposes of this function
 			// considered to be child variable groups
+			++current_top_level_vg_index;
 			return;
 		}
 
