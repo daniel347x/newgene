@@ -2226,6 +2226,17 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 				  primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
 	{
 		PopulateSchemaForRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, primary_or_secondary_view_index);
+
+		// Store the number of branch & leaf columns for the primary variable group
+		if (primary_or_secondary_view_index == top_level_vg_index)
+		{
+			ColumnsInTempView & columns_in_variable_group_view = primary_variable_groups_column_info.back();
+			for (auto const & column : columns_in_variable_group_view.columns_in_view)
+			{
+				if (column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			}
+		}
+
 		++primary_or_secondary_view_index;
 	});
 
