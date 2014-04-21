@@ -754,7 +754,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
 		KadSamplerWriteResultsToFileOrScreen(allWeightings);
-		messager.SetPerformanceLabel((boost::format("Wrote %1% rows to output file \"%2%\"") % allWeightings.rowsWritten % setting_path_to_kad_output.c_str()).str());
+		messager.AppendKadStatusText((boost::format("Wrote %1% rows to output file \"%2%\"") % allWeightings.rowsWritten % setting_path_to_kad_output.c_str()).str(), this);
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
