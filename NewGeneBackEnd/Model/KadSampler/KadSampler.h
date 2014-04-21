@@ -2540,6 +2540,7 @@ class MergedTimeSliceRow
 			if (MergedTimeSliceRow_RHS_wins)
 			{
 				time_slice = rhs.time_slice;
+				output_row.clear();
 				output_row.insert(output_row.begin(), rhs.output_row.cbegin(), rhs.output_row.cend());
 				empty = rhs.empty;
 				return *this;
@@ -2555,6 +2556,7 @@ class MergedTimeSliceRow
 				}
 
 				time_slice = rhs.time_slice;
+				output_row.clear();
 				output_row.insert(output_row.begin(), rhs.output_row.cbegin(), rhs.output_row.cend());
 				empty = rhs.empty;
 

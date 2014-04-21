@@ -5310,8 +5310,10 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	// Create pointer to prevent automatic deletion.
 	// We are here using a Boost Pool to delete the memory in saved_historic_rows,
 	// because standard deletion through the pool takes forever.
-	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> * saved_historic_rows_ = InstantiateUsingTopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>();
-	FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> & saved_historic_rows = *saved_historic_rows_;
+	//FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> * saved_historic_rows_ = InstantiateUsingTopLevelObjectsPool<tag__saved_historic_rows<saved_historic_rows_tag>>();
+	//FastSetMemoryTag<MergedTimeSliceRow<saved_historic_rows_tag>, saved_historic_rows_tag> & saved_historic_rows = *saved_historic_rows_;
+
+	auto & saved_historic_rows = allWeightings.consolidated_rows;
 
 	FastSetMemoryTag<MergedTimeSliceRow<ongoing_merged_rows_tag>, ongoing_merged_rows_tag> * ongoing_merged_rows_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_merged_rows<ongoing_merged_rows_tag>>();
 	FastSetMemoryTag<MergedTimeSliceRow<ongoing_merged_rows_tag>, ongoing_merged_rows_tag> & ongoing_merged_rows = *ongoing_merged_rows_;
@@ -5655,13 +5657,19 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	allWeightings.PurgeTags<ongoing_merged_rows_tag>();
 	allWeightings.ClearTopLevelTag<tag__ongoing_merged_rows>();
 
-	allWeightings.consolidated_rows.clear(); // This should be empty anyways
+	// Currently, saved_historic_rows is just a reference to allWeightings.consolidated_rows...
+	// so do not enter the following block.
+	// But if we return saved_historic_rows to being a separate, local data structure, then re-enable the following block.
+	if (false)
+	{
+		allWeightings.consolidated_rows.clear(); // This should be empty anyways
 
-	// Order the rows how we want them - first by time, then by keys
+		// Order the rows how we want them - first by time, then by keys
 
-	MergedTimeSliceRow_RHS_wins = true; // operator=() can be called from ctor during "insert"
-	allWeightings.consolidated_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
-	MergedTimeSliceRow_RHS_wins = false;
+		MergedTimeSliceRow_RHS_wins = true; // operator=() can be called from ctor during "insert"
+		allWeightings.consolidated_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
+		MergedTimeSliceRow_RHS_wins = false;
+	}
 
 	allWeightings.PurgeTags<saved_historic_rows_tag>();
 	allWeightings.ClearTopLevelTag<tag__saved_historic_rows>();
