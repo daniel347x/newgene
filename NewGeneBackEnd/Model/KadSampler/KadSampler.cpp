@@ -1020,7 +1020,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	for (auto const & branch_and_leaves_combo : branches_and_leaves_set)
 	{
 		// How many leaves?
-		size_t total_number_cols = branch_and_leaves_combo.size();
+		size_t total_number_cols = branch_and_leaves_combo.size() - 4; // -4 to account for the time columns
 		size_t total_number_leaf_cols = total_number_cols - number_branch_columns;
 		int total_number_leaves = static_cast<int>(total_number_leaf_cols) / number_primary_variable_group_single_leaf_columns;
 		newgene_cpp_int number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
@@ -1029,20 +1029,6 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 			number_branch_combinations = BinomialCoefficient(total_number_leaves, K);
 		}
 		weighting_consolidated.addWeighting(number_branch_combinations);
-
-		std::string fields_str;
-		bool first = true;
-		for (auto const & field_val : branch_and_leaves_combo)
-		{
-			if (!first)
-			{
-				fields_str += ",";
-			}
-			first = false;
-			fields_str += boost::lexical_cast<std::string>(field_val);
-		}
-		std::string how_many_combos_str = boost::lexical_cast<std::string>(number_branch_combinations);
-
 	}
 
 	InstanceDataVector<calculate_consolidated_total_number_rows_tag>().swap(temp_branches_and_leaves);
