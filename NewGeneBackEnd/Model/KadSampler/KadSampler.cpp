@@ -24,6 +24,8 @@ std::string create_output_row_visitor::row_in_process;
 
 int Weighting::how_many_weightings = 0;
 
+bool VariableGroupTimeSliceData::when_destructing_do_not_delete = false;
+
 KadSampler::KadSampler(Messager & messager_)
 	: insert_random_sample_stmt{ nullptr }
 	, numberChildVariableGroups{ 0 }
@@ -417,7 +419,7 @@ void KadSampler::SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMa
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
 	TimeSlice originalMapTimeSlice = timeSlice;
-	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second;
+	VariableGroupTimeSliceData const timeSliceData(std::move(existingMapElementPtr->second));
 
 	timeSlices.erase(existingMapElementPtr);
 
@@ -444,7 +446,7 @@ void KadSampler::SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMa
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
 	TimeSlice originalMapTimeSlice = timeSlice;
-	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second;
+	VariableGroupTimeSliceData const timeSliceData(std::move(existingMapElementPtr->second));
 
 	timeSlices.erase(existingMapElementPtr);
 
@@ -494,7 +496,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 	bool added = false;
 
 	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second;
-	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 
 	// Note: Currently, only one primary top-level variable group is supported.
 	// It will be the "begin()" element, if it exists.
@@ -720,7 +722,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type & timeSliceEntry)
 	{
 		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
-		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 		Weighting & variableGroupTimeSliceDataWeighting = variableGroupTimeSliceData.weighting;
 		std::for_each(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
 		{
@@ -886,7 +888,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 		TimeSlice const & timeSlice = timeSliceEntry.first;
 		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
-		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 		Weighting & variableGroupTimeSliceDataWeighting = variableGroupTimeSliceData.weighting;
 
 		if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -1045,7 +1047,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 void KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)
 {
 	VariableGroupTimeSliceData variableGroupTimeSliceData;
-	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 	VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_number);
 	Branches<hits_tag> & newBranchesAndLeaves = newVariableGroupBranch.branches;
 	newBranchesAndLeaves.insert(branch);
@@ -1530,7 +1532,7 @@ void KadSampler::ClearBranchCaches()
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type  & timeSliceData)
 	{
 
-		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = timeSliceData.second.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *timeSliceData.second.branches_and_leaves;
 
 		// For now, assume only one variable group
 		if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -1932,7 +1934,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 
 		TimeSlice const & timeSlice = timeSlicePtr->first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;
-		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 
 		// For now, assume only one variable group
 		if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -1982,7 +1984,7 @@ void KadSampler::PrepareFullSamples(int const K)
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = *variableGroupTimeSliceData.branches_and_leaves;
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{
@@ -2082,7 +2084,7 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & allWeightings, bool const reset_child_dmu_lookup)
 {
 
-	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = branches_and_leaves;
+	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *branches_and_leaves;
 
 	// For now, assume only one variable group
 	if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -2420,7 +2422,7 @@ void SpitAllWeightings(KadSampler const & allWeightings, std::string const & fil
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = *variableGroupTimeSliceData.branches_and_leaves;
 
 		file_.write(sdata_.c_str(), sdata_.size());
 		sdata_.clear();
@@ -2783,7 +2785,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	std::int64_t originalWidth = originalTimeSlice.WidthForWeighting(AvgMsperUnit);
 
 	fast__int64__to__fast_branch_output_row_set<remaining_tag> new_hits;
-	VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = branches_and_leaves;
+	VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *branches_and_leaves;
 	std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 	{
 
@@ -3032,7 +3034,7 @@ void KadSampler::getMySize() const
 		mySize.sizeTimeSlices += sizeof(timeSlice.second);
 
 		// branches_and_leaves is a vector
-		auto const & branches_and_leaves = timeSlice.second.branches_and_leaves;
+		auto const & branches_and_leaves = *timeSlice.second.branches_and_leaves;
 
 		for (auto const & variableGroupBranchesAndLeaves : branches_and_leaves)
 		{
@@ -3250,6 +3252,7 @@ void KadSampler::Clear()
 	ClearTopLevelTag<tag__ongoing_merged_rows>();
 	ClearTopLevelTag<tag__calculate_consolidated_total_number_rows>();
 	ClearTopLevelTag<tag__calculate_consolidated_total_number_rows__instance_vector>();
+	ClearTopLevelTag<tag__branches_and_leaves>();
 
 	PurgeTags<boost::pool_allocator_tag>();
 	PurgeTags<boost::fast_pool_allocator_tag>();
@@ -3272,7 +3275,7 @@ void KadSampler::ClearRemaining()
 	PurgeTags<remaining_tag>();
 	//std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type  & timeSliceData)
 	//{
-	//	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = timeSliceData.second.branches_and_leaves;
+	//	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *timeSliceData.second.branches_and_leaves;
 	//	VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
 	//	Branches<hits_tag> & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 	//	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)

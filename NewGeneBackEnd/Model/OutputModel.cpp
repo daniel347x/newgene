@@ -4886,7 +4886,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(KadSampler & all
 		TimeSlice const & timeSlice = timeSliceData.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
 
-		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 
 		// For now, assume only one variable group
 		if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -5327,7 +5327,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 		{
 			TimeSlice const & the_slice = timeSlice.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 
 			// See equivalent loop, below, for some comments
 			if (previousTimeSlice.DoesOverlap(the_slice))
@@ -5406,7 +5406,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 			TimeSlice const & the_slice = timeSlice.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 
 			if (previousTimeSlice.DoesOverlap(the_slice))
 			{
@@ -5834,7 +5834,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 		{
 			TimeSlice const & timeSlice = timeSliceData.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
-			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 
 			if (variableGroupBranchesAndLeavesVector.size() > 1)
 			{
@@ -5905,7 +5905,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 			TimeSlice const & timeSlice = timeSliceData.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
 
-			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 
 			// For now, assume only one variable group
 			if (variableGroupBranchesAndLeavesVector.size() > 1)
@@ -6140,7 +6140,7 @@ void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTi
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = *variableGroupTimeSliceData.branches_and_leaves;
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{
@@ -6169,7 +6169,7 @@ void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTi
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = *variableGroupTimeSliceData.branches_and_leaves;
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{

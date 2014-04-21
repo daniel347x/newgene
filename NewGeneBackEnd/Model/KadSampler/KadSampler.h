@@ -1001,6 +1001,12 @@ typename TOPLEVEL_POOL_TAG::type * InstantiateUsingTopLevelObjectsPool(Params...
 	return typed_ptr;
 }
 
+template<typename TOPLEVEL_POOL_TAG>
+void DeleteUsingTopLevelObjectsPool(typename TOPLEVEL_POOL_TAG::type * ptr)
+{
+	TopLevelObjectsPool<TOPLEVEL_POOL_TAG>::free(ptr);
+}
+
 enum CHILD_TO_PRIMARY_MAPPING
 {
 	CHILD_TO_PRIMARY_MAPPING__UNKNOWN
@@ -2245,18 +2251,77 @@ class VariableGroupBranchesAndLeaves
 template <typename MEMORY_TAG>
 using VariableGroupBranchesAndLeavesVector = FastVectorMemoryTag<VariableGroupBranchesAndLeaves, MEMORY_TAG>;
 
+template <typename MEMORY_TAG>
+struct tag__branches_and_leaves
+{
+	typedef VariableGroupBranchesAndLeavesVector<MEMORY_TAG> type;
+};
+
 class VariableGroupTimeSliceData
 {
 
 	public:
 
-		VariableGroupBranchesAndLeavesVector<hits_tag> branches_and_leaves;
+		VariableGroupTimeSliceData()
+			: branches_and_leaves{ InstantiateUsingTopLevelObjectsPool<tag__branches_and_leaves<hits_tag>>() }
+		{
+		}
+
+		VariableGroupTimeSliceData(VariableGroupTimeSliceData const & rhs)
+			: branches_and_leaves{ InstantiateUsingTopLevelObjectsPool<tag__branches_and_leaves<hits_tag>>() }
+			, weighting(rhs.weighting)
+		{
+			*branches_and_leaves = *rhs.branches_and_leaves;
+		}
+
+		VariableGroupTimeSliceData(VariableGroupTimeSliceData && rhs)
+			: branches_and_leaves(rhs.branches_and_leaves)
+			, weighting(rhs.weighting)
+		{
+			rhs.branches_and_leaves = nullptr;
+		}
+
+		~VariableGroupTimeSliceData()
+		{
+			if (!when_destructing_do_not_delete)
+			{
+				if (branches_and_leaves != nullptr)
+				{
+					DeleteUsingTopLevelObjectsPool<tag__branches_and_leaves<hits_tag>>(branches_and_leaves);
+					branches_and_leaves = nullptr;
+				}
+			}
+		}
+
+		VariableGroupTimeSliceData & operator=(VariableGroupTimeSliceData const & rhs)
+		{
+			if (this == &rhs)
+			{
+				return *this;
+			}
+			*branches_and_leaves = *rhs.branches_and_leaves;
+			weighting = rhs.weighting;
+		}
+
+		VariableGroupTimeSliceData & operator=(VariableGroupTimeSliceData && rhs)
+		{
+			if (this == &rhs)
+			{
+				return *this;
+			}
+			branches_and_leaves = rhs.branches_and_leaves;
+			rhs.branches_and_leaves = nullptr;
+			weighting = rhs.weighting;
+		}
+
+		VariableGroupBranchesAndLeavesVector<hits_tag> * branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves in all variable groups
 
 		void ResetBranchCachesSingleTimeSlice(KadSampler & allWeightings, bool const reset_child_dmu_lookup);
 		void PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit,
 							bool const consolidate_rows, bool const random_sampling);
 
+		static bool when_destructing_do_not_delete;
 };
 
 template <typename MEMORY_TAG>
