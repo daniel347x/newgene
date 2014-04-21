@@ -1400,6 +1400,10 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 		position.push_back(n);
 	}
 
+	if (branch.number_branch_combinations > 100000)
+	{
+		messager.SetPerformanceLabel((boost::format("A branch has %1% rows that need to be generated... Looks like this branch will take a while...") % boost::lexical_cast<std::string>(branch.number_branch_combinations)).str());
+	}
 	while (total_added < branch.number_branch_combinations)
 	{
 
@@ -1410,6 +1414,10 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 
 		++total_added;
 
+	}
+	if (branch.number_branch_combinations > 100000)
+	{
+		messager.SetPerformanceLabel("");
 	}
 
 	number_rows_generated += total_added;
