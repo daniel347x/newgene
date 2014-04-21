@@ -34,6 +34,7 @@ KadSampler::KadSampler(Messager & messager_)
 	, number_branch_columns{ 0 }
 	, number_primary_variable_group_single_leaf_columns{ 0 }
 	, debuggingflag{ false }
+	, rowsWritten{ 0 }
 {
 }
 
@@ -1028,6 +1029,20 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 			number_branch_combinations = BinomialCoefficient(total_number_leaves, K);
 		}
 		weighting_consolidated.addWeighting(number_branch_combinations);
+
+		std::string fields_str;
+		bool first = true;
+		for (auto const & field_val : branch_and_leaves_combo)
+		{
+			if (!first)
+			{
+				fields_str += ",";
+			}
+			first = false;
+			fields_str += boost::lexical_cast<std::string>(field_val);
+		}
+		std::string how_many_combos_str = boost::lexical_cast<std::string>(number_branch_combinations);
+
 	}
 
 	InstanceDataVector<calculate_consolidated_total_number_rows_tag>().swap(temp_branches_and_leaves);

@@ -2918,6 +2918,8 @@ class KadSampler
 		int number_branch_columns;
 		int number_primary_variable_group_single_leaf_columns;
 		bool debuggingflag;
+
+		std::int64_t rowsWritten;
 };
 
 template <typename TAG, int SIZE>

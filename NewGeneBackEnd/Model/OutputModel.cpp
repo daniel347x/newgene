@@ -661,6 +661,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Populate (merge) *BOTH* child variable groups *AND* non-primary top-level variable groups
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
+			messager.AppendKadStatusText((boost::format("Note: Merging of additional variable groups could increase the number of output rows beyond the numbers indicated above.")).str().c_str(), this);
 			KadSamplerFillDataForChildGroups(allWeightings);
 			if (failed || CheckCancelled()) { return; }
 
@@ -753,6 +754,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
 		KadSamplerWriteResultsToFileOrScreen(allWeightings);
+		messager.SetPerformanceLabel((boost::format("Wrote %1% rows to output file \"%2%\"") % allWeightings.rowsWritten % setting_path_to_kad_output.c_str()).str());
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
@@ -6095,6 +6097,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 		});
 
 	}
+
+	allWeightings.rowsWritten = rows_written;
 
 }
 
