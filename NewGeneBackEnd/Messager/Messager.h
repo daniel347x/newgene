@@ -286,24 +286,20 @@ class ProgressBarMeter
 
 		}
 
-		void UpdateProgressBarValue(std::int32_t cropped_current_value, newgene_cpp_int const & current_value)
+		void UpdateProgressBarValue(newgene_cpp_int const & current_value)
 		{
 
 			// This version of the function is only called by the routine that actually generates output rows.
 			// It's OK to do this calculation every time in the loop,
-			// because we know that this loop is only going to be called once per time slice,
+			// because we know that this loop is only going to be called once per branch,
 			// *not* once per calculation of an output row.
 
-			// For efficiency, evaluate 'cropped_current_value', which does not need to be exact, but only exists for the modulus
-			if (cropped_current_value % update_every_how_often == 0)
-			{
-				boost::multiprecision::cpp_dec_float_100 ratio(current_value);
-				ratio /= progress_bar_max_huge_value;
-				ratio *= 100.0L;
-				int current_progress_bar_value = ratio.convert_to<int>();
-				messager.UpdateProgressBarValue(current_progress_bar_value);
-				messager.SetPerformanceLabel((msg % boost::lexical_cast<std::string>(current_value).c_str() % boost::lexical_cast<std::string>(progress_bar_max_value).c_str()).str().c_str());
-			}
+			boost::multiprecision::cpp_dec_float_100 ratio(current_value);
+			ratio /= progress_bar_max_huge_value;
+			ratio *= 100.0L;
+			int current_progress_bar_value = ratio.convert_to<int>();
+			messager.UpdateProgressBarValue(current_progress_bar_value);
+			messager.SetPerformanceLabel((msg % boost::lexical_cast<std::string>(current_value).c_str() % boost::lexical_cast<std::string>(progress_bar_max_value).c_str()).str().c_str());
 
 		}
 

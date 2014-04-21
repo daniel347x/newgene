@@ -1978,7 +1978,6 @@ void KadSampler::PrepareFullSamples(int const K)
 
 	number_rows_generated = 0;
 	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% K-adic combinations"), weighting.getWeighting());
-	std::int32_t cropped_current_iteration = 0;
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
 
@@ -1991,17 +1990,11 @@ void KadSampler::PrepareFullSamples(int const K)
 			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 			{
 				GenerateAllOutputRows(K, branch);
+				number_rows_generated += branch.number_branch_combinations;
+				meter.UpdateProgressBarValue(number_rows_generated);
 			});
 
 		});
-
-		++cropped_current_iteration;
-		meter.UpdateProgressBarValue(cropped_current_iteration, number_rows_generated);
-
-		if (cropped_current_iteration > meter.update_every_how_often)
-		{
-			cropped_current_iteration = 0;
-		}
 
 	});
 

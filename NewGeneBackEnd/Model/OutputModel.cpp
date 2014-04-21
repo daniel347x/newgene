@@ -5246,7 +5246,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// child variable group.
 		// **************************************************************************************** //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Build cache to prepare for merge of child variable group \"%1%...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Build cache to prepare for merge of child variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		allWeightings.ResetBranchCaches(current_child_vg_index, true);
 
 		// **************************************************************************************** //
