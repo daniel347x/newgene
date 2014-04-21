@@ -2627,10 +2627,20 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 		return;
 	}
 
-	if (!originalTimeSlice.hasTimeGranularity() || !currentTimeSlice.hasTimeGranularity())
+	if (originalTimeSlice.hasTimeGranularity() && !currentTimeSlice.hasTimeGranularity())
 	{
-		boost::format msg("Attempting to prune time units with no time granularity!");
+		boost::format msg("Attempting to prune time units when the new time slice has no time granularity, while the original does!");
 		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	// special cases of no time granularity
+	if (!originalTimeSlice.hasTimeGranularity())
+	{
+		// We just keep all our hits.  They're already in th e-1 index.
+		// Let the new data merge into us later, after this function is exited,
+		// in "MergeTimeSliceDataIntoMap()".
+		ResetBranchCachesSingleTimeSlice(allWeightings, true);
+		return;
 	}
 
 	bool useLeft = false;
