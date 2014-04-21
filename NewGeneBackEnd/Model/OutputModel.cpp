@@ -5537,7 +5537,23 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 						// although they all *end* at the start of the new time slice, are saved.
 						std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow<ongoing_consolidation_tag> & merged_row)
 						{
-							merged_row.time_slice.setEnd(the_slice.getEnd());
+							if (the_slice.endsAtPlusInfinity())
+							{
+								if (merged_row.time_slice.startsAtNegativeInfinity())
+								{
+									merged_row.time_slice.Reshape(0, 0);
+								}
+								else
+								{
+									std::int64_t saved_start_time = merged_row.time_slice.getStart();
+									merged_row.time_slice.Reshape(0, 0);
+									merged_row.time_slice.setStart(saved_start_time);
+								}
+							}
+							else
+							{
+								merged_row.time_slice.setEnd(the_slice.getEnd());
+							}
 						});
 
 						// Intersection now contains all previous rows that matched with incoming rows,

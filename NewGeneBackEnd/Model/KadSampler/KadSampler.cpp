@@ -2634,9 +2634,9 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	}
 
 	// special cases of no time granularity
-	if (!originalTimeSlice.hasTimeGranularity())
+	if (allWeightings.time_granularity == TIME_GRANULARITY__NONE)
 	{
-		// We just keep all our hits.  They're already in th e-1 index.
+		// We just keep all our hits.  They're already in the -1 index.
 		// Let the new data merge into us later, after this function is exited,
 		// in "MergeTimeSliceDataIntoMap()".
 		ResetBranchCachesSingleTimeSlice(allWeightings, true);
