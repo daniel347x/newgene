@@ -967,7 +967,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 				temp_branches_and_leaves.emplace_back(static_cast<std::int32_t>(x));
 				temp_branches_and_leaves.emplace_back(static_cast<std::int32_t>(y));
 
-				temp_branches_and_leaves.insert(temp_branches_and_leaves.cbegin(), branch.primary_keys.cbegin(), branch.primary_keys.cend());
+				temp_branches_and_leaves.insert(temp_branches_and_leaves.cend(), branch.primary_keys.cbegin(), branch.primary_keys.cend());
 				for (auto const & leaf : leaves)
 				{
 					temp_branches_and_leaves.insert(temp_branches_and_leaves.cend(), leaf.primary_keys.cbegin(), leaf.primary_keys.cend());
