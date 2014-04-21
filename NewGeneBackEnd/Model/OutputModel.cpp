@@ -5417,6 +5417,13 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 				// We have a single time slice here
 
+				// // std::set<MergedTimeSliceRow<saved_historic_rows_tag>> incoming;
+				// Create pointer to prevent automatic deletion.
+				// We are here using a Boost Pool to delete the memory in saved_historic_rows,
+				// because standard deletion through the pool takes forever.
+				FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * incoming_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation<ongoing_consolidation_tag>>();
+				FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & incoming = *incoming_;
+
 				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
 
@@ -5426,12 +5433,6 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					{
 
 						// Here is a single branch and its leaves, corresponding to the primary variable group and the current time slice.
-						// // std::set<MergedTimeSliceRow<saved_historic_rows_tag>> incoming;
-						// Create pointer to prevent automatic deletion.
-						// We are here using a Boost Pool to delete the memory in saved_historic_rows,
-						// because standard deletion through the pool takes forever.
-						FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * incoming_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation<ongoing_consolidation_tag>>();
-						FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & incoming = *incoming_;
 
 						// ***************************************************************************************************** //
 						// All data within a single branch is guaranteed to have been consolidated into index -1.
@@ -5488,102 +5489,102 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 						}
 
-						MergedTimeSliceRow_RHS_wins = false;
-
-						// Ditto memory pool comments to "incoming", above
-						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * intersection_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
-						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_previous_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
-						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_new_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
-
-						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & intersection = *intersection_;
-						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & only_previous = *only_previous_;
-						FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & only_new = *only_new_;
-
-						intersection.resize(std::max(ongoing_merged_rows.size(), incoming.size()));
-						only_previous.resize(ongoing_merged_rows.size());
-						only_new.resize(incoming.size());
-
-						// ************************************************************************************************************************************************************** //
-						// Find out which rows match just in terms of DATA (not time) between the incoming, and the previous, sets of rows
-						// ************************************************************************************************************************************************************** //
-						{
-
-							// Place into a block so that the iterators go off the stack
-							// before the memory pool is purged at the end of the enclosing block.
-							// Otherwise, the iterators are corrupt when they go out of scope.
-
-							auto finalpos = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
-							auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
-							auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
-
-							intersection.resize(finalpos - intersection.begin());
-							only_previous.resize(finalpos_previous - only_previous.begin());
-							only_new.resize(finalpos_incoming - only_new.begin());
-
-						}
-
-						// ************************************************************************************************************************************************************** //
-						// Any rows that match in terms of DATA are also known to be adjacent in TIME,
-						// and these can now be placed into the ongoing set.
-						// Those previous rows that did not match are stashed away.
-						// ************************************************************************************************************************************************************** //
-
-						// We need to extend the time slice of the "intersection" rows,
-						// which are guaranteed to have been copied by "set_intersection" from the "ongoing_merged_rows" container,
-						// and will therefore (using the custom assignment operator which always takes the element that is not empty -
-						// and the result vector contained default-constructed elements which were empty)
-						// contain the time slices from the "ongoing_merged_rows" container,
-						// guaranteeing that these time slices, which may start at different places for different rows
-						// although they all *end* at the start of the new time slice, are saved.
-						std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow<ongoing_consolidation_tag> & merged_row)
-						{
-							if (the_slice.endsAtPlusInfinity())
-							{
-								if (merged_row.time_slice.startsAtNegativeInfinity())
-								{
-									merged_row.time_slice.Reshape(0, 0);
-								}
-								else
-								{
-									std::int64_t saved_start_time = merged_row.time_slice.getStart();
-									merged_row.time_slice.Reshape(0, 0);
-									merged_row.time_slice.setStart(saved_start_time);
-								}
-							}
-							else
-							{
-								merged_row.time_slice.setEnd(the_slice.getEnd());
-							}
-						});
-
-						// Intersection now contains all previous rows that matched with incoming rows,
-						// and they have been properly extended.
-
-						ongoing_merged_rows.clear();
-
-
-						MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
-
-						// Set ongoing to "intersection"
-						ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
-
-						// Now, add any new rows that were not present previously...
-						// these are new rows from this time slice that did not intersect the previous rows
-						// in terms of data columns.
-						ongoing_merged_rows.insert(only_new.cbegin(), only_new.cend());
-
-						// The rows that existed previously, but do not match, now must be set aside and saved.
-						saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
-
-						MergedTimeSliceRow_RHS_wins = false;
-
-						allWeightings.PurgeTags<ongoing_consolidation_tag>();
-						allWeightings.ClearTopLevelTag<tag__ongoing_consolidation>();
-						allWeightings.ClearTopLevelTag<tag__ongoing_consolidation_vector>();
-
 					});
 
 				});
+
+				MergedTimeSliceRow_RHS_wins = false;
+
+				// Ditto memory pool comments to "incoming", above
+				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * intersection_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
+				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_previous_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
+				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_new_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
+
+				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & intersection = *intersection_;
+				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & only_previous = *only_previous_;
+				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & only_new = *only_new_;
+
+				intersection.resize(std::max(ongoing_merged_rows.size(), incoming.size()));
+				only_previous.resize(ongoing_merged_rows.size());
+				only_new.resize(incoming.size());
+
+				// ************************************************************************************************************************************************************** //
+				// Find out which rows match just in terms of DATA (not time) between the incoming, and the previous, sets of rows
+				// ************************************************************************************************************************************************************** //
+				{
+
+					// Place into a block so that the iterators go off the stack
+					// before the memory pool is purged at the end of the enclosing block.
+					// Otherwise, the iterators are corrupt when they go out of scope.
+
+					auto finalpos = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
+					auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
+					auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
+
+					intersection.resize(finalpos - intersection.begin());
+					only_previous.resize(finalpos_previous - only_previous.begin());
+					only_new.resize(finalpos_incoming - only_new.begin());
+
+				}
+
+				// ************************************************************************************************************************************************************** //
+				// Any rows that match in terms of DATA are also known to be adjacent in TIME,
+				// and these can now be placed into the ongoing set.
+				// Those previous rows that did not match are stashed away.
+				// ************************************************************************************************************************************************************** //
+
+				// We need to extend the time slice of the "intersection" rows,
+				// which are guaranteed to have been copied by "set_intersection" from the "ongoing_merged_rows" container,
+				// and will therefore (using the custom assignment operator which always takes the element that is not empty -
+				// and the result vector contained default-constructed elements which were empty)
+				// contain the time slices from the "ongoing_merged_rows" container,
+				// guaranteeing that these time slices, which may start at different places for different rows
+				// although they all *end* at the start of the new time slice, are saved.
+				std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow<ongoing_consolidation_tag> & merged_row)
+				{
+					if (the_slice.endsAtPlusInfinity())
+					{
+						if (merged_row.time_slice.startsAtNegativeInfinity())
+						{
+							merged_row.time_slice.Reshape(0, 0);
+						}
+						else
+						{
+							std::int64_t saved_start_time = merged_row.time_slice.getStart();
+							merged_row.time_slice.Reshape(0, 0);
+							merged_row.time_slice.setStart(saved_start_time);
+						}
+					}
+					else
+					{
+						merged_row.time_slice.setEnd(the_slice.getEnd());
+					}
+				});
+
+				// Intersection now contains all previous rows that matched with incoming rows,
+				// and they have been properly extended.
+
+				ongoing_merged_rows.clear();
+
+
+				MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
+
+				// Set ongoing to "intersection"
+				ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
+
+				// Now, add any new rows that were not present previously...
+				// these are new rows from this time slice that did not intersect the previous rows
+				// in terms of data columns.
+				ongoing_merged_rows.insert(only_new.cbegin(), only_new.cend());
+
+				// The rows that existed previously, but do not match, now must be set aside and saved.
+				saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
+
+				MergedTimeSliceRow_RHS_wins = false;
+
+				allWeightings.PurgeTags<ongoing_consolidation_tag>();
+				allWeightings.ClearTopLevelTag<tag__ongoing_consolidation>();
+				allWeightings.ClearTopLevelTag<tag__ongoing_consolidation_vector>();
 
 			}
 
