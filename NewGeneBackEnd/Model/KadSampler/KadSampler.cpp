@@ -1014,7 +1014,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 	});
 
-	// Now count the number of *consolidated* K-ad combinations.
+	// Now count a good upper limit for the total umber of *consolidated* K-ad combinations.
 	// See comments above.
 	for (auto const & branch_and_leaves_combo : branches_and_leaves_set)
 	{
@@ -1027,18 +1027,6 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 		{
 			number_branch_combinations = BinomialCoefficient(total_number_leaves, K);
 		}
-		std::string fields_str;
-		bool first = true;
-		for (auto const & field_val : branch_and_leaves_combo)
-		{
-			if (!first)
-			{
-				fields_str += ",";
-			}
-			first = false;
-			fields_str += boost::lexical_cast<std::string>(field_val);
-		}
-		std::string how_many_combos_str = boost::lexical_cast<std::string>(number_branch_combinations);
 		weighting_consolidated.addWeighting(number_branch_combinations);
 	}
 
