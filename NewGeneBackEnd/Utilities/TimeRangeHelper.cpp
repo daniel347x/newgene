@@ -180,7 +180,7 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 		case TIME_GRANULARITY__YEAR:
 			{
 				result = date_year;
-				if (difference_between_incoming_and_year.total_milliseconds() == 0)
+				if (difference_between_incoming_and_year.total_milliseconds() != 0)
 				{
 					// round to next year
 					result += boost::gregorian::years(1);
