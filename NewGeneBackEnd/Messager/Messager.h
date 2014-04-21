@@ -299,7 +299,7 @@ class ProgressBarMeter
 			ratio *= 100.0L;
 			int current_progress_bar_value = ratio.convert_to<int>();
 			messager.UpdateProgressBarValue(current_progress_bar_value);
-			messager.SetPerformanceLabel((msg % boost::lexical_cast<std::string>(current_value).c_str() % boost::lexical_cast<std::string>(progress_bar_max_value).c_str()).str().c_str());
+			messager.SetPerformanceLabel((msg % boost::lexical_cast<std::string>(current_value).c_str() % boost::lexical_cast<std::string>(progress_bar_max_huge_value).c_str()).str().c_str());
 
 		}
 
