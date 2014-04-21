@@ -1400,7 +1400,7 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 		position.push_back(n);
 	}
 
-	if (branch.number_branch_combinations > 100000)
+	if (branch.number_branch_combinations > 1000)
 	{
 		messager.SetPerformanceLabel((boost::format("A branch has %1% rows that need to be generated... Looks like this branch will take a while...") % boost::lexical_cast<std::string>(branch.number_branch_combinations)).str());
 	}
