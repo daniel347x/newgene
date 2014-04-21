@@ -757,15 +757,26 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	// (It will be purged when the 'hits_tag' memory pool is purged, which only happens once - at the end of the entire K-ad run.)
 	auto calculateTotalConsolidatedRowsSortFunction = boost::function<bool(InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs)>([&](InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs) -> bool
 	{
-		if (lhs.size() < 3 || rhs.size() < 3)
+		if (lhs.size() < 5 || rhs.size() < 5)
 		{
-			boost::format msg("Logic error: InstanceDataVector used to count the total number of consolidated rows has less than 3 columns (two time columns and at least one primary key column) in sort function.");
+			boost::format msg("Logic error: InstanceDataVector used to count the total number of consolidated rows has less than the necessary number of columns (time columns and at least one primary key column) in sort function.");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
-		std::int64_t lhs_time_start = boost::lexical_cast<std::int64_t>(lhs[0]);
-		std::int64_t lhs_time_end = boost::lexical_cast<std::int64_t>(lhs[1]);
-		std::int64_t rhs_time_start = boost::lexical_cast<std::int64_t>(rhs[0]);
-		std::int64_t rhs_time_end = boost::lexical_cast<std::int64_t>(rhs[1]);
+
+		// From http://stackoverflow.com/a/2810302/368896
+		// ... Must unpack t 32-bit ints into a 64-bit
+		std::uint32_t lhsstart1 = boost::lexical_cast<std::uint32_t>(lhs[0]);
+		std::uint32_t lhsstart2 = boost::lexical_cast<std::uint32_t>(lhs[1]);
+		std::uint32_t lhsend1 = boost::lexical_cast<std::uint32_t>(lhs[2]);
+		std::uint32_t lhsend2 = boost::lexical_cast<std::uint32_t>(lhs[3]);
+		std::uint32_t rhsstart1 = boost::lexical_cast<std::uint32_t>(rhs[0]);
+		std::uint32_t rhsstart2 = boost::lexical_cast<std::uint32_t>(rhs[1]);
+		std::uint32_t rhsend1 = boost::lexical_cast<std::uint32_t>(rhs[2]);
+		std::uint32_t rhsend2 = boost::lexical_cast<std::uint32_t>(rhs[3]);
+		std::int64_t lhs_time_start = static_cast<std::int64_t>((static_cast<std::uint64_t>(lhsstart1)) << 32 | static_cast<std::uint64_t>(lhsstart2));
+		std::int64_t lhs_time_end = static_cast<std::int64_t>((static_cast<std::uint64_t>(lhsend1)) << 32 | static_cast<std::uint64_t>(lhsend2));
+		std::int64_t rhs_time_start = static_cast<std::int64_t>((static_cast<std::uint64_t>(rhsstart1)) << 32 | static_cast<std::uint64_t>(rhsstart2));
+		std::int64_t rhs_time_end = static_cast<std::int64_t>((static_cast<std::uint64_t>(rhsend1)) << 32 | static_cast<std::uint64_t>(rhsend2));
 
 		// check if time slices overlap
 		TimeSlice lhs_time_slice;
@@ -839,7 +850,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 		// ... sizes are the same.  Perform a lexographic comparison, skipping the two time fields.
 
-		for (int n = 2; n < lhs.size(); ++n)
+		for (size_t n = 2; n < lhs.size(); ++n)
 		{
 			if (lhs[n] < rhs[n])
 			{
@@ -902,30 +913,60 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 				// Add row (if not present) for counting total UN-consolidated rows
 				auto const & leaves = branch.leaves;
 				temp_branches_and_leaves.clear();
+
+				std::uint64_t packed = 0;
 				if (timeSlice.startsAtNegativeInfinity())
 				{
+
 					// Bit of a hack: -1 ms will never appear
 					// in NewGene's supported time granularity,
 					// which is at its most granular 1 second (i.e., 1000 ms)
 					// ... so -1 represents "negative infinity"
-					temp_branches_and_leaves.emplace_back(-1);
+					packed = static_cast<std::uint64_t>(-1);
+
 				}
 				else
 				{
-					temp_branches_and_leaves.emplace_back(timeSlice.getStart());
+
+					packed = static_cast<std::uint64_t>(timeSlice.getStart());
+
 				}
+
+				// Need to unpack the 64-bit timestamp into two 32-bit integers
+				// that will fit into an InstanceDataVector field
+				// from http://stackoverflow.com/a/2810302/368896
+				std::uint32_t x, y;
+				x = (std::uint32_t)((packed & 0xFFFFFFFF00000000) >> 32);
+				y = (std::uint32_t)(packed & 0xFFFFFFFF);
+				temp_branches_and_leaves.emplace_back(static_cast<std::int32_t>(x));
+				temp_branches_and_leaves.emplace_back(static_cast<std::int32_t>(y));
+
+				packed = 0;
 				if (timeSlice.endsAtPlusInfinity())
 				{
+
 					// Bit of a hack: -1 ms will never appear
 					// in NewGene's supported time granularity,
 					// which is at its most granular 1 second (i.e., 1000 ms)
 					// ... so -1 represents "positive infinity"
-					temp_branches_and_leaves.emplace_back(-1);
+					packed = static_cast<std::uint64_t>(-1);
+
 				}
 				else
 				{
-					temp_branches_and_leaves.emplace_back(timeSlice.getEnd());
+
+					packed = static_cast<std::uint64_t>(timeSlice.getEnd());
+
 				}
+
+				// Need to unpack the 64-bit timestamp into two 32-bit integers
+				// that will fit into an InstanceDataVector field
+				// from http://stackoverflow.com/a/2810302/368896
+				x = (std::uint32_t)((packed & 0xFFFFFFFF00000000) >> 32);
+				y = (std::uint32_t)(packed & 0xFFFFFFFF);
+				temp_branches_and_leaves.emplace_back(static_cast<std::int32_t>(x));
+				temp_branches_and_leaves.emplace_back(static_cast<std::int32_t>(y));
+
 				temp_branches_and_leaves.insert(temp_branches_and_leaves.cbegin(), branch.primary_keys.cbegin(), branch.primary_keys.cend());
 				for (auto const & leaf : leaves)
 				{
