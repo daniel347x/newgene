@@ -993,11 +993,11 @@ class Weighting
 
 };
 
-template<typename TOPLEVEL_POOL_TAG>
-typename TOPLEVEL_POOL_TAG::type * InstantiateUsingTopLevelObjectsPool()
+template<typename TOPLEVEL_POOL_TAG, typename... Params>
+typename TOPLEVEL_POOL_TAG::type * InstantiateUsingTopLevelObjectsPool(Params... args)
 {
 	void * ptr = TopLevelObjectsPool<TOPLEVEL_POOL_TAG>::malloc();
-	auto typed_ptr = new(ptr)(typename TOPLEVEL_POOL_TAG::type)();
+	auto typed_ptr = new(ptr)(typename TOPLEVEL_POOL_TAG::type)(args...);
 	return typed_ptr;
 }
 
