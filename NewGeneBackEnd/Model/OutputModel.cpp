@@ -2232,10 +2232,10 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 		PopulateSchemaForRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, primary_or_secondary_view_index);
 
 		// Store the number of branch & leaf columns for the primary variable group
-		allWeightings.number_branch_columns = 0;
-		allWeightings.number_primary_variable_group_single_leaf_columns = 0;
 		if (primary_or_secondary_view_index == top_level_vg_index)
 		{
+			allWeightings.number_branch_columns = 0;
+			allWeightings.number_primary_variable_group_single_leaf_columns = 0;
 			ColumnsInTempView & columns_in_variable_group_view = primary_variable_groups_column_info.back();
 			for (auto const & column : columns_in_variable_group_view.columns_in_view)
 			{
