@@ -2301,6 +2301,7 @@ class VariableGroupTimeSliceData
 			}
 			*branches_and_leaves = *rhs.branches_and_leaves;
 			weighting = rhs.weighting;
+			return *this;
 		}
 
 		VariableGroupTimeSliceData & operator=(VariableGroupTimeSliceData && rhs)
@@ -2312,6 +2313,7 @@ class VariableGroupTimeSliceData
 			branches_and_leaves = rhs.branches_and_leaves;
 			rhs.branches_and_leaves = nullptr;
 			weighting = rhs.weighting;
+			return *this;
 		}
 
 		VariableGroupBranchesAndLeavesVector<hits_tag> * branches_and_leaves;
