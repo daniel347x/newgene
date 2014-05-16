@@ -107,6 +107,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="checkBox_limitOutputToTheseDmuElements">
+            <property name="text">
+             <string>Limit output to these DMU members</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="verticalSpacer_dmu_members_rhs">
             <property name="orientation">
              <enum>Qt::Vertical</enum>

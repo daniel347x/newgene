@@ -1426,3 +1426,8 @@ void DisplayDMUsRegion::on_pushButton_cancel_clicked()
 		}
 	}
 }
+
+void DisplayDMUsRegion::on_checkBox_limitOutputToTheseDmuElements_toggled(bool checked)
+{
+
+}

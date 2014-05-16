@@ -63,6 +63,8 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 
 		void on_pushButton_cancel_clicked();
 
+		void on_checkBox_limitOutputToTheseDmuElements_toggled(bool checked);
+
 	protected:
 		void Empty();
 
