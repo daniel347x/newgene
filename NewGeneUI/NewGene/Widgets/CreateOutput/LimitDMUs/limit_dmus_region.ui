@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>FormLimitDmus</class>
+ <widget class="QWidget" name="FormLimitDmus">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -25,17 +25,17 @@
     </widget>
    </item>
    <item>
-    <widget class="QSplitter" name="splitter_dmus_dmu_members">
+    <widget class="QSplitter" name="splitter_limit_dmus">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
      <widget class="QWidget" name="horizontalLayoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_limit_dmus">
        <item>
-        <widget class="QListView" name="listView_dmus"/>
+        <widget class="QListView" name="listView_limit_dmus_top_pane"/>
        </item>
        <item>
-        <widget class="QCheckBox" name="checkBox">
+        <widget class="QCheckBox" name="checkBox_limit_dmus">
          <property name="text">
           <string>Limit DMU members for this DMU category</string>
          </property>
@@ -44,14 +44,14 @@
       </layout>
      </widget>
      <widget class="QWidget" name="horizontalLayoutWidget_2">
-      <layout class="QHBoxLayout" name="horizontalLayout_dmu_members">
+      <layout class="QHBoxLayout" name="horizontalLayout_limit_dmus">
        <item>
-        <widget class="QListView" name="listView_dmu_members"/>
+        <widget class="QListView" name="listView_limit_dmus_bottom_left_pane"/>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
+        <layout class="QVBoxLayout" name="verticalLayout_limit_dmus_bottom_pane_middle_strip">
          <item>
-          <spacer name="verticalSpacer">
+          <spacer name="verticalSpacer_limit_dmus_top_spacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -64,21 +64,21 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="pushButton_limit_dmus_move_right">
            <property name="text">
             <string>&gt;&gt;&gt;</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="pushButton_limit_dmus_move_left">
            <property name="text">
             <string>&lt;&lt;&lt;</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="verticalSpacer_2">
+          <spacer name="verticalSpacer_limit_dmus_bottom_spacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -93,7 +93,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QListView" name="listView"/>
+        <widget class="QListView" name="listView_limit_dmus_bottom_right_pane"/>
        </item>
       </layout>
      </widget>
