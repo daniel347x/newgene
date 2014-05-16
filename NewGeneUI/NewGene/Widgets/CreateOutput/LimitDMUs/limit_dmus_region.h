@@ -9,7 +9,7 @@ namespace Ui
     class limit_dmus_region;
 }
 
-class limit_dmus_region : public QWidget
+class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
 
         Q_OBJECT
@@ -18,6 +18,13 @@ class limit_dmus_region : public QWidget
 
         explicit limit_dmus_region(QWidget *parent = 0);
         ~limit_dmus_region();
+
+    signals:
+
+    public slots:
+
+        void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+        void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 
     protected:
 
