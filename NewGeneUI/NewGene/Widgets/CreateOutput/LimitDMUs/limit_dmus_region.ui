@@ -37,8 +37,7 @@
        <item>
         <widget class="QCheckBox" name="checkBox_limit_dmus">
          <property name="text">
-          <string>Limit DMU members for the selected DMU category.
-(I.e., for the DMU category selected from the above list, limit the output to those DMU members in the pane to the right, below.)</string>
+          <string>Limit DMU members for the selected DMU category.</string>
          </property>
         </widget>
        </item>
