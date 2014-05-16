@@ -116,7 +116,7 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTRO
 /************************************************************************/
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET widget)
 {
-	get()->getWorkService().post(DoRefreshOutputWidget<DATETIME_WIDGET>(widget, this));
+	get()->getWorkService().post(DoRefreshOutputWidget<TIMERANGE_REGION_WIDGET>(widget, this));
 }
 
 /************************************************************************/
