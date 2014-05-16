@@ -287,7 +287,8 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/ManageInput/DMUs/newgenemanagedmus.ui \
 	Widgets/ManageInput/UOAs/newgenemanageuoas.ui \
 	Widgets/ManageInput/VGs/newgenemanagevgs.ui \
-	Widgets/ManageInput/DMUs/displaydmusregion.ui
+	Widgets/ManageInput/DMUs/displaydmusregion.ui \
+    Widgets/CreateOutput/LimitDMUs/limit_dmus_region.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
