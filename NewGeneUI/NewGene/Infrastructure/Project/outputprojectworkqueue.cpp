@@ -80,11 +80,11 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_
 }
 
 /************************************************************************/
-// VARIABLE_GROUPS_SUMMARY
+// VARIABLE_GROUPS_SUMMARY_SCROLL_AREA
 /************************************************************************/
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA widget)
 {
-	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUPS_SUMMARY>(widget, this));
+	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA>(widget, this));
 }
 
 /************************************************************************/

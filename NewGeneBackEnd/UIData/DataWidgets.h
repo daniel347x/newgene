@@ -17,7 +17,7 @@ enum DATA_WIDGETS
 	, VARIABLE_GROUPS_SCROLL_AREA
 	, VARIABLE_GROUPS_TOOLBOX
 	, VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE
-	, VARIABLE_GROUPS_SUMMARY
+	, VARIABLE_GROUPS_SUMMARY_SCROLL_AREA
 	, VARIABLE_GROUPS_SUMMARY_SCROLL_AREA
 	, VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE
 	, KAD_SPIN_CONTROLS_AREA
@@ -25,6 +25,7 @@ enum DATA_WIDGETS
 	, TIMERANGE_REGION_WIDGET
 	, DATETIME_WIDGET
 	, GENERATE_OUTPUT_TAB
+	, LIMIT_DMUS_TAB
 
 	// Input project
 	, MANAGE_DMUS_WIDGET
@@ -235,43 +236,43 @@ typedef WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE> WidgetDataItem_VA
 
 
 /************************************************************************/
-// VARIABLE_GROUPS_SUMMARY
+// VARIABLE_GROUPS_SUMMARY_SCROLL_AREA
 /************************************************************************/
 template<>
-class WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY> : public WidgetDataItemRequest_base
+class WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA> : public WidgetDataItemRequest_base
 {
 public:
-	WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+	WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
 		: WidgetDataItemRequest_base(reason_, identifier_)
 	{
 	}
-	WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY>(WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY> const & rhs)
+	WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA>(WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA> const & rhs)
 		: WidgetDataItemRequest_base(rhs)
 	{
 	}
 };
-typedef WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY> WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA;
+typedef WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA> WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA;
 
 template<>
-class WidgetDataItem<VARIABLE_GROUPS_SUMMARY> : public WidgetDataItem_base
+class WidgetDataItem<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA> : public WidgetDataItem_base
 {
 public:
-	WidgetDataItem<VARIABLE_GROUPS_SUMMARY>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+	WidgetDataItem<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
 		: WidgetDataItem_base(request_reason_, identifier_)
 	{
 	}
-	WidgetDataItem<VARIABLE_GROUPS_SUMMARY>(WidgetDataItemRequest_base const & request_obj)
+	WidgetDataItem<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA>(WidgetDataItemRequest_base const & request_obj)
 		: WidgetDataItem_base(request_obj)
 	{
 	}
-	WidgetDataItem<VARIABLE_GROUPS_SUMMARY>(WidgetDataItem<VARIABLE_GROUPS_SUMMARY> const & rhs)
+	WidgetDataItem<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA>(WidgetDataItem<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA> const & rhs)
 		: WidgetDataItem_base(rhs)
 		, identifiers(rhs.identifiers)
 	{
 	}
 	WidgetInstanceIdentifiers identifiers;
 };
-typedef WidgetDataItem<VARIABLE_GROUPS_SUMMARY> WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA;
+typedef WidgetDataItem<VARIABLE_GROUPS_SUMMARY_SCROLL_AREA> WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA;
 
 
 /************************************************************************/
@@ -714,5 +715,46 @@ public:
 	std::vector<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier>> vgs_and_uoa;
 };
 typedef WidgetDataItem<MANAGE_VGS_WIDGET> WidgetDataItem_MANAGE_VGS_WIDGET;
+
+
+/************************************************************************/
+// LIMIT_DMUS_TAB
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<LIMIT_DMUS_TAB> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<LIMIT_DMUS_TAB>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+	{
+	}
+	WidgetDataItemRequest<LIMIT_DMUS_TAB>(WidgetDataItemRequest<LIMIT_DMUS_TAB> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItemRequest<LIMIT_DMUS_TAB> WidgetDataItemRequest_LIMIT_DMUS_TAB;
+
+template<>
+class WidgetDataItem<LIMIT_DMUS_TAB> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<LIMIT_DMUS_TAB>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+	{
+	}
+	WidgetDataItem<LIMIT_DMUS_TAB>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+	}
+	WidgetDataItem<LIMIT_DMUS_TAB>(WidgetDataItem<LIMIT_DMUS_TAB> const & rhs)
+		: WidgetDataItem_base(rhs)
+		, identifiers(rhs.identifiers)
+	{
+	}
+	WidgetInstanceIdentifiers identifiers;
+};
+typedef WidgetDataItem<LIMIT_DMUS_TAB> WidgetDataItem_LIMIT_DMUS_TAB;
+
 
 #endif

@@ -64,7 +64,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 }
 
 /************************************************************************/
-// VARIABLE_GROUPS_SUMMARY
+// VARIABLE_GROUPS_SUMMARY_SCROLL_AREA
 /************************************************************************/
 void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA const & widget_request, OutputProject & project)
 {
