@@ -6,7 +6,7 @@
 
 NewGeneVariableSummary::NewGeneVariableSummary( QWidget * parent ) :
 	QWidget( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_SUMMARY_SCROLL_AREA) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_SUMMARY) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui( new Ui::NewGeneVariableSummary )
 {
 

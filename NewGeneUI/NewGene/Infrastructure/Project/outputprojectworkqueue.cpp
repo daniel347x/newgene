@@ -104,7 +104,7 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTRO
 }
 
 /************************************************************************/
-//
+// KAD_SPIN_CONTROL_WIDGET
 /************************************************************************/
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET widget)
 {
@@ -112,15 +112,15 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTRO
 }
 
 /************************************************************************/
-//
+// DATETIME_WIDGET
 /************************************************************************/
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET widget)
 {
-	get()->getWorkService().post(DoRefreshOutputWidget<TIMERANGE_REGION_WIDGET>(widget, this));
+	get()->getWorkService().post(DoRefreshOutputWidget<DATETIME_WIDGET>(widget, this));
 }
 
 /************************************************************************/
-//
+// DATETIME_WIDGET
 /************************************************************************/
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET widget)
 {
@@ -128,11 +128,19 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET
 }
 
 /************************************************************************/
-//
+// GENERATE_OUTPUT_TAB
 /************************************************************************/
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB widget)
 {
 	get()->getWorkService().post(DoRefreshOutputWidget<GENERATE_OUTPUT_TAB>(widget, this));
+}
+
+/************************************************************************/
+// LIMIT_DMUS_TAB
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<LIMIT_DMUS_TAB>(widget, this));
 }
 
 

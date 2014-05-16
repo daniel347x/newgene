@@ -184,6 +184,7 @@ class Messager
         virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET &) {}
         virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET &) {}
         virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB &) {}
 
         // Input
         virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET &) {}

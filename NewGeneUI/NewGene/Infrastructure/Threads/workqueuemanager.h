@@ -38,6 +38,7 @@ class WorkQueueManagerBase : public QObject
 		// **********************************************************************************************************//
 		virtual void HandleChanges(DataChangeMessage &) {}
 
+		// Output-project related refreshes
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA &) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX &) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE &) {}
@@ -48,11 +49,15 @@ class WorkQueueManagerBase : public QObject
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET &) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET &) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB &) {}
+
+		// Input-project related refreshes
 		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET &) {}
 		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET &) {}
 		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_VGS_WIDGET &) {}
 
 	signals:
+
 		// Signals for ALL specializations of WorkQueueManager go here,
 		// and are NOT (and don't need to be) defined as virtual
 		void SignalMessageBox(STD_STRING);
@@ -61,6 +66,8 @@ class WorkQueueManagerBase : public QObject
 		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR, QObject *);
 		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *);
 		void DataChangeMessageSignal(WidgetChangeMessages);
+
+		// Output-project related refreshes
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
@@ -71,6 +78,9 @@ class WorkQueueManagerBase : public QObject
 		void WidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET);
 		void WidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET);
 		void WidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB);
+		void WidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB);
+
+		// Input-project related refreshes
 		void WidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET);
 		void WidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET);
 		void WidgetDataRefresh(WidgetDataItem_MANAGE_VGS_WIDGET);
@@ -86,7 +96,10 @@ class WorkQueueManagerBase : public QObject
 		virtual void LoadFromDatabase(UI_INPUT_MODEL_PTR, QObject *) {}
 		virtual void LoadFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *) {}
 		//
+
 		// Data refresh requests
+
+		// Output-project related refreshes
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
@@ -97,10 +110,14 @@ class WorkQueueManagerBase : public QObject
 		virtual void RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB) {}
+
+		// Input-project related refreshes
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_UOAS_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_VGS_WIDGET) {}
-		//
+
+
 		// Actions
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE) {}

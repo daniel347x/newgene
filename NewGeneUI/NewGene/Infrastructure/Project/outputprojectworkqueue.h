@@ -68,6 +68,10 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		{
 			emit WidgetDataRefresh(widgetData);
 		}
+		void EmitOutputWidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB & widgetData)
+		{
+			emit WidgetDataRefresh(widgetData);
+		}
 
 	private:
 
@@ -92,6 +96,7 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET widget);
 		void RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET widget);
 		void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB widget);
+		void RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB widget);
 
 		// Actions
 		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED);

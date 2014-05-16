@@ -21,6 +21,10 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetInstanceIdentifier>("WidgetInstanceIdentifier");
 	qRegisterMetaType<WidgetInstanceIdentifier_Bool_Pair>("WidgetInstanceIdentifier_Bool_Pair");
 
+
+	// Widget refresh request data
+
+	// Output widgets
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>("WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA");
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX>("WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX");
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>("WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE");
@@ -31,10 +35,17 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItemRequest_TIMERANGE_REGION_WIDGET>("WidgetDataItemRequest_TIMERANGE_REGION_WIDGET");
 	qRegisterMetaType<WidgetDataItemRequest_DATETIME_WIDGET>("WidgetDataItemRequest_DATETIME_WIDGET");
 	qRegisterMetaType<WidgetDataItemRequest_GENERATE_OUTPUT_TAB>("WidgetDataItemRequest_GENERATE_OUTPUT_TAB");
+	qRegisterMetaType<WidgetDataItemRequest_LIMIT_DMUS_TAB>("WidgetDataItemRequest_LIMIT_DMUS_TAB");
+
+	// Input widgets
 	qRegisterMetaType<WidgetDataItemRequest_MANAGE_DMUS_WIDGET>("WidgetDataItemRequest_MANAGE_DMUS_WIDGET");
 	qRegisterMetaType<WidgetDataItemRequest_MANAGE_UOAS_WIDGET>("WidgetDataItemRequest_MANAGE_UOAS_WIDGET");
 	qRegisterMetaType<WidgetDataItemRequest_MANAGE_VGS_WIDGET>("WidgetDataItemRequest_MANAGE_VGS_WIDGET");
 
+
+	// Widget refresh data
+
+	// Output widgets
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>("WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA");
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>("WidgetDataItem_VARIABLE_GROUPS_TOOLBOX");
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>("WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE");
@@ -45,10 +56,15 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItem_TIMERANGE_REGION_WIDGET>("WidgetDataItem_TIMERANGE_REGION_WIDGET");
 	qRegisterMetaType<WidgetDataItem_DATETIME_WIDGET>("WidgetDataItem_DATETIME_WIDGET");
 	qRegisterMetaType<WidgetDataItem_GENERATE_OUTPUT_TAB>("WidgetDataItem_GENERATE_OUTPUT_TAB");
+	qRegisterMetaType<WidgetDataItem_LIMIT_DMUS_TAB>("WidgetDataItem_LIMIT_DMUS_TAB");
+
+	// Input widgets
 	qRegisterMetaType<WidgetDataItem_MANAGE_DMUS_WIDGET>("WidgetDataItem_MANAGE_DMUS_WIDGET");
 	qRegisterMetaType<WidgetDataItem_MANAGE_UOAS_WIDGET>("WidgetDataItem_MANAGE_UOAS_WIDGET");
 	qRegisterMetaType<WidgetDataItem_MANAGE_VGS_WIDGET>("WidgetDataItem_MANAGE_VGS_WIDGET");
 
+
+	// Actions
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>("WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE>("WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE>("WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE");
@@ -67,6 +83,8 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_VG>("WidgetActionItemRequest_ACTION_DELETE_VG");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_REFRESH_VG>("WidgetActionItemRequest_ACTION_REFRESH_VG");
 
+
+	// Events
 	QEVENT_NONE                            = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_NONE_HINT));
 	QEVENT_PROMPT_FOR_VG_REFRESH           = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_PROMPT_FOR_VG_REFRESH_HINT));
 	QEVENT_CLICK_VG_REFRESH                = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_CLICK_VG_REFRESH_HINT));

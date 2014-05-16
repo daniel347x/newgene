@@ -27,6 +27,9 @@ class UIDataManager : public Manager<UIDataManager, MANAGER_DESCRIPTION_NAMESPAC
 		void DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_TIMERANGE_REGION_WIDGET const & widget_request, OutputProject & project);
 		void DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_DATETIME_WIDGET const & widget_request, OutputProject & project);
 		void DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_GENERATE_OUTPUT_TAB const & widget_request, OutputProject & project);
+		void DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_LIMIT_DMUS_TAB const & widget_request, OutputProject & project);
+
+		// Input project widget refreshes
 		void DoRefreshInputWidget(Messager & messager, WidgetDataItemRequest_MANAGE_DMUS_WIDGET const & widget_request, InputProject & project);
 		void DoRefreshInputWidget(Messager & messager, WidgetDataItemRequest_MANAGE_UOAS_WIDGET const & widget_request, InputProject & project);
 		void DoRefreshInputWidget(Messager & messager, WidgetDataItemRequest_MANAGE_VGS_WIDGET const & widget_request, InputProject & project);

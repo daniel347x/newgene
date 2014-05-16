@@ -297,6 +297,9 @@ void UIMessagerOutputProject::EmitOutputProjectChangeMessage(DataChangeMessage &
 	get()->getQueueManager()->HandleChanges(changes);
 }
 
+
+// Ouput project-related widgets
+
 void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData)
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
@@ -346,6 +349,14 @@ void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_GENERAT
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }
+
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
+}
+
+
+// Input project-related widgets
 
 void UIMessagerInputProject::EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET & widgetData)
 {

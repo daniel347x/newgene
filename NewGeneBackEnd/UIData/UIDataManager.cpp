@@ -174,6 +174,18 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 }
 
 /************************************************************************/
+// LIMIT_DMUS_TAB
+/************************************************************************/
+void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_LIMIT_DMUS_TAB const & widget_request, OutputProject & project)
+{
+	InputModel & input_model = project.model().getInputModel();
+	WidgetDataItem_LIMIT_DMUS_TAB variable_groups(widget_request);
+	//variable_groups.identifiers = input_model.t_vgp_identifiers.getIdentifiers();
+	//std::sort(variable_groups.identifiers.begin(), variable_groups.identifiers.end());
+	//messager.EmitOutputWidgetDataRefresh(variable_groups);
+}
+
+/************************************************************************/
 // MANAGE_DMUS_WIDGET
 /************************************************************************/
 void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequest_MANAGE_DMUS_WIDGET const & widget_request, InputProject & project)

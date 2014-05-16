@@ -198,6 +198,7 @@ class UIMessagerOutputProject : public UIMessager
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET & widgetData);
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET & widgetData);
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB & widgetData);
+		void EmitOutputWidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB & widgetData);
 
 	protected:
 

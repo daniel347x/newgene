@@ -66,6 +66,8 @@ class NewGeneWidget
 		// However, they do assist in assuring that derived classes use the same naming scheme.
 		// At some point, errors could be added to these otherwise empty functions to further
 		// encourage the proper naming scheme in derived classes.
+		//
+		// Output-project related refreshes
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
@@ -76,6 +78,9 @@ class NewGeneWidget
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB) {}
+		//
+		// Input-project related refreshes
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDGET) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDGET) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET) {}
@@ -89,6 +94,8 @@ class NewGeneWidget
 		// However, they do assist in assuring that derived classes use the same naming scheme.
 		// At some point, errors could be added to these otherwise empty functions to further
 		// encourage the proper naming scheme in derived classes.
+		//
+		// Output-project related refreshes
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
@@ -99,6 +106,9 @@ class NewGeneWidget
 		virtual void RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB) {}
+		//
+		// Input-project related refreshes
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_UOAS_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_VGS_WIDGET) {}
