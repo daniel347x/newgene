@@ -4,18 +4,32 @@
 #include <QWidget>
 #include "../../newgenewidget.h"
 
+namespace Ui
+{
+    class limit_dmus_region;
+}
+
 class limit_dmus_region : public QWidget
 {
 
-    Q_OBJECT
+        Q_OBJECT
 
-public:
+    public:
 
-    explicit limit_dmus_region(QWidget *parent = 0);
+        explicit limit_dmus_region(QWidget *parent = 0);
+        ~limit_dmus_region();
 
-signals:
+    protected:
 
-public slots:
+        void changeEvent( QEvent * e );
+
+    private:
+
+        Ui::limit_dmus_region * ui;
+
+    signals:
+
+    public slots:
 
 };
 
