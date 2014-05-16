@@ -106,7 +106,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
       <enum>QTabWidget::South</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>
@@ -148,6 +148,40 @@ border-bottom: 0px;;
 }</string>
          </property>
         </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabLimitDmus">
+      <property name="styleSheet">
+       <string notr="true">QWidget {
+/* border-bottom: 3px solid #f9dac7; */
+border-bottom: 5px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #ededed,
+                                 stop: 1.0 #f9dac7
+                                 );
+}</string>
+      </property>
+      <attribute name="title">
+       <string> Limit DMU's </string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="limit_dmus_region" name="widgetLimitDmusPane" native="true"/>
        </item>
       </layout>
      </widget>
@@ -212,6 +246,12 @@ border-bottom: 0px;
    <class>NewGeneGenerateOutput</class>
    <extends>QWidget</extends>
    <header>newgenegenerateoutput.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>limit_dmus_region</class>
+   <extends>QWidget</extends>
+   <header location="global">limit_dmus_region.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

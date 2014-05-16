@@ -2,11 +2,15 @@
 #define LIMIT_DMUS_REGION_H
 
 #include <QWidget>
+#include "../../newgenewidget.h"
 
 class limit_dmus_region : public QWidget
 {
+
     Q_OBJECT
+
 public:
+
     explicit limit_dmus_region(QWidget *parent = 0);
 
 signals:
