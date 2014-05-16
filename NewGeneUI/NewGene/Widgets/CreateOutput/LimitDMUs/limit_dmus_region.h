@@ -19,16 +19,23 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
         explicit limit_dmus_region(QWidget *parent = 0);
         ~limit_dmus_region();
 
+        void HandleChanges(DataChangeMessage const &);
+
     signals:
+
+        void RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB);
 
     public slots:
 
         void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
         void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+        void RefreshAllWidgets();
+        void WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB);
 
     protected:
 
         void changeEvent( QEvent * e );
+        void Empty();
 
     private:
 
