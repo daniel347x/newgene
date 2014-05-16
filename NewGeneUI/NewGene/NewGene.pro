@@ -149,7 +149,7 @@ SOURCES += main.cpp\
 	Widgets/ManageInput/DMUs/displaydmusregion.cpp \
 	Widgets/Utilities/qsortfilterproxymodel_numberslast.cpp \
 	Widgets/Utilities/dialoghelper.cpp \
-    Widgets/CreateOutput/LimitDMUs/limit_dmus_region.cpp
+	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -271,7 +271,7 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/UIAction/uoamanagement.h \
 	Infrastructure/UIAction/vgmanagement.h \
 	Widgets/Utilities/dialoghelper.h \
-    Widgets/CreateOutput/LimitDMUs/limit_dmus_region.h
+	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -290,7 +290,7 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/ManageInput/UOAs/newgenemanageuoas.ui \
 	Widgets/ManageInput/VGs/newgenemanagevgs.ui \
 	Widgets/ManageInput/DMUs/displaydmusregion.ui \
-    Widgets/CreateOutput/LimitDMUs/limit_dmus_region.ui
+	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
@@ -313,6 +313,7 @@ INCLUDEPATH += $$PWD/Widgets/CreateOutput/GenerateOutput
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/VariableSummary
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/Variables
+INCLUDEPATH += $$PWD/Widgets/CreateOutput/LimitDMUs
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/KadWidget
 INCLUDEPATH += $$PWD/Widgets/ManageInput
 INCLUDEPATH += $$PWD/Widgets/ManageInput/DMUs

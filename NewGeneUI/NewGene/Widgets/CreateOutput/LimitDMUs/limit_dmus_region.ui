@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FormLimitDmus</class>
- <widget class="QWidget" name="FormLimitDmus">
+ <class>limit_dmus_region</class>
+ <widget class="QWidget" name="limit_dmus_region">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -37,7 +37,8 @@
        <item>
         <widget class="QCheckBox" name="checkBox_limit_dmus">
          <property name="text">
-          <string>Limit DMU members for this DMU category</string>
+          <string>Limit DMU members for the selected DMU category.
+(I.e., for the DMU category selected from the above list, limit the output to those DMU members in the pane to the right, below.)</string>
          </property>
         </widget>
        </item>
@@ -46,7 +47,21 @@
      <widget class="QWidget" name="horizontalLayoutWidget_2">
       <layout class="QHBoxLayout" name="horizontalLayout_limit_dmus">
        <item>
-        <widget class="QListView" name="listView_limit_dmus_bottom_left_pane"/>
+        <layout class="QVBoxLayout" name="verticalLayout_bottomleft">
+         <item>
+          <widget class="QLabel" name="label_bottomleft">
+           <property name="text">
+            <string>&lt;b&gt;Available DMU members - these will NOT appear in the output&lt;/b&gt;</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::RichText</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QListView" name="listView_limit_dmus_bottom_left_pane"/>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_limit_dmus_bottom_pane_middle_strip">
@@ -93,7 +108,21 @@
         </layout>
        </item>
        <item>
-        <widget class="QListView" name="listView_limit_dmus_bottom_right_pane"/>
+        <layout class="QVBoxLayout" name="verticalLayout_bottomright">
+         <item>
+          <widget class="QLabel" name="label_bottomright">
+           <property name="text">
+            <string>&lt;b&gt;DMU members that will appear in the output&lt;/b&gt;</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::RichText</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QListView" name="listView_limit_dmus_bottom_right_pane"/>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
