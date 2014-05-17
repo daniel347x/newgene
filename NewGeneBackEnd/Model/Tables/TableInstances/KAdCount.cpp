@@ -10,7 +10,7 @@ std::string const Table_KAD_COUNT::KAD_COUNT__FLAGS = "FLAGS";
 void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
 {
 
-	if (!input_model_)
+	if (!output_model_ || !input_model_)
 	{
 		return;
 	}

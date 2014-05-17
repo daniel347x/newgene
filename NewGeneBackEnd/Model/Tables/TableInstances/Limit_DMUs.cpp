@@ -11,6 +11,11 @@ std::string const Table__Limit_DMUs__Elements::LIMIT_DMUS__DMU_SET_MEMBER_UUID =
 void Table__Limit_DMUS__Categories::Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
 {
 
+	if (!output_model_ || !input_model_)
+	{
+		return;
+	}
+
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	identifiers.clear();
@@ -221,6 +226,11 @@ bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output
 
 void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
 {
+
+	if (!output_model_ || !input_model_)
+	{
+		return;
+	}
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
