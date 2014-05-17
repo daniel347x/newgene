@@ -179,7 +179,11 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_LIMIT_DMUS_TAB const & widget_request, OutputProject & project)
 {
 	InputModel & input_model = project.model().getInputModel();
-	WidgetDataItem_LIMIT_DMUS_TAB variable_groups(widget_request);
+	WidgetDataItem_LIMIT_DMUS_TAB dmu_limit_info(widget_request);
+
+	dmu_category_limit_members_info_tuple & dmu_category_limit_members_info = dmu_limit_info.dmu_category_limit_members_info;
+
+	
 	//variable_groups.identifiers = input_model.t_vgp_identifiers.getIdentifiers();
 	//std::sort(variable_groups.identifiers.begin(), variable_groups.identifiers.end());
 	//messager.EmitOutputWidgetDataRefresh(variable_groups);

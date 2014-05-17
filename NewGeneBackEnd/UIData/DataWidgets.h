@@ -735,6 +735,7 @@ public:
 };
 typedef WidgetDataItemRequest<LIMIT_DMUS_TAB> WidgetDataItemRequest_LIMIT_DMUS_TAB;
 
+typedef std::tuple<WidgetInstanceIdentifier, bool, WidgetInstanceIdentifiers, WidgetInstanceIdentifiers, WidgetInstanceIdentifiers> dmu_category_limit_members_info_tuple;
 template<>
 class WidgetDataItem<LIMIT_DMUS_TAB> : public WidgetDataItem_base
 {
@@ -752,7 +753,7 @@ public:
 		, identifiers(rhs.identifiers)
 	{
 	}
-	WidgetInstanceIdentifiers identifiers;
+	dmu_category_limit_members_info_tuple dmu_category_limit_members_info;
 };
 typedef WidgetDataItem<LIMIT_DMUS_TAB> WidgetDataItem_LIMIT_DMUS_TAB;
 
