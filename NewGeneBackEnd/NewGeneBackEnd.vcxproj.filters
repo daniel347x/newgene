@@ -360,6 +360,9 @@
     <ClInclude Include="Utilities\NewGeneMemoryPool.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\Limit_DMUs.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -601,6 +604,9 @@
     </ClCompile>
     <ClCompile Include="Utilities\NewGeneMemoryPool.cpp">
       <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\Limit_DMUs.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

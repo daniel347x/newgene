@@ -106,6 +106,7 @@
     <ClInclude Include="Model\Tables\TableInstances\DMU.h" />
     <ClInclude Include="Model\Tables\TableInstances\GeneralOptions.h" />
     <ClInclude Include="Model\Tables\TableInstances\KAdCount.h" />
+    <ClInclude Include="Model\Tables\TableInstances\Limit_DMUs.h" />
     <ClInclude Include="Model\Tables\TableInstances\TimeRange.h" />
     <ClInclude Include="Model\Tables\TableInstances\UOA.h" />
     <ClInclude Include="Model\Tables\TableInstances\VariableGroup.h" />
@@ -181,6 +182,7 @@
     <ClCompile Include="Model\Tables\TableInstances\DMU.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\GeneralOptions.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\KAdCount.cpp" />
+    <ClCompile Include="Model\Tables\TableInstances\Limit_DMUs.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\TimeRange.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\UOA.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\VariableGroup.cpp" />
