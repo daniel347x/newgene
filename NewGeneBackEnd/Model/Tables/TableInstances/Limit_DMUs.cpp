@@ -8,7 +8,7 @@ std::string const Table__Limit_DMUS__Categories::LIMIT_DMUS__DMU_CATEGORY_STRING
 std::string const Table__Limit_DMUs__Elements::LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = "LIMIT_DMUS__DMU_CATEGORY_STRING_CODE";
 std::string const Table__Limit_DMUs__Elements::LIMIT_DMUS__DMU_SET_MEMBER_UUID = "LIMIT_DMUS__DMU_SET_MEMBER_UUID";
 
-void Table__Limit_DMUS__Categories::Load(sqlite3 * db, OutputModel * output_model_)
+void Table__Limit_DMUS__Categories::Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -16,7 +16,7 @@ void Table__Limit_DMUS__Categories::Load(sqlite3 * db, OutputModel * output_mode
 	identifiers.clear();
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM DMU_CATEGORY");
+	std::string sql("SELECT * FROM LIMIT_DMUS__CATEGORIES");
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
@@ -25,14 +25,8 @@ void Table__Limit_DMUS__Categories::Load(sqlite3 * db, OutputModel * output_mode
 	int step_result = 0;
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
-		char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_CATEGORY_UUID));
-		char const * code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_CATEGORY_STRING_CODE));
-		char const * longhand = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_CATEGORY_STRING_LONGHAND));
-		char const * notes1 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_CATEGORY_NOTES1));
-		char const * notes2 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_CATEGORY_NOTES2));
-		char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_CATEGORY_NOTES3));
-		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_CATEGORY_FLAGS));
-		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand))
+		char const * dmu_category_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__LIMIT_DMUS__DMU_CATEGORY_STRING_CODE));
+		if (dmu_category_code && /* strlen(dmu_category_code) == UUID_LENGTH && */ strlen(code))
 		{
 			WidgetInstanceIdentifier DMU_category_identifier(uuid, code, longhand, 0, flags, TIME_GRANULARITY__NONE, MakeNotes(notes1, notes2, notes3));
 			identifiers.push_back(DMU_category_identifier);
@@ -46,7 +40,7 @@ void Table__Limit_DMUS__Categories::Load(sqlite3 * db, OutputModel * output_mode
 
 }
 
-bool Table__Limit_DMUS__Categories::Exists(sqlite3 * db, OutputModel & output_model_, std::string const & dmu_category, bool const also_confirm_using_cache)
+bool Table__Limit_DMUS__Categories::Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category, bool const also_confirm_using_cache)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -103,7 +97,7 @@ bool Table__Limit_DMUS__Categories::Exists(sqlite3 * db, OutputModel & output_mo
 
 }
 
-bool Table__Limit_DMUS__Categories::AddDMU(sqlite3 * db, OutputModel & output_model_, std::string const & dmu_category)
+bool Table__Limit_DMUS__Categories::AddDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -156,7 +150,7 @@ bool Table__Limit_DMUS__Categories::AddDMU(sqlite3 * db, OutputModel & output_mo
 
 }
 
-bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output_model_, WidgetInstanceIdentifier & dmu_category, DataChangeMessage & change_message)
+bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier & dmu_category, DataChangeMessage & change_message)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -225,7 +219,7 @@ bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output
 
 }
 
-void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_)
+void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -295,7 +289,7 @@ void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_
 
 }
 
-bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, bool const also_confirm_using_cache)
+bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, bool const also_confirm_using_cache)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -350,7 +344,7 @@ bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_mode
 
 }
 
-WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db, OutputModel & output_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
+WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -403,7 +397,7 @@ WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db,
 
 }
 
-bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & output_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
+bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);

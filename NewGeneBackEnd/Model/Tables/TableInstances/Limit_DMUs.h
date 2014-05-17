@@ -24,11 +24,11 @@ public:
 			table_name = "LIMIT_DMUS__CATEGORIES";
 	}
 
-	void Load(sqlite3 * db, OutputModel * output_model_);
+	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
 
-	bool Exists(sqlite3 * db, OutputModel & output_model_, std::string const & dmu_category, bool const also_confirm_using_cache = true);
-	bool AddDMU(sqlite3 * db, OutputModel & output_model_, std::string const & dmu_category);
-	bool RemoveDMU(sqlite3 * db, OutputModel & output_model_, WidgetInstanceIdentifier & dmu_category, DataChangeMessage & change_message);
+	bool Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category, bool const also_confirm_using_cache = true);
+	bool AddDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category);
+	bool RemoveDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier & dmu_category, DataChangeMessage & change_message);
 
 };
 
@@ -52,11 +52,11 @@ public:
 			table_name = "LIMIT_DMUS__ELEMENTS";
 	}
 
-	void Load(sqlite3 * db, OutputModel * output_model_);
+	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
 
-	bool Exists(sqlite3 * db, OutputModel & output_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, bool const also_confirm_using_cache = true);
-	WidgetInstanceIdentifier AddDmuMember(sqlite3 * db, OutputModel & output_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid);
-	bool RemoveDmuMember(sqlite3 * db, OutputModel & output_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid);
+	bool Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, bool const also_confirm_using_cache = true);
+	WidgetInstanceIdentifier AddDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid);
+	bool RemoveDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid);
 
 };
 
