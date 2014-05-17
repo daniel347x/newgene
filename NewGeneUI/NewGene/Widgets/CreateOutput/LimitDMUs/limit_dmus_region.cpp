@@ -19,7 +19,9 @@ limit_dmus_region::limit_dmus_region(QWidget *parent) :
 
 limit_dmus_region::~limit_dmus_region()
 {
-	delete ui;
+
+    delete ui;
+
 }
 
 void limit_dmus_region::changeEvent( QEvent * e )
@@ -73,6 +75,7 @@ void limit_dmus_region::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 
 void limit_dmus_region::RefreshAllWidgets()
 {
+
     if (outp == nullptr)
     {
         Empty();
@@ -80,6 +83,7 @@ void limit_dmus_region::RefreshAllWidgets()
     }
     WidgetDataItemRequest_LIMIT_DMUS_TAB request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
     emit RefreshWidget(request);
+
 }
 
 void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB widget_data)
@@ -102,12 +106,14 @@ void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB w
 
 void limit_dmus_region::Empty()
 {
-//    QLayoutItem *child;
+
+    //    QLayoutItem *child;
 //    while ((child = layout()->takeAt(0)) != 0)
 //    {
 //        delete child->widget();
 //        delete child;
 //    }
+
 }
 
 
