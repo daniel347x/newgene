@@ -31,10 +31,15 @@ void Table__Limit_DMUS__Categories::Load(sqlite3 * db, OutputModel * output_mode
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		char const * dmu_category_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__LIMIT_DMUS__DMU_CATEGORY_STRING_CODE));
-		if (dmu_category_code && /* strlen(dmu_category_code) == UUID_LENGTH && */ strlen(code))
+		if (dmu_category_code && /* strlen(dmu_category_code) == UUID_LENGTH && */ strlen(dmu_category_code))
 		{
-			WidgetInstanceIdentifier DMU_category_identifier(uuid, code, longhand, 0, flags, TIME_GRANULARITY__NONE, MakeNotes(notes1, notes2, notes3));
-			identifiers.push_back(DMU_category_identifier);
+			WidgetInstanceIdentifier dmu_category;
+			input_model_->t_dmu_category.getIdentifierFromStringCode(dmu_category_code, dmu_category);
+			if (dmu_category.IsEmpty())
+			{
+				continue;
+			}
+			identifiers.push_back(dmu_category);
 		}
 	}
 	if (stmt)
@@ -237,7 +242,7 @@ void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_
 	identifiers_map.clear();
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM DMU_SET_MEMBER");
+	std::string sql("SELECT * FROM LIMIT_DMUS__ELEMENTS");
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
@@ -247,47 +252,22 @@ void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_
 
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
-		char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_UUID));
-		char const * code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_STRING_CODE));
-		char const * longhand = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_STRING_LONGHAND));
-		char const * notes1 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_NOTES1));
-		char const * notes2 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_NOTES2));
-		char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_NOTES3));
-		char const * fk_DMU_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID));
-		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_FLAGS));
-		if (uuid && fk_DMU_uuid)
+		char const * parent_dmu_category_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__LIMIT_DMUS__DMU_CATEGORY_STRING_CODE));
+		char const * dmu_set_member_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__LIMIT_DMUS__DMU_SET_MEMBER_UUID));
+		if (parent_dmu_category_code && dmu_set_member_uuid && strlen(parent_dmu_category_code) && strlen(dmu_set_member_uuid))
 		{
-			std::string code_string;
-			if (code)
+			WidgetInstanceIdentifier parent_dmu_category;
+			input_model_->t_dmu_category.getIdentifierFromStringCode(parent_dmu_category_code, parent_dmu_category);
+			if (parent_dmu_category.IsEmpty())
 			{
-				code_string = code;
+				continue;
 			}
-			std::string longhand_string;
-			if (longhand)
+			WidgetInstanceIdentifier dmu_set_member = input_model_->t_dmu_setmembers.getIdentifier(dmu_set_member_uuid, *parent_dmu_category.uuid);
+			if (dmu_set_member.IsEmpty())
 			{
-				longhand_string = longhand;
+				continue;
 			}
-			std::string flags_string;
-			if (flags)
-			{
-				flags_string = flags;
-			}
-			std::string notes_string_1;
-			if (notes1)
-			{
-				notes_string_1 = notes1;
-			}
-			std::string notes_string_2;
-			if (notes2)
-			{
-				notes_string_2 = notes2;
-			}
-			std::string notes_string_3;
-			if (notes3)
-			{
-				notes_string_3 = notes3;
-			}
-			identifiers_map[fk_DMU_uuid].push_back(WidgetInstanceIdentifier(uuid, input_model_->t_dmu_category.getIdentifier(fk_DMU_uuid), code_string.c_str(), longhand_string.c_str(), 0, flags_string.c_str(), TIME_GRANULARITY__NONE, MakeNotes(notes_string_1.c_str(), notes_string_2.c_str(), notes_string_3.c_str())));
+			identifiers_map[parent_dmu_category_code].push_back(dmu_set_member);
 		}
 	}
 
