@@ -750,7 +750,7 @@ public:
 	}
 	WidgetDataItem<LIMIT_DMUS_TAB>(WidgetDataItem<LIMIT_DMUS_TAB> const & rhs)
 		: WidgetDataItem_base(rhs)
-		, identifiers(rhs.identifiers)
+		, dmu_category_limit_members_info(rhs.dmu_category_limit_members_info)
 	{
 	}
 	dmu_category_limit_members_info_tuple dmu_category_limit_members_info;
