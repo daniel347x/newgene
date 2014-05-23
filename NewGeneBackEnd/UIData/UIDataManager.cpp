@@ -3,6 +3,9 @@
 #include "../Project/InputProject.h"
 #include "../Project/OutputProject.h"
 
+#include <algorithm>
+#include <iterator>
+
 /************************************************************************/
 // VARIABLE_GROUPS_SCROLL_AREA
 /************************************************************************/
@@ -181,12 +184,24 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	InputModel & input_model = project.model().getInputModel();
 	WidgetDataItem_LIMIT_DMUS_TAB dmu_limit_info(widget_request);
 
-	dmu_category_limit_members_info_tuple & dmu_category_limit_members_info = dmu_limit_info.dmu_category_limit_members_info;
+	std::vector<dmu_category_limit_members_info_tuple> & dmu_category_limit_members_info = dmu_limit_info.dmu_category_limit_members_info;
 
-	
-	//variable_groups.identifiers = input_model.t_vgp_identifiers.getIdentifiers();
-	//std::sort(variable_groups.identifiers.begin(), variable_groups.identifiers.end());
-	//messager.EmitOutputWidgetDataRefresh(variable_groups);
+	WidgetInstanceIdentifiers dmu_categories = project.model().getInputModel().t_dmu_category.getIdentifiers();
+	for (auto & dmu_category : dmu_categories)
+	{
+		WidgetInstanceIdentifiers dmu_set_members__all = project.model().getInputModel().t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
+		bool is_limited = project.model().t_limit_dmus_categories.Exists(project.model().getDb(), project.model(), project.model().getInputModel(), *dmu_category.code);
+		WidgetInstanceIdentifiers dmu_set_members__limited = project.model().t_limit_dmus_set_members.getIdentifiers(*dmu_category.code);
+		std::sort(dmu_set_members__all.begin(), dmu_set_members__all.end());
+		std::sort(dmu_set_members__limited.begin(), dmu_set_members__limited.end());
+
+		WidgetInstanceIdentifiers dmu_set_members_not_limited;
+		std::set_difference(dmu_set_members__all.cbegin(), dmu_set_members__all.cend(), dmu_set_members__limited.cbegin(), dmu_set_members__limited.cend(), std::inserter(dmu_set_members_not_limited, dmu_set_members_not_limited.begin()));
+
+		dmu_category_limit_members_info.emplace_back(std::make_tuple(dmu_category, is_limited, dmu_set_members__all, dmu_set_members_not_limited, dmu_set_members__limited));
+	}
+
+	messager.EmitOutputWidgetDataRefresh(dmu_limit_info);
 }
 
 /************************************************************************/
