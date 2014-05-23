@@ -388,61 +388,19 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 
 	//Executor theExecutor(db);
 
-	if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent || !dmu_member.identifier_parent->code || !dmu_member.identifier_parent->uuid)
-	{
-		return false;
-	}
-
-	WidgetInstanceIdentifier dmu_category = *dmu_member.identifier_parent;
-
-	bool already_exists = Exists(db, input_model_, dmu_category, *dmu_member.uuid);
+	bool already_exists = Exists(db, output_model_, input_model_, dmu_category, dmu_member_uuid);
 	if (!already_exists)
 	{
 		return false;
 	}
 
-	// Remove corresponding rows from any instance data tables
-	// ... *dmu_member.identifier_parent is the DMU category corresponding to this DMU member
-	WidgetInstanceIdentifiers uoas = input_model_.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(db, &input_model_, *dmu_member.identifier_parent);
-	std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
-	{
-		WidgetInstanceIdentifiers vgs_to_delete = input_model_.t_vgp_identifiers.RetrieveVGsFromUOA(db, &input_model_, *uoa.uuid);
-		std::for_each(vgs_to_delete.cbegin(), vgs_to_delete.cend(), [&](WidgetInstanceIdentifier const & vg_to_delete)
-		{
-			std::for_each(input_model_.t_vgp_data_vector.begin(), input_model_.t_vgp_data_vector.end(), [&](std::unique_ptr<Table_VariableGroupData> & vg_instance_table)
-			{
-				if (vg_instance_table)
-				{
-					if (boost::iequals(*vg_to_delete.code, vg_instance_table->vg_category_string_code))
-					{
-						std::string table_name = vg_instance_table->table_name;
-						std::vector<std::pair<WidgetInstanceIdentifier, std::vector<std::string>>> dmu_category_and_corresponding_column_names = input_model_.t_vgp_data_metadata__primary_keys.GetColumnNamesCorrespondingToPrimaryKeys(db, &input_model_, table_name);
-						std::for_each(dmu_category_and_corresponding_column_names.cbegin(), dmu_category_and_corresponding_column_names.cend(), [&](std::pair<WidgetInstanceIdentifier, std::vector<std::string>> const & single_dmu_category_and_corresponding_column_names)
-						{
-							WidgetInstanceIdentifier const & dmu_category_primary_key_column = single_dmu_category_and_corresponding_column_names.first;
-							if (dmu_category.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu_category_primary_key_column))
-							{
-								std::vector<std::string> const & corresponding_column_names = single_dmu_category_and_corresponding_column_names.second;
-								std::for_each(corresponding_column_names.cbegin(), corresponding_column_names.cend(), [&](std::string const & corresponding_column_name)
-								{
-									vg_instance_table->DeleteDmuMemberRows(db, &input_model_, dmu_member, corresponding_column_name);
-								});
-							}
-						});
-					}
-				}
-			});
-		});
-	});
-
-	// Remove from DMU_SET_MEMBER table
 	sqlite3_stmt * stmt = NULL;
-	boost::format sql("DELETE FROM DMU_SET_MEMBER WHERE DMU_SET_MEMBER_UUID = '%1%' AND DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID = '%2%'");
-	sql % *dmu_member.uuid % *dmu_category.uuid;
+	boost::format sql("DELETE FROM LIMIT_DMUS__ELEMENTS WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = '%1%' AND LIMIT_DMUS__DMU_SET_MEMBER_UUID = '%2%'");
+	sql % *dmu_category.code % dmu_member_uuid;
 	int err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
-		boost::format msg("Unable to prepare DELETE statement to delete DMU member: %1%");
+		boost::format msg("Unable to prepare DELETE statement to delete DMU member from the Limit DMUs member table: %1%");
 		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
@@ -450,7 +408,7 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 	step_result = sqlite3_step(stmt);
 	if (step_result != SQLITE_DONE)
 	{
-		boost::format msg("Unable to prepare DELETE statement to delete DMU member: %1%");
+		boost::format msg("Unable to execute DELETE statement to delete DMU member from the Limit DMUs member table: %1%");
 		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
@@ -461,9 +419,9 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 	}
 
 	// Remove from cache
-	identifiers_map[*dmu_category.uuid].erase(std::remove_if(identifiers_map[*dmu_category.uuid].begin(), identifiers_map[*dmu_category.uuid].end(), [&](WidgetInstanceIdentifier & test_dmu_member)
+	identifiers_map[*dmu_category.code].erase(std::remove_if(identifiers_map[*dmu_category.code].begin(), identifiers_map[*dmu_category.code].end(), [&](WidgetInstanceIdentifier & test_dmu_member)
 	{
-		if (test_dmu_member.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, dmu_member))
+		if (test_dmu_member.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, dmu_member_uuid))
 		{
 			return true;
 		}
