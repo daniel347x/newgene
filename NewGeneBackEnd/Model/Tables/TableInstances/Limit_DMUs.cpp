@@ -64,10 +64,11 @@ bool Table__Limit_DMUS__Categories::Exists(sqlite3 * db, OutputModel & output_mo
 	std::string sql("SELECT COUNT(*) FROM LIMIT_DMUS__CATEGORIES WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = '");
 	sql += dmu_category_code;
 	sql += "'";
-	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	int error_or_success_code = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
-		boost::format msg("Unable to prepare SELECT statement to search for an existing DMU category in the Limit DMUs categories table.");
+		boost::format msg("Unable to prepare SELECT statement to search for an existing DMU category in the Limit DMUs categories table: %1%");
+		msg % sqlite3_errstr(error_or_success_code);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 	int step_result = 0;
