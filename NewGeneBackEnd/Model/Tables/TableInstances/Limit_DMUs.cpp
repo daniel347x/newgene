@@ -166,40 +166,32 @@ bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output
 
 	//Executor theExecutor(db);
 
-	if (!dmu.code || !dmu.uuid)
+	if (!dmu_category.code || !dmu_category.uuid)
 	{
 		return false;
 	}
 
-	bool already_exists = Exists(db, input_model_, *dmu.code);
+	bool already_exists = Exists(db, output_model_, input_model_, *dmu_category.code);
 	if (!already_exists)
 	{
 		return false;
 	}
 
-	// Since the schema doesn't allow FK pointing from UOA to UOA_LOOKUP,
-	// we must reverse-map to the UOA's here and then remove those
-	WidgetInstanceIdentifiers uoas = input_model_.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(db, &input_model_, dmu);
-	std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
-	{
-		input_model_.t_uoa_category.DeleteUOA(db, input_model_, uoa, change_message);
-	});
-
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("DELETE FROM DMU_CATEGORY WHERE DMU_CATEGORY_UUID = ?");
+	std::string sql("DELETE FROM LIMIT_DMUS__CATEGORIES WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = ?");
 	int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
-		boost::format msg("Unable to prepare DELETE statement to delete a DMU category: %1%");
+		boost::format msg("Unable to prepare DELETE statement to delete a DMU category from the Limit DMUs category table: %1%");
 		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-	sqlite3_bind_text(stmt, 1, dmu.uuid->c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 1, dmu_category.code->c_str(), -1, SQLITE_TRANSIENT);
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
 	if (step_result != SQLITE_DONE)
 	{
-		boost::format msg("Unable to execute DELETE statement to delete a DMU category: %1%");
+		boost::format msg("Unable to execute DELETE statement to delete a DMU category from the Limit DMUs category table: %1%");
 		msg % sqlite3_errstr(step_result);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
@@ -211,15 +203,15 @@ bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output
 
 	// Remove from cache
 	std::string flags;
-	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu)), identifiers.end());
+	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu_category)), identifiers.end());
 
 	// ***************************************** //
 	// Prepare data to send back to user interface
 	// ***************************************** //
-	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
-	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-	DataChange change(type, intention, dmu, WidgetInstanceIdentifiers());
-	change_message.changes.push_back(change);
+	//DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
+	//DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+	//DataChange change(type, intention, dmu, WidgetInstanceIdentifiers());
+	//change_message.changes.push_back(change);
 
 	//theExecutor.success();
 
