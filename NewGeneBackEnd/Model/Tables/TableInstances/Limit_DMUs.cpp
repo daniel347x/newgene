@@ -275,24 +275,21 @@ bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_mode
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	if (!dmu_category.uuid || dmu_category.uuid->empty())
+	if (!dmu_category.uuid || dmu_category.uuid->empty() || !dmu_category.code || dmu_category.code->empty() || dmu_member_uuid.empty())
 	{
-		boost::format msg("Unable to prepare SELECT statement to search for an existing DMU member.");
-		throw NewGeneException() << newgene_error_description(msg.str());
+		return false;
 	}
 
-	std::string dmu_member_to_check(boost::to_upper_copy(dmu_member_uuid));
-
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT COUNT(*) FROM DMU_SET_MEMBER WHERE UPPER(DMU_SET_MEMBER_UUID) = '");
-	sql += boost::to_upper_copy(dmu_member_to_check);
-	sql += "' AND UPPER(DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID) = '";
-	sql += boost::to_upper_copy(*dmu_category.uuid);
+	std::string sql("SELECT COUNT(*) FROM LIMIT_DMUS__ELEMENTS WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = '");
+	sql += *dmu_category.code;
+	sql += "' AND LIMIT_DMUS__DMU_SET_MEMBER_UUID = '";
+	sql += dmu_member_uuid;
 	sql += "'";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
-		boost::format msg("Unable to prepare SELECT statement to search for an existing DMU member.");
+		boost::format msg("Unable to prepare SELECT statement to search for an existing DMU member from the Limit DMUs category table.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 	int step_result = 0;
@@ -314,9 +311,9 @@ bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_mode
 	if (also_confirm_using_cache)
 	{
 		// Safety check: Cache should match database
-		if (getIdentifier(dmu_member_uuid, *dmu_category.uuid).IsEmpty() == exists)
+		if (getIdentifier(*dmu_category.code, dmu_member_uuid).IsEmpty() == exists)
 		{
-			boost::format msg("Cache of DMU members is out-of-sync.");
+			boost::format msg("Cache of the Limit DMUs member table is out-of-sync.");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 	}
