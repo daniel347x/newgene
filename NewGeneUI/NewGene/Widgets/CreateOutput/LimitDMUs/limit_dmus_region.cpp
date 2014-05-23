@@ -91,16 +91,68 @@ void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB w
 
     Empty();
 
-//    std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](WidgetInstanceIdentifier const & identifier)
-//    {
-//        if (identifier.uuid && identifier.code && identifier.longhand)
-//        {
-//            WidgetInstanceIdentifier new_identifier(identifier);
-//            NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this, new_identifier, outp );
-//            tmpGrp->setTitle(identifier.longhand->c_str());
-//            layout()->addWidget(tmpGrp);
-//        }
-//    });
+    UIInputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    UIMessager messager(project);
+
+    if (!ui->listView_limit_dmus_top_pane)
+    {
+        boost::format msg("Invalid top pane list view in Limit DMUs widget.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_top_pane->model());
+    if (oldModel != nullptr)
+    {
+        delete oldModel;
+    }
+
+    QItemSelectionModel * oldSelectionModel = ui->listView_limit_dmus_top_pane->selectionModel();
+    QStandardItemModel * model = new QStandardItemModel(ui->listView_limit_dmus_top_pane);
+
+    std::vector<dmu_category_limit_members_info_tuple> & dmu_category_limit_members_info = dmu_limit_info.dmu_category_limit_members_info;
+
+    int index = 0;
+    for (auto & dmu_category_tuple : dmu_category_limit_members_info)
+    {
+        WidgetInstanceIdentifier const & dmu_category = std::get<0>(dmu_category_tuple);
+        bool const is_limited = std::get<1>(dmu_category_tuple);
+        WidgetInstanceIdentifiers const & dmu_set_members_all = std::get<2>(dmu_category_tuple);
+        WidgetInstanceIdentifiers const & dmu_set_members_not_limited = std::get<3>(dmu_category_tuple);
+        WidgetInstanceIdentifiers const & dmu_set_members_limited = std::get<4>(dmu_category_tuple);
+        if (dmu_category.code && !dmu_category.code->empty())
+        {
+
+            QStandardItem * item = new QStandardItem();
+            std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+            item->setText(text.c_str());
+            item->setEditable(false);
+            item->setCheckable(false);
+            QVariant v;
+            v.setValue(dmu_and_members);
+            item->setData(v);
+            model->setItem( index, item );
+
+            ++index;
+
+        }
+    });
+
+    model->sort(0);
+
+    ui->listView_limit_dmus_top_pane->setModel(model);
+    if (oldSelectionModel) delete oldSelectionModel;
+
+    //EmptyDmuMembersPane();
+
+    //connect( ui->listView_dmus->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection &, const QItemSelection &)));
 
 }
 
