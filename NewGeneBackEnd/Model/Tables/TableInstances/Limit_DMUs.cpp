@@ -329,33 +329,40 @@ WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db,
 
 	//Executor theExecutor(db);
 
-	bool already_exists = Exists(db, input_model_, dmu_category, dmu_member_uuid);
+	bool already_exists = Exists(db, output_model_, input_model_, dmu_category, dmu_member_uuid);
 	if (already_exists)
 	{
+		output_model_.t_limit_dmus_set_members.getIdentifier(); // fill in
 		return WidgetInstanceIdentifier();
+	}
+
+	WidgetInstanceIdentifier dmu_set_member = input_model_.t_dmu_setmembers.getIdentifier(dmu_member_uuid, *dmu_category.uuid);
+	if (dmu_set_member.IsEmpty())
+	{
+		boost::format msg("Unable to locate existing DMU set member while attempting to insert a new DMU set member in the Limit DMU set members table");
+		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
 	std::string new_uuid(dmu_member_uuid);
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("INSERT INTO DMU_SET_MEMBER (DMU_SET_MEMBER_UUID, DMU_SET_MEMBER_STRING_CODE, DMU_SET_MEMBER_STRING_LONGHAND, DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID) VALUES (");
-	sql += "?, ?, ?, '";
-	sql += *dmu_category.uuid;
+	std::string sql("INSERT INTO LIMIT_DMUS__ELEMENTS (LIMIT_DMUS__DMU_CATEGORY_STRING_CODE, LIMIT_DMUS__DMU_SET_MEMBER_UUID) VALUES (");
+	sql += "'";
+	sql += *dmu_category.code;
+	sql += "', '";
+	sql += dmu_member_uuid;
 	sql += "')";
 	int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
-		boost::format msg("Unable to prepare INSERT statement to create a new DMU member: %1%");
+		boost::format msg("Unable to prepare INSERT statement to create a new DMU member for the Limit DMUs member table: %1%");
 		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-	sqlite3_bind_text(stmt, 1, dmu_member_uuid.c_str(), -1, SQLITE_TRANSIENT);
-	sqlite3_bind_text(stmt, 2, dmu_member_code.c_str(), -1, SQLITE_TRANSIENT);
-	sqlite3_bind_text(stmt, 3, dmu_member_description.c_str(), -1, SQLITE_TRANSIENT);
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
 	if (step_result != SQLITE_DONE)
 	{
-		boost::format msg("Unable to execute INSERT statement to create a new DMU member: %1%");
+		boost::format msg("Unable to execute INSERT statement to create a new DMU member in the Limit DMUs member table: %1%");
 		msg % sqlite3_errstr(step_result);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
@@ -366,12 +373,11 @@ WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db,
 	}
 
 	// Append to cache
-	WidgetInstanceIdentifier dmu_member(dmu_member_uuid, dmu_category, dmu_member_code.c_str(), dmu_member_description.c_str(), 0);
-	identifiers_map[*dmu_category.uuid].push_back(dmu_member);
+	identifiers_map[*dmu_category.code].push_back(dmu_set_member);
 
 	//theExecutor.success();
 
-	return dmu_member;
+	return dmu_set_member;
 
 }
 
