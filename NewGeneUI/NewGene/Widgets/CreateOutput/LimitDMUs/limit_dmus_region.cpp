@@ -137,9 +137,9 @@ void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB w
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
-			QVariant v;
-			//v.setValue(dmu_and_members);
-			item->setData(v);
+            QVariant v;
+            v.setValue(dmu_category);
+            item->setData(v);
 			model->setItem( index, item );
 
 			++index;
