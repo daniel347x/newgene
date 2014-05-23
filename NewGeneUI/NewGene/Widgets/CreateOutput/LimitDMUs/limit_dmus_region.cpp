@@ -155,7 +155,7 @@ void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB w
 
     EmptyDmuMembersPanes();
 
-	//connect( ui->listView_dmus->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection &, const QItemSelection &)));
+    connect( ui->listView_limit_dmus_top_pane->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection &, const QItemSelection &)));
 
 }
 
@@ -257,6 +257,40 @@ void limit_dmus_region::EmptyBottomRightPane()
 
         delete dmuSetMembersProxyModel;
         dmuSetMembersProxyModel = nullptr;
+
+    }
+
+}
+
+void limit_dmus_region::ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+{
+
+    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    UIMessager messager(project);
+
+    if (!ui->listView_limit_dmus_top_pane || !ui->listView_limit_dmus_bottom_left_pane || !ui->listView_limit_dmus_bottom_right_pane)
+    {
+        boost::format msg("Invalid list view in Limit DMU's tab.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    if(!selected.indexes().isEmpty())
+    {
+
+        QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_top_pane->model());
+        QModelIndex selectedIndex = selected.indexes().first();
+        QVariant dmu_category_variant = dmuModel->item(selectedIndex.row())->data();
+        WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
+
+        //ResetDmuMembersPane(dmu_category, dmu_members);
 
     }
 

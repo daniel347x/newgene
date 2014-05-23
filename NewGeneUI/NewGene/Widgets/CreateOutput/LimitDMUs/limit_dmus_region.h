@@ -32,6 +32,10 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
         void RefreshAllWidgets();
         void WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB);
 
+    private slots:
+
+        void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+
     protected:
 
         void changeEvent( QEvent * e );
