@@ -61,7 +61,7 @@ bool Table__Limit_DMUS__Categories::Exists(sqlite3 * db, OutputModel & output_mo
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT COUNT(*) FROM LIMIT_DMUS__CATEGORIES WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = '");
+	std::string sql("SELECT COUNT(*) FROM `LIMIT_DMUS__CATEGORIES` WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = '");
 	sql += dmu_category_code;
 	sql += "'";
 	int error_or_success_code = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
