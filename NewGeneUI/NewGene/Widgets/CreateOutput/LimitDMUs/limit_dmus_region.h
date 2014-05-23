@@ -47,6 +47,10 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
         void EmptyBottomLeftPane();
         void EmptyBottomRightPane();
 
+        void ResetDmuMembersPanes(WidgetInstanceIdentifier const & dmu_category, bool const is_limited, WidgetInstanceIdentifiers const & dmu_set_members__all, WidgetInstanceIdentifiers const & dmu_set_members_not_limited, dmu_set_members__limited);
+        void ResetBottomLeftPane(WidgetInstanceIdentifiers const & dmu_set_members__not_limited);
+        void ResetBottomRightPane(WidgetInstanceIdentifiers const & dmu_set_members__limited);
+
     private:
 
         Ui::limit_dmus_region * ui;

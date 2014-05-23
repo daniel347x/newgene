@@ -8,6 +8,9 @@
 #include <QStandardItemModel>
 #include "../../Utilities/qsortfilterproxymodel_numberslast.h"
 
+#include <algorithm>
+#include <iterator>
+
 limit_dmus_region::limit_dmus_region(QWidget *parent) :
 	QWidget(parent),
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, LIMIT_DMUS_TAB, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
@@ -290,9 +293,102 @@ void limit_dmus_region::ReceiveDMUSelectionChanged(const QItemSelection & select
         QVariant dmu_category_variant = dmuModel->item(selectedIndex.row())->data();
         WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
 
-        //ResetDmuMembersPane(dmu_category, dmu_members);
+        WidgetInstanceIdentifiers dmu_set_members__all = project.model().backend().getInputModel().t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
+        bool is_limited = project.model().backend().t_limit_dmus_categories.Exists(project.model().getDb(), project.model(), project.model().getInputModel(), *dmu_category.code);
+        WidgetInstanceIdentifiers dmu_set_members__limited = project.model().backend().t_limit_dmus_set_members.getIdentifiers(*dmu_category.code);
+        std::sort(dmu_set_members__all.begin(), dmu_set_members__all.end());
+        std::sort(dmu_set_members__limited.begin(), dmu_set_members__limited.end());
+
+        WidgetInstanceIdentifiers dmu_set_members_not_limited;
+        std::set_difference(dmu_set_members__all.cbegin(), dmu_set_members__all.cend(), dmu_set_members__limited.cbegin(), dmu_set_members__limited.cend(), std::inserter(dmu_set_members_not_limited, dmu_set_members_not_limited.begin()));
+
+        ResetDmuMembersPanes(dmu_category, is_limited, dmu_set_members__all, dmu_set_members_not_limited, dmu_set_members__limited);
 
     }
+
+}
+
+void limit_dmus_region::ResetDmuMembersPanes(WidgetInstanceIdentifier const & dmu_category, bool const is_limited, WidgetInstanceIdentifiers const & dmu_set_members__all, WidgetInstanceIdentifiers const & dmu_set_members_not_limited, dmu_set_members__limited)
+{
+
+    EmptyDmuMembersPanes();
+
+    ResetBottomLeftPane();
+    ResetBottomRightPane();
+
+}
+
+void limit_dmus_region::ResetBottomLeftPane(WidgetInstanceIdentifiers const & dmu_set_members__not_limited)
+{
+
+    QItemSelectionModel * oldSelectionModel = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
+    QStandardItemModel * model = new QStandardItemModel();
+
+    int index = 0;
+    for (auto & dmu_member : dmu_set_members__not_limited)
+    {
+        if (dmu_member.uuid && !dmu_member.uuid->empty())
+        {
+
+            std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
+
+            QStandardItem * item = new QStandardItem();
+            item->setText(text.c_str());
+            item->setEditable(false);
+            item->setCheckable(true);
+            QVariant v;
+            v.setValue(dmu_member);
+            item->setData(v);
+            model->setItem( index, item );
+
+            ++index;
+
+        }
+    });
+
+    QSortFilterProxyModel_NumbersLast *proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_limit_dmus_bottom_left_pane);
+    proxyModel->setDynamicSortFilter(true);
+    proxyModel->setSourceModel(model);
+    proxyModel->sort(0);
+    ui->listView_limit_dmus_bottom_left_pane->setModel(proxyModel);
+    if (oldSelectionModel) delete oldSelectionModel;
+
+}
+
+void limit_dmus_region::ResetBottomRightPane(WidgetInstanceIdentifiers const & dmu_set_members__limited)
+{
+
+    QItemSelectionModel * oldSelectionModel = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
+    QStandardItemModel * model = new QStandardItemModel();
+
+    int index = 0;
+    for (auto & dmu_member : dmu_set_members__limited)
+    {
+        if (dmu_member.uuid && !dmu_member.uuid->empty())
+        {
+
+            std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
+
+            QStandardItem * item = new QStandardItem();
+            item->setText(text.c_str());
+            item->setEditable(false);
+            item->setCheckable(true);
+            QVariant v;
+            v.setValue(dmu_member);
+            item->setData(v);
+            model->setItem( index, item );
+
+            ++index;
+
+        }
+    });
+
+    QSortFilterProxyModel_NumbersLast *proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_limit_dmus_bottom_right_pane);
+    proxyModel->setDynamicSortFilter(true);
+    proxyModel->setSourceModel(model);
+    proxyModel->sort(0);
+    ui->listView_limit_dmus_bottom_right_pane->setModel(proxyModel);
+    if (oldSelectionModel) delete oldSelectionModel;
 
 }
 
