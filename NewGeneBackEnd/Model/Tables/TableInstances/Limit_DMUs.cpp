@@ -332,8 +332,7 @@ WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db,
 	bool already_exists = Exists(db, output_model_, input_model_, dmu_category, dmu_member_uuid);
 	if (already_exists)
 	{
-		output_model_.t_limit_dmus_set_members.getIdentifier(); // fill in
-		return WidgetInstanceIdentifier();
+		return output_model_.t_limit_dmus_set_members.getIdentifier(dmu_member_uuid, *dmu_category.code);
 	}
 
 	WidgetInstanceIdentifier dmu_set_member = input_model_.t_dmu_setmembers.getIdentifier(dmu_member_uuid, *dmu_category.uuid);
