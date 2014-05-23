@@ -6,6 +6,7 @@
 #include "../Project/uioutputproject.h"
 
 #include <QStandardItemModel>
+#include "../../Utilities/qsortfilterproxymodel_numberslast.h"
 
 limit_dmus_region::limit_dmus_region(QWidget *parent) :
 	QWidget(parent),
@@ -152,7 +153,7 @@ void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB w
 	ui->listView_limit_dmus_top_pane->setModel(model);
 	if (oldSelectionModel) delete oldSelectionModel;
 
-	//EmptyDmuMembersPane();
+    EmptyDmuMembersPanes();
 
 	//connect( ui->listView_dmus->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection &, const QItemSelection &)));
 
@@ -161,15 +162,105 @@ void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB w
 void limit_dmus_region::Empty()
 {
 
-	//    QLayoutItem *child;
-//    while ((child = layout()->takeAt(0)) != 0)
-//    {
-//        delete child->widget();
-//        delete child;
-//    }
+    if (!ui->listView_limit_dmus_top_pane || !ui->listView_limit_dmus_bottom_left_pane || !ui->listView_limit_dmus_bottom_right_pane)
+    {
+        boost::format msg("Invalid list view in Limit DMU's tab.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    QSortFilterProxyModel * oldModel = nullptr;
+    QAbstractItemModel * oldSourceModel = nullptr;
+    QStandardItemModel * oldDmuModel = nullptr;
+    QItemSelectionModel * oldSelectionModel = nullptr;
+
+    EmptyDmuMembersPanes();
+
+    oldDmuModel = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_top_pane->model());
+    if (oldDmuModel != nullptr)
+    {
+        delete oldDmuModel;
+        oldDmuModel = nullptr;
+    }
+
+    oldSelectionModel = ui->listView_limit_dmus_top_pane->selectionModel();
+    if (oldSelectionModel != nullptr)
+    {
+        delete oldSelectionModel;
+        oldSelectionModel = nullptr;
+    }
 
 }
 
+void limit_dmus_region::EmptyDmuMembersPanes()
+{
+
+    EmptyBottomLeftPane();
+    EmptyBottomRightPane();
+
+}
+
+void limit_dmus_region::EmptyBottomLeftPane()
+{
+
+    QItemSelectionModel * oldSelectionModel = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
+    if (oldSelectionModel != nullptr)
+    {
+        delete oldSelectionModel;
+        oldSelectionModel = nullptr;
+    }
+
+    QSortFilterProxyModel_NumbersLast * dmuSetMembersProxyModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_limit_dmus_bottom_left_pane->model());
+    if (dmuSetMembersProxyModel != nullptr)
+    {
+
+        QAbstractItemModel * dmuSetMembersSourceModel = dmuSetMembersProxyModel->sourceModel();
+        if (dmuSetMembersSourceModel != nullptr)
+        {
+
+            delete dmuSetMembersSourceModel;
+            dmuSetMembersSourceModel = nullptr;
+
+        }
+
+        delete dmuSetMembersProxyModel;
+        dmuSetMembersProxyModel = nullptr;
+
+    }
+
+}
+
+void limit_dmus_region::EmptyBottomRightPane()
+{
+
+    QItemSelectionModel * oldSelectionModel = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
+    if (oldSelectionModel != nullptr)
+    {
+        delete oldSelectionModel;
+        oldSelectionModel = nullptr;
+    }
+
+    QSortFilterProxyModel_NumbersLast * dmuSetMembersProxyModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_limit_dmus_bottom_right_pane->model());
+    if (dmuSetMembersProxyModel != nullptr)
+    {
+
+        QAbstractItemModel * dmuSetMembersSourceModel = dmuSetMembersProxyModel->sourceModel();
+        if (dmuSetMembersSourceModel != nullptr)
+        {
+
+            delete dmuSetMembersSourceModel;
+            dmuSetMembersSourceModel = nullptr;
+
+        }
+
+        delete dmuSetMembersProxyModel;
+        dmuSetMembersProxyModel = nullptr;
+
+    }
+
+}
 
 void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 {
