@@ -112,7 +112,7 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTRO
 }
 
 /************************************************************************/
-// DATETIME_WIDGET
+// TIMERANGE_REGION_WIDGET
 /************************************************************************/
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET widget)
 {
