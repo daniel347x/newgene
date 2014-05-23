@@ -12,6 +12,7 @@
 #include "TableInstances/KAdCount.h"
 #include "TableInstances/TimeRange.h"
 #include "TableInstances/VariableGroupData.h"
+#include "TableInstances/Limit_DMUs.h"
 #include <vector>
 
 class TableManager

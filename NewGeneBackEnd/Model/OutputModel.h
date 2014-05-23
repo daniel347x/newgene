@@ -284,6 +284,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 		Table_KAD_COUNT t_kad_count;
 		Table_TIME_RANGE t_time_range;
 		Table_GENERAL_OPTIONS t_general_options;
+		Table__Limit_DMUS__Categories t_limit_dmus_categories;
+		Table__Limit_DMUs__Elements t_limit_dmus_set_members;
 
 	protected:
 

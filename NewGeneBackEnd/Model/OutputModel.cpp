@@ -47,6 +47,9 @@ void OutputModel::LoadTables()
 
 		t_time_range.Load(db, this, input_model.get());
 		t_general_options.Load(db, this, input_model.get());
+
+		t_limit_dmus_categories.Load(db, this, input_model.get());
+		t_limit_dmus_set_members.Load(db, this, input_model.get());
 	}
 
 }
