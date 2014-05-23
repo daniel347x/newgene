@@ -335,7 +335,7 @@ void limit_dmus_region::ResetBottomLeftPane(WidgetInstanceIdentifiers const & dm
 			QStandardItem * item = new QStandardItem();
 			item->setText(text.c_str());
 			item->setEditable(false);
-			item->setCheckable(true);
+            item->setCheckable(false);
 			QVariant v;
 			v.setValue(dmu_member);
 			item->setData(v);
@@ -372,7 +372,7 @@ void limit_dmus_region::ResetBottomRightPane(WidgetInstanceIdentifiers const & d
 			QStandardItem * item = new QStandardItem();
 			item->setText(text.c_str());
 			item->setEditable(false);
-			item->setCheckable(true);
+            item->setCheckable(false);
 			QVariant v;
 			v.setValue(dmu_member);
 			item->setData(v);
