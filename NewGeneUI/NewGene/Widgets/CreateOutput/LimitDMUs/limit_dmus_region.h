@@ -36,7 +36,11 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
 		void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 
-	protected:
+        void on_pushButton_limit_dmus_move_right_clicked();
+
+        void on_pushButton_limit_dmus_move_left_clicked();
+
+protected:
 
 		void changeEvent( QEvent * e );
 		void Empty();

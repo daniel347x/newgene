@@ -503,3 +503,13 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 	});
 
 }
+
+void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
+{
+
+}
+
+void limit_dmus_region::on_pushButton_limit_dmus_move_left_clicked()
+{
+
+}
