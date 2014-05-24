@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include <QModelIndexList>
+
 limit_dmus_region::limit_dmus_region(QWidget *parent) :
 	QWidget(parent),
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, LIMIT_DMUS_TAB, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
@@ -506,6 +508,40 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 
 void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 {
+
+    QItemSelectionModel * dmus_selectionModel = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
+    if (dmus_selectionModel == nullptr)
+    {
+        boost::format msg("Invalid selection in Limit DMU's bottom-left pane.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    QStandardItemModel * dmusModel = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_left_pane->model());
+    if (dmusModel == nullptr)
+    {
+        boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    WidgetInstanceIdentifiers dmuCategoriesToMoveToLimitingList;
+    QModelIndexList selectedDMUs = dmus_selectionModel->selectedRows();
+    for (auto & selectedDmuIndex : selectedDMUs)
+    {
+        QVariant dmu_category_variant = dmusModel->item(selectedDmuIndex.row())->data();
+        WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
+        dmuCategoriesToMoveToLimitingList.push_back(dmu_category);
+    }
+
+    if (!dmuCategoriesToMoveToLimitingList.empty())
+    {
+        // Submit the action
+    }
 
 }
 
