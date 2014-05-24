@@ -1420,7 +1420,7 @@ bool Importer::ValidateMapping()
 
 }
 
-void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg)
+void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, std::string & errorMsg)
 {
 	bool is_quoted_field = false;
 	bool quote_type_is_single = false;
@@ -1761,7 +1761,7 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 	}
 
 	// read it, and do nothing with it
-	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition, errorMsg);
+	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, errorMsg);
 
 	if (stop)
 	{
@@ -1776,7 +1776,7 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 
 }
 
-int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, long & badreadlines, std::string & errorMsg, Messager & messager)
+int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg, Messager & messager)
 {
 	int current_lines_read = 0;
 
@@ -2093,7 +2093,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			import_definition.input_schema.ReorderAccToColumnNames(colnames);
 
 			bool bad = false;
-			std::string errorMsg;
 			std::for_each(import_definition.input_schema.schema.cbegin(), import_definition.input_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
 			{
 
@@ -2209,7 +2208,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			long saved_linenum = linenum;
 
 			std::string blockErrorMsg;
-			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum, badreadlines, blockErrorMsg, messager);
+			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum, blockErrorMsg, messager);
 
 			if (CheckCancelled())
 			{
@@ -2299,7 +2298,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 
 	// For all data types, retrieve the full field as a string, to start
 	std::string stringFieldErrorMsg;
-	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition, stringFieldErrorMsg);
+	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, stringFieldErrorMsg);
 
 	if (stop)
 	{

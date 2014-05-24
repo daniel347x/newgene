@@ -16,10 +16,10 @@
 // ACTION_REFRESH_VG
 /************************************************************************/
 
-void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTION_CREATE_VG const & action_request, InputProject & project)
+void UIActionManager::CreateVG(Messager & messager__, WidgetActionItemRequest_ACTION_CREATE_VG const & action_request, InputProject & project)
 {
 
-	if (FailIfBusy(messager))
+	if (FailIfBusy(messager__))
 	{
 		return;
 	}
@@ -32,7 +32,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 	if (!action_request.items)
 	{
 		boost::format msg("There are no new VGs to add.");
-		messager.ShowMessageBox(msg.str());
+		messager__.ShowMessageBox(msg.str());
 		return;
 	}
 
@@ -41,7 +41,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 	if (!action_request.items || action_request.items->size() == 0)
 	{
 		boost::format msg("There are no new VGs to add.");
-		messager.ShowMessageBox(msg.str());
+		messager__.ShowMessageBox(msg.str());
 		return;
 	}
 
@@ -53,7 +53,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 				DataChangeMessage change_response(&project);
 
-				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
 					Executor executor(input_model.getDb());
@@ -61,7 +61,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 					if (!instanceActionItem.second)
 					{
 						boost::format msg("Missing the new VG to create.");
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 						return;
 					}
 
@@ -75,7 +75,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 					if (vg_strings.size() == 0)
 					{
 						boost::format msg("Incorrect internal data format for VG creation.");
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 						return;
 					}
 					std::string const & new_vg_code = vg_strings[0];
@@ -87,7 +87,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 					{
 						boost::format msg("The VG code '%1%' already exists.");
 						msg % boost::to_upper_copy(new_vg_code);
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 						return;
 					}
 
@@ -127,7 +127,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 				});
 
-				messager.EmitChangeMessage(change_response);
+				messager__.EmitChangeMessage(change_response);
 
 			}
 			break;

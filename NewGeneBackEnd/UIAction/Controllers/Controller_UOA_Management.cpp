@@ -15,10 +15,10 @@
 // ACTION_DELETE_UOA
 /************************************************************************/
 
-void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION_ADD_UOA const & action_request, InputProject & project)
+void UIActionManager::AddUOA(Messager & messager__, WidgetActionItemRequest_ACTION_ADD_UOA const & action_request, InputProject & project)
 {
 
-	if (FailIfBusy(messager))
+	if (FailIfBusy(messager__))
 	{
 		return;
 	}
@@ -31,7 +31,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 	if (!action_request.items)
 	{
 		boost::format msg("There are no new UOAs to add.");
-		messager.ShowMessageBox(msg.str());
+		messager__.ShowMessageBox(msg.str());
 		return;
 	}
 
@@ -40,7 +40,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 	if (!action_request.items || action_request.items->size() == 0)
 	{
 		boost::format msg("There are no new UOAs to add.");
-		messager.ShowMessageBox(msg.str());
+		messager__.ShowMessageBox(msg.str());
 		return;
 	}
 
@@ -52,7 +52,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 
 				DataChangeMessage change_response(&project);
 
-				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
 					Executor executor(input_model.getDb());
@@ -60,7 +60,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 					if (!instanceActionItem.second)
 					{
 						boost::format msg("Missing the new UOA to create.");
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 						return;
 					}
 
@@ -78,7 +78,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 					if (dmu_categories.size() == 0)
 					{
 						boost::format msg("At least one DMU category is required to create a new UOA.");
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 						return;
 					}
 
@@ -88,7 +88,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 					{
 						boost::format msg("The UOA code '%1%' already exists.");
 						msg % boost::to_upper_copy(new_uoa_code);
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 						return;
 					}
 
@@ -102,7 +102,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 
 					boost::format msg("UOA '%1%' successfully created.");
 					msg % boost::to_upper_copy(new_uoa_code);
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 
 					// ***************************************** //
 					// Prepare data to send back to user interface
@@ -127,7 +127,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 
 				});
 
-				messager.EmitChangeMessage(change_response);
+				messager__.EmitChangeMessage(change_response);
 
 			}
 			break;

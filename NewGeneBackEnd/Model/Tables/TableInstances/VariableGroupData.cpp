@@ -167,12 +167,12 @@ Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName
 
 	if (!db)
 	{
-		return false;
+		return nullptr;
 	}
 
 	if (!input_model_)
 	{
-		return false;
+		return nullptr;
 	}
 
 	auto vg_instance_table = std::find_if(input_model_->t_vgp_data_vector.begin(), input_model_->t_vgp_data_vector.end(), [&](std::unique_ptr<Table_VariableGroupData> & test_vg_table)
@@ -319,7 +319,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	std::string table_name = Table_VariableGroupData::TableNameFromVGCode(*vg.code);
+	//std::string table_name = Table_VariableGroupData::TableNameFromVGCode(*vg.code);
 
 	definition.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	definition.input_file = filepathname;

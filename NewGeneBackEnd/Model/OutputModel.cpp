@@ -280,7 +280,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	msg_starttime % time_start_formatted;
 	messager.AppendKadStatusText(msg_starttime.str(), nullptr);
 
-	InputModel & input_model = model->getInputModel();
+	//InputModel & input_model = model->getInputModel();
 
 	bool delete_tables_ = delete_tables;
 	BOOST_SCOPE_EXIT(&input_model, &delete_tables_)
@@ -320,6 +320,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	timerange_start = timerange_start_identifier.second;
 	found = false;
+
 	WidgetInstanceIdentifier_Int64_Pair timerange_end_identifier;
 	found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "e", timerange_end_identifier);
 
@@ -652,7 +653,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		// Create the schema for the output
 		// ********************************************************************************************************************************************************* //
-		random_sampling_schema = KadSamplerBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
+		random_sampling_schema = KadSamplerBuildOutputSchema();
 		if (failed || CheckCancelled()) { return; }
 
 		final_result = random_sampling_schema;
@@ -1428,7 +1429,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Copy(SQLExecutor const & rhs)
 	this->db = rhs.db;
 	this->failed = rhs.failed;
 	this->sql = rhs.sql;
-	this->sql_error = sql_error;
+	this->sql_error = rhs.sql_error;
 	this->statement_is_prepared = rhs.statement_is_prepared;
 	this->statement_type = rhs.statement_type;
 	this->stmt = rhs.stmt;
@@ -1449,7 +1450,7 @@ void OutputModel::OutputGenerator::SQLExecutor::CopyOwned(SQLExecutor & rhs)
 	this->db = rhs.db;
 	this->failed = rhs.failed;
 	this->sql = rhs.sql;
-	this->sql_error = sql_error;
+	this->sql_error = rhs.sql_error;
 	this->statement_is_prepared = rhs.statement_is_prepared;
 	this->statement_type = rhs.statement_type;
 	this->stmt = rhs.stmt;
@@ -4408,8 +4409,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadSamplerBuildOutputSchema(std::vector<ColumnsInTempView> const &
-		primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadSamplerBuildOutputSchema()
 {
 
 	// **************************************************************************************** //
@@ -4433,7 +4433,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	result_columns.has_no_datetime_columns = false;
 
 
-	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_raw_data_columns[top_level_vg_index];
+	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[top_level_vg_index];
 
 	// **************************************************************************************** //
 	// Start with the primary key columns of multiplicity 1.
@@ -4533,7 +4533,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 	{
 
-		ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_raw_data_columns[top_level_vg_index];
+		ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[top_level_vg_index];
 
 		WidgetInstanceIdentifiers const & variables_selected =
 			(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
@@ -4600,8 +4600,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	// **************************************************************************************** //
 
 	int primary_group_number = 0;
-	std::for_each(primary_variable_groups_raw_data_columns.cbegin(),
-				  primary_variable_groups_raw_data_columns.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	std::for_each(primary_variable_groups_column_info.cbegin(),
+				  primary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
 
 		if (primary_group_number == top_level_vg_index)
@@ -4938,7 +4938,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(KadSampler & all
 					// Execute the insert of the row into the table
 					if ((step_result = sqlite3_step(allWeightings.insert_random_sample_stmt)) != SQLITE_DONE)
 					{
-						std::string sql_error = sqlite3_errmsg(db);
+						sql_error = sqlite3_errmsg(db);
 						boost::format msg("Unable to execute prepared insert query to insert a new random sample: %1%");
 						msg % sql_error;
 						errorMessages.push_back(msg.str());

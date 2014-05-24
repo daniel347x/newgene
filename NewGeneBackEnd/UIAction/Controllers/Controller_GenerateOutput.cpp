@@ -11,10 +11,10 @@
 /************************************************************************/
 // ACTION_GENERATE_OUTPUT
 /************************************************************************/
-void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequest_ACTION_GENERATE_OUTPUT const & action_request, OutputProject & project)
+void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRequest_ACTION_GENERATE_OUTPUT const & action_request, OutputProject & project)
 {
 
-	if (FailIfBusy(messager))
+	if (FailIfBusy(messager__))
 	{
 		return;
 	}
@@ -45,7 +45,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				is_cancelled = false;
 			} BOOST_SCOPE_EXIT_END
 
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &project, &change_response](InstanceActionItem const & instanceActionItem)
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager__, &project, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
 				if (!instanceActionItem.second)
@@ -71,7 +71,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				// ***************************************** //
 				// Generate output
 				// ***************************************** //
-				OutputModel::OutputGenerator output_generator(messager, output_model, project);
+				OutputModel::OutputGenerator output_generator(messager__, output_model, project);
 				try
 				{
 					output_generator.GenerateOutput(change_response);
@@ -81,28 +81,28 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 					if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
 					{
 						boost::format msg(error_desc->c_str());
-						messager.AppendKadStatusText(msg.str().c_str(), &output_generator);
+						messager__.AppendKadStatusText(msg.str().c_str(), &output_generator);
 					}
 					else
 					{
 						std::string the_error = boost::diagnostic_information(e);
 						boost::format msg("Error: %1%");
 						msg % the_error.c_str();
-						messager.AppendKadStatusText(msg.str().c_str(), &output_generator);
+						messager__.AppendKadStatusText(msg.str().c_str(), &output_generator);
 					}
 				}
 				catch (std::exception & e)
 				{
 					boost::format msg("Exception thrown: %1%");
 					msg % e.what();
-					messager.AppendKadStatusText(msg.str().c_str(), &output_generator);
+					messager__.AppendKadStatusText(msg.str().c_str(), &output_generator);
 				}
 				if (!output_generator.done)
 				{
-					messager.UpdateStatusBarText("", &output_generator);
+					messager__.UpdateStatusBarText("", &output_generator);
 					if (OutputModel::OutputGenerator::cancelled)
 					{
-						messager.AppendKadStatusText("Operation cancelled.", &output_generator);
+						messager__.AppendKadStatusText("Operation cancelled.", &output_generator);
 					}
 				}
 
@@ -124,7 +124,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 
 			});
 
-			messager.EmitChangeMessage(change_response);
+			messager__.EmitChangeMessage(change_response);
 
 		}
 		break;

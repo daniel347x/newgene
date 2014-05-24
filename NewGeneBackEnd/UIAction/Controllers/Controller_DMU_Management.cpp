@@ -18,10 +18,10 @@
 // ACTION_REFRESH_DMUS_FROM_FILE
 /************************************************************************/
 
-void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION_ADD_DMU const & action_request, InputProject & project)
+void UIActionManager::AddDMU(Messager & messager__, WidgetActionItemRequest_ACTION_ADD_DMU const & action_request, InputProject & project)
 {
 
-	if (FailIfBusy(messager))
+	if (FailIfBusy(messager__))
 	{
 		return;
 	}
@@ -34,7 +34,7 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 	if (!action_request.items)
 	{
 		boost::format msg("There are no new DMU categories to add.");
-		messager.ShowMessageBox(msg.str());
+		messager__.ShowMessageBox(msg.str());
 		return;
 	}
 
@@ -43,7 +43,7 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 	if (!action_request.items || action_request.items->size() == 0)
 	{
 		boost::format msg("There are no new DMU categories to add.");
-		messager.ShowMessageBox(msg.str());
+		messager__.ShowMessageBox(msg.str());
 		return;
 	}
 
@@ -55,7 +55,7 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 
 			DataChangeMessage change_response(&project);
 
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
 				Executor executor(input_model.getDb());
@@ -63,7 +63,7 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 				if (!instanceActionItem.second)
 				{
 					boost::format msg("Missing a new DMU category.");
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 
@@ -77,7 +77,7 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 				if (dmu_strings.size() != 2)
 				{
 					boost::format msg("A DMU category name, and descriptive text, are required.");
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 
@@ -89,7 +89,7 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 				{
 					boost::format msg("The DMU category '%1%' already exists.");
 					msg % boost::to_upper_copy(proposed_new_dmu);
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 
@@ -132,7 +132,7 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 
 			});
 
-			messager.EmitChangeMessage(change_response);
+			messager__.EmitChangeMessage(change_response);
 	
 		}
 			break;

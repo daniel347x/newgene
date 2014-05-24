@@ -539,8 +539,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void KadSamplerFillDataForChildGroups(KadSampler & allWeightings);
 				void KadSampler_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, KadSampler & allWeightings,
 						VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages);
-				SqlAndColumnSet KadSamplerBuildOutputSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns,
-						std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info);
+				SqlAndColumnSet KadSamplerBuildOutputSchema();
 				void KadSamplerCreateOutputTable();
 				void KadSamplerWriteToOutputTable(KadSampler & allWeightings, std::vector<std::string> & errorMessages);
 				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);

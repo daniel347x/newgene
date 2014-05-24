@@ -530,7 +530,7 @@ class Importer
 	
 		bool ValidateMapping();
 		void InitializeFields();
-		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, long & badreadlines, std::string & errorMsg, Messager & messager);
+		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg, Messager & messager);
 		void ReadFieldFromFile(char * & current_line_ptr, int & current_lines_read, int const & current_column_index, char * & parsed_line_ptr, bool & stop, SchemaEntry const & column, long const line, int const col, bool const is_final_col, std::string & errorMsg);
 
 	public:
@@ -542,7 +542,7 @@ class Importer
 	protected:
 
 		static void ReadOneDataField(SchemaEntry const &column, BaseField & theField, char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, long const line, int const col, std::string & errorMsg);
-		static void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg);
+		static void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, std::string & errorMsg);
 		static void EatWhitespace(char * & current_line_ptr, ImportDefinition const & import_definition);
 		static void EatSeparator(char * & current_line_ptr, ImportDefinition const & import_definition);
 
