@@ -11,6 +11,7 @@
 #include "../UIAction/dmumanagement.h"
 #include "../UIAction/uoamanagement.h"
 #include "../UIAction/vgmanagement.h"
+#include "../UIAction/limitdmus.h"
 #include <QStandardItem>
 
 OutputProjectWorkQueue::OutputProjectWorkQueue(QObject * parent)
@@ -207,7 +208,7 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 /************************************************************************/
 void OutputProjectWorkQueue::LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request)
 {
-    get()->getWorkService().post(LimitDMUs(action_request, this));
+	get()->getWorkService().post(LimitDMUs(action_request, this));
 }
 
 /************************************************************************/
