@@ -446,25 +446,59 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 
 									WidgetInstanceIdentifier dmu_category(change.parent_identifier);
 
-									QStandardItemModel * dmusModelBottomLeft = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_left_pane->model());
-									if (dmusModelBottomLeft == nullptr)
-									{
-										boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
-										QMessageBox msgBox;
-										msgBox.setText( msg.str().c_str() );
-										msgBox.exec();
-										return;
-									}
+                                    QSortFilterProxyModel_NumbersLast * modelLeft = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_limit_dmus_bottom_left_pane->model());
+                                    if (modelLeft == nullptr)
+                                    {
+                                        return;
+                                    }
 
-									QStandardItemModel * dmusModelBottomRight = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_right_pane->model());
-									if (dmusModelBottomRight == nullptr)
-									{
-										boost::format msg("Invalid model in Limit DMU's bottom-right pane.");
-										QMessageBox msgBox;
-										msgBox.setText( msg.str().c_str() );
-										msgBox.exec();
-										return;
-									}
+                                    QAbstractItemModel * sourceModelLeft = modelLeft->sourceModel();
+                                    if (sourceModelLeft == nullptr)
+                                    {
+                                        return;
+                                    }
+
+                                    QStandardItemModel * dmusModelBottomLeft = nullptr;
+                                    try
+                                    {
+                                        dmusModelBottomLeft = dynamic_cast<QStandardItemModel*>(sourceModelLeft);
+                                    }
+                                    catch (std::bad_cast &)
+                                    {
+                                        // guess not
+                                        boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+                                        QMessageBox msgBox;
+                                        msgBox.setText( msg.str().c_str() );
+                                        msgBox.exec();
+                                        return;
+                                    }
+
+                                    QSortFilterProxyModel_NumbersLast * modelRight = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_limit_dmus_bottom_right_pane->model());
+                                    if (modelRight == nullptr)
+                                    {
+                                        return;
+                                    }
+
+                                    QAbstractItemModel * sourceModelRight = modelRight->sourceModel();
+                                    if (sourceModelRight == nullptr)
+                                    {
+                                        return;
+                                    }
+
+                                    QStandardItemModel * dmusModelBottomRight = nullptr;
+                                    try
+                                    {
+                                        dmusModelBottomRight = dynamic_cast<QStandardItemModel*>(sourceModelRight);
+                                    }
+                                    catch (std::bad_cast &)
+                                    {
+                                        // guess not
+                                        boost::format msg("Invalid model in Limit DMU's bottom-right pane.");
+                                        QMessageBox msgBox;
+                                        msgBox.setText( msg.str().c_str() );
+                                        msgBox.exec();
+                                        return;
+                                    }
 
 									int rowsBottomLeft = dmusModelBottomLeft->rowCount();
 									int rowsBottomRight = dmusModelBottomRight->rowCount();
