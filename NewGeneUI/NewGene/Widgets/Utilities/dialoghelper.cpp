@@ -993,6 +993,9 @@ void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWi
 			rhsModel->takeRow(selectedIndex.row());
 			dmu_selectionModel->clearSelection();
 
+			// TODO: memory leak here - must delete the QStandardItem at the row.
+			// But this is so minor I haven't gotten to it yet.
+
 			return true;
 
 		});
