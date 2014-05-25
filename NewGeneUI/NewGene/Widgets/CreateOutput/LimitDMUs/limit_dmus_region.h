@@ -50,7 +50,8 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
 	private:
 
-		void EmptyDmuMembersPanes();
+        bool GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_category);
+        void EmptyDmuMembersPanes();
 		void EmptyBottomLeftPane();
 		void EmptyBottomRightPane();
 
