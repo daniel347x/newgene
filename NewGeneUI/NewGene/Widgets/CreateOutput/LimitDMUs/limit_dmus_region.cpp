@@ -56,10 +56,18 @@ void limit_dmus_region::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB)));
         connect(this, SIGNAL(LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE)), outp->getConnector(), SLOT(LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE)));
+        if (project)
+        {
+            project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE, false, "");
+        }
     }
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
-		Empty();
+        if (outp)
+        {
+            outp->UnregisterInterestInChanges(this);
+        }
+        Empty();
 	}
 }
 
