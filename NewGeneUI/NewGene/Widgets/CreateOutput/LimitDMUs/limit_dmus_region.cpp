@@ -446,6 +446,67 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 
                                     WidgetInstanceIdentifier dmu_category(change.parent_identifier);
 
+                                    QStandardItemModel * dmusModelBottomLeft = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_left_pane->model());
+                                    if (dmusModelBottomLeft == nullptr)
+                                    {
+                                        boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+                                        QMessageBox msgBox;
+                                        msgBox.setText( msg.str().c_str() );
+                                        msgBox.exec();
+                                        return;
+                                    }
+
+                                    QStandardItemModel * dmusModelBottomRight = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_right_pane->model());
+                                    if (dmusModelBottomRight == nullptr)
+                                    {
+                                        boost::format msg("Invalid model in Limit DMU's bottom-right pane.");
+                                        QMessageBox msgBox;
+                                        msgBox.setText( msg.str().c_str() );
+                                        msgBox.exec();
+                                        return;
+                                    }
+
+                                    int rowsBottomLeft = dmusModelBottomLeft->rowCount();
+                                    int rowsBottomRight = dmusModelBottomRight->rowCount();
+
+                                    WidgetInstanceIdentifiers dmu_set_members_bottom_left;
+                                    for (int n=0; n<rowsBottomLeft; ++n)
+                                    {
+                                        QStandardItem * itemBottomLeft = dmusModelBottomLeft->item(n);
+                                        WidgetInstanceIdentifier dmu_set_member = itemBottomLeft->data().value<WidgetInstanceIdentifier>();
+                                        dmu_set_members_bottom_left.push_back(dmu_set_member);
+                                    }
+
+                                    WidgetInstanceIdentifiers dmu_set_members_bottom_right;
+                                    for (int n=0; n<rowsBottomRight; ++n)
+                                    {
+                                        QStandardItem * itemBottomRight = dmusModelBottomRight->item(n);
+                                        WidgetInstanceIdentifier dmu_set_member = itemBottomRight->data().value<WidgetInstanceIdentifier>();
+                                        dmu_set_members_bottom_right.push_back(dmu_set_member);
+                                    }
+
+                                    WidgetInstanceIdentifiers dmu_set_members_bottom_left__new = change.child_identifiers;
+                                    WidgetInstanceIdentifiers dmu_set_members_bottom_right__new = change.vector_of_identifiers;
+
+                                    std::sort(dmu_set_members_bottom_left.begin(), dmu_set_members_bottom_left.end());
+                                    std::sort(dmu_set_members_bottom_right.begin(), dmu_set_members_bottom_right.end());
+                                    std::sort(dmu_set_members_bottom_left_new.begin(), dmu_set_members_bottom_left_new.end());
+                                    std::sort(dmu_set_members_bottom_right_new.begin(), dmu_set_members_bottom_right_new.end());
+
+                                    WidgetInstanceIdentifiers dmu_set_members__not_limited__to_add;
+                                    WidgetInstanceIdentifiers dmu_set_members__not_limited__to_remove;
+                                    std::set_difference(dmu_set_members_bottom_left__new.cbegin(), dmu_set_members_bottom_left__new.cend(), dmu_set_members_bottom_left.cbegin(), dmu_set_members_bottom_left.cend(),
+                                                   std::inserter(dmu_set_members__not_limited__to_add, dmu_set_members__not_limited__to_add.begin()));
+                                    std::set_difference(dmu_set_members_bottom_left.cbegin(), dmu_set_members_bottom_left.cend(), dmu_set_members_bottom_left__new.cbegin(), dmu_set_members_bottom_left__new.cend(),
+                                                   std::inserter(dmu_set_members__not_limited__to_remove, dmu_set_members__not_limited__to_remove.begin()));
+
+                                    WidgetInstanceIdentifiers dmu_set_members__limited__to_add;
+                                    WidgetInstanceIdentifiers dmu_set_members__limited__to_remove;
+                                    std::set_difference(dmu_set_members_bottom_right__new.cbegin(), dmu_set_members_bottom_right__new.cend(), dmu_set_members_bottom_right.cbegin(), dmu_set_members_bottom_right.cend(),
+                                                   std::inserter(dmu_set_members__limited__to_add, dmu_set_members__limited__to_add.begin()));
+                                    std::set_difference(dmu_set_members_bottom_right.cbegin(), dmu_set_members_bottom_right.cend(), dmu_set_members_bottom_right__new.cbegin(), dmu_set_members_bottom_right__new.cend(),
+                                                   std::inserter(dmu_set_members__limited__to_remove, dmu_set_members__limited__to_remove.begin()));
+
                                 }
 
                             }
