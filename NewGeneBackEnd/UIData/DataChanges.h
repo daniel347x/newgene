@@ -40,6 +40,7 @@ enum DATA_CHANGE_TYPE
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__GENERATE_OUTPUT
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE
+	, DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE
 
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__LAST
 
@@ -217,16 +218,8 @@ class DataChange
 
 		}
 
-		DataChange(DataChange const & rhs)
-			: change_type(rhs.change_type)
-			, change_intention(rhs.change_intention)
-			, parent_identifier(rhs.parent_identifier)
-			, child_identifiers(rhs.child_identifiers)
-			, set_of_identifiers(rhs.set_of_identifiers)
-			, change_packet(rhs.change_packet)
-		{
-
-		}
+		DataChange(DataChange const & rhs) = default;
+		DataChange & operator=(DataChange const & rhs) = default;
 
 		void SetPacket(std::shared_ptr<DataChangePacket> packet_)
 		{
@@ -247,6 +240,7 @@ class DataChange
 		WidgetInstanceIdentifier parent_identifier;
 		WidgetInstanceIdentifiers child_identifiers;
 		std::set<WidgetInstanceIdentifier> set_of_identifiers; // only when needed
+		WidgetInstanceIdentifiers vector_of_identifiers; // only when needed
 
 		std::shared_ptr<DataChangePacket> change_packet;
 

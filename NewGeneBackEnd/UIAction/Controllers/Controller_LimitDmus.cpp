@@ -8,6 +8,9 @@
 #	include <boost/scope_exit.hpp>
 #endif
 
+#include <algorithm>
+#include <iterator>
+
 /************************************************************************/
 // ACTION_KAD_COUNT_CHANGE
 /************************************************************************/
@@ -39,7 +42,7 @@ void UIActionManager::DoLimitDmusChange(Messager & messager, WidgetActionItemReq
 
 				DataChangeMessage change_response(&project);
 
-				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				for(auto const & instanceActionItem : *action_request.items)
 				{
 
 					Executor executor(input_model.getDb());
@@ -49,9 +52,9 @@ void UIActionManager::DoLimitDmusChange(Messager & messager, WidgetActionItemReq
 						return;
 					}
 
-					WidgetInstanceIdentifier const & identifier = instanceActionItem.first;
+					WidgetInstanceIdentifier const & dmu_category = instanceActionItem.first;
 
-					if (!identifier.uuid)
+					if (!dmu_category.uuid)
 					{
 						return;
 					}
@@ -60,23 +63,35 @@ void UIActionManager::DoLimitDmusChange(Messager & messager, WidgetActionItemReq
 					// Retrieve data sent by user interface
 					// ************************************* //
 					WidgetActionItem const & actionItem = *instanceActionItem.second;
-					WidgetActionItem__Spinbox const & actionItemSpinbox = static_cast<WidgetActionItem__Spinbox const &>(actionItem);
+					WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const & actionItemLimitDmuInfo = static_cast<WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const &>(actionItem);
+					WidgetInstanceIdentifiers dmu_set_members__to_add = actionItemLimitDmuInfo.getValue();
 
 					// ***************************************** //
 					// Prepare data to send back to user interface
 					// ***************************************** //
-					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE;
-					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
-					WidgetInstanceIdentifiers child_identifiers;
-					child_identifiers.push_back(identifier);
-					DataChange change(type, intention, WidgetInstanceIdentifier(identifier), child_identifiers);
-					change.SetPacket(std::make_shared<DataChangePacket_int>(actionItemSpinbox.getValue()));
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__RESET_ALL;
+
+					WidgetInstanceIdentifiers dmu_set_members__all = input_model.t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
+					WidgetInstanceIdentifiers dmu_set_members__current_limited = output_model.t_limit_dmus_set_members.getIdentifiers(*dmu_category.code);
+					std::sort(dmu_set_members__all.begin(), dmu_set_members__all.end());
+					std::sort(dmu_set_members__current_limited.begin(), dmu_set_members__current_limited.end());
+					std::sort(dmu_set_members__to_add.begin(), dmu_set_members__to_add.end());
+
+					WidgetInstanceIdentifiers dmu_set_members__new_limited;
+					std::set_union(dmu_set_members__current_limited.cbegin(), dmu_set_members__current_limited.cend(), dmu_set_members__to_add.cbegin(), dmu_set_members__to_add.cend(), std::inserter(dmu_set_members__new_limited, dmu_set_members__new_limited.begin()));
+
+					WidgetInstanceIdentifiers dmu_set_members__not_limited;
+					std::set_difference(dmu_set_members__all.cbegin(), dmu_set_members__all.cend(), dmu_set_members__new_limited.cbegin(), dmu_set_members__new_limited.cend(), std::inserter(dmu_set_members__not_limited, dmu_set_members__not_limited.begin()));
+
+					DataChange change(type, intention, dmu_category, dmu_set_members__not_limited);
+					change.vector_of_identifiers = dmu_set_members__new_limited;
 					change_response.changes.push_back(change);
 
 					// ***************************************** //
 					// Update database and cache
 					// ***************************************** //
-					output_model.t_kad_count.Update(output_model.getDb(), output_model, input_model, change_response);
+					output_model.t_limit_dmus_set_members.Update(output_model.getDb(), output_model, input_model, change_response);
 
 					executor.success();
 
