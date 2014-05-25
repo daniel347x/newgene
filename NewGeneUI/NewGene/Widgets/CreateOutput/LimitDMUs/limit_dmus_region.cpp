@@ -641,55 +641,72 @@ bool limit_dmus_region::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 {
 
-	// Get selected DMU category
-	WidgetInstanceIdentifier dmu_category;
-	bool is_selected = GetSelectedDmuCategory(dmu_category);
-	if (!is_selected)
-	{
-		return;
-	}
+    // Get selected DMU category
+    WidgetInstanceIdentifier dmu_category;
+    bool is_selected = GetSelectedDmuCategory(dmu_category);
+    if (!is_selected)
+    {
+        return;
+    }
 
-	QItemSelectionModel * dmus_selectionModel = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
-	if (dmus_selectionModel == nullptr)
-	{
-		boost::format msg("Invalid selection in Limit DMU's bottom-left pane.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
+    QItemSelectionModel * dmus_selectionModel = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
+    if (dmus_selectionModel == nullptr)
+    {
+        boost::format msg("Invalid selection in Limit DMU's bottom-left pane.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
 
-	QStandardItemModel * dmusModel = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_left_pane->model());
-	if (dmusModel == nullptr)
-	{
-		boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
+    QSortFilterProxyModel_NumbersLast * model = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_limit_dmus_bottom_left_pane->model());
+    if (model == nullptr)
+    {
+        return;
+    }
 
-	WidgetInstanceIdentifiers dmuCategoriesToMoveToLimitingList;
-	QModelIndexList selectedDMUs = dmus_selectionModel->selectedRows();
-	for (auto & selectedDmuIndex : selectedDMUs)
-	{
-		QVariant dmu_category_variant = dmusModel->item(selectedDmuIndex.row())->data();
-		WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
-		dmuCategoriesToMoveToLimitingList.push_back(dmu_category);
-	}
+    QAbstractItemModel * sourceModel = model->sourceModel();
+    if (sourceModel == nullptr)
+    {
+        return;
+    }
 
-	if (!dmuCategoriesToMoveToLimitingList.empty())
-	{
+    QStandardItemModel * dmusModel = nullptr;
+    try
+    {
+        dmusModel = dynamic_cast<QStandardItemModel*>(sourceModel);
+    }
+    catch (std::bad_cast &)
+    {
+        // guess not
+        boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
 
-		// Submit the action
-		InstanceActionItems actionItems;
-		std::string no_checkbox_change; // empty string passed to back end means no change in checkbox state
-		actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(dmuCategoriesToMoveToLimitingList, no_checkbox_change)))));
-		WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
+    WidgetInstanceIdentifiers dmuCategoriesToMoveToLimitingList;
+    QModelIndexList selectedDMUs = dmus_selectionModel->selectedRows();
+    for (auto & selectedDmuIndex : selectedDMUs)
+    {
+        QVariant dmu_category_variant = dmusModel->item(selectedDmuIndex.row())->data();
+        WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
+        dmuCategoriesToMoveToLimitingList.push_back(dmu_category);
+    }
 
-		emit LimitDMUsChange(action_request);
+    if (!dmuCategoriesToMoveToLimitingList.empty())
+    {
 
-	}
+        // Submit the action
+        InstanceActionItems actionItems;
+        std::string no_checkbox_change; // empty string passed to back end means no change in checkbox state
+        actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(dmuCategoriesToMoveToLimitingList, no_checkbox_change)))));
+        WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
+
+        emit LimitDMUsChange(action_request);
+
+    }
 
 }
 
