@@ -1,6 +1,16 @@
 #ifndef LIMITDMUS_H
 #define LIMITDMUS_H
 
+#include "../../../../NewGeneBackEnd/UIAction/ActionWidgets.h"
+#include "../Project/inputprojectworkqueue.h"
+#include "../Project/outputprojectworkqueue.h"
+#include "../Messager/uimessager.h"
+#include "../Messager/uimessagersingleshot.h"
+#include "../UIAction/uiuiactionmanager.h"
+#include "uiaction.h"
+#include "../Project/uiinputproject.h"
+#include "../Project/uioutputproject.h"
+
 class LimitDMUs : public DoOutputAction<ACTION_LIMIT_DMU_MEMBERS_CHANGE>
 {
 
