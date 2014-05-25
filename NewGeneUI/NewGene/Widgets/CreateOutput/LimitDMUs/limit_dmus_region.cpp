@@ -55,19 +55,19 @@ void limit_dmus_region::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB)));
-        connect(this, SIGNAL(LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE)), outp->getConnector(), SLOT(LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE)));
-        if (project)
-        {
-            project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE, false, "");
-        }
-    }
+		connect(this, SIGNAL(LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE)), outp->getConnector(), SLOT(LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE)));
+		if (project)
+		{
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE, false, "");
+		}
+	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
-        if (outp)
-        {
-            outp->UnregisterInterestInChanges(this);
-        }
-        Empty();
+		if (outp)
+		{
+			outp->UnregisterInterestInChanges(this);
+		}
+		Empty();
 	}
 }
 
@@ -75,7 +75,7 @@ void limit_dmus_region::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 {
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
-    {
+	{
 		if (project)
 		{
 			//project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE, false, "");
@@ -346,7 +346,7 @@ void limit_dmus_region::ResetBottomLeftPane(WidgetInstanceIdentifiers const & dm
 			QStandardItem * item = new QStandardItem();
 			item->setText(text.c_str());
 			item->setEditable(false);
-            item->setCheckable(false);
+			item->setCheckable(false);
 			QVariant v;
 			v.setValue(dmu_member);
 			item->setData(v);
@@ -383,7 +383,7 @@ void limit_dmus_region::ResetBottomRightPane(WidgetInstanceIdentifiers const & d
 			QStandardItem * item = new QStandardItem();
 			item->setText(text.c_str());
 			item->setEditable(false);
-            item->setCheckable(false);
+			item->setCheckable(false);
 			QVariant v;
 			v.setValue(dmu_member);
 			item->setData(v);
@@ -418,7 +418,7 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 	{
 		switch (change.change_type)
 		{
-            case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE:
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE:
 				{
 					switch (change.change_intention)
 					{
@@ -441,147 +441,147 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 
-                                if (change.parent_identifier.code && change.parent_identifier.uuid)
-                                {
+								if (change.parent_identifier.code && change.parent_identifier.uuid)
+								{
 
-                                    WidgetInstanceIdentifier dmu_category(change.parent_identifier);
+									WidgetInstanceIdentifier dmu_category(change.parent_identifier);
 
-                                    QStandardItemModel * dmusModelBottomLeft = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_left_pane->model());
-                                    if (dmusModelBottomLeft == nullptr)
-                                    {
-                                        boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
-                                        QMessageBox msgBox;
-                                        msgBox.setText( msg.str().c_str() );
-                                        msgBox.exec();
-                                        return;
-                                    }
+									QStandardItemModel * dmusModelBottomLeft = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_left_pane->model());
+									if (dmusModelBottomLeft == nullptr)
+									{
+										boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+										QMessageBox msgBox;
+										msgBox.setText( msg.str().c_str() );
+										msgBox.exec();
+										return;
+									}
 
-                                    QStandardItemModel * dmusModelBottomRight = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_right_pane->model());
-                                    if (dmusModelBottomRight == nullptr)
-                                    {
-                                        boost::format msg("Invalid model in Limit DMU's bottom-right pane.");
-                                        QMessageBox msgBox;
-                                        msgBox.setText( msg.str().c_str() );
-                                        msgBox.exec();
-                                        return;
-                                    }
+									QStandardItemModel * dmusModelBottomRight = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_right_pane->model());
+									if (dmusModelBottomRight == nullptr)
+									{
+										boost::format msg("Invalid model in Limit DMU's bottom-right pane.");
+										QMessageBox msgBox;
+										msgBox.setText( msg.str().c_str() );
+										msgBox.exec();
+										return;
+									}
 
-                                    int rowsBottomLeft = dmusModelBottomLeft->rowCount();
-                                    int rowsBottomRight = dmusModelBottomRight->rowCount();
+									int rowsBottomLeft = dmusModelBottomLeft->rowCount();
+									int rowsBottomRight = dmusModelBottomRight->rowCount();
 
-                                    WidgetInstanceIdentifiers dmu_set_members_bottom_left;
-                                    for (int n=0; n<rowsBottomLeft; ++n)
-                                    {
-                                        QStandardItem * itemBottomLeft = dmusModelBottomLeft->item(n);
-                                        WidgetInstanceIdentifier dmu_set_member = itemBottomLeft->data().value<WidgetInstanceIdentifier>();
-                                        dmu_set_members_bottom_left.push_back(dmu_set_member);
-                                    }
+									WidgetInstanceIdentifiers dmu_set_members_bottom_left;
+									for (int n=0; n<rowsBottomLeft; ++n)
+									{
+										QStandardItem * itemBottomLeft = dmusModelBottomLeft->item(n);
+										WidgetInstanceIdentifier dmu_set_member = itemBottomLeft->data().value<WidgetInstanceIdentifier>();
+										dmu_set_members_bottom_left.push_back(dmu_set_member);
+									}
 
-                                    WidgetInstanceIdentifiers dmu_set_members_bottom_right;
-                                    for (int n=0; n<rowsBottomRight; ++n)
-                                    {
-                                        QStandardItem * itemBottomRight = dmusModelBottomRight->item(n);
-                                        WidgetInstanceIdentifier dmu_set_member = itemBottomRight->data().value<WidgetInstanceIdentifier>();
-                                        dmu_set_members_bottom_right.push_back(dmu_set_member);
-                                    }
+									WidgetInstanceIdentifiers dmu_set_members_bottom_right;
+									for (int n=0; n<rowsBottomRight; ++n)
+									{
+										QStandardItem * itemBottomRight = dmusModelBottomRight->item(n);
+										WidgetInstanceIdentifier dmu_set_member = itemBottomRight->data().value<WidgetInstanceIdentifier>();
+										dmu_set_members_bottom_right.push_back(dmu_set_member);
+									}
 
-                                    WidgetInstanceIdentifiers dmu_set_members_bottom_left__new = change.child_identifiers;
-                                    WidgetInstanceIdentifiers dmu_set_members_bottom_right__new = change.vector_of_identifiers;
+									WidgetInstanceIdentifiers dmu_set_members_bottom_left__new = change.child_identifiers;
+									WidgetInstanceIdentifiers dmu_set_members_bottom_right__new = change.vector_of_identifiers;
 
-                                    std::sort(dmu_set_members_bottom_left.begin(), dmu_set_members_bottom_left.end());
-                                    std::sort(dmu_set_members_bottom_right.begin(), dmu_set_members_bottom_right.end());
-                                    std::sort(dmu_set_members_bottom_left_new.begin(), dmu_set_members_bottom_left_new.end());
-                                    std::sort(dmu_set_members_bottom_right_new.begin(), dmu_set_members_bottom_right_new.end());
+									std::sort(dmu_set_members_bottom_left.begin(), dmu_set_members_bottom_left.end());
+									std::sort(dmu_set_members_bottom_right.begin(), dmu_set_members_bottom_right.end());
+									std::sort(dmu_set_members_bottom_left__new.begin(), dmu_set_members_bottom_left__new.end());
+									std::sort(dmu_set_members_bottom_right__new.begin(), dmu_set_members_bottom_right__new.end());
 
-                                    WidgetInstanceIdentifiers dmu_set_members__not_limited__to_add;
-                                    WidgetInstanceIdentifiers dmu_set_members__not_limited__to_remove;
-                                    std::set_difference(dmu_set_members_bottom_left__new.cbegin(), dmu_set_members_bottom_left__new.cend(), dmu_set_members_bottom_left.cbegin(), dmu_set_members_bottom_left.cend(),
-                                                   std::inserter(dmu_set_members__not_limited__to_add, dmu_set_members__not_limited__to_add.begin()));
-                                    std::set_difference(dmu_set_members_bottom_left.cbegin(), dmu_set_members_bottom_left.cend(), dmu_set_members_bottom_left__new.cbegin(), dmu_set_members_bottom_left__new.cend(),
-                                                   std::inserter(dmu_set_members__not_limited__to_remove, dmu_set_members__not_limited__to_remove.begin()));
+									WidgetInstanceIdentifiers dmu_set_members__not_limited__to_add;
+									WidgetInstanceIdentifiers dmu_set_members__not_limited__to_remove;
+									std::set_difference(dmu_set_members_bottom_left__new.cbegin(), dmu_set_members_bottom_left__new.cend(), dmu_set_members_bottom_left.cbegin(), dmu_set_members_bottom_left.cend(),
+												   std::inserter(dmu_set_members__not_limited__to_add, dmu_set_members__not_limited__to_add.begin()));
+									std::set_difference(dmu_set_members_bottom_left.cbegin(), dmu_set_members_bottom_left.cend(), dmu_set_members_bottom_left__new.cbegin(), dmu_set_members_bottom_left__new.cend(),
+												   std::inserter(dmu_set_members__not_limited__to_remove, dmu_set_members__not_limited__to_remove.begin()));
 
-                                    WidgetInstanceIdentifiers dmu_set_members__limited__to_add;
-                                    WidgetInstanceIdentifiers dmu_set_members__limited__to_remove;
-                                    std::set_difference(dmu_set_members_bottom_right__new.cbegin(), dmu_set_members_bottom_right__new.cend(), dmu_set_members_bottom_right.cbegin(), dmu_set_members_bottom_right.cend(),
-                                                   std::inserter(dmu_set_members__limited__to_add, dmu_set_members__limited__to_add.begin()));
-                                    std::set_difference(dmu_set_members_bottom_right.cbegin(), dmu_set_members_bottom_right.cend(), dmu_set_members_bottom_right__new.cbegin(), dmu_set_members_bottom_right__new.cend(),
-                                                   std::inserter(dmu_set_members__limited__to_remove, dmu_set_members__limited__to_remove.begin()));
+									WidgetInstanceIdentifiers dmu_set_members__limited__to_add;
+									WidgetInstanceIdentifiers dmu_set_members__limited__to_remove;
+									std::set_difference(dmu_set_members_bottom_right__new.cbegin(), dmu_set_members_bottom_right__new.cend(), dmu_set_members_bottom_right.cbegin(), dmu_set_members_bottom_right.cend(),
+												   std::inserter(dmu_set_members__limited__to_add, dmu_set_members__limited__to_add.begin()));
+									std::set_difference(dmu_set_members_bottom_right.cbegin(), dmu_set_members_bottom_right.cend(), dmu_set_members_bottom_right__new.cbegin(), dmu_set_members_bottom_right__new.cend(),
+												   std::inserter(dmu_set_members__limited__to_remove, dmu_set_members__limited__to_remove.begin()));
 
-                                    for (auto const & dmu_set_member : dmu_set_members__not_limited__to_remove)
-                                    {
-                                        std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-                                        QList<QStandardItem *> items = dmusModelBottomLeft->findItems(text.c_str());
-                                        if (items.count() == 1)
-                                        {
-                                            QStandardItem * dmu_member_to_remove = items.at(0);
-                                            if (dmu_member_to_remove != nullptr)
-                                            {
-                                                QModelIndex index_to_remove = dmusModelBottomLeft->indexFromItem(dmu_member_to_remove);
-                                                dmusModelBottomLeft->takeRow(index_to_remove.row());
+									for (auto const & dmu_set_member : dmu_set_members__not_limited__to_remove)
+									{
+										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
+										QList<QStandardItem *> items = dmusModelBottomLeft->findItems(text.c_str());
+										if (items.count() == 1)
+										{
+											QStandardItem * dmu_member_to_remove = items.at(0);
+											if (dmu_member_to_remove != nullptr)
+											{
+												QModelIndex index_to_remove = dmusModelBottomLeft->indexFromItem(dmu_member_to_remove);
+												dmusModelBottomLeft->takeRow(index_to_remove.row());
 
-                                                delete dmu_member_to_remove;
-                                                dmu_member_to_remove = nullptr;
-                                            }
-                                        }
-                                    }
+												delete dmu_member_to_remove;
+												dmu_member_to_remove = nullptr;
+											}
+										}
+									}
 
-                                    for (auto const & dmu_set_member : dmu_set_members__limited__to_remove)
-                                    {
-                                        std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-                                        QList<QStandardItem *> items = dmusModelBottomRight->findItems(text.c_str());
-                                        if (items.count() == 1)
-                                        {
-                                            QStandardItem * dmu_member_to_remove = items.at(0);
-                                            if (dmu_member_to_remove != nullptr)
-                                            {
-                                                QModelIndex index_to_remove = dmusModelBottomRight->indexFromItem(dmu_member_to_remove);
-                                                dmusModelBottomRight->takeRow(index_to_remove.row());
+									for (auto const & dmu_set_member : dmu_set_members__limited__to_remove)
+									{
+										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
+										QList<QStandardItem *> items = dmusModelBottomRight->findItems(text.c_str());
+										if (items.count() == 1)
+										{
+											QStandardItem * dmu_member_to_remove = items.at(0);
+											if (dmu_member_to_remove != nullptr)
+											{
+												QModelIndex index_to_remove = dmusModelBottomRight->indexFromItem(dmu_member_to_remove);
+												dmusModelBottomRight->takeRow(index_to_remove.row());
 
-                                                delete dmu_member_to_remove;
-                                                dmu_member_to_remove = nullptr;
-                                            }
-                                        }
-                                    }
+												delete dmu_member_to_remove;
+												dmu_member_to_remove = nullptr;
+											}
+										}
+									}
 
-                                    QItemSelectionModel * selectionModelBottomLeft = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
-                                    for (auto const & dmu_set_member : dmu_set_members__not_limited__to_add)
-                                    {
-                                        std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
+									QItemSelectionModel * selectionModelBottomLeft = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
+									for (auto const & dmu_set_member : dmu_set_members__not_limited__to_add)
+									{
+										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
 
-                                        QStandardItem * item = new QStandardItem();
-                                        item->setText(text.c_str());
-                                        item->setEditable(false);
-                                        item->setCheckable(false);
-                                        QVariant v;
-                                        v.setValue(dmu_set_member);
-                                        item->setData(v);
-                                        dmusModelBottomLeft->appendRow( item );
+										QStandardItem * item = new QStandardItem();
+										item->setText(text.c_str());
+										item->setEditable(false);
+										item->setCheckable(false);
+										QVariant v;
+										v.setValue(dmu_set_member);
+										item->setData(v);
+										dmusModelBottomLeft->appendRow( item );
 
-                                        QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
-                                        selectionModelBottomLeft->select(newDmuMemberIndex, QItemSelectionModel::Select);
-                                    }
+										QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
+										selectionModelBottomLeft->select(newDmuMemberIndex, QItemSelectionModel::Select);
+									}
 
-                                    QItemSelectionModel * selectionModelBottomLeft = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
-                                    for (auto const & dmu_set_member : dmu_set_members__limited__to_add)
-                                    {
-                                        std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
+									QItemSelectionModel * selectionModelBottomRight = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
+									for (auto const & dmu_set_member : dmu_set_members__limited__to_add)
+									{
+										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
 
-                                        QStandardItem * item = new QStandardItem();
-                                        item->setText(text.c_str());
-                                        item->setEditable(false);
-                                        item->setCheckable(false);
-                                        QVariant v;
-                                        v.setValue(dmu_set_member);
-                                        item->setData(v);
-                                        dmusModelBottomRight->appendRow( item );
+										QStandardItem * item = new QStandardItem();
+										item->setText(text.c_str());
+										item->setEditable(false);
+										item->setCheckable(false);
+										QVariant v;
+										v.setValue(dmu_set_member);
+										item->setData(v);
+										dmusModelBottomRight->appendRow( item );
 
-                                        QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
-                                        selectionModelBottomRight->select(newDmuMemberIndex, QItemSelectionModel::Select);
-                                    }
+										QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
+										selectionModelBottomRight->select(newDmuMemberIndex, QItemSelectionModel::Select);
+									}
 
-                                }
+								}
 
-                            }
+							}
 							break;
 
 						default:
@@ -604,92 +604,92 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 bool limit_dmus_region::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_category)
 {
 
-    QItemSelectionModel * dmu_selectionModel = ui->listView_limit_dmus_top_pane->selectionModel();
-    if (dmu_selectionModel == nullptr)
-    {
-        boost::format msg("Invalid selection in Limit DMU's DMU category pane.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return false;
-    }
+	QItemSelectionModel * dmu_selectionModel = ui->listView_limit_dmus_top_pane->selectionModel();
+	if (dmu_selectionModel == nullptr)
+	{
+		boost::format msg("Invalid selection in Limit DMU's DMU category pane.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
 
-    QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
-    if (!selectedIndex.isValid())
-    {
-        // No selection
-        return false;
-    }
+	QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+	if (!selectedIndex.isValid())
+	{
+		// No selection
+		return false;
+	}
 
-    QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_top_pane->model());
-    if (dmuModel == nullptr)
-    {
-        boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return false;
-    }
+	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_top_pane->model());
+	if (dmuModel == nullptr)
+	{
+		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
 
-    QVariant dmu_variant = dmuModel->item(selectedIndex.row())->data();
-    dmu_category = dmu_variant.value<WidgetInstanceIdentifier>();
+	QVariant dmu_variant = dmuModel->item(selectedIndex.row())->data();
+	dmu_category = dmu_variant.value<WidgetInstanceIdentifier>();
 
-    return true;
+	return true;
 
 }
 
 void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 {
 
-    // Get selected DMU category
-    WidgetInstanceIdentifier dmu_category;
-    bool is_selected = GetSelectedDmuCategory(dmu_category);
-    if (!is_selected)
-    {
-        return;
-    }
+	// Get selected DMU category
+	WidgetInstanceIdentifier dmu_category;
+	bool is_selected = GetSelectedDmuCategory(dmu_category);
+	if (!is_selected)
+	{
+		return;
+	}
 
-    QItemSelectionModel * dmus_selectionModel = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
-    if (dmus_selectionModel == nullptr)
-    {
-        boost::format msg("Invalid selection in Limit DMU's bottom-left pane.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	QItemSelectionModel * dmus_selectionModel = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
+	if (dmus_selectionModel == nullptr)
+	{
+		boost::format msg("Invalid selection in Limit DMU's bottom-left pane.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
 
-    QStandardItemModel * dmusModel = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_left_pane->model());
-    if (dmusModel == nullptr)
-    {
-        boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	QStandardItemModel * dmusModel = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_bottom_left_pane->model());
+	if (dmusModel == nullptr)
+	{
+		boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
 
-    WidgetInstanceIdentifiers dmuCategoriesToMoveToLimitingList;
-    QModelIndexList selectedDMUs = dmus_selectionModel->selectedRows();
-    for (auto & selectedDmuIndex : selectedDMUs)
-    {
-        QVariant dmu_category_variant = dmusModel->item(selectedDmuIndex.row())->data();
-        WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
-        dmuCategoriesToMoveToLimitingList.push_back(dmu_category);
-    }
+	WidgetInstanceIdentifiers dmuCategoriesToMoveToLimitingList;
+	QModelIndexList selectedDMUs = dmus_selectionModel->selectedRows();
+	for (auto & selectedDmuIndex : selectedDMUs)
+	{
+		QVariant dmu_category_variant = dmusModel->item(selectedDmuIndex.row())->data();
+		WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
+		dmuCategoriesToMoveToLimitingList.push_back(dmu_category);
+	}
 
-    if (!dmuCategoriesToMoveToLimitingList.empty())
-    {
+	if (!dmuCategoriesToMoveToLimitingList.empty())
+	{
 
-        // Submit the action
-        InstanceActionItems actionItems;
-        std::string no_checkbox_change; // empty string passed to back end means no change in checkbox state
-        actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(dmuCategoriesToMoveToLimitingList, no_checkbox_change)))));
-        WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
+		// Submit the action
+		InstanceActionItems actionItems;
+		std::string no_checkbox_change; // empty string passed to back end means no change in checkbox state
+		actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(dmuCategoriesToMoveToLimitingList, no_checkbox_change)))));
+		WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
-        emit LimitDMUsChange(action_request);
+		emit LimitDMUsChange(action_request);
 
-    }
+	}
 
 }
 
