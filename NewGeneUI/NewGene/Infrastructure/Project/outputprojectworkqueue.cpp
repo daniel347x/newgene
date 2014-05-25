@@ -202,19 +202,33 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 	get()->getWorkService().post(GenerateOutput(action_request, this));
 }
 
+/************************************************************************/
+// ACTION_LIMIT_DMU_MEMBERS_CHANGE
+/************************************************************************/
+void OutputProjectWorkQueue::LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request)
+{
+    get()->getWorkService().post(LimitDMUs(action_request, this));
+}
 
-
-
+/************************************************************************/
+// ACTION_DELETE_DMU
+/************************************************************************/
 void OutputProjectWorkQueue::DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU action_request)
 {
 	get()->getWorkService().post(DeleteDMU_Output(action_request, this));
 }
 
+/************************************************************************/
+// ACTION_DELETE_UOA
+/************************************************************************/
 void OutputProjectWorkQueue::DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA action_request)
 {
 	get()->getWorkService().post(DeleteUOA_Output(action_request, this));
 }
 
+/************************************************************************/
+// ACTION_DELETE_VG
+/************************************************************************/
 void OutputProjectWorkQueue::DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG action_request)
 {
 	get()->getWorkService().post(DeleteVG_Output(action_request, this));

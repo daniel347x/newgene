@@ -608,5 +608,8 @@
     <ClCompile Include="Model\Tables\TableInstances\Limit_DMUs.cpp">
       <Filter>Source Files\Model\Tables\TableInstances</Filter>
     </ClCompile>
+    <ClCompile Include="UIAction\Controllers\Controller_LimitDmus.cpp">
+      <Filter>Source Files\UIAction\Controllers</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

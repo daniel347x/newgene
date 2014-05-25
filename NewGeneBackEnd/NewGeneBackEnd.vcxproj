@@ -225,6 +225,7 @@
     <ClCompile Include="UIAction\Controllers\Controller_GeneralOptions.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_GenerateOutput.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_KAdCountChange.cpp" />
+    <ClCompile Include="UIAction\Controllers\Controller_LimitDmus.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_TimeRangeChange.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_UOA_Management.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_VariableGroupSetMemberSelectionChange.cpp" />

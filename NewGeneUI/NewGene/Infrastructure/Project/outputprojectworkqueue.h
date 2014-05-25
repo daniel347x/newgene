@@ -110,6 +110,7 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		void DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU);
 		void DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA);
 		void DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG);
+        void LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE);
 
 };
 
