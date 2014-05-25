@@ -25,7 +25,10 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
 		void RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB);
 
-	public slots:
+        // Actions
+        void LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE);
+
+    public slots:
 
 		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
@@ -40,7 +43,7 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
         void on_pushButton_limit_dmus_move_left_clicked();
 
-protected:
+    protected:
 
 		void changeEvent( QEvent * e );
 		void Empty();

@@ -72,7 +72,8 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE>("WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE>("WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_GENERATE_OUTPUT>("WidgetActionItemRequest_ACTION_GENERATE_OUTPUT");
-	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_DMU>("WidgetActionItemRequest_ACTION_ADD_DMU");
+    qRegisterMetaType<WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE>("WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE");
+    qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_DMU>("WidgetActionItemRequest_ACTION_ADD_DMU");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_DMU>("WidgetActionItemRequest_ACTION_DELETE_DMU");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS>("WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS>("WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS");

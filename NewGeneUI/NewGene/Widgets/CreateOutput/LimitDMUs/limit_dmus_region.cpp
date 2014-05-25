@@ -55,7 +55,8 @@ void limit_dmus_region::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB)));
-	}
+        connect(this, SIGNAL(LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE)), outp->getConnector(), SLOT(LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE)));
+    }
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
@@ -66,7 +67,7 @@ void limit_dmus_region::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 {
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
-	{
+    {
 		if (project)
 		{
 			//project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE, false, "");
@@ -540,7 +541,14 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 
     if (!dmuCategoriesToMoveToLimitingList.empty())
     {
+
         // Submit the action
+        InstanceActionItems actionItems;
+        actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_member_uuid, proposed_dmu_member_code, proposed_dmu_member_description})))));
+        WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
+
+        emit AddDMUMembers(action_request);
+
     }
 
 }

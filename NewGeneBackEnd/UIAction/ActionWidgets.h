@@ -19,6 +19,7 @@ enum WIDGET_ACTIONS
 	, ACTION_CONSOLIDATE_ROWS_CHANGE
 	, ACTION_DATETIME_RANGE_CHANGE
 	, ACTION_GENERATE_OUTPUT
+	, ACTION_LIMIT_DMU_MEMBERS_CHANGE
 
 	, ACTION_ADD_DMU
 	, ACTION_DELETE_DMU
@@ -836,7 +837,25 @@ public:
 typedef WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> WidgetActionItemRequest_ACTION_GENERATE_OUTPUT;
 
 /************************************************************************/
-//
+// ACTION_LIMIT_DMU_MEMBERS_CHANGE
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE> : public WidgetActionItemRequest_base
+{
+public:
+	WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
+		: WidgetActionItemRequest_base(reason_, items_)
+	{
+	}
+	WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE>(WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE> const & rhs)
+		: WidgetActionItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE> WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE;
+
+/************************************************************************/
+// ACTION_ADD_DMU
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_ADD_DMU> : public WidgetActionItemRequest_base
@@ -854,7 +873,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_ADD_DMU> WidgetActionItemRequest_ACTION_ADD_DMU;
 
 /************************************************************************/
-//
+// ACTION_DELETE_DMU
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_DMU> : public WidgetActionItemRequest_base
@@ -872,7 +891,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_DELETE_DMU> WidgetActionItemRequest_ACTION_DELETE_DMU;
 
 /************************************************************************/
-//
+// ACTION_ADD_DMU_MEMBERS
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> : public WidgetActionItemRequest_base
@@ -890,7 +909,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS;
 
 /************************************************************************/
-//
+// ACTION_DELETE_DMU_MEMBERS
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> : public WidgetActionItemRequest_base
@@ -908,7 +927,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS;
 
 /************************************************************************/
-//
+// ACTION_REFRESH_DMUS_FROM_FILE
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> : public WidgetActionItemRequest_base
@@ -926,7 +945,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE;
 
 /************************************************************************/
-//
+// ACTION_ADD_UOA
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_ADD_UOA> : public WidgetActionItemRequest_base
@@ -944,7 +963,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_ADD_UOA> WidgetActionItemRequest_ACTION_ADD_UOA;
 
 /************************************************************************/
-//
+// ACTION_DELETE_UOA
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_UOA> : public WidgetActionItemRequest_base
@@ -962,7 +981,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_DELETE_UOA> WidgetActionItemRequest_ACTION_DELETE_UOA;
 
 /************************************************************************/
-//
+// ACTION_CREATE_VG
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_CREATE_VG> : public WidgetActionItemRequest_base
@@ -980,7 +999,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_CREATE_VG> WidgetActionItemRequest_ACTION_CREATE_VG;
 
 /************************************************************************/
-//
+// ACTION_DELETE_VG
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_VG> : public WidgetActionItemRequest_base
@@ -998,7 +1017,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_DELETE_VG> WidgetActionItemRequest_ACTION_DELETE_VG;
 
 /************************************************************************/
-//
+// ACTION_REFRESH_VG
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_REFRESH_VG> : public WidgetActionItemRequest_base
