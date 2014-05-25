@@ -418,84 +418,37 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 	{
 		switch (change.change_type)
 		{
-			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE:
+            case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE:
 				{
 					switch (change.change_intention)
 					{
 
 						case DATA_CHANGE_INTENTION__ADD:
 							{
-
-//                                if (change.parent_identifier.uuid && change.parent_identifier.code && change.parent_identifier.longhand)
-//                                {
-//                                    WidgetInstanceIdentifier new_identifier(change.parent_identifier);
-//                                    NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this, new_identifier, outp );
-//                                    tmpGrp->setTitle(new_identifier.longhand->c_str());
-//                                    layout()->addWidget(tmpGrp);
-//                                }
-
 							}
 							break;
 
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
-
-								if (change.parent_identifier.code && change.parent_identifier.uuid)
-								{
-
-//                                    WidgetInstanceIdentifier vg_to_remove(change.parent_identifier);
-
-//                                    int current_number = layout()->count();
-//                                    bool found = false;
-//                                    QWidget * widgetToRemove = nullptr;
-//                                    QLayoutItem * layoutItemToRemove = nullptr;
-//                                    int i = 0;
-//                                    for (i=0; i<current_number; ++i)
-//                                    {
-//                                        QLayoutItem * testLayoutItem = layout()->itemAt(i);
-//                                        QWidget * testWidget(testLayoutItem->widget());
-//                                        try
-//                                        {
-//                                            NewGeneVariableSummaryGroup * testVG = dynamic_cast<NewGeneVariableSummaryGroup*>(testWidget);
-//                                            if (testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg_to_remove))
-//                                            {
-//                                                widgetToRemove = testVG;
-//                                                layoutItemToRemove = testLayoutItem;
-//                                                found = true;
-//                                                break;
-//                                            }
-//                                        }
-//                                        catch (std::bad_cast &)
-//                                        {
-//                                            // guess not
-//                                        }
-
-//                                    }
-
-//                                    if (found && widgetToRemove != nullptr)
-//                                    {
-//                                        layout()->takeAt(i);
-//                                        delete widgetToRemove;
-//                                        delete layoutItemToRemove;
-//                                        widgetToRemove = nullptr;
-//                                        layoutItemToRemove = nullptr;
-//                                    }
-
-								}
-
 							}
 							break;
 
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
-								// Should never receive this.
 							}
 							break;
 
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
-								// Ditto above.
-							}
+
+                                if (change.parent_identifier.code && change.parent_identifier.uuid)
+                                {
+
+                                    WidgetInstanceIdentifier dmu_category(change.parent_identifier);
+
+                                }
+
+                            }
 							break;
 
 						default:
