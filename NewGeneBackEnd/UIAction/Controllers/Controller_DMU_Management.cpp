@@ -252,7 +252,7 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 
 }
 
-void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_DMU const & action_request, OutputProject & project)
+void UIActionManager::DeleteDMUOutput(Messager & messager__, WidgetActionItemRequest_ACTION_DELETE_DMU const & action_request, OutputProject & project)
 {
 
 	if (!action_request.items)
@@ -271,7 +271,7 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 
 			DataChangeMessage change_response(&project);
 
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
 				ProjectManager & project_manager = projectManager();
@@ -281,7 +281,7 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 				{
 					boost::format msg("Error deleting DMU: %1%");
 					msg % errorMsg.c_str();
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 				BOOST_SCOPE_EXIT_ALL(&)
@@ -291,11 +291,11 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 					{
 						boost::format msg("Error deleting DMU: %1%. Please restart NewGene.");
 						msg % errorMsg.c_str();
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 					}
 				};
 
-				if (this->FailIfBusy(messager))
+				if (this->FailIfBusy(messager__))
 				{
 					return;
 				}
@@ -362,7 +362,7 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 
 			});
 
-			messager.EmitChangeMessage(change_response);
+			messager__.EmitChangeMessage(change_response);
 
 		}
 		break;
@@ -374,10 +374,10 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 
 }
 
-void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS const & action_request, InputProject & project)
+void UIActionManager::AddDMUMembers(Messager & messager__, WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS const & action_request, InputProject & project)
 {
 
-	if (FailIfBusy(messager))
+	if (FailIfBusy(messager__))
 	{
 		return;
 	}
@@ -404,7 +404,7 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 			std::string result_msg("The following DMU members have been added:");
 			result_msg += "\n";
 
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
 				Executor executor(input_model.getDb());
@@ -413,14 +413,14 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 				if (!dmu_category.uuid || dmu_category.uuid->empty())
 				{
 					boost::format msg("Missing the associated DMU category.");
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 
 				if (!instanceActionItem.second)
 				{
 					boost::format msg("Missing a new DMU member.");
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 
@@ -434,7 +434,7 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 				if (dmu_strings.size() != 3)
 				{
 					boost::format msg("A DMU member code, name and descriptive text are required.");
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 
@@ -447,7 +447,7 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 				{
 					boost::format msg("The DMU member '%1%' already exists for '%2%'.");
 					msg % boost::to_upper_copy(proposed_new_dmu_member_uuid) % boost::to_upper_copy(*dmu_category.code);
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 
@@ -480,9 +480,9 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 
 			boost::format msg("%1%");
 			msg % result_msg;
-			messager.ShowMessageBox(msg.str());
+			messager__.ShowMessageBox(msg.str());
 
-			messager.EmitChangeMessage(change_response);
+			messager__.EmitChangeMessage(change_response);
 
 		}
 			break;
@@ -576,10 +576,10 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 
 }
 
-void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE const & action_request, InputProject & project)
+void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE const & action_request, InputProject & project)
 {
 
-	if (FailIfBusy(messager))
+	if (FailIfBusy(messager__))
 	{
 		return;
 	}
@@ -613,7 +613,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 
 			DataChangeMessage change_response(&project);
 
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
 				WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
@@ -621,14 +621,14 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 				if (!dmu_category.code || !dmu_category.uuid || dmu_category.code->empty() || dmu_category.uuid->empty())
 				{
 					boost::format msg("Missing the DMU category to refresh.");
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 
 				if (!instanceActionItem.second)
 				{
 					boost::format msg("Missing DMU refresh information.");
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 					return;
 				}
 
@@ -643,7 +643,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 				std::string dmu_refresh_file_pathname = dmu_refresh_strings[0];
 				std::vector<std::string> dmu_refresh_column_labels(dmu_refresh_strings.cbegin() + 1, dmu_refresh_strings.cend());
 
-				bool success = input_model.t_dmu_setmembers.RefreshFromFile(input_model.getDb(), input_model, dmu_category, boost::filesystem::path(dmu_refresh_file_pathname), dmu_refresh_column_labels, messager, do_refresh_not_plain_insert);
+				bool success = input_model.t_dmu_setmembers.RefreshFromFile(input_model.getDb(), input_model, dmu_category, boost::filesystem::path(dmu_refresh_file_pathname), dmu_refresh_column_labels, messager__, do_refresh_not_plain_insert);
 
 				if (!success)
 				{
@@ -664,7 +664,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
 							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
 							% cancelAddendum;
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 					}
 					else
 					if (input_model.t_dmu_setmembers.badreadlines == 0 && input_model.t_dmu_setmembers.badwritelines > 0)
@@ -673,7 +673,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
 							% cancelAddendum;
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 					}
 					else
 					if (input_model.t_dmu_setmembers.badreadlines > 0 && input_model.t_dmu_setmembers.badwritelines == 0)
@@ -682,7 +682,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
 							% cancelAddendum;
-						messager.ShowMessageBox(msg.str());
+						messager__.ShowMessageBox(msg.str());
 					}
 				}
 				else
@@ -690,7 +690,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 					boost::format msg("DMU '%1%' successfully refreshed from file%2%.");
 					msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 						% cancelAddendum;
-					messager.ShowMessageBox(msg.str());
+					messager__.ShowMessageBox(msg.str());
 				}
 
 				// ***************************************** //
@@ -707,7 +707,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 
 			});
 
-			messager.EmitChangeMessage(change_response);
+			messager__.EmitChangeMessage(change_response);
 
 		}
 			break;

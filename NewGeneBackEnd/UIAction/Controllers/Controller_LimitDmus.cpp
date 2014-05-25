@@ -14,10 +14,10 @@
 /************************************************************************/
 // ACTION_KAD_COUNT_CHANGE
 /************************************************************************/
-void UIActionManager::DoLimitDmusChange(Messager & messager, WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE const & action_request, OutputProject & project)
+void UIActionManager::DoLimitDmusChange(Messager & messager__, WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE const & action_request, OutputProject & project)
 {
 
-	if (FailIfBusy(messager))
+	if (FailIfBusy(messager__))
 	{
 		return;
 	}
@@ -102,7 +102,7 @@ void UIActionManager::DoLimitDmusChange(Messager & messager, WidgetActionItemReq
 
 				}
 
-				messager.EmitChangeMessage(change_response);
+				messager__.EmitChangeMessage(change_response);
 
 			}
 			break;
@@ -172,7 +172,7 @@ void UIActionManager::DoLimitDmusChange(Messager & messager, WidgetActionItemReq
 
 				}
 
-				messager.EmitChangeMessage(change_response);
+				messager__.EmitChangeMessage(change_response);
 
 			}
 			break;

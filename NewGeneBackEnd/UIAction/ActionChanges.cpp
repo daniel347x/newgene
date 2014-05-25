@@ -19,15 +19,6 @@ DataChangeMessage::DataChangeMessage(OutputProject * project)
 
 }
 
-DataChangeMessage::DataChangeMessage(DataChangeMessage const & rhs)
-	: inp(rhs.inp)
-	, outp(rhs.outp)
-	, data_lock(rhs.data_lock)
-	, changes(rhs.changes)
-{
-
-}
-
 DataChangeMessage::DataChangeMessage()
 	: inp(nullptr)
 	, outp(nullptr)

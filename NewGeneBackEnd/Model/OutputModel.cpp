@@ -291,13 +291,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// and the second (here) in case of exit due to failure
 		if (delete_tables_)
 		{
-			input_model.ClearRemnantTemporaryTables();
+			input_model->ClearRemnantTemporaryTables();
 		}
 
-		input_model.VacuumDatabase();
+		input_model->VacuumDatabase();
 	} BOOST_SCOPE_EXIT_END
 
-	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
+	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, input_model);
 	the_map = &the_map_;
 
 	if (the_map->size() == 0)
@@ -356,7 +356,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	debug_sql_path.replace_extension(".debugsql.txt");
 
 	messager.AppendKadStatusText("Validating database...", nullptr);
-	input_model.ClearRemnantTemporaryTables();
+	input_model->ClearRemnantTemporaryTables();
 
 	BOOST_SCOPE_EXIT(this_)
 	{
@@ -435,7 +435,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 				sqlite3_db_release_memory(model->getDb());
 			}
 
-			sqlite3_db_release_memory(input_model.getDb());
+			sqlite3_db_release_memory(input_model->getDb());
 		}
 
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
@@ -774,10 +774,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Delete the tables we used to store the selected columns of raw data over the selected time range
 			// ********************************************************************************************************************************************************* //
-			input_model.ClearRemnantTemporaryTables();
+			input_model->ClearRemnantTemporaryTables();
 		}
 
-		input_model.VacuumDatabase();
+		input_model->VacuumDatabase();
 		messager.SetPerformanceLabel("");
 		messager.UpdateProgressBarValue(1000);
 		messager.UpdateStatusBarText((boost::format("Output successfully generated (%1%)") % boost::filesystem::path(setting_path_to_kad_output).filename().string().c_str()).str().c_str(), this);

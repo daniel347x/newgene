@@ -16,7 +16,8 @@ class DataChangeMessage
 		DataChangeMessage(InputProject *);
 		DataChangeMessage(OutputProject *);
 		DataChangeMessage();
-		DataChangeMessage(DataChangeMessage const & rhs);
+		DataChangeMessage(DataChangeMessage const & rhs) = default;
+		DataChangeMessage & operator=(DataChangeMessage const &) = default;
 
 		InputProject * inp;
 		OutputProject * outp;
