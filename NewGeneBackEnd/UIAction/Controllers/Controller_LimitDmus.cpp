@@ -163,9 +163,9 @@ void UIActionManager::DoLimitDmusChange(Messager & messager, WidgetActionItemReq
 					// ***************************************** //
 					// Update database and cache
 					// ***************************************** //
-					for (auto const & dmu_set_member_to_add : dmu_set_members__to_remove)
+					for (auto const & dmu_set_member_to_remove : dmu_set_members__to_remove)
 					{
-						output_model.t_limit_dmus_set_members.AddDmuMember(output_model.getDb(), output_model, input_model, dmu_category, *dmu_set_member_to_add.uuid);
+						output_model.t_limit_dmus_set_members.RemoveDmuMember(output_model.getDb(), output_model, input_model, dmu_category, *dmu_set_member_to_remove.uuid);
 					}
 
 					executor.success();
