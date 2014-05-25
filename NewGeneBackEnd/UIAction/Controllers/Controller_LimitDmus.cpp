@@ -11,7 +11,7 @@
 /************************************************************************/
 // ACTION_KAD_COUNT_CHANGE
 /************************************************************************/
-void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE const & action_request, OutputProject & project)
+void UIActionManager::DoLimitDmusChange(Messager & messager, WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE const & action_request, OutputProject & project)
 {
 
 	if (FailIfBusy(messager))
