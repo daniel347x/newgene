@@ -263,7 +263,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			WidgetInstanceIdentifier the_identifier;
 			bool found = false;
-			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&uuid_, &parent_uuid, &found, &the_identifier](std::pair<UUID, WidgetInstanceIdentifiers> const & identifiers_)
+			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&uuid_, &parent_uuid, &found, &the_identifier, &use_code_for_parent](std::pair<UUID, WidgetInstanceIdentifiers> const & identifiers_)
 			{
 				if (found)
 				{
@@ -275,10 +275,10 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 
 					// The category matches
 
-					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&uuid_, &parent_uuid, &found, &the_identifier](WidgetInstanceIdentifier const & identifier_)
+					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&uuid_, &parent_uuid, &found, &the_identifier, &use_code_for_parent](WidgetInstanceIdentifier const & identifier_)
 					{
 
-						if (use_code_for_parent)
+						if (!use_code_for_parent)
 						{
 							if (identifier_.uuid && boost::iequals(uuid_, *identifier_.uuid) && identifier_.identifier_parent && identifier_.identifier_parent->uuid
 								&& boost::iequals(parent_uuid, *identifier_.identifier_parent->uuid))
