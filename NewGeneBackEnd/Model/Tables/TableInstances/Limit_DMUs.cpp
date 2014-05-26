@@ -312,7 +312,7 @@ bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_mode
 	if (also_confirm_using_cache)
 	{
 		// Safety check: Cache should match database
-		if (!getIdentifier(*dmu_category.code, dmu_member_uuid).IsEmpty() == exists)
+		if (!getIdentifier(*dmu_category.code, dmu_member_uuid).IsEmpty() != exists)
 		{
 			boost::format msg("Cache of the Limit DMUs member table is out-of-sync.");
 			throw NewGeneException() << newgene_error_description(msg.str());
