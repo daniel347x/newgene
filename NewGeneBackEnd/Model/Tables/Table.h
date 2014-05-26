@@ -258,7 +258,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 			return found;
 		}
 
-		WidgetInstanceIdentifier getIdentifier(UUID const & uuid_, UUID parent_uuid)
+		WidgetInstanceIdentifier getIdentifier(UUID const & uuid_, UUID parent_uuid, bool const use_code_for_parent = false)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			WidgetInstanceIdentifier the_identifier;
@@ -277,12 +277,26 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 
 					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&uuid_, &parent_uuid, &found, &the_identifier](WidgetInstanceIdentifier const & identifier_)
 					{
-						if (identifier_.uuid && boost::iequals(uuid_, *identifier_.uuid) && identifier_.identifier_parent && identifier_.identifier_parent->uuid
-							&& boost::iequals(parent_uuid, *identifier_.identifier_parent->uuid))
+
+						if (use_code_for_parent)
 						{
-							the_identifier = identifier_;
-							found = true;
-							return;
+							if (identifier_.uuid && boost::iequals(uuid_, *identifier_.uuid) && identifier_.identifier_parent && identifier_.identifier_parent->uuid
+								&& boost::iequals(parent_uuid, *identifier_.identifier_parent->uuid))
+							{
+								the_identifier = identifier_;
+								found = true;
+								return;
+							}
+						}
+						else
+						{
+							if (identifier_.uuid && boost::iequals(uuid_, *identifier_.uuid) && identifier_.identifier_parent && identifier_.identifier_parent->code
+								&& boost::iequals(parent_uuid, *identifier_.identifier_parent->code))
+							{
+								the_identifier = identifier_;
+								found = true;
+								return;
+							}
 						}
 					});
 
