@@ -500,13 +500,13 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
                                         return;
                                     }
 
-									int rowsBottomLeft = dmusModelBottomLeft->rowCount();
-									int rowsBottomRight = dmusModelBottomRight->rowCount();
+                                    int rowsBottomLeft = modelLeft->rowCount();
+                                    int rowsBottomRight = modelRight->rowCount();
 
 									WidgetInstanceIdentifiers dmu_set_members_bottom_left;
 									for (int n=0; n<rowsBottomLeft; ++n)
 									{
-										QStandardItem * itemBottomLeft = dmusModelBottomLeft->item(n);
+                                        QStandardItem * itemBottomLeft = modelLeft->item(n);
 										WidgetInstanceIdentifier dmu_set_member = itemBottomLeft->data().value<WidgetInstanceIdentifier>();
 										dmu_set_members_bottom_left.push_back(dmu_set_member);
 									}
@@ -514,7 +514,7 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									WidgetInstanceIdentifiers dmu_set_members_bottom_right;
 									for (int n=0; n<rowsBottomRight; ++n)
 									{
-										QStandardItem * itemBottomRight = dmusModelBottomRight->item(n);
+                                        QStandardItem * itemBottomRight = modelRight->item(n);
 										WidgetInstanceIdentifier dmu_set_member = itemBottomRight->data().value<WidgetInstanceIdentifier>();
 										dmu_set_members_bottom_right.push_back(dmu_set_member);
 									}
@@ -544,14 +544,14 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									for (auto const & dmu_set_member : dmu_set_members__not_limited__to_remove)
 									{
 										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
-										QList<QStandardItem *> items = dmusModelBottomLeft->findItems(text.c_str());
+                                        QList<QStandardItem *> items = modelLeft->findItems(text.c_str());
 										if (items.count() == 1)
 										{
 											QStandardItem * dmu_member_to_remove = items.at(0);
 											if (dmu_member_to_remove != nullptr)
 											{
-												QModelIndex index_to_remove = dmusModelBottomLeft->indexFromItem(dmu_member_to_remove);
-												dmusModelBottomLeft->takeRow(index_to_remove.row());
+                                                QModelIndex index_to_remove = modelLeft->indexFromItem(dmu_member_to_remove);
+                                                modelLeft->takeRow(index_to_remove.row());
 
 												delete dmu_member_to_remove;
 												dmu_member_to_remove = nullptr;
@@ -562,14 +562,14 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									for (auto const & dmu_set_member : dmu_set_members__limited__to_remove)
 									{
 										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
-										QList<QStandardItem *> items = dmusModelBottomRight->findItems(text.c_str());
+                                        QList<QStandardItem *> items = modelRight->findItems(text.c_str());
 										if (items.count() == 1)
 										{
 											QStandardItem * dmu_member_to_remove = items.at(0);
 											if (dmu_member_to_remove != nullptr)
 											{
-												QModelIndex index_to_remove = dmusModelBottomRight->indexFromItem(dmu_member_to_remove);
-												dmusModelBottomRight->takeRow(index_to_remove.row());
+                                                QModelIndex index_to_remove = modelRight->indexFromItem(dmu_member_to_remove);
+                                                modelRight->takeRow(index_to_remove.row());
 
 												delete dmu_member_to_remove;
 												dmu_member_to_remove = nullptr;
@@ -590,10 +590,10 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 										QVariant v;
 										v.setValue(dmu_set_member);
 										item->setData(v);
-										dmusModelBottomLeft->appendRow( item );
+                                        modelLeft->appendRow( item );
 
-                                        //QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
-                                        //selectionModelBottomLeft->select(newDmuMemberIndex, QItemSelectionModel::Select);
+                                        QModelIndex newDmuMemberIndex = modelLeft->indexFromItem(item);
+                                        selectionModelBottomLeft->select(newDmuMemberIndex, QItemSelectionModel::Select);
 									}
 
 									QItemSelectionModel * selectionModelBottomRight = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
@@ -609,10 +609,10 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 										QVariant v;
 										v.setValue(dmu_set_member);
 										item->setData(v);
-										dmusModelBottomRight->appendRow( item );
+                                        modelRight->appendRow( item );
 
-                                        //QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
-                                        //selectionModelBottomRight->select(newDmuMemberIndex, QItemSelectionModel::Select);
+                                        QModelIndex newDmuMemberIndex = modelRight->indexFromItem(item);
+                                        selectionModelBottomRight->select(newDmuMemberIndex, QItemSelectionModel::Select);
 									}
 
 								}
@@ -726,7 +726,7 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
     QModelIndexList selectedDMUs = dmus_selectionModel->selectedRows();
     for (auto & selectedDmuIndex : selectedDMUs)
     {
-        QVariant dmu_category_variant = dmusModel->item(selectedDmuIndex.row())->data();
+        QVariant dmu_category_variant = model->item(selectedDmuIndex.row())->data();
         WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
         dmuCategoriesToMoveToLimitingList.push_back(dmu_category);
     }
@@ -798,7 +798,7 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_left_clicked()
     QModelIndexList selectedDMUs = dmus_selectionModel->selectedRows();
     for (auto & selectedDmuIndex : selectedDMUs)
     {
-        QVariant dmu_category_variant = dmusModel->item(selectedDmuIndex.row())->data();
+        QVariant dmu_category_variant = model->item(selectedDmuIndex.row())->data();
         WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
         dmuCategoriesToMoveToNonLimitingList.push_back(dmu_category);
     }
