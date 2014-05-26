@@ -592,8 +592,8 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 										item->setData(v);
 										dmusModelBottomLeft->appendRow( item );
 
-										QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
-										selectionModelBottomLeft->select(newDmuMemberIndex, QItemSelectionModel::Select);
+                                        //QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
+                                        //selectionModelBottomLeft->select(newDmuMemberIndex, QItemSelectionModel::Select);
 									}
 
 									QItemSelectionModel * selectionModelBottomRight = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
@@ -611,8 +611,8 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 										item->setData(v);
 										dmusModelBottomRight->appendRow( item );
 
-										QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
-										selectionModelBottomRight->select(newDmuMemberIndex, QItemSelectionModel::Select);
+                                        //QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
+                                        //selectionModelBottomRight->select(newDmuMemberIndex, QItemSelectionModel::Select);
 									}
 
 								}
