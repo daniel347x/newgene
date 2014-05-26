@@ -506,18 +506,22 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									WidgetInstanceIdentifiers dmu_set_members_bottom_left;
 									for (int n=0; n<rowsBottomLeft; ++n)
 									{
-                                        QStandardItem * itemBottomLeft = modelLeft->item(n);
+                                        QModelIndex indexBottomLeftProxy = modelLeft->index(n, 0);
+                                        QModelIndex indexBottomLeft = modelLeft->mapToSource(indexBottomLeftProxy);
+                                        QStandardItem * itemBottomLeft = dmusModelBottomLeft->itemFromIndex(indexBottomLeft);
 										WidgetInstanceIdentifier dmu_set_member = itemBottomLeft->data().value<WidgetInstanceIdentifier>();
 										dmu_set_members_bottom_left.push_back(dmu_set_member);
 									}
 
 									WidgetInstanceIdentifiers dmu_set_members_bottom_right;
-									for (int n=0; n<rowsBottomRight; ++n)
-									{
-                                        QStandardItem * itemBottomRight = modelRight->item(n);
-										WidgetInstanceIdentifier dmu_set_member = itemBottomRight->data().value<WidgetInstanceIdentifier>();
-										dmu_set_members_bottom_right.push_back(dmu_set_member);
-									}
+                                    for (int n=0; n<rowsBottomRight; ++n)
+                                    {
+                                        QModelIndex indexBottomRightProxy = modelRight->index(n, 0);
+                                        QModelIndex indexBottomRight = modelRight->mapToSource(indexBottomRightProxy);
+                                        QStandardItem * itemBottomRight = dmusModelBottomRight->itemFromIndex(indexBottomRight);
+                                        WidgetInstanceIdentifier dmu_set_member = itemBottomRight->data().value<WidgetInstanceIdentifier>();
+                                        dmu_set_members_bottom_right.push_back(dmu_set_member);
+                                    }
 
 									WidgetInstanceIdentifiers dmu_set_members_bottom_left__new = change.child_identifiers;
 									WidgetInstanceIdentifiers dmu_set_members_bottom_right__new = change.vector_of_identifiers;
@@ -544,14 +548,14 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									for (auto const & dmu_set_member : dmu_set_members__not_limited__to_remove)
 									{
 										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
-                                        QList<QStandardItem *> items = modelLeft->findItems(text.c_str());
+                                        QList<QStandardItem *> items = dmusModelBottomLeft->findItems(text.c_str());
 										if (items.count() == 1)
 										{
 											QStandardItem * dmu_member_to_remove = items.at(0);
 											if (dmu_member_to_remove != nullptr)
 											{
-                                                QModelIndex index_to_remove = modelLeft->indexFromItem(dmu_member_to_remove);
-                                                modelLeft->takeRow(index_to_remove.row());
+                                                QModelIndex index_to_remove = dmusModelBottomLeft->indexFromItem(dmu_member_to_remove);
+                                                dmusModelBottomLeft->takeRow(index_to_remove.row());
 
 												delete dmu_member_to_remove;
 												dmu_member_to_remove = nullptr;
@@ -562,14 +566,14 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									for (auto const & dmu_set_member : dmu_set_members__limited__to_remove)
 									{
 										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
-                                        QList<QStandardItem *> items = modelRight->findItems(text.c_str());
+                                        QList<QStandardItem *> items = dmusModelBottomRight->findItems(text.c_str());
 										if (items.count() == 1)
 										{
 											QStandardItem * dmu_member_to_remove = items.at(0);
 											if (dmu_member_to_remove != nullptr)
 											{
-                                                QModelIndex index_to_remove = modelRight->indexFromItem(dmu_member_to_remove);
-                                                modelRight->takeRow(index_to_remove.row());
+                                                QModelIndex index_to_remove = dmusModelBottomRight->indexFromItem(dmu_member_to_remove);
+                                                dmusModelBottomRight->takeRow(index_to_remove.row());
 
 												delete dmu_member_to_remove;
 												dmu_member_to_remove = nullptr;
@@ -590,10 +594,11 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 										QVariant v;
 										v.setValue(dmu_set_member);
 										item->setData(v);
-                                        modelLeft->appendRow( item );
+                                        dmusModelBottomLeft->appendRow( item );
 
-                                        QModelIndex newDmuMemberIndex = modelLeft->indexFromItem(item);
-                                        selectionModelBottomLeft->select(newDmuMemberIndex, QItemSelectionModel::Select);
+                                        QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
+                                        QModelIndex newDmuMemberIndexProxy = modelLeft->mapFromSource(newDmuMemberIndex);
+                                        selectionModelBottomLeft->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
 									}
 
 									QItemSelectionModel * selectionModelBottomRight = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
@@ -609,10 +614,11 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 										QVariant v;
 										v.setValue(dmu_set_member);
 										item->setData(v);
-                                        modelRight->appendRow( item );
+                                        dmusModelBottomRight->appendRow( item );
 
-                                        QModelIndex newDmuMemberIndex = modelRight->indexFromItem(item);
-                                        selectionModelBottomRight->select(newDmuMemberIndex, QItemSelectionModel::Select);
+                                        QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
+                                        QModelIndex newDmuMemberIndexProxy = modelRight->mapFromSource(newDmuMemberIndex);
+                                        selectionModelBottomRight->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
 									}
 
 								}
