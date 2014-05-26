@@ -312,7 +312,7 @@ bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_mode
 	if (also_confirm_using_cache)
 	{
 		// Safety check: Cache should match database
-		if (!getIdentifier(dmu_member_uuid, *dmu_category.code).IsEmpty() != exists)
+		if (!getIdentifier(dmu_member_uuid, *dmu_category.code, true).IsEmpty() != exists)
 		{
 			boost::format msg("Cache of the Limit DMUs member table is out-of-sync.");
 			throw NewGeneException() << newgene_error_description(msg.str());
@@ -333,7 +333,7 @@ WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db,
 	bool already_exists = Exists(db, output_model_, input_model_, dmu_category, dmu_member_uuid);
 	if (already_exists)
 	{
-		return getIdentifier(dmu_member_uuid, *dmu_category.code);
+		return getIdentifier(dmu_member_uuid, *dmu_category.code, true);
 	}
 
 	WidgetInstanceIdentifier dmu_set_member = input_model_.t_dmu_setmembers.getIdentifier(dmu_member_uuid, *dmu_category.uuid);
