@@ -426,7 +426,7 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 			return true;
 		}
 		return false;
-	}), identifiers_map[*dmu_category.uuid].end());
+	}), identifiers_map[*dmu_category.code].end());
 
 	//theExecutor.success();
 
