@@ -730,9 +730,10 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 
     WidgetInstanceIdentifiers dmuCategoriesToMoveToLimitingList;
     QModelIndexList selectedDMUs = dmus_selectionModel->selectedRows();
-    for (auto & selectedDmuIndex : selectedDMUs)
+    for (auto & selectedDmuIndexProxy : selectedDMUs)
     {
-        QVariant dmu_category_variant = model->item(selectedDmuIndex.row())->data();
+        QModelIndex selectedDmuIndex = model->mapToSource(selectedDmuIndexProxy);
+        QVariant dmu_category_variant = dmusModel->item(selectedDmuIndex.row())->data();
         WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
         dmuCategoriesToMoveToLimitingList.push_back(dmu_category);
     }
@@ -802,9 +803,10 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_left_clicked()
 
     WidgetInstanceIdentifiers dmuCategoriesToMoveToNonLimitingList;
     QModelIndexList selectedDMUs = dmus_selectionModel->selectedRows();
-    for (auto & selectedDmuIndex : selectedDMUs)
+    for (auto & selectedDmuIndexProxy : selectedDMUs)
     {
-        QVariant dmu_category_variant = model->item(selectedDmuIndex.row())->data();
+        QModelIndex selectedDmuIndex = model->mapToSource(selectedDmuIndexProxy);
+        QVariant dmu_category_variant = dmusModel->item(selectedDmuIndex.row())->data();
         WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
         dmuCategoriesToMoveToNonLimitingList.push_back(dmu_category);
     }
