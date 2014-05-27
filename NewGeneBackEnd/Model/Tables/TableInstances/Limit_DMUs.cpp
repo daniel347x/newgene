@@ -160,7 +160,7 @@ bool Table__Limit_DMUS__Categories::AddDMU(sqlite3 * db, OutputModel & output_mo
 
 }
 
-bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier & dmu_category, DataChangeMessage & change_message)
+bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier & dmu_category)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -209,10 +209,7 @@ bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output
 	// ***************************************** //
 	// Prepare data to send back to user interface
 	// ***************************************** //
-	//DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
-	//DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-	//DataChange change(type, intention, dmu, WidgetInstanceIdentifiers());
-	//change_message.changes.push_back(change);
+	// no-op
 
 	//theExecutor.success();
 

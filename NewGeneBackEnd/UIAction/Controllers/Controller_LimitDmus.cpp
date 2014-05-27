@@ -180,7 +180,10 @@ void UIActionManager::DoLimitDmusChange(Messager & messager__, WidgetActionItemR
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 			{
 
-				DataChangeMessage change_response(&project);
+				// Checkbox - "Limit DMU members for the selected DMU category."
+
+				// No need to send response to UI
+				//DataChangeMessage change_response(&project);
 
 				for (auto const & instanceActionItem : *action_request.items)
 				{
@@ -204,45 +207,40 @@ void UIActionManager::DoLimitDmusChange(Messager & messager__, WidgetActionItemR
 					// ************************************* //
 					WidgetActionItem const & actionItem = *instanceActionItem.second;
 					WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const & actionItemLimitDmuInfo = static_cast<WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const &>(actionItem);
-					WidgetInstanceIdentifiers dmu_set_members__to_add = actionItemLimitDmuInfo.getValue();
+					std::string is_limited_string = actionItemLimitDmuInfo.getValueString();
+					bool is_limited = false;
+					if (is_limited_string == "y")
+					{
+						is_limited = true;
+					}
 
 					// ***************************************** //
-					// Prepare data to send back to user interface
+					// No need to send response to UI
+					// - the UI already has all the information it needs
+					//   and knows what to do
 					// ***************************************** //
-					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE;
-					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__RESET_ALL;
-
-					WidgetInstanceIdentifiers dmu_set_members__all = input_model.t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
-					WidgetInstanceIdentifiers dmu_set_members__current_limited = output_model.t_limit_dmus_set_members.getIdentifiers(*dmu_category.code);
-					std::sort(dmu_set_members__all.begin(), dmu_set_members__all.end());
-					std::sort(dmu_set_members__current_limited.begin(), dmu_set_members__current_limited.end());
-					std::sort(dmu_set_members__to_add.begin(), dmu_set_members__to_add.end());
-
-					WidgetInstanceIdentifiers dmu_set_members__new_limited;
-					std::set_union(dmu_set_members__current_limited.cbegin(), dmu_set_members__current_limited.cend(), dmu_set_members__to_add.cbegin(), dmu_set_members__to_add.cend(),
-								   std::inserter(dmu_set_members__new_limited, dmu_set_members__new_limited.begin()));
-
-					WidgetInstanceIdentifiers dmu_set_members__not_limited;
-					std::set_difference(dmu_set_members__all.cbegin(), dmu_set_members__all.cend(), dmu_set_members__new_limited.cbegin(), dmu_set_members__new_limited.cend(),
-										std::inserter(dmu_set_members__not_limited, dmu_set_members__not_limited.begin()));
-
-					DataChange change(type, intention, dmu_category, dmu_set_members__not_limited);
-					change.vector_of_identifiers = dmu_set_members__new_limited;
-					change_response.changes.push_back(change);
+					//
+					// // no-op - no response to UI
+					//
 
 					// ***************************************** //
 					// Update database and cache
 					// ***************************************** //
-					for (auto const & dmu_set_member_to_add : dmu_set_members__to_add)
+					if (is_limited)
 					{
-						output_model.t_limit_dmus_set_members.AddDmuMember(output_model.getDb(), output_model, input_model, dmu_category, *dmu_set_member_to_add.uuid);
+						output_model.t_limit_dmus_categories.AddDMU(output_model.getDb(), output_model, input_model, dmu_category);
+					}
+					else
+					{
+						output_model.t_limit_dmus_categories.RemoveDMU(output_model.getDb(), output_model, input_model, dmu_category);
 					}
 
 					executor.success();
 
 				}
 
-				messager__.EmitChangeMessage(change_response);
+				// No need to send response to UI
+				//messager__.EmitChangeMessage(change_response);
 
 			}
 			break;
