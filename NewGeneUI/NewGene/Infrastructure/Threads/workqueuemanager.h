@@ -125,14 +125,13 @@ class WorkQueueManagerBase : public QObject
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE) {}
-        virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT) {}
-        virtual void LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE) {}
-        //
+		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT) {}
+		virtual void LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE) {}
+		//
 		virtual void AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU) {}
 		virtual void DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU) {}
 		virtual void DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS) {}
 		virtual void AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS) {}
-		virtual void DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS) {}
 		virtual void RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE) {}
 		virtual void AddUOA(WidgetActionItemRequest_ACTION_ADD_UOA) {}
 		virtual void DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA) {}
