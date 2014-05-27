@@ -45,10 +45,11 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
         void on_checkBox_limit_dmus_toggled(bool checked);
 
-protected:
+    protected:
 
 		void changeEvent( QEvent * e );
 		void Empty();
+        void PrepareItem(QStandardItem * item, std::string const * text, bool const is_limited);
 
 	private:
 

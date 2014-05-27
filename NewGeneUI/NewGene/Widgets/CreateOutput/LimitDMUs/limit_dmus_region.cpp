@@ -12,6 +12,7 @@
 #include <iterator>
 
 #include <QModelIndexList>
+#include <Qbrush>
 
 limit_dmus_region::limit_dmus_region(QWidget *parent) :
 	QWidget(parent),
@@ -105,6 +106,30 @@ void limit_dmus_region::RefreshAllWidgets()
 
 }
 
+void limit_dmus_region::PrepareItem(QStandardItem * item, std::string const * text, bool const is_limited)
+{
+
+    item->setText(text.c_str());
+    item->setEditable(false);
+    item->setCheckable(false);
+    if (is_limited)
+    {
+         QBrush brush = item->foreground();
+         brush.setColor(Qt::yellow);
+         item->setForeground(brush);
+    }
+    else
+    {
+        QBrush brush = item->foreground();
+        brush.setColor(Qt::white);
+        item->setForeground(brush);
+    }
+    QVariant v;
+    v.setValue(dmu_category);
+    item->setData(v);
+
+}
+
 void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB widget_data)
 {
 
@@ -151,12 +176,7 @@ void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB w
 
 			QStandardItem * item = new QStandardItem();
 			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
-			item->setText(text.c_str());
-			item->setEditable(false);
-			item->setCheckable(false);
-			QVariant v;
-			v.setValue(dmu_category);
-			item->setData(v);
+            PrepareItem(item, text, is_limited);
 			model->setItem( index, item );
 
 			++index;
@@ -353,15 +373,9 @@ void limit_dmus_region::ResetBottomLeftPane(WidgetInstanceIdentifiers const & dm
 		if (dmu_member.uuid && !dmu_member.uuid->empty())
 		{
 
-			std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-
-			QStandardItem * item = new QStandardItem();
-			item->setText(text.c_str());
-			item->setEditable(false);
-			item->setCheckable(false);
-			QVariant v;
-			v.setValue(dmu_member);
-			item->setData(v);
+            QStandardItem * item = new QStandardItem();
+            std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
+            PrepareItem(item, text, false);
 			model->setItem( index, item );
 
 			++index;
@@ -390,16 +404,10 @@ void limit_dmus_region::ResetBottomRightPane(WidgetInstanceIdentifiers const & d
 		if (dmu_member.uuid && !dmu_member.uuid->empty())
 		{
 
-			std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-
-			QStandardItem * item = new QStandardItem();
-			item->setText(text.c_str());
-			item->setEditable(false);
-			item->setCheckable(false);
-			QVariant v;
-			v.setValue(dmu_member);
-			item->setData(v);
-			model->setItem( index, item );
+            QStandardItem * item = new QStandardItem();
+            std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
+            PrepareItem(item, text, false);
+            model->setItem( index, item );
 
 			++index;
 
@@ -597,16 +605,10 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									selectionModelBottomLeft->clearSelection();
 									for (auto const & dmu_set_member : dmu_set_members__not_limited__to_add)
 									{
-										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
-
-										QStandardItem * item = new QStandardItem();
-										item->setText(text.c_str());
-										item->setEditable(false);
-										item->setCheckable(false);
-										QVariant v;
-										v.setValue(dmu_set_member);
-										item->setData(v);
-										dmusModelBottomLeft->appendRow( item );
+                                        QStandardItem * item = new QStandardItem();
+                                        std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
+                                        PrepareItem(item, text, false);
+                                        dmusModelBottomLeft->appendRow( item );
 
 										QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
 										QModelIndex newDmuMemberIndexProxy = modelLeft->mapFromSource(newDmuMemberIndex);
@@ -617,16 +619,10 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									selectionModelBottomRight->clearSelection();
 									for (auto const & dmu_set_member : dmu_set_members__limited__to_add)
 									{
-										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
-
-										QStandardItem * item = new QStandardItem();
-										item->setText(text.c_str());
-										item->setEditable(false);
-										item->setCheckable(false);
-										QVariant v;
-										v.setValue(dmu_set_member);
-										item->setData(v);
-										dmusModelBottomRight->appendRow( item );
+                                        QStandardItem * item = new QStandardItem();
+                                        std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
+                                        PrepareItem(item, text, false);
+                                        dmusModelBottomRight->appendRow( item );
 
 										QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
 										QModelIndex newDmuMemberIndexProxy = modelRight->mapFromSource(newDmuMemberIndex);
