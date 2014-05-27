@@ -50,7 +50,7 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
 		void changeEvent( QEvent * e );
 		void Empty();
-		void PrepareItem(QStandardItem * item, std::string const & text, bool const is_limited);
+		void PrepareItem(QStandardItem * item, std::string const & text, WidgetInstanceIdentifier const & identifier, bool const is_limited);
 
 	private:
 

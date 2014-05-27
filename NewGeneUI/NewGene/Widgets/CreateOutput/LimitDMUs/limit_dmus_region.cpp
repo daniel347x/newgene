@@ -106,7 +106,7 @@ void limit_dmus_region::RefreshAllWidgets()
 
 }
 
-void limit_dmus_region::PrepareItem(QStandardItem * item, std::string const & text, bool const is_limited)
+void limit_dmus_region::PrepareItem(QStandardItem * item, std::string const & text, WidgetInstanceIdentifier const & identifier, bool const is_limited)
 {
 
 	item->setText(text.c_str());
@@ -125,7 +125,7 @@ void limit_dmus_region::PrepareItem(QStandardItem * item, std::string const & te
 		item->setForeground(brush);
 	}
 	QVariant v;
-	v.setValue(dmu_category);
+	v.setValue(identifier);
 	item->setData(v);
 
 }
@@ -176,7 +176,7 @@ void limit_dmus_region::WidgetDataRefreshReceive(WidgetDataItem_LIMIT_DMUS_TAB w
 
 			QStandardItem * item = new QStandardItem();
 			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
-			PrepareItem(item, text, is_limited);
+			PrepareItem(item, text, dmu_category, is_limited);
 			model->setItem( index, item );
 
 			++index;
@@ -375,7 +375,7 @@ void limit_dmus_region::ResetBottomLeftPane(WidgetInstanceIdentifiers const & dm
 
 			QStandardItem * item = new QStandardItem();
 			std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-			PrepareItem(item, text, false);
+			PrepareItem(item, text, dmu_member, false);
 			model->setItem( index, item );
 
 			++index;
@@ -406,7 +406,7 @@ void limit_dmus_region::ResetBottomRightPane(WidgetInstanceIdentifiers const & d
 
 			QStandardItem * item = new QStandardItem();
 			std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-			PrepareItem(item, text, false);
+			PrepareItem(item, text, dmu_member, false);
 			model->setItem( index, item );
 
 			++index;
@@ -607,7 +607,7 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									{
 										QStandardItem * item = new QStandardItem();
 										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
-										PrepareItem(item, text, false);
+										PrepareItem(item, text, dmu_set_member, false);
 										dmusModelBottomLeft->appendRow( item );
 
 										QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
@@ -621,7 +621,7 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									{
 										QStandardItem * item = new QStandardItem();
 										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
-										PrepareItem(item, text, false);
+										PrepareItem(item, text, dmu_set_member, false);
 										dmusModelBottomRight->appendRow( item );
 
 										QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
