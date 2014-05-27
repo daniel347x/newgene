@@ -43,7 +43,9 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
         void on_pushButton_limit_dmus_move_left_clicked();
 
-    protected:
+        void on_checkBox_limit_dmus_toggled(bool checked);
+
+protected:
 
 		void changeEvent( QEvent * e );
 		void Empty();

@@ -825,3 +825,8 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_left_clicked()
     }
 
 }
+
+void limit_dmus_region::on_checkBox_limit_dmus_toggled(bool checked)
+{
+
+}
