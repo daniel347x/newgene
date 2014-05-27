@@ -150,7 +150,7 @@ void UIActionManager::DoLimitDmusChange(Messager & messager__, WidgetActionItemR
 
 					WidgetInstanceIdentifiers dmu_set_members__new_limited;
 					std::set_difference(dmu_set_members__current_limited.cbegin(), dmu_set_members__current_limited.cend(), dmu_set_members__to_remove.cbegin(), dmu_set_members__to_remove.cend(),
-								   std::inserter(dmu_set_members__new_limited, dmu_set_members__new_limited.begin()));
+										std::inserter(dmu_set_members__new_limited, dmu_set_members__new_limited.begin()));
 
 					WidgetInstanceIdentifiers dmu_set_members__not_limited;
 					std::set_difference(dmu_set_members__all.cbegin(), dmu_set_members__all.cend(), dmu_set_members__new_limited.cbegin(), dmu_set_members__new_limited.cend(),
