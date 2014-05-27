@@ -848,18 +848,33 @@ void limit_dmus_region::on_checkBox_limit_dmus_toggled(bool checked)
 
 	// Submit the action: Note: no response is necessary
 	InstanceActionItems actionItems;
-	std::string did_checkbox_change;
+    std::string checkbox_state;
 	if (checked)
 	{
-		did_checkbox_change = "y";
+        checkbox_state = "y";
 		ui->limit_dmus_bottom_half_widget->show();
 	}
 	else
 	{
-		did_checkbox_change = "n";
+        checkbox_state = "n";
 		ui->limit_dmus_bottom_half_widget->hide();
-	}
-	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetInstanceIdentifiers(), did_checkbox_change)))));
+	}    
+
+    std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+    QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView_limit_dmus_top_pane->model());
+    QList<QStandardItem *> items = model->findItems(text.c_str());
+    if (items.count() == 1)
+    {
+        QStandardItem * dmu_category_item = items.at(0);
+        if (dmu_category_item != nullptr)
+        {
+            QFont font = item->font();
+            font.setBold(checked);
+            dmu_category_item->setFont(font);
+        }
+    }
+
+    actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetInstanceIdentifiers(), checkbox_state)))));
 	WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 	emit LimitDMUsChange(action_request);
 
