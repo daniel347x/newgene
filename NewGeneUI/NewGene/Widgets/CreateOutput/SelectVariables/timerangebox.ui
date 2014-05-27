@@ -198,8 +198,6 @@
               </spacer>
              </item>
             </layout>
-            <zorder>label</zorder>
-            <zorder>verticalLayoutWidget_2</zorder>
             <zorder>verticalSpacer_8</zorder>
            </widget>
           </item>
@@ -228,7 +226,7 @@
           <item>
            <widget class="QCheckBox" name="mergeIdenticalRows">
             <property name="text">
-             <string>Merge identical adjacent output rows</string>
+             <string>Merge identical adjacent output rows (recommended)</string>
             </property>
            </widget>
           </item>
