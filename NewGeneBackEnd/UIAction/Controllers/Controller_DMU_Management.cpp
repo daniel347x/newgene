@@ -635,7 +635,7 @@ void UIActionManager::DeleteDMUMembersOutput(Messager & messager, WidgetActionIt
 
 				//DataChangeMessage change_response(&project);
 
-				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager](InstanceActionItem const & instanceActionItem)
 				{
 
 					Executor executor(input_model.getDb());
