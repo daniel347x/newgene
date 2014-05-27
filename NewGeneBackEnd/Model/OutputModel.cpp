@@ -1994,7 +1994,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// in both time range fields)
 	if (!variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
-		sql_string += " WHERE CASE WHEN `";
+		sql_string += " WHERE ( CASE WHEN `";
 		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
 		sql_string += "` = 0 AND `";
 		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
@@ -2017,7 +2017,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		sql_string += "` < ";
 		sql_string += boost::lexical_cast<std::string>(timerange_end);
 		sql_string += " ELSE 0";
-		sql_string += " END";
+		sql_string += " END )";
 	}
 
 	// Now limit by DMU member
@@ -2043,9 +2043,46 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						if (primary_dmu_category.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, limiting_dmu_category))
 						{
 
-							sql_string += " AND `";
-							sql_string += *limiting_dmu_category.code;
-							sql_string += "` IN ";
+							sql_string += " AND (`";
+							sql_string += column_in_view.column_name_in_temporary_table;
+							sql_string += "` ";
+
+							WidgetInstanceIdentifiers limited_dmu_set_members = model->t_limit_dmus_set_members.getIdentifiers(*limiting_dmu_category.code);
+							if (limited_dmu_set_members.empty())
+							{
+								sql_string += " IS NULL OR `";
+								sql_string += column_in_view.column_name_in_temporary_table;
+								sql_string += "` = \"\"";
+							}
+							else
+							{
+								sql_string += " IN (";
+
+								bool first_limited_dmu = true;
+								for (auto const & limited_dmu_set_member : limited_dmu_set_members)
+								{
+									if (!first_limited_dmu)
+									{
+										sql_string += ", ";
+									}
+									first_limited_dmu = false;
+
+									if (column_in_view.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
+									{
+										sql_string += *limited_dmu_set_member.uuid;
+									}
+									else
+									{
+										sql_string += "\"";
+										sql_string += *limited_dmu_set_member.uuid;
+										sql_string += "\"";
+									}
+								}
+
+								sql_string += ")";
+							}
+
+							sql_string += ")";
 
 						}
 					}
