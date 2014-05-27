@@ -12,7 +12,8 @@
 #include <iterator>
 
 #include <QModelIndexList>
-#include <Qbrush>
+#include <QBrush>
+#include <QFont>
 
 limit_dmus_region::limit_dmus_region(QWidget *parent) :
 	QWidget(parent),
@@ -114,16 +115,16 @@ void limit_dmus_region::PrepareItem(QStandardItem * item, std::string const & te
 	item->setCheckable(false);
 	if (is_limited)
 	{
-         QBrush brush = item->background();
-		 brush.setColor(Qt::yellow);
-         item->setBackground(brush);
+         QFont font = item->font();
+         font.setBold(true);
+         item->setFont(font);
 	}
 	else
 	{
-        QBrush brush = item->background();
-		brush.setColor(Qt::white);
-        item->setBackground(brush);
-	}
+        QFont font = item->font();
+        font.setBold(false);
+        item->setFont(font);
+    }
 	QVariant v;
 	v.setValue(identifier);
 	item->setData(v);
