@@ -346,6 +346,7 @@ void UIActionManager::DeleteDMUOutput(Messager & messager__, WidgetActionItemReq
 				// ***************************************** //
 				// Prepare data to send back to user interface
 				// ***************************************** //
+				// DMU's with any variables selected - this might have changed
 				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE;
 				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
 				DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
