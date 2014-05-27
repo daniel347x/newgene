@@ -386,16 +386,31 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 
 	//Executor theExecutor(db);
 
-	bool already_exists = Exists(db, output_model_, input_model_, dmu_category, dmu_member_uuid);
-	if (!already_exists)
+	// Empty dmu_member_uuid means "remove all members for the given DMU category"
+	if (!dmu_member_uuid.empty())
 	{
-		return false;
+		bool already_exists = Exists(db, output_model_, input_model_, dmu_category, dmu_member_uuid);
+		if (!already_exists)
+		{
+			return false;
+		}
 	}
 
 	sqlite3_stmt * stmt = NULL;
-	boost::format sql("DELETE FROM LIMIT_DMUS__ELEMENTS WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = '%1%' AND LIMIT_DMUS__DMU_SET_MEMBER_UUID = '%2%'");
-	sql % *dmu_category.code % dmu_member_uuid;
-	int err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
+	int err = 0;
+	if (dmu_member_uuid.empty())
+	{
+		// Empty dmu_member_uuid means "remove all members for the given DMU category"
+		boost::format sql("DELETE FROM LIMIT_DMUS__ELEMENTS WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = '%1%'");
+		sql % *dmu_category.code;
+		err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
+	}
+	else
+	{
+		boost::format sql("DELETE FROM LIMIT_DMUS__ELEMENTS WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = '%1%' AND LIMIT_DMUS__DMU_SET_MEMBER_UUID = '%2%'");
+		sql % *dmu_category.code % dmu_member_uuid;
+		int err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
+	}
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare DELETE statement to delete DMU member from the Limit DMUs member table: %1%");
@@ -417,14 +432,22 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 	}
 
 	// Remove from cache
-	identifiers_map[*dmu_category.code].erase(std::remove_if(identifiers_map[*dmu_category.code].begin(), identifiers_map[*dmu_category.code].end(), [&](WidgetInstanceIdentifier & test_dmu_member)
+	if (dmu_member_uuid.empty())
 	{
-		if (boost::iequals(*test_dmu_member.uuid, dmu_member_uuid))
+		// Empty dmu_member_uuid means "remove all members for the given DMU category"
+		identifiers_map.erase(*dmu_category.code);
+	}
+	else
+	{
+		identifiers_map[*dmu_category.code].erase(std::remove_if(identifiers_map[*dmu_category.code].begin(), identifiers_map[*dmu_category.code].end(), [&](WidgetInstanceIdentifier & test_dmu_member)
 		{
-			return true;
-		}
-		return false;
-	}), identifiers_map[*dmu_category.code].end());
+			if (boost::iequals(*test_dmu_member.uuid, dmu_member_uuid))
+			{
+				return true;
+			}
+			return false;
+		}), identifiers_map[*dmu_category.code].end());
+	}
 
 	//theExecutor.success();
 

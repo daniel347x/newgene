@@ -361,13 +361,29 @@ void UIActionManager::DeleteDMUOutput(Messager & messager__, WidgetActionItemReq
 					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
 					DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
 					change_response.changes.push_back(change);
-
 					// ***************************************** //
 					// Use updated cache info to set further info
 					// in change_response
 					// ***************************************** //
 					std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
 					change_response.changes.back().set_of_identifiers = active_dmus;
+
+
+					// Now remove the DMU from the "Limit DMU's" category table
+					output_model.t_limit_dmus_categories.RemoveDMU(output_model.getDb(), output_model, input_model, dmu);
+
+					// Now remove the corresponding DMU members from the "Limit DMU's" members table
+					// empty string for last arg means "delete all members for this DMU category"
+					output_model.t_limit_dmus_set_members.RemoveDmuMember(output_model.getDb(), output_model, input_model, dmu, std::string());
+
+					// ******************************************************************************************************** //
+					// No need to send this message - the Limit DMU's tab already responds to the INPUT model message change,
+					// which is always sent
+					// ******************************************************************************************************** //
+					//DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__INPUT_DMU_OR_DMU_MEMBER_CHANGE;
+					//DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__NONE;
+					//DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
+					//change_response.changes.push_back(change);
 
 					executor.success();
 
@@ -608,7 +624,8 @@ void UIActionManager::DeleteDMUMembersOutput(Messager & messager, WidgetActionIt
 		return;
 	}
 
-	InputModel & input_model = project.model();
+	OutputModel & output_model = project.model();
+	InputModel & input_model = output_model.getInputModel();
 
 	switch (action_request.reason)
 	{
@@ -618,39 +635,26 @@ void UIActionManager::DeleteDMUMembersOutput(Messager & messager, WidgetActionIt
 
 				DataChangeMessage change_response(&project);
 
-				std::string result_msg("The following DMU members have been removed:");
-				result_msg += "\n";
-
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
 					Executor executor(input_model.getDb());
 
 					WidgetInstanceIdentifier const & dmu_member = instanceActionItem.first;
-
-					if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent)
-					{
-						boost::format msg("Missing the DMU member to delete.");
-						messager.ShowMessageBox(msg.str());
-						return;
-					}
-
 					WidgetInstanceIdentifier const & dmu_category = *dmu_member.identifier_parent;
 
-					boost::format msg("%1% (from %2%)\n");
-					msg % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
-					result_msg += msg.str();
+					// Now remove the corresponding DMU members from the "Limit DMU's" members table
+					// empty string for last arg means "delete all members for this DMU category"
+					output_model.t_limit_dmus_set_members.RemoveDmuMember(output_model.getDb(), output_model, input_model, dmu_category, *dmu_member.uuid);
 
-					input_model.t_dmu_setmembers.DeleteDmuMember(input_model.getDb(), input_model, dmu_member);
-
-
-					// ***************************************** //
-					// Prepare data to send back to user interface
-					// ***************************************** //
-					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-					DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
-					change_response.changes.push_back(change);
+					// ******************************************************************************************************** //
+					// No need to send this message - the Limit DMU's tab already responds to the INPUT model message change,
+					// which is always sent
+					// ******************************************************************************************************** //
+					//DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__INPUT_DMU_OR_DMU_MEMBER_CHANGE;
+					//DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__NONE;
+					//DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
+					//change_response.changes.push_back(change);
 
 					executor.success();
 
