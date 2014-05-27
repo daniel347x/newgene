@@ -128,7 +128,7 @@ bool Table__Limit_DMUS__Categories::AddDMU(sqlite3 * db, OutputModel & output_mo
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("INSERT INTO LIMIT_DMUS__CATEGORIES VALUES ('");
 	sql += dmu_category_code;
-	sql += ")";
+	sql += "')";
 	int error_or_success_code = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
