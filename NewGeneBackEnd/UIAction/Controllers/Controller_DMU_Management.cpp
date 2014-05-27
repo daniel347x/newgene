@@ -423,6 +423,7 @@ void UIActionManager::AddDMUMembers(Messager & messager__, WidgetActionItemReque
 
 	switch (action_request.reason)
 	{
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
 			{
 
@@ -508,6 +509,8 @@ void UIActionManager::AddDMUMembers(Messager & messager__, WidgetActionItemReque
 
 				});
 
+				EndFailIfBusy();
+
 				boost::format msg("%1%");
 				msg % result_msg;
 				messager__.ShowMessageBox(msg.str());
@@ -589,6 +592,8 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 					executor.success();
 
 				});
+
+				EndFailIfBusy();
 
 				boost::format msg("%1%");
 				msg % result_msg;
