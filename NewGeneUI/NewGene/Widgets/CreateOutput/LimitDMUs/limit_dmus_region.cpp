@@ -23,6 +23,8 @@ limit_dmus_region::limit_dmus_region(QWidget *parent) :
 
 	PrepareOutputWidget();
 
+    ui->limit_dmus_bottom_half_widget->hide(); // initially, no DMU category is checked
+
 }
 
 limit_dmus_region::~limit_dmus_region()
@@ -305,7 +307,6 @@ void limit_dmus_region::ReceiveDMUSelectionChanged(const QItemSelection & select
 		WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
 
 		WidgetInstanceIdentifiers dmu_set_members__all = project->model().backend().getInputModel().t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
-		bool is_limited = project->model().backend().t_limit_dmus_categories.Exists(project->model().backend().getDb(), project->model().backend(), project->model().backend().getInputModel(), *dmu_category.code);
 		WidgetInstanceIdentifiers dmu_set_members__limited = project->model().backend().t_limit_dmus_set_members.getIdentifiers(*dmu_category.code);
 		std::sort(dmu_set_members__all.begin(), dmu_set_members__all.end());
 		std::sort(dmu_set_members__limited.begin(), dmu_set_members__limited.end());
@@ -315,7 +316,18 @@ void limit_dmus_region::ReceiveDMUSelectionChanged(const QItemSelection & select
 
 		ResetDmuMembersPanes(dmu_category, is_limited, dmu_set_members__all, dmu_set_members_not_limited, dmu_set_members__limited);
 
-	}
+        bool is_limited = project->model().backend().t_limit_dmus_categories.Exists(project->model().backend().getDb(), project->model().backend(), project->model().backend().getInputModel(), *dmu_category.code);
+        ui->checkBox_limit_dmus->setChecked(is_limited);
+        if (is_limited)
+        {
+            ui->limit_dmus_bottom_half_widget->show();
+        }
+        else
+        {
+            ui->limit_dmus_bottom_half_widget->hide();
+        }
+
+    }
 
 }
 
@@ -837,13 +849,21 @@ void limit_dmus_region::on_checkBox_limit_dmus_toggled(bool checked)
         return;
     }
 
+    // Submit the action: Note: no response is necessary
+    InstanceActionItems actionItems;
+    std::string did_checkbox_change;
     if (checked)
     {
-        ui->horizontalLayout_limit_dmus->
+        did_checkbox_change = "y";
+        ui->limit_dmus_bottom_half_widget->hide();
     }
     else
     {
-
+        did_checkbox_change = "n";
+        ui->limit_dmus_bottom_half_widget->show();
     }
+    actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetInstanceIdentifiers(), did_checkbox_change)))));
+    WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
+    emit LimitDMUsChange(action_request);
 
 }
