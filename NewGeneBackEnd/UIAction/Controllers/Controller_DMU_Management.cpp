@@ -380,10 +380,10 @@ void UIActionManager::DeleteDMUOutput(Messager & messager__, WidgetActionItemReq
 					// No need to send this message - the Limit DMU's tab already responds to the INPUT model message change,
 					// which is always sent
 					// ******************************************************************************************************** //
-					//DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__INPUT_DMU_OR_DMU_MEMBER_CHANGE;
-					//DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__NONE;
-					//DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
-					//change_response.changes.push_back(change);
+					//type = DATA_CHANGE_TYPE__OUTPUT_MODEL__INPUT_DMU_OR_DMU_MEMBER_CHANGE;
+					//intention = DATA_CHANGE_INTENTION__NONE;
+					//DataChange change2(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
+					//change_response.changes.push_back(change2);
 
 					executor.success();
 
@@ -633,9 +633,9 @@ void UIActionManager::DeleteDMUMembersOutput(Messager & messager, WidgetActionIt
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
 			{
 
-				DataChangeMessage change_response(&project);
+				//DataChangeMessage change_response(&project);
 
-				for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
 					Executor executor(input_model.getDb());
@@ -660,11 +660,7 @@ void UIActionManager::DeleteDMUMembersOutput(Messager & messager, WidgetActionIt
 
 				});
 
-				boost::format msg("%1%");
-				msg % result_msg;
-				messager.ShowMessageBox(msg.str());
-
-				messager.EmitChangeMessage(change_response);
+				//messager.EmitChangeMessage(change_response);
 
 			}
 			break;
