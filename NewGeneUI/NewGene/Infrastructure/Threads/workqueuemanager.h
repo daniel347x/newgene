@@ -130,6 +130,7 @@ class WorkQueueManagerBase : public QObject
         //
 		virtual void AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU) {}
 		virtual void DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU) {}
+		virtual void DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS) {}
 		virtual void AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS) {}
 		virtual void DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS) {}
 		virtual void RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE) {}

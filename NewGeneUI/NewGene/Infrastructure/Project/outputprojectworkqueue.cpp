@@ -220,6 +220,14 @@ void OutputProjectWorkQueue::DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU
 }
 
 /************************************************************************/
+// ACTION_DELETE_DMU_MEMBERS
+/************************************************************************/
+void OutputProjectWorkQueue::DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS action_request)
+{
+	get()->getWorkService().post(DeleteDMUMembers_Output(action_request, this));
+}
+
+/************************************************************************/
 // ACTION_DELETE_UOA
 /************************************************************************/
 void OutputProjectWorkQueue::DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA action_request)

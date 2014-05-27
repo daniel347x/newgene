@@ -106,6 +106,25 @@ class DeleteDMUMembers_ : public DoInputAction<ACTION_DELETE_DMU_MEMBERS>
 
 };
 
+class DeleteDMUMembers_Output : public DoOutputAction<ACTION_DELETE_DMU_MEMBERS>
+{
+
+	public:
+
+		DeleteDMUMembers_Output(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS & action_request_, OutputProjectWorkQueue * queue_)
+			: DoOutputAction<ACTION_DELETE_DMU_MEMBERS>(static_cast<WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS>(action_request_), queue_)
+		{
+
+		}
+
+		void operator()()
+		{
+			UIMessagerSingleShot messager(queue->get()->messager);
+			uiactionManagerUI().getBackendManager().DeleteDMUMembersOutput(messager.get(), action_request, queue->get()->backend());
+		}
+
+};
+
 class RefreshDMUsFromFile_ : public DoInputAction<ACTION_REFRESH_DMUS_FROM_FILE>
 {
 
