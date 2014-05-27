@@ -2,9 +2,9 @@
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 #include "../../OutputModel.h"
 #include "../../../Utilities/UUID.h"
-//#ifndef Q_MOC_RUN
-//#	include <boost/format.hpp>
-//#endif
+#ifndef Q_MOC_RUN
+#	include <boost/algorithm/string.hpp>
+#endif
 
 std::string const Table__Limit_DMUS__Categories::LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = "LIMIT_DMUS__DMU_CATEGORY_STRING_CODE";
 
@@ -421,7 +421,7 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 	// Remove from cache
 	identifiers_map[*dmu_category.code].erase(std::remove_if(identifiers_map[*dmu_category.code].begin(), identifiers_map[*dmu_category.code].end(), [&](WidgetInstanceIdentifier & test_dmu_member)
 	{
-		if (test_dmu_member.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, dmu_member_uuid))
+		if (boost::iequals(*test_dmu_member.uuid, dmu_member_uuid))
 		{
 			return true;
 		}
