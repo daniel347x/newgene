@@ -446,12 +446,9 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
                 {
 
                     case DATA_CHANGE_INTENTION__ADD:
-                        {
-                        }
-                        break;
-
                     case DATA_CHANGE_INTENTION__REMOVE:
                         {
+                            RefreshAllWidgets();
                         }
                         break;
 
@@ -461,6 +458,11 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
                         break;
 
                     case DATA_CHANGE_INTENTION__RESET_ALL:
+                        {
+                        }
+                        break;
+
+                    default:
                         {
                         }
                         break;
@@ -472,12 +474,10 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
                 {
 
                     case DATA_CHANGE_INTENTION__ADD:
-                        {
-                        }
-                        break;
-
                     case DATA_CHANGE_INTENTION__REMOVE:
+                    case DATA_CHANGE_INTENTION__RESET_ALL:
                         {
+                            RefreshAllWidgets();
                         }
                         break;
 
@@ -486,7 +486,7 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
                         }
                         break;
 
-                    case DATA_CHANGE_INTENTION__RESET_ALL:
+                    default:
                         {
                         }
                         break;
@@ -496,7 +496,8 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 
             case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__LIMIT_DMUS_CHANGE:
 				{
-					switch (change.change_intention)
+
+                    switch (change.change_intention)
 					{
 
 						case DATA_CHANGE_INTENTION__ADD:
