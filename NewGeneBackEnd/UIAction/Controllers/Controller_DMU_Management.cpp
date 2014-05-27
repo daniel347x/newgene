@@ -50,91 +50,93 @@ void UIActionManager::AddDMU(Messager & messager__, WidgetActionItemRequest_ACTI
 	switch (action_request.reason)
 	{
 
-	case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
-		{
-
-			DataChangeMessage change_response(&project);
-
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
+		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
 			{
 
-				Executor executor(input_model.getDb());
+				DataChangeMessage change_response(&project);
 
-				if (!instanceActionItem.second)
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 				{
-					boost::format msg("Missing a new DMU category.");
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
 
-				// ************************************* //
-				// Retrieve data sent by user interface
-				// ************************************* //
-				WidgetActionItem const & actionItem = *instanceActionItem.second;
-				WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
-				std::vector<std::string> dmu_strings = actionItemString.getValue();
-				
-				if (dmu_strings.size() != 2)
-				{
-					boost::format msg("A DMU category name, and descriptive text, are required.");
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
+					Executor executor(input_model.getDb());
 
-				std::string proposed_new_dmu = dmu_strings[0];
-				std::string new_dmu_description = dmu_strings[1];
+					if (!instanceActionItem.second)
+					{
+						boost::format msg("Missing a new DMU category.");
+						messager__.ShowMessageBox(msg.str());
+						return;
+					}
 
-				bool dmu_already_exists = input_model.t_dmu_category.Exists(input_model.getDb(), input_model, proposed_new_dmu);
-				if (dmu_already_exists)
-				{
-					boost::format msg("The DMU category '%1%' already exists.");
-					msg % boost::to_upper_copy(proposed_new_dmu);
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
+					// ************************************* //
+					// Retrieve data sent by user interface
+					// ************************************* //
+					WidgetActionItem const & actionItem = *instanceActionItem.second;
+					WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
+					std::vector<std::string> dmu_strings = actionItemString.getValue();
 
-				bool dmu_successfully_created = input_model.t_dmu_category.CreateNewDMU(input_model.getDb(), input_model, proposed_new_dmu, new_dmu_description);
+					if (dmu_strings.size() != 2)
+					{
+						boost::format msg("A DMU category name, and descriptive text, are required.");
+						messager__.ShowMessageBox(msg.str());
+						return;
+					}
 
-				if (!dmu_successfully_created)
-				{
-					boost::format msg("Unable to execute INSERT statement to create a new DMU category.");
-					throw NewGeneException() << newgene_error_description(msg.str());
-				}
+					std::string proposed_new_dmu = dmu_strings[0];
+					std::string new_dmu_description = dmu_strings[1];
 
-				std::string new_dmu(proposed_new_dmu);
+					bool dmu_already_exists = input_model.t_dmu_category.Exists(input_model.getDb(), input_model, proposed_new_dmu);
 
-				// UI will provide dialog confirmation
-				//boost::format msg("DMU category '%1%' successfully created.");
-				//msg % boost::to_upper_copy(proposed_new_dmu);
-				//messager.ShowMessageBox(msg.str());
+					if (dmu_already_exists)
+					{
+						boost::format msg("The DMU category '%1%' already exists.");
+						msg % boost::to_upper_copy(proposed_new_dmu);
+						messager__.ShowMessageBox(msg.str());
+						return;
+					}
 
-				// ***************************************** //
-				// Prepare data to send back to user interface
-				// ***************************************** //
+					bool dmu_successfully_created = input_model.t_dmu_category.CreateNewDMU(input_model.getDb(), input_model, proposed_new_dmu, new_dmu_description);
 
-				WidgetInstanceIdentifier newIdentifier;
-				bool found_newly_created_dmu = input_model.t_dmu_category.getIdentifierFromStringCode(new_dmu, newIdentifier);
-				if (!found_newly_created_dmu)
-				{
-					boost::format msg("Unable to find newly created DMU.");
-					throw NewGeneException() << newgene_error_description(msg.str());
-				}
+					if (!dmu_successfully_created)
+					{
+						boost::format msg("Unable to execute INSERT statement to create a new DMU category.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
 
-				WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*newIdentifier.uuid);
+					std::string new_dmu(proposed_new_dmu);
 
-				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
-				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
-				DataChange change(type, intention, newIdentifier, dmu_members);
+					// UI will provide dialog confirmation
+					//boost::format msg("DMU category '%1%' successfully created.");
+					//msg % boost::to_upper_copy(proposed_new_dmu);
+					//messager.ShowMessageBox(msg.str());
 
-				change_response.changes.push_back(change);
+					// ***************************************** //
+					// Prepare data to send back to user interface
+					// ***************************************** //
 
-				executor.success();
+					WidgetInstanceIdentifier newIdentifier;
+					bool found_newly_created_dmu = input_model.t_dmu_category.getIdentifierFromStringCode(new_dmu, newIdentifier);
 
-			});
+					if (!found_newly_created_dmu)
+					{
+						boost::format msg("Unable to find newly created DMU.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
 
-			messager__.EmitChangeMessage(change_response);
-	
-		}
+					WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*newIdentifier.uuid);
+
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
+					DataChange change(type, intention, newIdentifier, dmu_members);
+
+					change_response.changes.push_back(change);
+
+					executor.success();
+
+				});
+
+				messager__.EmitChangeMessage(change_response);
+
+			}
 			break;
 
 		default:
@@ -158,91 +160,95 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 	{
 
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
-		{
-
-			DataChangeMessage change_response(&project);
-
-			std::for_each(action_request.items->cbegin(), action_request.items->cend(), [&](InstanceActionItem const & instanceActionItem)
 			{
 
-				ProjectManager & project_manager = projectManager();
-				std::string errorMsg;
-				bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_dmu"), errorMsg);
-				if (!proceed)
+				DataChangeMessage change_response(&project);
+
+				std::for_each(action_request.items->cbegin(), action_request.items->cend(), [&](InstanceActionItem const & instanceActionItem)
 				{
-					boost::format msg("Error deleting DMU: %1%");
-					msg % errorMsg.c_str();
-					messager.ShowMessageBox(msg.str());
-					return;
-				}
-				BOOST_SCOPE_EXIT_ALL(&)
-				{
-					bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_dmu"), errorMsg);
-					if (!success)
+
+					ProjectManager & project_manager = projectManager();
+					std::string errorMsg;
+					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_dmu"), errorMsg);
+
+					if (!proceed)
 					{
-						boost::format msg("Error deleting DMU: %1%. Please restart NewGene.");
+						boost::format msg("Error deleting DMU: %1%");
 						msg % errorMsg.c_str();
 						messager.ShowMessageBox(msg.str());
+						return;
 					}
-				};
 
-				if (this->FailIfBusy(messager))
-				{
-					return;
-				}
+					BOOST_SCOPE_EXIT_ALL( &)
+					{
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_dmu"), errorMsg);
 
-				BOOST_SCOPE_EXIT_ALL(&, this)
-				{
-					this->EndFailIfBusy();
-				};
+						if (!success)
+						{
+							boost::format msg("Error deleting DMU: %1%. Please restart NewGene.");
+							msg % errorMsg.c_str();
+							messager.ShowMessageBox(msg.str());
+						}
+					};
 
-				Executor executor(input_model.getDb());
+					if (this->FailIfBusy(messager))
+					{
+						return;
+					}
 
-				WidgetInstanceIdentifier dmu = instanceActionItem.first;
+					BOOST_SCOPE_EXIT_ALL( &, this)
+					{
+						this->EndFailIfBusy();
+					};
 
-				if (!dmu.code || !dmu.uuid)
-				{
-					boost::format msg("Missing the DMU category to delete.");
-					messager.ShowMessageBox(msg.str());
-					return;
-				}
+					Executor executor(input_model.getDb());
 
-				// ************************************* //
-				// Retrieve data sent by user interface
-				// ************************************* //
-				std::string dmu_to_delete_code = *dmu.code;
-				std::string dmu_to_delete_uuid = *dmu.uuid;
+					WidgetInstanceIdentifier dmu = instanceActionItem.first;
 
-				bool dmu_already_exists = input_model.t_dmu_category.Exists(input_model.getDb(), input_model, dmu_to_delete_code);
-				if (!dmu_already_exists)
-				{
-					boost::format msg("The DMU category '%1%' is already absent.");
-					msg % boost::to_upper_copy(dmu_to_delete_code);
-					messager.ShowMessageBox(msg.str());
-					return;
-				}
+					if (!dmu.code || !dmu.uuid)
+					{
+						boost::format msg("Missing the DMU category to delete.");
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
 
-				bool dmu_successfully_deleted = input_model.t_dmu_category.DeleteDMU(input_model.getDb(), input_model, dmu, change_response);
+					// ************************************* //
+					// Retrieve data sent by user interface
+					// ************************************* //
+					std::string dmu_to_delete_code = *dmu.code;
+					std::string dmu_to_delete_uuid = *dmu.uuid;
 
-				if (!dmu_successfully_deleted)
-				{
-					boost::format msg("Unable to delete the DMU category.");
-					throw NewGeneException() << newgene_error_description(msg.str());
-				}
+					bool dmu_already_exists = input_model.t_dmu_category.Exists(input_model.getDb(), input_model, dmu_to_delete_code);
 
-				// User request: do not display the following confirmation dialog.  It is redundant.
-				//boost::format msg("DMU category '%1%' successfully deleted.");
-				//msg % boost::to_upper_copy(dmu_to_delete_code);
-				//messager.ShowMessageBox(msg.str());
+					if (!dmu_already_exists)
+					{
+						boost::format msg("The DMU category '%1%' is already absent.");
+						msg % boost::to_upper_copy(dmu_to_delete_code);
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
 
-				executor.success();
+					bool dmu_successfully_deleted = input_model.t_dmu_category.DeleteDMU(input_model.getDb(), input_model, dmu, change_response);
 
-			});
+					if (!dmu_successfully_deleted)
+					{
+						boost::format msg("Unable to delete the DMU category.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+
+					// User request: do not display the following confirmation dialog.  It is redundant.
+					//boost::format msg("DMU category '%1%' successfully deleted.");
+					//msg % boost::to_upper_copy(dmu_to_delete_code);
+					//messager.ShowMessageBox(msg.str());
+
+					executor.success();
+
+				});
 
 
-			messager.EmitChangeMessage(change_response);
+				messager.EmitChangeMessage(change_response);
 
-		}
+			}
 			break;
 
 		default:
@@ -267,106 +273,110 @@ void UIActionManager::DeleteDMUOutput(Messager & messager__, WidgetActionItemReq
 	{
 
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
-		{
-
-			DataChangeMessage change_response(&project);
-
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
-				ProjectManager & project_manager = projectManager();
-				std::string errorMsg;
-				bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_dmu"), errorMsg);
-				if (!proceed)
+				DataChangeMessage change_response(&project);
+
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager__, &change_response](
+							 InstanceActionItem const & instanceActionItem)
 				{
-					boost::format msg("Error deleting DMU: %1%");
-					msg % errorMsg.c_str();
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
-				BOOST_SCOPE_EXIT_ALL(&)
-				{
-					bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_dmu"), errorMsg);
-					if (!success)
+
+					ProjectManager & project_manager = projectManager();
+					std::string errorMsg;
+					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_dmu"), errorMsg);
+
+					if (!proceed)
 					{
-						boost::format msg("Error deleting DMU: %1%. Please restart NewGene.");
+						boost::format msg("Error deleting DMU: %1%");
 						msg % errorMsg.c_str();
 						messager__.ShowMessageBox(msg.str());
+						return;
 					}
-				};
 
-				if (this->FailIfBusy(messager__))
-				{
-					return;
-				}
-
-				BOOST_SCOPE_EXIT_ALL(&, this)
-				{
-					this->EndFailIfBusy();
-				};
-
-				Executor executor(input_model.getDb());
-
-				WidgetInstanceIdentifier dmu = instanceActionItem.first;
-
-				if (!dmu.code || !dmu.uuid)
-				{
-					// Error should already be handled in input model function
-					return;
-				}
-
-				// ************************************* //
-				// Retrieve data sent by user interface
-				// ************************************* //
-				std::string dmu_to_delete_code = *dmu.code;
-				std::string dmu_to_delete_uuid = *dmu.uuid;
-
-				// The INPUT model does the bulk of the deleting,
-				// and informs the UI.
-				// Here, we just want to clear a couple things in the output database.
-
-				output_model.t_kad_count.Remove(output_model.getDb(), *dmu.code);
-
-				WidgetInstanceIdentifiers uoas = input_model.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(input_model.getDb(), &input_model, dmu);
-				std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
-				{
-					if (uoa.uuid)
+					BOOST_SCOPE_EXIT_ALL( &)
 					{
-						WidgetInstanceIdentifiers vgs(input_model.t_vgp_identifiers.RetrieveVGsFromUOA(input_model.getDb(), &input_model, *uoa.uuid));
-						std::for_each(vgs.cbegin(), vgs.cend(), [&](WidgetInstanceIdentifier const & vg)
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_dmu"), errorMsg);
+
+						if (!success)
 						{
-							if (vg.code)
-							{
-								output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), vg);
-							}
-						});
+							boost::format msg("Error deleting DMU: %1%. Please restart NewGene.");
+							msg % errorMsg.c_str();
+							messager__.ShowMessageBox(msg.str());
+						}
+					};
+
+					if (this->FailIfBusy(messager__))
+					{
+						return;
 					}
+
+					BOOST_SCOPE_EXIT_ALL( &, this)
+					{
+						this->EndFailIfBusy();
+					};
+
+					Executor executor(input_model.getDb());
+
+					WidgetInstanceIdentifier dmu = instanceActionItem.first;
+
+					if (!dmu.code || !dmu.uuid)
+					{
+						// Error should already be handled in input model function
+						return;
+					}
+
+					// ************************************* //
+					// Retrieve data sent by user interface
+					// ************************************* //
+					std::string dmu_to_delete_code = *dmu.code;
+					std::string dmu_to_delete_uuid = *dmu.uuid;
+
+					// The INPUT model does the bulk of the deleting,
+					// and informs the UI.
+					// Here, we just want to clear a couple things in the output database.
+
+					output_model.t_kad_count.Remove(output_model.getDb(), *dmu.code);
+
+					WidgetInstanceIdentifiers uoas = input_model.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(input_model.getDb(), &input_model, dmu);
+					std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
+					{
+						if (uoa.uuid)
+						{
+							WidgetInstanceIdentifiers vgs(input_model.t_vgp_identifiers.RetrieveVGsFromUOA(input_model.getDb(), &input_model, *uoa.uuid));
+							std::for_each(vgs.cbegin(), vgs.cend(), [&](WidgetInstanceIdentifier const & vg)
+							{
+								if (vg.code)
+								{
+									output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), vg);
+								}
+							});
+						}
+					});
+
+					// ***************************************** //
+					// Prepare data to send back to user interface
+					// ***************************************** //
+					// DMU's with any variables selected - this might have changed
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
+					DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
+					change_response.changes.push_back(change);
+
+					// ***************************************** //
+					// Use updated cache info to set further info
+					// in change_response
+					// ***************************************** //
+					std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
+					change_response.changes.back().set_of_identifiers = active_dmus;
+
+					executor.success();
+
 				});
 
-				// ***************************************** //
-				// Prepare data to send back to user interface
-				// ***************************************** //
-				// DMU's with any variables selected - this might have changed
-				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE;
-				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
-				DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
-				change_response.changes.push_back(change);
+				messager__.EmitChangeMessage(change_response);
 
-				// ***************************************** //
-				// Use updated cache info to set further info
-				// in change_response
-				// ***************************************** //
-				std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
-				change_response.changes.back().set_of_identifiers = active_dmus;
-
-				executor.success();
-
-			});
-
-			messager__.EmitChangeMessage(change_response);
-
-		}
-		break;
+			}
+			break;
 
 		default:
 			break;
@@ -398,94 +408,97 @@ void UIActionManager::AddDMUMembers(Messager & messager__, WidgetActionItemReque
 	switch (action_request.reason)
 	{
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
-		{
-
-			DataChangeMessage change_response(&project);
-
-			std::string result_msg("The following DMU members have been added:");
-			result_msg += "\n";
-
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
-				Executor executor(input_model.getDb());
+				DataChangeMessage change_response(&project);
 
-				WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
-				if (!dmu_category.uuid || dmu_category.uuid->empty())
+				std::string result_msg("The following DMU members have been added:");
+				result_msg += "\n";
+
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 				{
-					boost::format msg("Missing the associated DMU category.");
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
 
-				if (!instanceActionItem.second)
-				{
-					boost::format msg("Missing a new DMU member.");
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
+					Executor executor(input_model.getDb());
 
-				// ************************************* //
-				// Retrieve data sent by user interface
-				// ************************************* //
-				WidgetActionItem const & actionItem = *instanceActionItem.second;
-				WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
-				std::vector<std::string> dmu_strings = actionItemString.getValue();
+					WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
 
-				if (dmu_strings.size() != 3)
-				{
-					boost::format msg("A DMU member code, name and descriptive text are required.");
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
+					if (!dmu_category.uuid || dmu_category.uuid->empty())
+					{
+						boost::format msg("Missing the associated DMU category.");
+						messager__.ShowMessageBox(msg.str());
+						return;
+					}
 
-				std::string proposed_new_dmu_member_uuid = dmu_strings[0];
-				std::string proposed_new_dmu_member_code = dmu_strings[1];
-				std::string proposed_new_dmu_member_description = dmu_strings[2];
+					if (!instanceActionItem.second)
+					{
+						boost::format msg("Missing a new DMU member.");
+						messager__.ShowMessageBox(msg.str());
+						return;
+					}
 
-				bool dmu_member_already_exists = input_model.t_dmu_setmembers.Exists(input_model.getDb(), input_model, dmu_category, proposed_new_dmu_member_uuid);
-				if (dmu_member_already_exists)
-				{
-					boost::format msg("The DMU member '%1%' already exists for '%2%'.");
-					msg % boost::to_upper_copy(proposed_new_dmu_member_uuid) % boost::to_upper_copy(*dmu_category.code);
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
+					// ************************************* //
+					// Retrieve data sent by user interface
+					// ************************************* //
+					WidgetActionItem const & actionItem = *instanceActionItem.second;
+					WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
+					std::vector<std::string> dmu_strings = actionItemString.getValue();
 
-				WidgetInstanceIdentifier dmu_member = input_model.t_dmu_setmembers.CreateNewDmuMember(input_model.getDb(), input_model, dmu_category, proposed_new_dmu_member_uuid, proposed_new_dmu_member_code, proposed_new_dmu_member_description);
+					if (dmu_strings.size() != 3)
+					{
+						boost::format msg("A DMU member code, name and descriptive text are required.");
+						messager__.ShowMessageBox(msg.str());
+						return;
+					}
 
-				if (dmu_member.IsEmpty())
-				{
-					boost::format msg("Unable to execute INSERT statement to create a new DMU member.");
-					throw NewGeneException() << newgene_error_description(msg.str());
-				}
+					std::string proposed_new_dmu_member_uuid = dmu_strings[0];
+					std::string proposed_new_dmu_member_code = dmu_strings[1];
+					std::string proposed_new_dmu_member_description = dmu_strings[2];
 
-				boost::format msg("%1% (%2%)\n");
-				msg % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
-				result_msg += msg.str();
+					bool dmu_member_already_exists = input_model.t_dmu_setmembers.Exists(input_model.getDb(), input_model, dmu_category, proposed_new_dmu_member_uuid);
+
+					if (dmu_member_already_exists)
+					{
+						boost::format msg("The DMU member '%1%' already exists for '%2%'.");
+						msg % boost::to_upper_copy(proposed_new_dmu_member_uuid) % boost::to_upper_copy(*dmu_category.code);
+						messager__.ShowMessageBox(msg.str());
+						return;
+					}
+
+					WidgetInstanceIdentifier dmu_member = input_model.t_dmu_setmembers.CreateNewDmuMember(input_model.getDb(), input_model, dmu_category, proposed_new_dmu_member_uuid,
+														  proposed_new_dmu_member_code, proposed_new_dmu_member_description);
+
+					if (dmu_member.IsEmpty())
+					{
+						boost::format msg("Unable to execute INSERT statement to create a new DMU member.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+
+					boost::format msg("%1% (%2%)\n");
+					msg % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+					result_msg += msg.str();
 
 
 
-				// ***************************************** //
-				// Prepare data to send back to user interface
-				// ***************************************** //
-				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
-				DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+					// ***************************************** //
+					// Prepare data to send back to user interface
+					// ***************************************** //
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
+					DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
 
-				change_response.changes.push_back(change);
+					change_response.changes.push_back(change);
 
-				executor.success();
+					executor.success();
 
-			});
+				});
 
-			boost::format msg("%1%");
-			msg % result_msg;
-			messager__.ShowMessageBox(msg.str());
+				boost::format msg("%1%");
+				msg % result_msg;
+				messager__.ShowMessageBox(msg.str());
 
-			messager__.EmitChangeMessage(change_response);
+				messager__.EmitChangeMessage(change_response);
 
-		}
+			}
 			break;
 
 		default:
@@ -519,55 +532,55 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 	{
 
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
-		{
-
-			DataChangeMessage change_response(&project);
-
-			std::string result_msg("The following DMU members have been removed:");
-			result_msg += "\n";
-
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
-				Executor executor(input_model.getDb());
+				DataChangeMessage change_response(&project);
 
-				WidgetInstanceIdentifier const & dmu_member = instanceActionItem.first;
+				std::string result_msg("The following DMU members have been removed:");
+				result_msg += "\n";
 
-				if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent)
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
-					boost::format msg("Missing the DMU member to delete.");
-					messager.ShowMessageBox(msg.str());
-					return;
-				}
 
-				WidgetInstanceIdentifier const & dmu_category = *dmu_member.identifier_parent;
+					Executor executor(input_model.getDb());
 
-				boost::format msg("%1% (from %2%)\n");
-				msg % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
-				result_msg += msg.str();
+					WidgetInstanceIdentifier const & dmu_member = instanceActionItem.first;
 
-				input_model.t_dmu_setmembers.DeleteDmuMember(input_model.getDb(), input_model, dmu_member);
+					if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent)
+					{
+						boost::format msg("Missing the DMU member to delete.");
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
+					WidgetInstanceIdentifier const & dmu_category = *dmu_member.identifier_parent;
+
+					boost::format msg("%1% (from %2%)\n");
+					msg % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+					result_msg += msg.str();
+
+					input_model.t_dmu_setmembers.DeleteDmuMember(input_model.getDb(), input_model, dmu_member);
 
 
-				// ***************************************** //
-				// Prepare data to send back to user interface
-				// ***************************************** //
-				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-				DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
-				change_response.changes.push_back(change);
+					// ***************************************** //
+					// Prepare data to send back to user interface
+					// ***************************************** //
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+					DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+					change_response.changes.push_back(change);
 
-				executor.success();
+					executor.success();
 
-			});
+				});
 
-			boost::format msg("%1%");
-			msg % result_msg;
-			messager.ShowMessageBox(msg.str());
+				boost::format msg("%1%");
+				msg % result_msg;
+				messager.ShowMessageBox(msg.str());
 
-			messager.EmitChangeMessage(change_response);
+				messager.EmitChangeMessage(change_response);
 
-		}
+			}
 			break;
 
 		default:
@@ -600,60 +613,60 @@ void UIActionManager::DeleteDMUMembersOutput(Messager & messager, WidgetActionIt
 	switch (action_request.reason)
 	{
 
-	case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
-	{
+		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
+			{
 
-															DataChangeMessage change_response(&project);
+				DataChangeMessage change_response(&project);
 
-															std::string result_msg("The following DMU members have been removed:");
-															result_msg += "\n";
+				std::string result_msg("The following DMU members have been removed:");
+				result_msg += "\n";
 
-															for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
-															{
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				{
 
-																Executor executor(input_model.getDb());
+					Executor executor(input_model.getDb());
 
-																WidgetInstanceIdentifier const & dmu_member = instanceActionItem.first;
+					WidgetInstanceIdentifier const & dmu_member = instanceActionItem.first;
 
-																if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent)
-																{
-																	boost::format msg("Missing the DMU member to delete.");
-																	messager.ShowMessageBox(msg.str());
-																	return;
-																}
+					if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent)
+					{
+						boost::format msg("Missing the DMU member to delete.");
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
 
-																WidgetInstanceIdentifier const & dmu_category = *dmu_member.identifier_parent;
+					WidgetInstanceIdentifier const & dmu_category = *dmu_member.identifier_parent;
 
-																boost::format msg("%1% (from %2%)\n");
-																msg % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
-																result_msg += msg.str();
+					boost::format msg("%1% (from %2%)\n");
+					msg % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+					result_msg += msg.str();
 
-																input_model.t_dmu_setmembers.DeleteDmuMember(input_model.getDb(), input_model, dmu_member);
+					input_model.t_dmu_setmembers.DeleteDmuMember(input_model.getDb(), input_model, dmu_member);
 
 
-																// ***************************************** //
-																// Prepare data to send back to user interface
-																// ***************************************** //
-																DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-																DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-																DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
-																change_response.changes.push_back(change);
+					// ***************************************** //
+					// Prepare data to send back to user interface
+					// ***************************************** //
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+					DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+					change_response.changes.push_back(change);
 
-																executor.success();
+					executor.success();
 
-															});
+				});
 
-															boost::format msg("%1%");
-															msg % result_msg;
-															messager.ShowMessageBox(msg.str());
+				boost::format msg("%1%");
+				msg % result_msg;
+				messager.ShowMessageBox(msg.str());
 
-															messager.EmitChangeMessage(change_response);
+				messager.EmitChangeMessage(change_response);
 
-	}
-		break;
+			}
+			break;
 
-	default:
-		break;
+		default:
+			break;
 
 	}
 
@@ -679,6 +692,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 
 	{
 		std::lock_guard<std::recursive_mutex> guard(Importer::is_performing_import_mutex);
+
 		if (Importer::is_performing_import)
 		{
 			boost::format msg("Another import operation is in progress.  Please wait for that operation to complete first.");
@@ -692,107 +706,111 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 	{
 
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION:
-		{
-
-			DataChangeMessage change_response(&project);
-
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
-				WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
+				DataChangeMessage change_response(&project);
 
-				if (!dmu_category.code || !dmu_category.uuid || dmu_category.code->empty() || dmu_category.uuid->empty())
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager__, &change_response](InstanceActionItem const & instanceActionItem)
 				{
-					boost::format msg("Missing the DMU category to refresh.");
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
 
-				if (!instanceActionItem.second)
-				{
-					boost::format msg("Missing DMU refresh information.");
-					messager__.ShowMessageBox(msg.str());
-					return;
-				}
+					WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
 
-				// ************************************* //
-				// Retrieve data sent by user interface
-				// ************************************* //
-				WidgetActionItem const & actionItem = *instanceActionItem.second;
-				WidgetActionItem__StringVector_Plus_Int const & actionItemStringInt = static_cast<WidgetActionItem__StringVector_Plus_Int const &>(actionItem);
-				std::vector<std::string> dmu_refresh_strings = actionItemStringInt.getValue();
-				bool do_refresh_not_plain_insert = actionItemStringInt.getIntValue() > 0 ? true : false;
-
-				std::string dmu_refresh_file_pathname = dmu_refresh_strings[0];
-				std::vector<std::string> dmu_refresh_column_labels(dmu_refresh_strings.cbegin() + 1, dmu_refresh_strings.cend());
-
-				bool success = input_model.t_dmu_setmembers.RefreshFromFile(input_model.getDb(), input_model, dmu_category, boost::filesystem::path(dmu_refresh_file_pathname), dmu_refresh_column_labels, messager__, do_refresh_not_plain_insert);
-
-				if (!success)
-				{
-					return;
-				}
-
-				std::string cancelAddendum;
-				if (Importer::cancelled)
-				{
-					cancelAddendum = " (until cancelled)";
-				}
-				if (input_model.t_dmu_setmembers.badreadlines > 0 || input_model.t_dmu_setmembers.badwritelines > 0)
-				{
-					if (input_model.t_dmu_setmembers.badreadlines > 0 && input_model.t_dmu_setmembers.badwritelines > 0)
+					if (!dmu_category.code || !dmu_category.uuid || dmu_category.code->empty() || dmu_category.uuid->empty())
 					{
-						boost::format msg("DMU category '%1%' refreshed from file%4%, but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
-						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+						boost::format msg("Missing the DMU category to refresh.");
+						messager__.ShowMessageBox(msg.str());
+						return;
+					}
+
+					if (!instanceActionItem.second)
+					{
+						boost::format msg("Missing DMU refresh information.");
+						messager__.ShowMessageBox(msg.str());
+						return;
+					}
+
+					// ************************************* //
+					// Retrieve data sent by user interface
+					// ************************************* //
+					WidgetActionItem const & actionItem = *instanceActionItem.second;
+					WidgetActionItem__StringVector_Plus_Int const & actionItemStringInt = static_cast<WidgetActionItem__StringVector_Plus_Int const &>(actionItem);
+					std::vector<std::string> dmu_refresh_strings = actionItemStringInt.getValue();
+					bool do_refresh_not_plain_insert = actionItemStringInt.getIntValue() > 0 ? true : false;
+
+					std::string dmu_refresh_file_pathname = dmu_refresh_strings[0];
+					std::vector<std::string> dmu_refresh_column_labels(dmu_refresh_strings.cbegin() + 1, dmu_refresh_strings.cend());
+
+					bool success = input_model.t_dmu_setmembers.RefreshFromFile(input_model.getDb(), input_model, dmu_category, boost::filesystem::path(dmu_refresh_file_pathname),
+								   dmu_refresh_column_labels, messager__, do_refresh_not_plain_insert);
+
+					if (!success)
+					{
+						return;
+					}
+
+					std::string cancelAddendum;
+
+					if (Importer::cancelled)
+					{
+						cancelAddendum = " (until cancelled)";
+					}
+
+					if (input_model.t_dmu_setmembers.badreadlines > 0 || input_model.t_dmu_setmembers.badwritelines > 0)
+					{
+						if (input_model.t_dmu_setmembers.badreadlines > 0 && input_model.t_dmu_setmembers.badwritelines > 0)
+						{
+							boost::format
+							msg("DMU category '%1%' refreshed from file%4%, but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+							msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
 							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
 							% cancelAddendum;
-						messager__.ShowMessageBox(msg.str());
-					}
-					else
-					if (input_model.t_dmu_setmembers.badreadlines == 0 && input_model.t_dmu_setmembers.badwritelines > 0)
-					{
-						boost::format msg("DMU category '%1%' refreshed from file%3%, but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
-						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+							messager__.ShowMessageBox(msg.str());
+						}
+						else if (input_model.t_dmu_setmembers.badreadlines == 0 && input_model.t_dmu_setmembers.badwritelines > 0)
+						{
+							boost::format
+							msg("DMU category '%1%' refreshed from file%3%, but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+							msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
 							% cancelAddendum;
-						messager__.ShowMessageBox(msg.str());
-					}
-					else
-					if (input_model.t_dmu_setmembers.badreadlines > 0 && input_model.t_dmu_setmembers.badwritelines == 0)
-					{
-						boost::format msg("DMU category '%1%' refreshed from file%3%, but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
-						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+							messager__.ShowMessageBox(msg.str());
+						}
+						else if (input_model.t_dmu_setmembers.badreadlines > 0 && input_model.t_dmu_setmembers.badwritelines == 0)
+						{
+							boost::format
+							msg("DMU category '%1%' refreshed from file%3%, but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+							msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
 							% cancelAddendum;
-						messager__.ShowMessageBox(msg.str());
+							messager__.ShowMessageBox(msg.str());
+						}
 					}
-				}
-				else
-				{
-					boost::format msg("DMU '%1%' successfully refreshed from file%2%.");
-					msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+					else
+					{
+						boost::format msg("DMU '%1%' successfully refreshed from file%2%.");
+						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 						% cancelAddendum;
-					messager__.ShowMessageBox(msg.str());
-				}
+						messager__.ShowMessageBox(msg.str());
+					}
 
-				// ***************************************** //
-				// Prepare data to send back to user interface
-				// ***************************************** //
+					// ***************************************** //
+					// Prepare data to send back to user interface
+					// ***************************************** //
 
-				WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
+					WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
 
-				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__RESET_ALL;
-				DataChange change(type, intention, dmu_category, dmu_members);
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__RESET_ALL;
+					DataChange change(type, intention, dmu_category, dmu_members);
 
-				change_response.changes.push_back(change);
+					change_response.changes.push_back(change);
 
-			});
+				});
 
-			messager__.EmitChangeMessage(change_response);
+				messager__.EmitChangeMessage(change_response);
 
-		}
+			}
 			break;
 
 		default:
