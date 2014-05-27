@@ -114,15 +114,15 @@ void limit_dmus_region::PrepareItem(QStandardItem * item, std::string const & te
 	item->setCheckable(false);
 	if (is_limited)
 	{
-		 QBrush brush = item->foreground();
+         QBrush brush = item->background();
 		 brush.setColor(Qt::yellow);
-		 item->setForeground(brush);
+         item->setBackground(brush);
 	}
 	else
 	{
-		QBrush brush = item->foreground();
+        QBrush brush = item->background();
 		brush.setColor(Qt::white);
-		item->setForeground(brush);
+        item->setBackground(brush);
 	}
 	QVariant v;
 	v.setValue(identifier);
