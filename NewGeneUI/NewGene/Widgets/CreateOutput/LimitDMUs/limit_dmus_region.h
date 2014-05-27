@@ -2,6 +2,7 @@
 #define LIMIT_DMUS_REGION_H
 
 #include <QWidget>
+#include <QStandardItem>
 #include "../../newgenewidget.h"
 
 namespace Ui
@@ -25,10 +26,10 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
 		void RefreshWidget(WidgetDataItemRequest_LIMIT_DMUS_TAB);
 
-        // Actions
-        void LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE);
+		// Actions
+		void LimitDMUsChange(WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE);
 
-    public slots:
+	public slots:
 
 		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
@@ -39,22 +40,22 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
 		void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 
-        void on_pushButton_limit_dmus_move_right_clicked();
+		void on_pushButton_limit_dmus_move_right_clicked();
 
-        void on_pushButton_limit_dmus_move_left_clicked();
+		void on_pushButton_limit_dmus_move_left_clicked();
 
-        void on_checkBox_limit_dmus_toggled(bool checked);
+		void on_checkBox_limit_dmus_toggled(bool checked);
 
-    protected:
+	protected:
 
 		void changeEvent( QEvent * e );
 		void Empty();
-        void PrepareItem(QStandardItem * item, std::string const * text, bool const is_limited);
+		void PrepareItem(QStandardItem * item, std::string const & text, bool const is_limited);
 
 	private:
 
-        bool GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_category);
-        void EmptyDmuMembersPanes();
+		bool GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_category);
+		void EmptyDmuMembersPanes();
 		void EmptyBottomLeftPane();
 		void EmptyBottomRightPane();
 
