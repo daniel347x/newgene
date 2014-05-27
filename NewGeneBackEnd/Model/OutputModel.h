@@ -155,7 +155,7 @@ class ColumnsInTempView
 
 				}
 
-				std::string column_name_in_temporary_table; // The name of the column in the temporary view (includes UUID)
+				std::string column_name_in_temporary_table; // The name of the column in the temporary view (currently does NOT always include UUID, but it can)
 				std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
 				std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
 				WidgetInstanceIdentifier current_variable_group; // The variable group associated with this column

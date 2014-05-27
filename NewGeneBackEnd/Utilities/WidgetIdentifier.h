@@ -320,7 +320,7 @@ public:
 
 	}
 
-	bool IsEmpty()
+	bool IsEmpty() const
 	{
 		if (!uuid && !code)
 		{

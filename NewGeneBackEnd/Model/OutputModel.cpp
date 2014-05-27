@@ -473,7 +473,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		// ********************************************************************************************************************************************************* //
 		// From the schema for the selected columns for the primary variable group,
-		// create a temporary table to store just the selected columns over just the selected time range.
+		// create a temporary table and store just the selected columns over just the selected time range.
 		// ********************************************************************************************************************************************************* //
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
 		if (failed || CheckCancelled()) { return; }
@@ -484,8 +484,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		// ********************************************************************************************************************************************************* //
 		// Create TIME SLICES.
-		// From the schema for the selected columns for the primary variable group,
-		// load the selected columns of raw data into the temporary table created with the same schema.
+		// This is the first stage of K-ad generation.
+		// It loads the raw data (as stored in the temporary table, above)
+		// into the K-ad sampler, broken into time slices, to be made ready for following processing by the sampler.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
@@ -1990,7 +1991,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// Only include rows in raw data that overlap the time range selected
 	// by the user, or that have no time range granularity (represented by 0
-	// in the time range fields)
+	// in both time range fields)
 	if (!variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		sql_string += " WHERE CASE WHEN `";
@@ -2017,6 +2018,41 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		sql_string += boost::lexical_cast<std::string>(timerange_end);
 		sql_string += " ELSE 0";
 		sql_string += " END";
+	}
+
+	// Now limit by DMU member
+	WidgetInstanceIdentifiers limiting_dmu_categories = model->t_limit_dmus_categories.getIdentifiers();
+	int number_dmu_categories_by_which_to_limit_by_dmu_member = limiting_dmu_categories.size();
+	if (number_dmu_categories_by_which_to_limit_by_dmu_member > 0)
+	{
+
+		for (auto const & limiting_dmu_category : limiting_dmu_categories)
+		{
+			if (!limiting_dmu_category.code || limiting_dmu_category.code->empty())
+			{
+				continue;
+			}
+
+			for (auto const & column_in_view : variable_group_raw_data_columns.columns_in_view)
+			{
+				if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				{
+					WidgetInstanceIdentifier const & primary_dmu_category = column_in_view.primary_key_dmu_category_identifier;
+					if (!primary_dmu_category.IsEmpty())
+					{
+						if (primary_dmu_category.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, limiting_dmu_category))
+						{
+
+							sql_string += " AND `";
+							sql_string += *limiting_dmu_category.code;
+							sql_string += "` IN ";
+
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
