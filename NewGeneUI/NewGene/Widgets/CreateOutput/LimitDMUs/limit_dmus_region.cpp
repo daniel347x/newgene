@@ -829,4 +829,21 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_left_clicked()
 void limit_dmus_region::on_checkBox_limit_dmus_toggled(bool checked)
 {
 
+    // Get selected DMU category
+    WidgetInstanceIdentifier dmu_category;
+    bool is_selected = GetSelectedDmuCategory(dmu_category);
+    if (!is_selected)
+    {
+        return;
+    }
+
+    if (checked)
+    {
+        ui->horizontalLayout_limit_dmus->
+    }
+    else
+    {
+
+    }
+
 }
