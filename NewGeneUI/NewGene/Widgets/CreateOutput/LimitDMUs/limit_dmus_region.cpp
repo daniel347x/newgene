@@ -855,12 +855,12 @@ void limit_dmus_region::on_checkBox_limit_dmus_toggled(bool checked)
 	if (checked)
 	{
 		did_checkbox_change = "y";
-		ui->limit_dmus_bottom_half_widget->hide();
+		ui->limit_dmus_bottom_half_widget->show();
 	}
 	else
 	{
 		did_checkbox_change = "n";
-		ui->limit_dmus_bottom_half_widget->show();
+		ui->limit_dmus_bottom_half_widget->hide();
 	}
 	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetInstanceIdentifiers(), did_checkbox_change)))));
 	WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
