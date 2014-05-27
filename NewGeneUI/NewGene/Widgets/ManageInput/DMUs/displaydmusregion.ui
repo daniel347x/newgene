@@ -28,7 +28,14 @@
      <widget class="QWidget" name="horizontalLayoutWidget">
       <layout class="QHBoxLayout" name="horizontalLayout_dmus">
        <item>
-        <widget class="QListView" name="listView_dmus"/>
+        <widget class="QListView" name="listView_dmus">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QWidget" name="widget_dmu_pushbuttons" native="true">
@@ -74,7 +81,14 @@
      <widget class="QWidget" name="horizontalLayoutWidget_2">
       <layout class="QHBoxLayout" name="horizontalLayout_dmu_members">
        <item>
-        <widget class="QListView" name="listView_dmu_members"/>
+        <widget class="QListView" name="listView_dmu_members">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>3</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QWidget" name="widget_dmu_member_pushbuttons" native="true">
