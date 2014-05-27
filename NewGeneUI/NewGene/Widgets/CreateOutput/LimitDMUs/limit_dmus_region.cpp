@@ -82,15 +82,14 @@ void limit_dmus_region::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 	{
 		if (project)
 		{
-            project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
-            project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE, false, "");
+            //project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
         }
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (inp)
 		{
-            inp->UnregisterInterestInChanges(this);
+            //inp->UnregisterInterestInChanges(this);
 		}
 	}
 }
@@ -442,54 +441,10 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
         switch (change.change_type)
 		{
 
-            case DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE:
+            case DATA_CHANGE_TYPE__OUTPUT_MODEL__INPUT_DMU_OR_DMU_MEMBER_CHANGE:
                 {
 
-                    case DATA_CHANGE_INTENTION__ADD:
-                    case DATA_CHANGE_INTENTION__REMOVE:
-                        {
-                            RefreshAllWidgets();
-                        }
-                        break;
-
-                    case DATA_CHANGE_INTENTION__UPDATE:
-                        {
-                        }
-                        break;
-
-                    case DATA_CHANGE_INTENTION__RESET_ALL:
-                        {
-                        }
-                        break;
-
-                    default:
-                        {
-                        }
-                        break;
-
-                }
-                break;
-
-            case DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE:
-                {
-
-                    case DATA_CHANGE_INTENTION__ADD:
-                    case DATA_CHANGE_INTENTION__REMOVE:
-                    case DATA_CHANGE_INTENTION__RESET_ALL:
-                        {
-                            RefreshAllWidgets();
-                        }
-                        break;
-
-                    case DATA_CHANGE_INTENTION__UPDATE:
-                        {
-                        }
-                        break;
-
-                    default:
-                        {
-                        }
-                        break;
+                    RefreshAllWidgets();
 
                 }
                 break;
