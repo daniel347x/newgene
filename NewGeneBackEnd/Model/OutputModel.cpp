@@ -280,7 +280,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	msg_starttime % time_start_formatted;
 	messager.AppendKadStatusText(msg_starttime.str(), nullptr);
 
-	//InputModel & input_model = model->getInputModel();
+	input_model = &model->getInputModel();
 
 	bool delete_tables_ = delete_tables;
 	BOOST_SCOPE_EXIT(&input_model, &delete_tables_)
@@ -2187,8 +2187,6 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 	// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
 	//temp_dot = "temp.";
 	temp_dot = "";
-
-	input_model = &model->getInputModel();
 
 	db = input_model->getDb();
 

@@ -409,7 +409,7 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 	{
 		boost::format sql("DELETE FROM LIMIT_DMUS__ELEMENTS WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = '%1%' AND LIMIT_DMUS__DMU_SET_MEMBER_UUID = '%2%'");
 		sql % *dmu_category.code % dmu_member_uuid;
-		int err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
+		err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
 	}
 	if (stmt == NULL)
 	{
