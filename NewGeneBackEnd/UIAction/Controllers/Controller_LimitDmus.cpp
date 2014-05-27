@@ -197,7 +197,7 @@ void UIActionManager::DoLimitDmusChange(Messager & messager__, WidgetActionItemR
 
 					WidgetInstanceIdentifier const & dmu_category = instanceActionItem.first;
 
-					if (!dmu_category.uuid)
+					if (!dmu_category.uuid || !dmu_category.code)
 					{
 						return;
 					}
@@ -228,7 +228,7 @@ void UIActionManager::DoLimitDmusChange(Messager & messager__, WidgetActionItemR
 					// ***************************************** //
 					if (is_limited)
 					{
-						output_model.t_limit_dmus_categories.AddDMU(output_model.getDb(), output_model, input_model, dmu_category);
+						output_model.t_limit_dmus_categories.AddDMU(output_model.getDb(), output_model, input_model, *dmu_category.code);
 					}
 					else
 					{

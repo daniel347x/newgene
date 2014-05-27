@@ -160,7 +160,7 @@ bool Table__Limit_DMUS__Categories::AddDMU(sqlite3 * db, OutputModel & output_mo
 
 }
 
-bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier & dmu_category)
+bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);

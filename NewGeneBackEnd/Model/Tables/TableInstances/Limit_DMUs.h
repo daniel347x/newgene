@@ -28,7 +28,7 @@ public:
 
 	bool Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category, bool const also_confirm_using_cache = true);
 	bool AddDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category);
-	bool RemoveDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier & dmu_category);
+	bool RemoveDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category);
 
 };
 
