@@ -237,7 +237,30 @@ public:
 			}
 		}
 
-		if (code && rhs.code)
+		bool lhs_has_code = false;
+		bool rhs_has_code = false;
+		bool lhs_has_uuid = false;
+		bool rhs_has_uuid = false;
+
+		if (code && !code->empty())
+		{
+			lhs_has_code = true;
+		}
+		if (rhs.code && !rhs.code->empty())
+		{
+			rhs_has_code = true;
+		}
+		if (uuid && !uuid->empty())
+		{
+			lhs_has_uuid = true;
+		}
+		if (rhs.uuid && !rhs.uuid->empty())
+		{
+			rhs_has_uuid = true;
+		}
+
+
+		if (lhs_has_code && rhs_has_code)
 		{
 			if (*code < *rhs.code)
 			{
@@ -248,19 +271,44 @@ public:
 				return false;
 			}
 		}
-
-		if (uuid && rhs.uuid)
+		else if (lhs_has_code && !rhs_has_code)
 		{
-			if (*uuid < *rhs.uuid)
+			return true;
+		}
+		else if (!lhs_has_code && rhs_has_code)
+		{
+			return false;
+		}
+		else
+		{
+			// !lhs_has_code && !rhs_has_code
+			if (lhs_has_uuid && rhs_has_uuid)
+			{
+				if (*uuid < *rhs.uuid)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else if (lhs_has_uuid && !rhs_has_uuid)
 			{
 				return true;
 			}
+			else if (!lhs_has_uuid && rhs_has_uuid)
+			{
+				return false;
+			}
 			else
 			{
+				// !lhs_has_uuid && !rhs_has_uuid
 				return false;
 			}
 		}
 
+		// unreachable
 		return false;
 
 	}
