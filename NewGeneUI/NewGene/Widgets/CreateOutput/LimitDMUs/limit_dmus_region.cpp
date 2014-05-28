@@ -686,9 +686,9 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 										PrepareItem(item, text, dmu_set_member, false);
 										dmusModelBottomLeft->appendRow( item );
 
-										QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
-										QModelIndex newDmuMemberIndexProxy = modelLeft->mapFromSource(newDmuMemberIndex);
-										selectionModelBottomLeft->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
+                                        //QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
+                                        //QModelIndex newDmuMemberIndexProxy = modelLeft->mapFromSource(newDmuMemberIndex);
+                                        //selectionModelBottomLeft->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
 									}
 
 									QItemSelectionModel * selectionModelBottomRight = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
