@@ -1085,6 +1085,14 @@ enum VARIABLE_GROUP_MERGE_MODE
 	, VARIABLE_GROUP_MERGE_MODE__CHILD
 };
 
+// ******************************************************************************************* //
+// The following class is used as the base class for the "Leaf" and "Branch" classes, below
+// (they aren't actually called "Leaf" and "Branch", but they are indicated as such in comments
+//  and variable names throughout the code).
+//
+// This class is a wrapper over a vector of DMU instance data
+// (i.e., for Country, we might have {2, 200, 300} corresponding to an instance of this class).
+// ******************************************************************************************* //
 class PrimaryKeysGrouping
 {
 
