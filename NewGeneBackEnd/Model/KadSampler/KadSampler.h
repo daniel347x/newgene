@@ -30,6 +30,25 @@ typedef boost::variant<std::int32_t, double, fast_string> InstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> DMUInstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> SecondaryInstanceData;
 
+// ******************************************************************************************* //
+//
+// MEMORY_TAG is the tag - just an empty, uniquely-named struct - used by the internals
+// of Boost Pool to mark different global memory pools.
+// 
+// Whenever the code instantiates an instance of any of the classes below,
+// the code (namely, us) gets to choose which pool in which to store the object in memory.
+//
+// The benefit of using Boost Pool is that our code can free a block of memory (pool) wholesale,
+// without calling the destructor for any of the objects in the pool, which is a major
+// profiler-demonstrated optimization.
+//
+// By controlling which pool each object is created in, NewGene has the ability to 
+// have fine-grain control over which objects are freed at any given time.
+//
+// This code has pool-enabled a variety of different classes, for convenience.
+// Any class templatized with the MEMORY_TAG parameter is pool-enabled.
+//
+// ******************************************************************************************* //
 template <typename MEMORY_TAG>
 using InstanceDataVector = FastVectorMemoryTag<InstanceData, MEMORY_TAG>;
 
@@ -67,6 +86,9 @@ using DataCache = FastMapMemoryTag<std::int32_t, SecondaryInstanceDataVector<MEM
 template <typename MEMORY_TAG>
 using fast_short_to_data_cache_map = FastMapMemoryTag<std::int16_t, DataCache<MEMORY_TAG>, MEMORY_TAG>;
 
+
+// For the below classes, instead of templatizing the class on MEMORY_TAG (which represents an empty, uniquely named struct),
+// we just explicitly use a particular struct as the tag.
 struct newgene_randomvector_tag {};
 typedef boost::singleton_pool<newgene_randomvector_tag, sizeof(FastVectorCppInt)>
 RandomVectorPool;
@@ -77,6 +99,8 @@ RandomSetPool;
 
 template <typename TOPLEVEL_POOL_TAG>
 using TopLevelObjectsPool = boost::singleton_pool<TOPLEVEL_POOL_TAG, sizeof(TOPLEVEL_POOL_TAG::type)>;
+
+
 
 class KadSampler;
 
