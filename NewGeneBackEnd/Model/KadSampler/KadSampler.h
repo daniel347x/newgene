@@ -1206,7 +1206,13 @@ class size_of_visitor : public boost::static_visitor<size_t>
 
 };
 
+// ******************************************************************************************************************************************************************** //
+//
 // "Leaf"
+//
+// See detailed comments inside the "Branch" class declaration, further down in this file.
+//
+// ******************************************************************************************************************************************************************** //
 class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 {
 
@@ -1909,7 +1915,13 @@ struct tag__fast__lookup__from_child_dmu_set__to__output_rows
 	typedef fast__lookup__from_child_dmu_set__to__output_rows<MEMORY_TAG> type;
 };
 
+// ******************************************************************************************************************************************************************** //
+//
 // "Branch"
+//
+// See detailed comments inside this class declaration.
+//
+// ******************************************************************************************************************************************************************** //
 class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 {
 
