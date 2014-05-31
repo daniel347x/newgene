@@ -1936,6 +1936,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
+			, how_many_excluded_leaves(0)
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector)
@@ -1943,7 +1944,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
-			{
+			, how_many_excluded_leaves(0)
+		{
 		}
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
@@ -1957,6 +1959,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, leaves { rhs.leaves }
 			, leaves_cache { rhs.leaves_cache }
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
+			, how_many_excluded_leaves(rhs.how_many_excluded_leaves)
 		{
 		}
 
@@ -1971,6 +1974,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, leaves{ rhs.leaves }
 			, leaves_cache{ rhs.leaves_cache }
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
+			, how_many_excluded_leaves(rhs.how_many_excluded_leaves)
 		{
 			// Confirm this is never called
 			boost::format msg("Branch rvalue constructor called!");
@@ -1993,6 +1997,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			leaves_cache = rhs.leaves_cache;
 			hits_consolidated = rhs.hits_consolidated;
 			helper_lookup__from_child_key_set__to_matching_output_rows = nullptr;
+			how_many_excluded_leaves = rhs.how_many_excluded_leaves;
 			return *this;
 		}
 
@@ -2019,6 +2024,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				leaves_cache = std::move(rhs.leaves_cache);
 				hits_consolidated = std::move(rhs.hits_consolidated);
 				helper_lookup__from_child_key_set__to_matching_output_rows = nullptr;
+				how_many_excluded_leaves = rhs.how_many_excluded_leaves;
 			}
 
 			return *this;
@@ -2048,6 +2054,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Weighting for this branch: This is the lowest-level, calculated value, with unit granularity according to the primary variable group.
 		// It is the product of the number of branch combinations and the number of time units in this time slice.
 		mutable Weighting weighting;
+		mutable int how_many_excluded_leaves;
 
 
 		// ******************************************************************************************************** //
