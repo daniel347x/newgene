@@ -2657,8 +2657,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// [.............][.............][.............][.............][.............][.............][.............][.............]
 	//             |____A____|       |______________B_____________]
 	//
-	// In this example, each [.............] corresponds to a time unit with some output rows - on average, the dots
-	// each represent an output row.
+	// In this example, each [.............] corresponds to a time unit with some output rows -
+	// on average, the dots each represent an output row.
 	// Note that each element of the "hits" vector corresponds to a single [.............].
 	// In particular, note that in the FULL SAMPLING (i.e., NOT random sampling) case,
 	// the rows in each [.............] are identical (that is how the time slices are constructed -
