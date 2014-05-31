@@ -2386,6 +2386,8 @@ class VariableGroupTimeSliceData
 			return *this;
 		}
 
+		// One branch per variable group.  Currently, only one primary variable group is supported,
+		// so this vector always has (currently) just one entry
 		VariableGroupBranchesAndLeavesVector<hits_tag> * branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves in all variable groups
 
