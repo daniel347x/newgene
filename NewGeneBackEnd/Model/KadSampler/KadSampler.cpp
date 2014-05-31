@@ -2660,9 +2660,18 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// In this example, each [.............] corresponds to a time unit with some output rows - on average, the dots
 	// each represent an output row.
 	// Note that each element of the "hits" vector corresponds to a single [.............].
+	// In particular, note that in the FULL SAMPLING (i.e., NOT random sampling) case,
+	// the rows in each [.............] are identical (that is how the time slices are constructed -
+	// i.e., whenever a leaf is added to a sub-fraction of a time slice, the time slice is first split,
+	// and only then is the new leaf - which creates a new set of rows as it is combined with all other leaves -
+	// added.  But for RANDOM sampling, only a random selection of rows appears in each [.............],
+	// and so the rows in each [.............] are different.
+	// 
 	// B is a time slice that evenly covers two time units.
 	// A covers just a sliver of one time unit, but A, since it is being merged in, will actually be sliced and its left sliver
-	// will contain ALL of the output rows from the left time unit (and ditto for the right piece of A);
+	// will contain ALL of the output rows from the left time unit 
+	// (in the first entry of its "hits" vector)
+	// (and ditto for the right piece of A, in the last entry of its "hits" vector);
 	// You can see that the algorithm that outputs the data will simply output all rows in the sliver,
 	// but the sliver will have a very narrow range, so the weighting still works out.  (The algorithm
 	// will also output the big left chunk of the first time unit with all the same rows and the bigger time range.)
