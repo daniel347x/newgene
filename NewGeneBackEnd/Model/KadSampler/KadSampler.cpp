@@ -2659,6 +2659,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	//
 	// In this example, each [.............] corresponds to a time unit with some output rows - on average, the dots
 	// each represent an output row.
+	// Note that each element of the "hits" vector corresponds to a single [.............].
 	// B is a time slice that evenly covers two time units.
 	// A covers just a sliver of one time unit, but A, since it is being merged in, will actually be sliced and its left sliver
 	// will contain ALL of the output rows from the left time unit (and ditto for the right piece of A);
