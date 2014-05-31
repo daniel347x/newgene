@@ -1921,6 +1921,10 @@ struct tag__fast__lookup__from_child_dmu_set__to__output_rows
 //
 // See detailed comments inside this class declaration.
 //
+// Note: The branch represented by this class corresponds to 
+// a single time slice (but the branch itself has no information
+// about its corresponding time slice)
+//
 // ******************************************************************************************************************************************************************** //
 class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 {
