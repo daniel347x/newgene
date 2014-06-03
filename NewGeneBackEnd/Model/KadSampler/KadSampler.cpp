@@ -2655,7 +2655,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// and let the output routine ensure that the time widths properly weight the slices.
 	//
 	// [.............][.............][.............][.............][.............][.............][.............][.............]
-	//             |____A____|       |______________B_____________]
+	//             |____A____|       |______________B_____________|
 	//
 	// In this example, each [.............] corresponds to a time unit with some output rows -
 	// on average, the dots each represent an output row.
@@ -2664,10 +2664,10 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// the rows in each [.............] are identical (that is how the time slices are constructed -
 	// i.e., whenever a leaf is added to a sub-fraction of a time slice, the time slice is first split,
 	// and only then is the new leaf - which creates a new set of rows as it is combined with all other leaves -
-	// added.  But for RANDOM sampling, only a random selection of rows appears in each [.............],
+	// added).  But for RANDOM sampling, only a random selection of rows appears in each [.............],
 	// and so the rows in each [.............] are different.
 	// 
-	// B is a time slice that evenly covers two time units.
+	// B is an example of a time slice that evenly covers two time units.
 	// A covers just a sliver of one time unit, but A, since it is being merged in, will actually be sliced and its left sliver
 	// will contain ALL of the output rows from the left time unit 
 	// (in the first entry of its "hits" vector)

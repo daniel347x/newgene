@@ -1220,20 +1220,23 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne()
 			: PrimaryKeysGrouping { DMUInstanceDataVector<hits_tag>() }
-		, index_into_raw_data { 0 }
+			, index_into_raw_data{ 0 }
+			, has_excluded_dmu_member{false}
 		{
 		}
 
-		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0)
+			PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0, bool const has_excluded_dmu_member_ = false)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data { index_into_raw_data_ }
+			, has_excluded_dmu_member{ has_excluded_dmu_member_ }
 		{
 		}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
 			, index_into_raw_data { rhs.index_into_raw_data }
-			, other_top_level_indices_into_raw_data { rhs.other_top_level_indices_into_raw_data }
+			, other_top_level_indices_into_raw_data{ rhs.other_top_level_indices_into_raw_data }
+			, has_excluded_dmu_member{rhs.has_excluded_dmu_member}
 		{
 		}
 
@@ -1241,6 +1244,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 			: PrimaryKeysGrouping(std::move(rhs))
 			, index_into_raw_data { rhs.index_into_raw_data }
 			, other_top_level_indices_into_raw_data { std::move(rhs.other_top_level_indices_into_raw_data) }
+			, has_excluded_dmu_member{ rhs.has_excluded_dmu_member }
 		{
 		}
 
@@ -1254,6 +1258,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 			PrimaryKeysGrouping::operator=(rhs);
 			index_into_raw_data = rhs.index_into_raw_data;
 			other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
+			has_excluded_dmu_member = rhs.has_excluded_dmu_member;
 			return *this;
 		}
 
@@ -1267,6 +1272,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 			PrimaryKeysGrouping::operator=(std::move(rhs));
 			index_into_raw_data = rhs.index_into_raw_data;
 			other_top_level_indices_into_raw_data = std::move(rhs.other_top_level_indices_into_raw_data);
+			has_excluded_dmu_member = rhs.has_excluded_dmu_member;
 			return *this;
 		}
 
@@ -1279,6 +1285,8 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 		// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
 		mutable fast_short_to_int_map<hits_tag>
 		other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
+
+		bool has_excluded_dmu_member;
 
 };
 
@@ -1936,7 +1944,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
-			, how_many_excluded_leaves(0)
+			, has_excluded_leaves(false)
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector)
@@ -1944,7 +1952,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
-			, how_many_excluded_leaves(0)
+			, has_excluded_leaves(false)
 		{
 		}
 
@@ -1959,7 +1967,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, leaves { rhs.leaves }
 			, leaves_cache { rhs.leaves_cache }
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
-			, how_many_excluded_leaves(rhs.how_many_excluded_leaves)
+			, has_excluded_leaves(rhs.has_excluded_leaves)
 		{
 		}
 
@@ -1974,7 +1982,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, leaves{ rhs.leaves }
 			, leaves_cache{ rhs.leaves_cache }
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
-			, how_many_excluded_leaves(rhs.how_many_excluded_leaves)
+			, has_excluded_leaves(rhs.has_excluded_leaves)
 		{
 			// Confirm this is never called
 			boost::format msg("Branch rvalue constructor called!");
@@ -1997,7 +2005,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			leaves_cache = rhs.leaves_cache;
 			hits_consolidated = rhs.hits_consolidated;
 			helper_lookup__from_child_key_set__to_matching_output_rows = nullptr;
-			how_many_excluded_leaves = rhs.how_many_excluded_leaves;
+			has_excluded_leaves = rhs.has_excluded_leaves;
 			return *this;
 		}
 
@@ -2024,7 +2032,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				leaves_cache = std::move(rhs.leaves_cache);
 				hits_consolidated = std::move(rhs.hits_consolidated);
 				helper_lookup__from_child_key_set__to_matching_output_rows = nullptr;
-				how_many_excluded_leaves = rhs.how_many_excluded_leaves;
+				has_excluded_leaves = rhs.has_excluded_leaves;
 			}
 
 			return *this;
@@ -2054,7 +2062,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Weighting for this branch: This is the lowest-level, calculated value, with unit granularity according to the primary variable group.
 		// It is the product of the number of branch combinations and the number of time units in this time slice.
 		mutable Weighting weighting;
-		mutable int how_many_excluded_leaves;
+		mutable bool has_excluded_leaves;
 
 
 		// ******************************************************************************************************** //
@@ -2173,6 +2181,12 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		void InsertLeaf(Leaf const & leaf) const
 		{
+			// Lookup into "ignored DMU" map to see if this leaf should be skipped and the boolean flag set
+			if (leaf.has_excluded_dmu_member)
+			{
+				this->has_excluded_leaves = true;
+				return;
+			}
 			leaves.insert(leaf);
 			ResetLeafCache();
 		}

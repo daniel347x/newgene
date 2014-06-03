@@ -4,6 +4,7 @@
 #include "../../../Utilities/UUID.h"
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
+#	include <boost/lexical_cast.hpp>
 #endif
 
 std::string const Table__Limit_DMUS__Categories::LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = "LIMIT_DMUS__DMU_CATEGORY_STRING_CODE";
@@ -53,6 +54,11 @@ void Table__Limit_DMUS__Categories::Load(sqlite3 * db, OutputModel * output_mode
 
 	Sort();
 
+}
+
+bool Table__Limit_DMUS__Categories::ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category_code)
+{
+	return getIdentifierFromStringCode(dmu_category_code, WidgetInstanceIdentifier());
 }
 
 bool Table__Limit_DMUS__Categories::Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category_code, bool const also_confirm_using_cache)
@@ -267,6 +273,16 @@ void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_
 		stmt = nullptr;
 	}
 
+}
+
+bool Table__Limit_DMUs__Elements::ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
+{
+	return getIdentifier(dmu_member_uuid, *dmu_category.code, true).IsEmpty();
+}
+
+bool Table__Limit_DMUs__Elements::ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::int64_t const & dmu_member_uuid)
+{
+	return getIdentifier(boost::lexical_cast<std::string>(dmu_member_uuid), *dmu_category.code, true).IsEmpty();
 }
 
 bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, bool const also_confirm_using_cache)

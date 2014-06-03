@@ -458,17 +458,20 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							: datetime_start(0)
 							, datetime_end(0)
 							, failed(false)
+							, branch_has_excluded_dmu(false)
+							, leaf_has_excluded_dmu(false)
 						{
 
 						}
 
 						void Clear();
-						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & column_schema, sqlite3_stmt * stmt_result,
-															  XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid = false);
+						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & column_schema, sqlite3_stmt * stmt_result, OutputModel & model);
 
 						SavedRowData & GetSavedRowData() { return *this; }
 
 						std::int64_t rowid; // for use with SQLite's "rowid" - currently only used for random sampling algorithm
+						bool branch_has_excluded_dmu;
+						bool leaf_has_excluded_dmu;
 
 						std::int64_t datetime_start;
 						std::int64_t datetime_end;
@@ -493,8 +496,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_columns;
 
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_multiplicity_greater_than_1;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_multiplicity_equal_to_1;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_secondary_key_columns;
 
 						std::vector<bool> is_index_a_primary_key;

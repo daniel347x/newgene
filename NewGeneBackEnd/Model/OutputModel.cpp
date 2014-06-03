@@ -845,9 +845,9 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	failed = false;
 	indices_of_primary_key_columns.clear();
 	is_index_a_primary_key.clear();
-	indices_of_primary_key_columns_with_multiplicity_greater_than_1.clear();
+	indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.clear();
 	is_index_a_primary_key_with_outer_multiplicity_greater_than_1.clear();
-	indices_of_primary_key_columns_with_multiplicity_equal_to_1.clear();
+	indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.clear();
 	is_index_a_primary_key_with_outer_multiplicity_equal_to_1.clear();
 	is_index_a_secondary_key.clear();
 	indices_of_secondary_key_columns.clear();
@@ -878,8 +878,7 @@ void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGr
 
 }
 
-void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & column_schema, sqlite3_stmt * stmt_result,
-		XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid)
+void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & column_schema, sqlite3_stmt * stmt_result, OutputModel & model)
 {
 
 	Clear();
@@ -970,6 +969,14 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 		bool add_as_secondary_datetime_column = one_column.originally_datetime;
 
+		bool is_excluded_dmu_category = false;
+		bool is_excluded_dmu_set_member = false; // this gets set, if necessary, below
+		if (add_as_primary_key_column)
+		{
+			// Test if this DMU member is being excluded by the user in the "Limit DMU's" tab
+			is_excluded_dmu_category = model.t_limit_dmus_categories.ExistsInCache(model.getDb(), model, model.getInputModel(), *one_column.primary_key_dmu_category_identifier.code);
+		}
+
 		column_data_type = sqlite3_column_type(stmt_result, current_column);
 
 		switch (column_data_type)
@@ -979,6 +986,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				{
 
 					data_int64 = sqlite3_column_int64(stmt_result, current_column);
+
+					if (is_excluded_dmu_category)
+					{
+						is_excluded_dmu_set_member = model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_int64);
+					}
 
 					std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> binding;
 
@@ -995,12 +1007,20 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(binding);
+						indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.push_back(binding);
+						if (is_excluded_dmu_set_member)
+						{
+							branch_has_excluded_dmu = true;
+						}
 					}
 
 					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(binding);
+						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(binding);
+						if (is_excluded_dmu_set_member)
+						{
+							leaf_has_excluded_dmu = true;
+						}
 					}
 
 					if (is_index_a_secondary_key[current_column])
@@ -1027,14 +1047,22 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT,
+						indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT,
 								std::make_pair((int)current_parameter_floats.size() - 1, current_column)));
+						if (is_excluded_dmu_set_member)
+						{
+							branch_has_excluded_dmu = true;
+						}
 					}
 
 					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT,
+						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT,
 								std::make_pair((int)current_parameter_floats.size() - 1, current_column)));
+						if (is_excluded_dmu_set_member)
+						{
+							leaf_has_excluded_dmu = true;
+						}
 					}
 
 					if (is_index_a_secondary_key[current_column])
@@ -1050,9 +1078,9 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, current_column));
 
-					if (boost::lexical_cast<std::string>(data_string) == "Austria-Hungary")
+					if (is_excluded_dmu_category)
 					{
-						int m = 0;
+						is_excluded_dmu_set_member = model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_string);
 					}
 
 					current_parameter_strings.push_back(data_string);
@@ -1067,14 +1095,22 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING,
+						indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING,
 								std::make_pair((int)current_parameter_strings.size() - 1, current_column)));
+						if (is_excluded_dmu_set_member)
+						{
+							branch_has_excluded_dmu = true;
+						}
 					}
 
 					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING,
+						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING,
 								std::make_pair((int)current_parameter_strings.size() - 1, current_column)));
+						if (is_excluded_dmu_set_member)
+						{
+							leaf_has_excluded_dmu = true;
+						}
 					}
 
 					if (is_index_a_secondary_key[current_column])
@@ -1109,13 +1145,13 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0,
+						indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0,
 								current_column)));
 					}
 
 					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0, current_column)));
+						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0, current_column)));
 					}
 
 					if (is_index_a_secondary_key[current_column])
@@ -1141,11 +1177,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 	});
 
-	if (obtain_rowid)
-	{
-		data_int64 = sqlite3_column_int64(stmt_result, current_column);
-		rowid = data_int64;
-	}
+	data_int64 = sqlite3_column_int64(stmt_result, current_column);
+	rowid = data_int64;
 
 }
 
@@ -2023,7 +2056,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Now limit by DMU member
 	WidgetInstanceIdentifiers limiting_dmu_categories = model->t_limit_dmus_categories.getIdentifiers();
 	int number_dmu_categories_by_which_to_limit_by_dmu_member = limiting_dmu_categories.size();
-	if (number_dmu_categories_by_which_to_limit_by_dmu_member > 0)
+
+	// false, because we are now handling this with greater granularity when rows are actually loaded
+	if (false && number_dmu_categories_by_which_to_limit_by_dmu_member > 0)
 	{
 
 		for (auto const & limiting_dmu_category : limiting_dmu_categories)
@@ -4157,7 +4192,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 			return;
 		}
 
-		sorting_row_of_data.PopulateFromCurrentRowInDatabase(variable_group_selected_columns_schema, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true);
+		sorting_row_of_data.PopulateFromCurrentRowInDatabase(variable_group_selected_columns_schema, stmt_result, *model);
 
 		// Construct branch and leaf
 
@@ -4173,8 +4208,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		DMUInstanceDataVector<hits_tag> dmus_leaf;
 
 		bool bad = false;
-		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(),
-					  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.cbegin(),
+					  sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 		{
 
 			if (bad)
@@ -4223,8 +4258,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		// Construct Branch
 		DMUInstanceDataVector<hits_tag> dmus_branch;
 
-		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cbegin(),
-					  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.cbegin(),
+					  sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 		{
 
 			if (bad)
@@ -4323,7 +4358,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 		});
 
-		if (!bad)
+		if (!bad && !sorting_row_of_data.branch_has_excluded_dmu)
 		{
 
 			TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
@@ -4334,7 +4369,9 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 				case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
 					{
 
-						Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid));
+						// Lookup into "ignored DMU" map to see if this branch should be skipped
+
+						Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid), sorting_row_of_data.leaf_has_excluded_dmu);
 						Branch branch(dmus_branch);
 
 						bool call_again = false;
@@ -4370,6 +4407,11 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 				case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
 					{
+
+						if (sorting_row_of_data.leaf_has_excluded_dmu)
+						{
+							break;
+						}
 
 						Leaf leaf(dmus_leaf);
 						Branch branch(dmus_branch);
@@ -4411,6 +4453,11 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 				case VARIABLE_GROUP_MERGE_MODE__CHILD:
 					{
+
+						if (sorting_row_of_data.leaf_has_excluded_dmu)
+						{
+							break;
+						}
 
 						// pack the child data index into the main leaf for use in the function called below - because this leaf is TEMPORARY
 						// (this data will be unpacked from the temporary leaf and put into the proper place in the function called below)

@@ -26,8 +26,9 @@ public:
 
 	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
 
-	bool Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category, bool const also_confirm_using_cache = true);
-	bool AddDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category);
+	bool Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category_code, bool const also_confirm_using_cache = true);
+	bool ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category_code);
+	bool AddDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category_code);
 	bool RemoveDMU(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category);
 
 };
@@ -55,6 +56,8 @@ public:
 	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
 
 	bool Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, bool const also_confirm_using_cache = true);
+	bool ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid);
+	bool ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::int64_t const & dmu_member_uuid);
 	WidgetInstanceIdentifier AddDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid);
 	bool RemoveDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid);
 
