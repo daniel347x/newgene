@@ -748,11 +748,14 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 	// and these will be MERGED during consolidation.
 	// So, the current approach is simply to store all branch + leaves combinations in a set, which guarantees uniqueness,
 	// and then iterate through the set to calculate the total number of consolidated K-ad combinations.
+	// The issue of whether time slices are adjacent or not is also handled
+	// (if not, rows should not be consolidated).
+	//
 	// In terms of memory allocation, because we are just storing a single entry in the set for ALL leaves for a given branch,
 	// i.e., for each MID we store only the total leaves for a given branch (not broken down into K-ad combinations),
 	// we expect this to be light on memory in almost all use cases.
 	//
-	// Also use a custom sort to ensure holes and subsets are handled properly.
+	// Also use this custom sort to ensure holes and subsets are handled properly, as noted previously.
 	//
 	// Place the following vector into the 'hits_tag' memory pool, NOT the 'calculate_consolidated_total_number_rows_tag' memory pool.
 	// That way, when this block exits, even though the 'calculate_consolidated_total_number_rows_tag' memory pool has been purged,
@@ -767,7 +770,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 		}
 
 		// From http://stackoverflow.com/a/2810302/368896
-		// ... Must unpack t 32-bit ints into a 64-bit
+		// ... Must pack two 32-bit ints into a 64-bit
 		std::uint32_t lhsstart1 = boost::lexical_cast<std::uint32_t>(lhs[0]);
 		std::uint32_t lhsstart2 = boost::lexical_cast<std::uint32_t>(lhs[1]);
 		std::uint32_t lhsend1 = boost::lexical_cast<std::uint32_t>(lhs[2]);
@@ -986,6 +989,13 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 				// It is just the binomial coefficient (assuming K <= N)
 
 				branch.number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
+
+				// Handle "Limit DMU's" scenario
+				if (K > 1 && numberLeaves < K && branch.has_excluded_leaves)
+				{
+					// There would always be an excluded DMU member in every row
+					branch.number_branch_combinations = 0;
+				}
 
 				if (K <= numberLeaves && numberLeaves > 0)
 				{

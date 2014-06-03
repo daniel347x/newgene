@@ -463,7 +463,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		// ********************************************************************************************************************************************************* //
 		// Build a schema object, one per variable group with selected data,
-		// intended for internal use by the K-ad algorithm (i.e., converted from the raw format used in the database into a handy set of schema instances)
+		// intended for internal use by the K-ad algorithm (i.e., converted from the raw format used in the database
+		// into a handy set of schema instances)
 		// ********************************************************************************************************************************************************* //
 		PopulateSchemaForRawDataTables(allWeightings);
 		if (failed || CheckCancelled()) { return; }
