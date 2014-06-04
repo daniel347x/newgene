@@ -4974,6 +4974,21 @@ void OutputModel::OutputGenerator::KadSamplerCreateOutputTable()
 void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(KadSampler & allWeightings, std::vector<std::string> & errorMessages)
 {
 
+
+
+	// ************************************************************************************************* //
+	// ************************************************************************************************* //
+	// ************************************************************************************************* //
+	// ************************************************************************************************* //
+	//
+	// THIS FUNCTION IS NEVER CALLED AND MAY NEED TO BE MODIFIED TO ACCOUNT FOR CONSOLIDATED VS.
+	// UNCONSOLIDATED OUTPUT, AND CORRESPONDINGLY PROPER HANDLING OF THE TIME UNITS
+	//
+	// ************************************************************************************************* //
+	// ************************************************************************************************* //
+	// ************************************************************************************************* //
+	// ************************************************************************************************* //
+
 	ColumnsInTempView const & random_sampling_columns = random_sampling_schema.second;
 
 	int const    minimum_desired_rows_per_transaction = 1024 * 16;
@@ -6175,6 +6190,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						std::int64_t hit_number = 0;
 						std::int64_t total_hits = branch.hits.size();
 
+						// random sampling; not consolidated
 						for (auto const & time_unit_hit : branch.hits)
 						{
 
@@ -6274,6 +6290,20 @@ void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTi
 	// Because inserts of duplicate data into the set are rejected, this effectively merges
 	// all output rows across time units (bins) within each branch into a single set of rows
 	// for each branch.
+	//
+	// Note that even though each row corresponds only to a single time unit within a time slice,
+	// not to the entire time range of the time slice, that when we output the results
+	// in *consolidated* mode, we expect to see output rows whose time range matches
+	// that of the actual raw data.  Therefore,
+	// each row of output always corresponds to the *full* time range of the time slice,
+	// not to the time range of the individual bin (time unit).  These bins were only used
+	// to ensure that the random sampling is unbiased, not to indicate that the row
+	// only corresponds to the time range of the individual bin.
+	//
+	// Therefore, in consolidated mode,
+	// we simply wipe out the time ranges associated with the bins, merge
+	// all rows (regardless of the bin of origin within the time slice) into a single
+	// bin with index -1, and the output routine will pro
 	//
 	// Once this is complete, we are ready to move on to the main consolidation phase
 	// ... namely, merging identical rows *across* time slices.

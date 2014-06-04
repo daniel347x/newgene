@@ -373,13 +373,19 @@ class TimeSlice
 			std::int64_t val = absolute - mod;
 			std::int64_t ret = val / ms_per_unit_time;
 
-			if (mod < ms_per_unit_time / 2)
+			// We expect only even multiples of the time unit for the primary variable group,
+			// so only the following block is currently hit
+			// (since only the primary variable group calls this function)
+			BOOST_ASSERT_MSG(mod == 0, "The time slice is not an even multiple of the time unit!");
+			//if (mod < ms_per_unit_time / 2)
+			if (mod == 0)
 			{
-				// round down
 				return ret;
 			}
 
-			// round up
+			// The following is never reached and, if the program changes
+			// to support fractions of a time unit here,
+			// we must handle that logic outside this function
 			return ret + 1;
 
 		}

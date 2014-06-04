@@ -1198,16 +1198,26 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 
 	if (K >= branch.numberLeaves())
 	{
+
 		skip = true;
 
-		for (int n = 0; n < static_cast<int>(branch.numberLeaves()); ++n)
+		bool dmu_limited = false;
+		if (K > 1 && K > branch.numberLeaves() && branch.has_excluded_leaves)
 		{
-			single_leaf_combination.Insert(n);
+			dmu_limited = true;
 		}
 
-		branch.remaining[which_time_unit_full_sampling__MINUS_ONE].push_back(single_leaf_combination);
+		if (!dmu_limited)
+		{
+			for (int n = 0; n < static_cast<int>(branch.numberLeaves()); ++n)
+			{
+				single_leaf_combination.Insert(n);
+			}
 
-		++number_rows_generated;
+			branch.remaining[which_time_unit_full_sampling__MINUS_ONE].push_back(single_leaf_combination);
+
+			++number_rows_generated;
+		}
 
 	}
 
@@ -1237,6 +1247,7 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 
 	if (time_granularity != TIME_GRANULARITY__NONE)
 	{
+		BOOST_ASSERT_MSG(branch.number_branch_combinations > 0, "The number of branch combinations is 0 or less!");
 		newgene_cpp_int which_time_unit_ = random_number / branch.number_branch_combinations;
 		which_time_unit = which_time_unit_.convert_to<std::int64_t>();
 	}
@@ -1362,8 +1373,10 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 
 	// It might easily be a duplicate - random sampling will produce multiple hits on the same row
 	// because some rows can have a heavier weight than other rows;
-	// this is handled by storing a map of every *time unut* (corresponding to the primary variable group)
+	// this is handled by storing a map of every *time unit* (corresponding to the primary variable group)
 	// and all leaf combinations that have been hit for that time unit.
+	// The time unit is defined by the time granularity of the unit of analysis associated
+	// with the primary variable group.
 
 	auto insert_result = branch.hits[which_time_unit].insert(test_leaf_combination);
 	bool inserted = insert_result.second;
@@ -1918,6 +1931,21 @@ void KadSampler::PrepareRandomSamples(int const K)
 			while (random_number > currentMapElementHighEndWeight)
 			{
 
+				// ************************************************************ //
+				// Limit DMU functionality is properly handled here
+				//
+				// Note that elements with a weighting of 0 always have their
+				// "end" value set to 1 less than their "start" value.
+				// That is what makes this work.
+				//
+				// For example, if the first element/s have a weighting of 0,
+				// they will all have [0,-1] for their [start, end] values.
+				// Suppose the first element with non-zero weight has a weight of 1.
+				// Its range will be [0,0], and the FOLLOWING element will have
+				// a start value of 1: [1,x].
+				// (If it has a weight of 0, it will have a range [1,0]; and so on.)
+				// ************************************************************ //
+
 				// The current map element is still good!
 				++timeSlicePtr;
 
@@ -1931,6 +1959,13 @@ void KadSampler::PrepareRandomSamples(int const K)
 		{
 
 			// no optimization - the random number could lie in any map element
+
+
+			// ******************************************************* //
+			// Note: "Limit DMU" functionality should be properly handled here,
+			// but it's untested since this block is disabled.
+			// See comments above
+			// ******************************************************* //
 
 			BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0
 							 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
@@ -1969,6 +2004,12 @@ void KadSampler::PrepareRandomSamples(int const K)
 		Branches<hits_tag>::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch,
 											   newgene_cpp_int const & test_random_number)
 		{
+
+			// ************************************************************ //
+			// Limit DMU functionality should be properly handled here.
+			// See comments in analogous block for time slices, above.
+			// ************************************************************ //
+
 			if (testBranch.weighting.getWeightingRangeEnd() < test_random_number)
 			{
 				return true;
@@ -2542,20 +2583,33 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 {
 
 	// ********************************************************************************************** //
-	// This function is called when time slices (and corresponding output row data)
-	// are SPLIT.
+	// ********************************************************************************************** //
+	//
+	// This is arguably the trickiest function in the entire application.
+	//
+	// Detailed comments follow.
+	//
+	// ********************************************************************************************** //
+	// ********************************************************************************************** //
+
+	// ********************************************************************************************** //
+	// This function is called when time slices (and corresponding output row data) are SPLIT.
+	//
 	// Note that the opposite case - when time slices are MERGED -
-	// it is the context of CONSOLIDATED output,
+	// is always in the context of CONSOLIDATED output,
 	// a scenario where precisely the "hits" data is wiped out and consolidated
-	// so that this function would be irrelevent (and is not called).
+	// so that this function would be irrelevant (and is not called).
+	//
 	// So again, in the context of this function, we are only slicing time slices, never merging.
 	// Furthermore, the calling code guarantees that time slices are only shrunk from both sides
 	// (or left the same), never expanded.
-	// So it is guaranteed that "originalTimeSlice" fully covers "currentTimeSlice".
+	// So it is guaranteed that "originalTimeSlice" fully covers "currentTimeSlice"
+	// (or matches it on one and/or the other edge in time).
 	//
 	// This function takes the current time slice (this instance)
 	// and recalculates its "hits" data, throwing away "hits" time units that
 	// are outside the range indicated by "current time slice" in relation to "original time slice".
+	//
 	// Note that each "hit" element contains possibly MANY output rows, all corresponding
 	// to a fixed (sub-)time-width that is exactly equal to the time width corresponding
 	// to a single unit of time at the time range granularity corresponding to the primary variable group.
@@ -2572,7 +2626,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// will be at least 1 entry (set of rows) in "hits".  This will correspond to having
 	// the data output file contain *multiple* sets of rows of data that lie in the same
 	// "day" time slice - but with sub-day granularity.  This is desired so that all K-ads
-	// are successfully output.
+	// are successfully output, with the weighting taken care of by the width of the slice.
 	//
 	// Finally, note that this function is always exited if full sampling is being performed
 	// (not random), EVEN THOUGH the full sampler must distribute rows over the time units
@@ -2586,10 +2640,13 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// within each time slice (that is the entire purpose of the "hits" data structure and its data!)
 	// must process the "hits" when time slices are pruned.
 	//
-	// Note that we call it "pruning" time slices, but really the calling function is "splitting"
-	// existing time slices into multiple pieces, each a sub-piece of the original (never expanding)
+	// Note that we call it "pruning" time slices, but really the calling function
+	// before calling this function first "splits"
+	// existing time slices into multiple pieces,
+	// each a non-overlapping sub-piece of the original (never expanding)
 	// and each with an exact copy of the original piece's "hits" data, and then the calling function
-	// calls "prune" on each of the relevant sub-pieces (those that are not being thrown away).
+	// calls "prune" (this function) on each of the relevant sub-pieces
+	// (those that are not being thrown away).
 	//
 	// Again, the *merging* of time slices only occurs when "consolidate_rows" is true,
 	// so there's no need for this function to handle the case of EXPANDING (rather than pruning)
@@ -2665,10 +2722,25 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// and let the output routine ensure that the time widths properly weight the slices.
 	//
 	// [.............][.............][.............][.............][.............][.............][.............][.............]
-	//             |____A____|       |______________B_____________|
+	//     |       |____________________________A____________________________|    |______________B_____________|    |         |
+	//
+	// ^                                                                                                                      ^
+	// |                                                                                                                      |
+	// a                                                                                                                      b
+	//     ^                                                                                                        ^
+	//     |                                                                                                        |
+	//     c                                                                                                        d
 	//
 	// In this example, each [.............] corresponds to a time unit with some output rows -
 	// on average, the dots each represent an output row.
+	//
+	// Each [.............] corresponds to a time range that is precisely equal to 
+	// the time granularity corresponding to the primary variable group's unit of analysis,
+	// and furthermore, the [.............] are always guaranteed to be aligned in absolute
+	// coordinates on even multiples of this time unit (starting at the Unix timestamp 0 point,
+	// which is the start of day on Jan 1, 1970 (i.e. the turn of midnight the previous day leading
+	// into Jan 1, 1970).
+	//
 	// Note that each element of the "hits" vector corresponds to a single [.............].
 	// In particular, note that in the FULL SAMPLING (i.e., NOT random sampling) case,
 	// the rows in each [.............] are identical (that is how the time slices are constructed -
@@ -2676,20 +2748,47 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// and only then is the new leaf - which creates a new set of rows as it is combined with all other leaves -
 	// added).  But for RANDOM sampling, only a random selection of rows appears in each [.............],
 	// and so the rows in each [.............] are different.
+	//
+	// The "original" time slice might be evenly aligned, represented by [a,b],
+	//  (it will *always* be evenly aligned when this function is called while
+	//   processing time slices for the primary variable group),
+	// or it could be that the original time slice is NOT evenly aligned
+	//  (represented by [c,d]).
+	//
+	// The "current" time slice will be some arbitrary slice that is fully contained
+	// by the "original" time slice (represented by the two examples, A and B).
+	// Note: one or both edges of the "current" slice could match the corresponding edge/s
+	// of the "original" time slice, but will never exceed the corresponding edge of the
+	// original time slice (on the left or right).
 	// 
-	// B is an example of a time slice that evenly covers two time units.
-	// A covers just a sliver of one time unit, but A, since it is being merged in, will actually be sliced and its left sliver
-	// will contain ALL of the output rows from the left time unit 
-	// (in the first entry of its "hits" vector)
-	// (and ditto for the right piece of A, in the last entry of its "hits" vector);
-	// You can see that the algorithm that outputs the data will simply output all rows in the sliver,
-	// but the sliver will have a very narrow range, so the weighting still works out.  (The algorithm
-	// will also output the big left chunk of the first time unit with all the same rows and the bigger time range.)
+	// B is an example of a "current" time slice that evenly covers two time units.
+	//
+	// A is an example of a "current" time slice that
+	// covers a sliver of the full time unit at both the left and right.
+	// After this function exits, A will contain ALL of the output rows
+	// from the left time unit sliver
+	// (in the first entry of its "hits" vector),
+	// and all of the output rows from the right time unit sliver
+	// (in the last entry of its "hits" vector),
+	// as well as all of the output rows from both fully-enclosed and full-sized
+	// middle two time units (it the middle elements of its "hits" vector,
+	// in this case, two middle elements).
+	//
+	// You can see that the algorithm that outputs the data will simply output all rows
+	// corresponding to each "sliver" piece,
+	// but the sliver will have a very narrow range, so the weighting still works out.
 	//
 	// For this algorithm to work, it is critical that the PRIMARY variable group always arrive in multiples
-	// of the time unit, and evenly aligned.  The data import and time granularity of the unit of analysis assure this.
+	// of the time unit in absolute measure, and evenly aligned.
 	//
-	// It's all about counting
+	// The DATA IMPORT routine, in conjunction with the time granularity
+	// of the unit of analysis, assure this.
+	//
+	// But merges with non-primary variable groups (both top-level and child) can have any time granularity
+	// (even if it's smaller), just so long as they themselves are aligned on 
+	// absolute boundaries corresponding to their own time granularities.
+	//
+	// It's all about counting.
 
 	long double originalWidthFloat = static_cast<long double>(originalTimeSlice.getWidth());
 	long double currentWidthFloat = static_cast<long double>(currentTimeSlice.getWidth());
@@ -2814,8 +2913,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	std::int64_t middleRounded = 0;
 	std::int64_t rightRounded = 0;
 
-	std::int64_t originalWidth = originalTimeSlice.WidthForWeighting(AvgMsperUnit);
-
 	fast__int64__to__fast_branch_output_row_set<remaining_tag> new_hits;
 	VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *branches_and_leaves;
 	std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
@@ -2866,87 +2963,76 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 				// Single time unit in branch, with its own set of rows
 				// ************************************************************** //
 
-				if (true)
+				++hit_number;
+
+
+				long double hit_start_position = hit_total_distance_so_far;
+				long double current_hit_width = 0.0;
+
+				if (hit_number == 1 && first_hit_is_a_sliver)
 				{
+					current_hit_width = start_sliver_width;
+				}
+				else if (hit_number == total_hits && last_hit_is_a_sliver)
+				{
+					current_hit_width = end_sliver_width;
+				}
+				else
+				{
+					current_hit_width = static_cast<long double>(AvgMsperUnit);
+				}
 
-					++hit_number;
+				long double hit_end_position = hit_start_position + current_hit_width;
 
+				hit_total_distance_so_far = hit_end_position;
 
-					long double hit_start_position = hit_total_distance_so_far;
-					long double current_hit_width = 0.0;
+				bool leftOverlaps = false;
 
-					if (hit_number == 1 && first_hit_is_a_sliver)
+				if (hit_start_position < UnitsLeftFloat)
+				{
+					leftOverlaps = true;
+				}
+
+				bool middleOverlaps = false;
+
+				if (hit_start_position < UnitsLeftFloat + UnitsMiddleFloat && hit_end_position > UnitsLeftFloat)
+				{
+					middleOverlaps = true;
+				}
+
+				bool rightOverlaps = false;
+
+				if (hit_end_position > UnitsLeftFloat + UnitsMiddleFloat)
+				{
+					rightOverlaps = true;
+				}
+
+				if (useRight)
+				{
+					if (rightOverlaps)
 					{
-						current_hit_width = start_sliver_width;
+						new_hits[hit_number - 1].clear();
+						new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
 					}
-					else if (hit_number == total_hits && last_hit_is_a_sliver)
+				}
+				else if (useLeft)
+				{
+					if (leftOverlaps)
 					{
-						current_hit_width = end_sliver_width;
+						new_hits[hit_number - 1].clear();
+						new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
 					}
-					else
+				}
+				else if (useMiddle)
+				{
+					if (middleOverlaps)
 					{
-						current_hit_width = static_cast<long double>(AvgMsperUnit);
+						new_hits[hit_number - 1].clear();
+						new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
 					}
-
-					long double hit_end_position = hit_start_position + current_hit_width;
-
-					hit_total_distance_so_far = hit_end_position;
-
-					bool leftOverlaps = false;
-
-					if (hit_start_position < UnitsLeftFloat)
-					{
-						leftOverlaps = true;
-					}
-
-					bool middleOverlaps = false;
-
-					if (hit_start_position < UnitsLeftFloat + UnitsMiddleFloat && hit_end_position > UnitsLeftFloat)
-					{
-						middleOverlaps = true;
-					}
-
-					bool rightOverlaps = false;
-
-					if (hit_end_position > UnitsLeftFloat + UnitsMiddleFloat)
-					{
-						rightOverlaps = true;
-					}
-
-					if (useRight)
-					{
-						if (rightOverlaps)
-						{
-							new_hits[hit_number - 1].clear();
-							new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
-						}
-					}
-					else if (useLeft)
-					{
-						if (leftOverlaps)
-						{
-							new_hits[hit_number - 1].clear();
-							new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
-						}
-					}
-					else if (useMiddle)
-					{
-						if (middleOverlaps)
-						{
-							new_hits[hit_number - 1].clear();
-							new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
-						}
-					}
-
 				}
 
 			});
-
-
-			if (new_hits.empty())
-			{
-				int m = 0;
-			}
 
 			hits.clear();
 			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const & new_hit)

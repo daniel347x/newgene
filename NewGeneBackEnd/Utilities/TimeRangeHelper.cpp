@@ -4,9 +4,10 @@
 #	include <boost/format.hpp>
 #endif
 
-// Returns the closest Unix timestamp that is equal to or higher than test_timestamp,
-// or equal to or lower than test_timestamp (depending on ALIGN_MODE),
+// Returns the closest Unix timestamp that is equal to or higher/lower than test_timestamp
+// (depending on ALIGN_MODE),
 // but aligned on the given time_granularity
+// (which is always the time granularity of the primary variable group's unit of analysis, currently)
 std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_timestamp, TIME_GRANULARITY const time_granularity, ALIGN_MODE const align_mode)
 {
 
