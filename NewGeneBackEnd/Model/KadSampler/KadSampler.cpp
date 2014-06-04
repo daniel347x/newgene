@@ -2710,14 +2710,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 		return;
 	}
 
-	bool useLeft = false;
-	bool useMiddle = false;
-	bool useRight = false;
-
-	std::int64_t leftWidth = 0;
-	std::int64_t middleWidth = 0;
-	std::int64_t rightWidth = 0;
-
 	// We *leave the data available* no matter how small the time slice is,
 	// and let the output routine ensure that the time widths properly weight the slices.
 	//
@@ -2790,128 +2782,15 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	//
 	// It's all about counting.
 
-	long double originalWidthFloat = static_cast<long double>(originalTimeSlice.getWidth());
-	long double currentWidthFloat = static_cast<long double>(currentTimeSlice.getWidth());
-
-	long double widthLeftFloat = 0.0;
-	long double widthMiddleFloat = 0.0;
-	long double widthRightFloat = 0.0;
-
-	if (originalTimeSlice.getStart() < currentTimeSlice.getStart())
-	{
-		if (originalTimeSlice.getEnd() <= currentTimeSlice.getStart())
-		{
-			// no overlap
-			boost::format msg("Attempting to prune time units that do not overlap!");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-		else if (originalTimeSlice.getEnd() < currentTimeSlice.getEnd())
-		{
-			// left of original is by itself, right of original overlaps left of current, right of current is by itself
-			// The current slice must be embedded within the original slice for a legitimate prune!
-			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
-		{
-
-			// left of original is by itself, right of original overlaps entire current with nothing left over
-			widthLeftFloat = static_cast<long double>(currentTimeSlice.getStart() - originalTimeSlice.getStart());
-			widthRightFloat = static_cast<long double>(currentTimeSlice.getEnd() - currentTimeSlice.getStart());
-
-			useRight = true;
-
-		}
-		else
-		{
-
-			// original end is past current end
-			// left of original is by itself, current is completely overlapped by original, right of original is by itself
-			widthLeftFloat = static_cast<long double>(currentTimeSlice.getStart() - originalTimeSlice.getStart());
-			widthMiddleFloat = static_cast<long double>(currentTimeSlice.getEnd() - currentTimeSlice.getStart());
-			widthRightFloat = static_cast<long double>(originalTimeSlice.getEnd() - currentTimeSlice.getEnd());
-
-			useMiddle = true;
-
-		}
-	}
-	else if (originalTimeSlice.getStart() == currentTimeSlice.getStart())
-	{
-		if (originalTimeSlice.getEnd() < currentTimeSlice.getEnd())
-		{
-			// left of original matches left of current, entire original overlaps the left part of current, and the right of current is by itself
-			// The current slice must be embedded within the original slice for a legitimate prune!
-			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
-		{
-
-			// both time slices are identical
-			// Treat this as the middle piece
-			widthMiddleFloat = static_cast<long double>(originalTimeSlice.getEnd() - originalTimeSlice.getStart());
-
-			useMiddle = true;
-
-		}
-		else
-		{
-
-			// original end is past current end
-			// Left edges are the same, entire current overlaps original, and right side of original is by itself on the right
-			widthLeftFloat = static_cast<long double>(currentTimeSlice.getEnd() - currentTimeSlice.getStart());
-			widthRightFloat = static_cast<long double>(originalTimeSlice.getEnd() - currentTimeSlice.getEnd());
-
-			useLeft = true;
-
-		}
-	}
-	else if (originalTimeSlice.getStart() < currentTimeSlice.getEnd())
-	{
-		if (originalTimeSlice.getEnd() < currentTimeSlice.getEnd())
-		{
-			// left of current is by itself, entire original is overlapped by current, right of current is by itself
-			// The current slice must be embedded within the original slice for a legitimate prune!
-			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
-		{
-			// left of current is by itself, entire original overlaps entire right of current exactly with nothing left over
-			// The current slice must be embedded within the original slice for a legitimate prune!
-			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-		else
-		{
-			// original end is past current end
-			// left of current is by itself, right of current overlaps the left of original, and the right of original is by itself on the right
-			// The current slice must be embedded within the original slice for a legitimate prune!
-			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-	}
-	else
-	{
-		// no overlap
-		boost::format msg("Attempting to prune time units that do not overlap!");
-		throw NewGeneException() << newgene_error_description(msg.str());
-	}
-
+	long double start = currentTimeSlice.getStart();
+	long double end = currentTimeSlice.getEnd();
 	long double AvgMsperUnitFloat = static_cast<long double>(AvgMsperUnit);
 
-	long double UnitsLeftFloat = widthLeftFloat;
-	long double UnitsMiddleFloat = widthMiddleFloat;
-	long double UnitsRightFloat = widthRightFloat;
+	std::int64_t starting_time = originalTimeSlice.getStart();
+	starting_time = TimeRange::determineAligningTimestamp(starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
 
-
-	bool left_was_zero = false;
-	bool middle_was_zero = false;
-	bool right_was_zero = false;
-
-	std::int64_t leftRounded = 0;
-	std::int64_t middleRounded = 0;
-	std::int64_t rightRounded = 0;
+	std::int64_t ending_time = originalTimeSlice.getEnd();
+	ending_time = TimeRange::determineAligningTimestamp(ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
 
 	fast__int64__to__fast_branch_output_row_set<remaining_tag> new_hits;
 	VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *branches_and_leaves;
@@ -2929,31 +2808,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 
 			auto & hits = current_branch.hits;
 
+			long double current_end_position = starting_time;
 
-			bool first_hit_is_a_sliver = false;
-			bool last_hit_is_a_sliver = false;
-
-			std::int64_t current_starting_time = originalTimeSlice.getStart();
-			std::int64_t current_aligned_down_time = TimeRange::determineAligningTimestamp(current_starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
-			long double start_sliver_width = 0.0;
-
-			if (current_aligned_down_time < current_starting_time)
-			{
-				first_hit_is_a_sliver = true;
-				start_sliver_width = static_cast<long double>(current_starting_time - current_aligned_down_time);
-			}
-
-			std::int64_t current_ending_time = originalTimeSlice.getEnd();
-			std::int64_t current_aligned_up_time = TimeRange::determineAligningTimestamp(current_ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
-			long double end_sliver_width = 0.0;
-
-			if (current_aligned_up_time > current_ending_time)
-			{
-				last_hit_is_a_sliver = true;
-				end_sliver_width = static_cast<long double>(current_aligned_up_time - current_ending_time);
-			}
-
-			long double hit_total_distance_so_far = 0.0;
 			std::int64_t hit_number = 0;
 			std::int64_t total_hits = hits.size();
 			std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<hits_tag>::value_type const & hit)
@@ -2966,70 +2822,19 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 				++hit_number;
 
 
-				long double hit_start_position = hit_total_distance_so_far;
-				long double current_hit_width = 0.0;
+				long double hit_start_position = current_end_position;
+				long double hit_end_position = hit_start_position + static_cast<long double>(AvgMsperUnit);
+				current_end_position = hit_end_position;
 
-				if (hit_number == 1 && first_hit_is_a_sliver)
+				bool overlaps = false;
+				if (hit_start_position < end && hit_end_position > start)
 				{
-					current_hit_width = start_sliver_width;
+					overlaps = true;
 				}
-				else if (hit_number == total_hits && last_hit_is_a_sliver)
+				if (overlaps)
 				{
-					current_hit_width = end_sliver_width;
-				}
-				else
-				{
-					current_hit_width = static_cast<long double>(AvgMsperUnit);
-				}
-
-				long double hit_end_position = hit_start_position + current_hit_width;
-
-				hit_total_distance_so_far = hit_end_position;
-
-				bool leftOverlaps = false;
-
-				if (hit_start_position < UnitsLeftFloat)
-				{
-					leftOverlaps = true;
-				}
-
-				bool middleOverlaps = false;
-
-				if (hit_start_position < UnitsLeftFloat + UnitsMiddleFloat && hit_end_position > UnitsLeftFloat)
-				{
-					middleOverlaps = true;
-				}
-
-				bool rightOverlaps = false;
-
-				if (hit_end_position > UnitsLeftFloat + UnitsMiddleFloat)
-				{
-					rightOverlaps = true;
-				}
-
-				if (useRight)
-				{
-					if (rightOverlaps)
-					{
-						new_hits[hit_number - 1].clear();
-						new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
-					}
-				}
-				else if (useLeft)
-				{
-					if (leftOverlaps)
-					{
-						new_hits[hit_number - 1].clear();
-						new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
-					}
-				}
-				else if (useMiddle)
-				{
-					if (middleOverlaps)
-					{
-						new_hits[hit_number - 1].clear();
-						new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
-					}
+					new_hits[hit_number - 1].clear();
+					new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
 				}
 
 			});
