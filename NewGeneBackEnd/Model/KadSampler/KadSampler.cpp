@@ -486,7 +486,7 @@ void KadSampler::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const
 }
 
 // Merge time slice data into a map element
-bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
+bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & incoming_variable_group_branch_dmu_values, TimeSliceLeaf const & incoming_variable_group_time_slice_leaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
 		VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
@@ -521,8 +521,8 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 		{
 			VariableGroupBranchesAndLeaves newPrimaryVariableGroupBranch(variable_group_number);
 			Branches<hits_tag> & newBranchesAndLeaves = newPrimaryVariableGroupBranch.branches;
-			branch.InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
-			newBranchesAndLeaves.insert(branch);
+			incoming_variable_group_branch_dmu_values.InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch
+			newBranchesAndLeaves.insert(incoming_variable_group_branch_dmu_values);
 			variableGroupBranchesAndLeavesVector.push_back(newPrimaryVariableGroupBranch);
 
 			added = true;
@@ -558,15 +558,15 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 					// ... (the first one - emplace does nothing if the entry already exists).
 					// ... (Note that the leaf points to a specific row of secondary data.)
 					// *********************************************************************************** //
-					auto primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(branch);
+					auto primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(incoming_variable_group_branch_dmu_values);
 
 					if (primaryVariableGroupBranchPtr == primaryVariableGroupBranches.cend())
 					{
-						auto inserted = primaryVariableGroupBranches.insert(branch);
+						auto inserted = primaryVariableGroupBranches.insert(incoming_variable_group_branch_dmu_values);
 						primaryVariableGroupBranchPtr = inserted.first;
 					}
 
-					primaryVariableGroupBranchPtr->InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
+					primaryVariableGroupBranchPtr->InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
 
 					added = true;
 
@@ -578,7 +578,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 					// Let's take a peek and see if our branch is already present
 
-					Branches<hits_tag>::iterator primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(branch);
+					Branches<hits_tag>::iterator primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(incoming_variable_group_branch_dmu_values);
 
 					if (primaryVariableGroupBranchPtr != primaryVariableGroupBranches.end())
 					{
@@ -609,7 +609,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 						// "doesLeafExist()" will return false because the PRIMARY
 						// variable group, which preceded this, will not have
 						// added the leaf.
-						if (current_primary_variable_group_branch.doesLeafExist(timeSliceLeaf.second))
+						if (current_primary_variable_group_branch.doesLeafExist(incoming_variable_group_time_slice_leaf.second))
 						{
 
 							// This branch *does* contain the incoming leaf!
@@ -637,7 +637,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 							// Note that in the case of NO LEAF, there is still a single "leaf" (with no DMU associated with it)
 							// that nonetheless contains the data index lookup into the raw data for this branch
 							// (the branch, in this case, having only one possible data lookup).
-							current_primary_variable_group_branch.setTopGroupIndexIntoRawData(timeSliceLeaf.second, variable_group_number, timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
+							current_primary_variable_group_branch.setTopGroupIndexIntoRawData(incoming_variable_group_time_slice_leaf.second, variable_group_number, incoming_variable_group_time_slice_leaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
 
 							added = true;
 
@@ -656,20 +656,21 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 					// child leaf in the incoming data, because it's straight from the raw data table,
 					// even if there are multiple child leaf slots in the output data for this child's UOA
 
-					ChildDMUInstanceDataVector<hits_tag> dmu_keys;
+					ChildDMUInstanceDataVector<hits_tag> dmu_keys_child;
 
-					dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
-					dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
+					dmu_keys_child.insert(dmu_keys_child.end(), incoming_variable_group_branch_dmu_values.primary_keys.begin(), incoming_variable_group_branch_dmu_values.primary_keys.end());
+					dmu_keys_child.insert(dmu_keys_child.end(), incoming_variable_group_time_slice_leaf.second.primary_keys.begin(), incoming_variable_group_time_slice_leaf.second.primary_keys.end());
 
 					// *********************************************************************************** //
-					// Loop through all BRANCHES for this variable group in this time slice.
+					// Loop through all BRANCHES for the PRIMARY variable group in this time slice
+					// (not the branches in the child variable group).
 					// For each, we have a set of output rows.
 					// *********************************************************************************** //
 
-					for (auto branchesPtr = primaryVariableGroupBranches.begin(); branchesPtr != primaryVariableGroupBranches.end(); ++branchesPtr)
+					for (auto primaryVariableGroupBranchesPtr = primaryVariableGroupBranches.begin(); primaryVariableGroupBranchesPtr != primaryVariableGroupBranches.end(); ++primaryVariableGroupBranchesPtr)
 					{
 
-						Branch const & the_current_map_branch = *branchesPtr;
+						Branch const & the_current_primary_variable_group_branch = *primaryVariableGroupBranchesPtr;
 
 						// *********************************************************************************** //
 						// "leaves_cache" is a vector cache containing the same leaves in the same order
@@ -681,14 +682,14 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 						// *********************************************************************************** //
 
 						// The following cache will only be filled on the first pass
-						//the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
+						//the_current_primary_variable_group_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
 
 						// *********************************************************************************** //
 						// We have an incoming child variable group branch and leaf.
 						// Find all matching output rows that contain the same DMU data on the matching columns.
 						// *********************************************************************************** //
 						// ... never use "consolidating rows" version here, because consolidation always happens after all rows are merged
-						if (the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
+						if (the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 						{
 ;							boost::format msg("Null child DMU key lookup cache.");
 							throw NewGeneException() << newgene_error_description(msg.str());
@@ -696,16 +697,16 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 						// Different memory pools may be used, templatized on the memory pool,
 						// so a simple "find" will not compile.
-						//auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->find(dmu_keys);
+						//auto const & matchingOutputRows = the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->find(dmu_keys);
 
 						// Also, std::binary_search only returns true or false, not an iterator to the match, if any,
 						// so this must be followed up by std::lower_bound if there is a match, which does.
-						bool found = std::binary_search(the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), dmu_keys);
+						bool found = std::binary_search(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), dmu_keys_child);
 
 						if (found)
 						{
 
-							auto const & matchingOutputRows = std::lower_bound(the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), dmu_keys);
+							auto const & matchingOutputRows = std::lower_bound(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), dmu_keys_child);
 
 							// Loop through all matching output rows
 							for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
@@ -716,7 +717,8 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 								// matchingOutputChildLeaves is a vector
 
-								// Loop through all matching output row child leaves
+								// Loop through all matching output row CHILD leaves
+								// (This is *NOT* a loop through PRIMARY variable group leaves)
 								for (auto matchingOutputChildLeavesPtr = matchingOutputChildLeaves.cbegin(); matchingOutputChildLeavesPtr != matchingOutputChildLeaves.cend(); ++matchingOutputChildLeavesPtr)
 								{
 
@@ -730,7 +732,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 									}
 
 									auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
-									outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
+									outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = incoming_variable_group_time_slice_leaf.second.index_into_raw_data;
 
 									added = true;
 
