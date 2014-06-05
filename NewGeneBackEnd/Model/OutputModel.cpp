@@ -3224,9 +3224,39 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	// Make sure that, for each child UOA, the UOA k-value for all DMU categories
 	// is either 0, 1, or the corresponding UOA k-value of the primary UOA;
 	// 
-	// and that where not 0 and where it is less than the corresponding UOA k-value of the primary UOA
-	// (which means it has a value of 1) for only the DMU category with multiplicity greater than 1 (if any)
-	// for the primary UOAs
+	// and that it is 1 only if it is also 1 in the primary group for that DMU
+	// or if the primary group has outer multiplicity > 1 in that DMU
+	//
+	// A way to visualize this restriction is the following:
+	//
+	// PRIMARY:
+	// Assume 3 DMU columns of DMU category A in the UOA,
+	// 4 DMU columns of DMU category B in the UOA,
+	// and 3 DMU columns of DMU category C in the UOA.
+	// Also assume that the outer multiplicity of DMU category C is equal to 4
+	// (i.e., the spin control is set to 12 for DMU category C).
+	// (Note that only 1 DMU category can have outer multiplicity greater than 1
+	// for the primary group, as well as for child groups.)
+	// A A A   B B B B   C C C   C C C   C C C   C C C
+	//
+	// The child group MUST have either 0 or an identical number of DMU columns for A, and B.
+	// But for C, it can have 0, 1, 3, or 12.
+	// Child:
+	// A A A   B B B B
+	// A A A   B B B B   C
+	// A A A   B B B B   C C C
+	// A A A   B B B B   C C C   C C C   C C C   C C C
+	// ... are all acceptable.
+	//
+	// Also fine: The primary has multiplicity 1
+	// Primary:
+	// A A A   B B B B   C C C
+	//
+	// ... and the child has K=1 for any of these
+	// Child:
+	// A       B B B B   C C C
+	// A A A   B         C C C
+	// A A A   B B B B   C
 	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
 		if (failed || CheckCancelled())
@@ -3263,6 +3293,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					
 					if (current_child_dmu_plus_count.second == k_count_for_primary_uoa_for_given_dmu_category__info.second)
 					{
+
 						// The number of DMU columns for this DMU category is the same for both child and primary group
 
 						if (boost::iequals(*current_child_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code))
@@ -3285,11 +3316,15 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 						}
 
 						return; // from lambda
+
 					}
 
 					if (current_child_dmu_plus_count.second > 1)
 					{
-						// Todo: error message
+
+						// The number of child DMU columns for this DMU category is greater than 1,
+						// but not equal to the number of DMU columns in the primary for this DMU category
+
 						// Invalid child UOA for this output
 						if (current_child_dmu_plus_count.first.longhand)
 						{
@@ -3308,6 +3343,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 						failed = true;
 						return; // from lambda
+
 					}
 
 					// Redundant 0-check for future code foolproofing
@@ -3318,12 +3354,20 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					}
 
 					// Current UOA's current DMU category has 1 column and the same DMU category in the primary group has more than one column
+					// (due to the first "if" block above and the fact that the child cannot have more columns than the primary),
+					// so if this is NOT the DMU category with multiplicity > 1 (implying that there *IS* a DMU category
+					// with multiplicity greater than 1),
+					// then we exclude it
 					else if ( ! boost::iequals(*current_child_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code) )
 					{
+
+						// ... But the current DMU category is not the one with multiplicity greater than 1
+
+						// The following check is redundant, because the variable holding the string code for DMU with multiplicity > 1 (above)
+						// will be an empty string if there isn't a DMU with multiplicity > 1
 						if (highest_multiplicity_primary_uoa > 1)
 						{
-							// Todo: error message
-
+	
 							// *************************************************************************************** //
 							// Subtle edge case failure:
 							//
@@ -3353,12 +3397,38 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 							failed = true;
 							return; // from lambda
+
 						}
+
 					}
 
+					// The number of DMU columns for the child in this DMU category
+					// is not the same as the number of DMU columns for the primary,
+					// because of the first "if" block, above.
+					//
+					// And, the number of DMU columns for the child
+					// is not greater than 1, and it's not 0,
+					// due to the next two "if" blocks.
+					//
+					// So the number of DMU columns for the child must be 1.
+					// Given that the number of DMU columns for the child
+					// is not equal to the number of DMU columns for the primary
+					// (see first paragraph in this comment),
+					// the number in the primary is either 0, or greater than 1.
+					// Due to the logic in PopulateDMUCounts(),
+					// this child group would not have been defined as a child group
+					// if it had a larger number of DMU columns than the primary
+					// for any of its DMU categories.
+					// Therefore it must have less DMU columns than the primary
+					// for this DMU category (given that it's not equal).
+					//
+					// Given the previous sentence, we can safely increment the following variable.
 					++primary_dmu_categories_for_which_child_has_less;
+				
 				}
+			
 			});
+		
 		});
 
 		if (primary_dmu_categories_for_which_child_has_less > 1)
