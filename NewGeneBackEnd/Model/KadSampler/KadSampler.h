@@ -3078,7 +3078,7 @@ class KadSampler
 		void SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice);
 
 		// Merge time slice data into a map element
-		bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
+		bool MergeNewDataIntoTimeSlice(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
 									   VARIABLE_GROUP_MERGE_MODE const merge_mode);
 
 		void GenerateRandomKad(newgene_cpp_int random_number, int const K, Branch const & branch);

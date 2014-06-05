@@ -299,7 +299,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 			// Leave the second piece unchanged.
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.getEnd(), newMapElementLeftPtr, newMapElementRightPtr, consolidate_rows, random_sampling);
-			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_number, merge_mode);
+			added_new = MergeNewDataIntoTimeSlice(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = newMapElementLeftPtr;
 
@@ -313,7 +313,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 
 			// Merge the new time slice with the map element.
 
-			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, mapElementPtr, variable_group_number, merge_mode);
+			added_new = MergeNewDataIntoTimeSlice(branch, newTimeSliceLeaf, mapElementPtr, variable_group_number, merge_mode);
 
 			newTimeSliceEatenCompletelyUp = true;
 
@@ -333,7 +333,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.getEnd(), new_left_slice);
 
-			added_new = MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_number, merge_mode);
+			added_new = MergeNewDataIntoTimeSlice(branch, new_left_slice, mapElementPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = ++mapElementPtr;
 
@@ -359,7 +359,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 			// The third is unchanged.
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.getStart(), newTimeSlice.getEnd(), newMapElementMiddlePtr, consolidate_rows, random_sampling);
-			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_number, merge_mode);
+			added_new = MergeNewDataIntoTimeSlice(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_number, merge_mode);
 
 			mapElementPtr = newMapElementMiddlePtr;
 
@@ -379,7 +379,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 			// (with the right edge equal to the right edge of the map element).
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.getStart(), newMapElementLeftPtr, newMapElementRightPtr, consolidate_rows, random_sampling);
-			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_number, merge_mode);
+			added_new = MergeNewDataIntoTimeSlice(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = newMapElementRightPtr;
 
@@ -402,7 +402,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.getEnd(), new_left_slice);
 			SliceMapEntry(mapElementPtr, new_left_slice.first.getStart(), newMapElementLeftPtr, newMapElementRightPtr, consolidate_rows, random_sampling);
-			added_new = MergeTimeSliceDataIntoMap(branch, new_left_slice, newMapElementRightPtr, variable_group_number, merge_mode);
+			added_new = MergeNewDataIntoTimeSlice(branch, new_left_slice, newMapElementRightPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = ++newMapElementRightPtr;
 
@@ -486,7 +486,7 @@ void KadSampler::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const
 }
 
 // Merge time slice data into a map element
-bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & incoming_variable_group_branch_dmu_values, TimeSliceLeaf const & incoming_variable_group_time_slice_leaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
+bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_group_branch_dmu_values, TimeSliceLeaf const & incoming_variable_group_time_slice_leaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
 		VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
@@ -521,7 +521,12 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & incoming_variable_grou
 		{
 			VariableGroupBranchesAndLeaves newPrimaryVariableGroupBranch(variable_group_number);
 			Branches<hits_tag> & newBranchesAndLeaves = newPrimaryVariableGroupBranch.branches;
+
+			// ****************************************************************************************************************** //
+			// The leaf already contains lookup data into the PRIMARY variable group's cache
+			// ****************************************************************************************************************** //
 			incoming_variable_group_branch_dmu_values.InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch
+
 			newBranchesAndLeaves.insert(incoming_variable_group_branch_dmu_values);
 			variableGroupBranchesAndLeavesVector.push_back(newPrimaryVariableGroupBranch);
 
@@ -566,6 +571,9 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & incoming_variable_grou
 						primaryVariableGroupBranchPtr = inserted.first;
 					}
 
+					// ****************************************************************************************************************** //
+					// The leaf already contains lookup data into the PRIMARY variable group's cache
+					// ****************************************************************************************************************** //
 					primaryVariableGroupBranchPtr->InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
 
 					added = true;
@@ -2925,7 +2933,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	{
 		// We just keep all our hits.  They're already in the -1 index.
 		// Let the new data merge into us later, after this function is exited,
-		// in "MergeTimeSliceDataIntoMap()".
+		// in "MergeNewDataIntoTimeSlice()".
 		ResetBranchCachesSingleTimeSlice(allWeightings, true);
 		return;
 	}
