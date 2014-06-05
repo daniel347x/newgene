@@ -3073,7 +3073,6 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		if (multiplicity == 0)
 		{
 			// User's K-ad selection is too small in this DMU category to support the variables they have selected
-			// Todo: Error message
 			if (the_dmu_category.longhand)
 			{
 				if (biggest_counts[0].first.longhand)
@@ -3202,7 +3201,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				// A second DMU category's multiplicity is greater than 1 - for now, not allowed.  This can be implemented in the future.
 				// ********************************************************************************************************************** //
 				failed = true;
-				boost::format msg("Only a single DMU category may have its K value in the spin control set to larger than the minimum.  Future versions of NewGene may allow this.");
+				boost::format msg("Only a single DMU category may have its K value in the spin control set to larger than the minimum.");
 				SetFailureErrorMessage(msg.str());
 				return; // from lambda
 			}
@@ -3223,11 +3222,10 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	// Validate child UOA's
 	// For child UOA's:
 	// Make sure that, for each child UOA, the UOA k-value for all DMU categories
-	// is either 0, 1, or the corresponding UOA k-value of the primary UOA
-	// and that where not 0, it is less than the corresponding UOA k-value of the primary UOA
-	// (i.e., has a value of 1)
-	// for only 1 DMU category,
-	// and this DMU category must match the DMU category with multiplicity greater than 1 (if any)
+	// is either 0, 1, or the corresponding UOA k-value of the primary UOA;
+	// 
+	// and that where not 0 and where it is less than the corresponding UOA k-value of the primary UOA
+	// (which means it has a value of 1) for only the DMU category with multiplicity greater than 1 (if any)
 	// for the primary UOAs
 	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
@@ -3237,22 +3235,22 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		}
 
 		int primary_dmu_categories_for_which_child_has_less = 0;
-		Table_UOA_Identifier::DMU_Counts const & current_dmu_counts = uoa__to__dmu_counts__pair.second;
-		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [this, &primary_dmu_categories_for_which_child_has_less](
-						  Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
+		Table_UOA_Identifier::DMU_Counts const & current_child_dmu_counts = uoa__to__dmu_counts__pair.second;
+		std::for_each(current_child_dmu_counts.cbegin(), current_child_dmu_counts.cend(), [this, &primary_dmu_categories_for_which_child_has_less](
+						  Table_UOA_Identifier::DMU_Plus_Count const & current_child_dmu_plus_count)
 		{
 			if (failed || CheckCancelled())
 			{
 				return; // from lambda
 			}
 
-			if (current_dmu_plus_count.second == 0)
+			if (current_child_dmu_plus_count.second == 0)
 			{
 				// just fine
 				return; // from lambda
 			}
 
-			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &current_dmu_plus_count, &primary_dmu_categories_for_which_child_has_less](
+			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &current_child_dmu_plus_count, &primary_dmu_categories_for_which_child_has_less](
 							  Table_UOA_Identifier::DMU_Plus_Count const & k_count_for_primary_uoa_for_given_dmu_category__info)
 			{
 				if (failed || CheckCancelled())
@@ -3260,15 +3258,23 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					return; // from lambda
 				}
 
-				if (current_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, k_count_for_primary_uoa_for_given_dmu_category__info.first))
+				if (current_child_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, k_count_for_primary_uoa_for_given_dmu_category__info.first))
 				{
-					if (current_dmu_plus_count.second ==
-						k_count_for_primary_uoa_for_given_dmu_category__info.second) // biggest_dmu_plus_count.second is the K-value of the unit of analysis, not the K-value chosen by the user in the spin control
+					
+					if (current_child_dmu_plus_count.second == k_count_for_primary_uoa_for_given_dmu_category__info.second)
 					{
-						if (boost::iequals(*current_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code))
+						// The number of DMU columns for this DMU category is the same for both child and primary group
+
+						if (boost::iequals(*current_child_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code))
 						{
 							if (highest_multiplicity_primary_uoa > 1)
 							{
+								// ... And this DMU category has multiplicity selected by the user in the K-spin-control
+								// of greater than 1
+								// (i.e., the K-value in the spin control for this DMU category
+								// is higher than the number of DMU columns in this DMU category
+								// (for both child and primary))
+
 								// Special case:
 								// The child UOA has the same K-value in this DMU category
 								// as the K-value of the primary UOA,
@@ -3281,36 +3287,38 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 						return; // from lambda
 					}
 
-					if (current_dmu_plus_count.second > 1)
+					if (current_child_dmu_plus_count.second > 1)
 					{
 						// Todo: error message
 						// Invalid child UOA for this output
-						if (current_dmu_plus_count.first.longhand)
+						if (current_child_dmu_plus_count.first.longhand)
 						{
 							boost::format
 							msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (%2%) may only be greater than 1 if it matches the K-value within the UOA of the top-level variable group/s.");
-							msg % *current_dmu_plus_count.first.code % *current_dmu_plus_count.first.longhand;
+							msg % *current_child_dmu_plus_count.first.code % *current_child_dmu_plus_count.first.longhand;
 							SetFailureErrorMessage(msg.str());
 						}
 						else
 						{
 							boost::format
 							msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% may only be greater than 1 if it matches the K-value within the UOA of the top-level variable group/s.");
-							msg % *current_dmu_plus_count.first.code;
+							msg % *current_child_dmu_plus_count.first.code;
 							SetFailureErrorMessage(msg.str());
 						}
 
 						failed = true;
 						return; // from lambda
 					}
+
 					// Redundant 0-check for future code foolproofing
-					else if (current_dmu_plus_count.second == 0)
+					else if (current_child_dmu_plus_count.second == 0)
 					{
 						// just fine
 						return; // from lambda
 					}
-					// Current UOA's current DMU category's K-value is 1
-					else if (!boost::iequals(*current_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code))
+
+					// Current UOA's current DMU category has 1 column and the same DMU category in the primary group has more than one column
+					else if ( ! boost::iequals(*current_child_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code) )
 					{
 						if (highest_multiplicity_primary_uoa > 1)
 						{
@@ -3328,18 +3336,18 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 							// *************************************************************************************** //
 
 							// Invalid child UOA for this output
-							if (current_dmu_plus_count.first.longhand)
+							if (current_child_dmu_plus_count.first.longhand)
 							{
 								boost::format
 								msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (%2%) cannot currently be 1 if the K-value within the UOA of the top-level variable group/s is greater than 1 when that DMU category does not have multiplicity greater than 1 for the top-level variable group.");
-								msg % *current_dmu_plus_count.first.code % *current_dmu_plus_count.first.longhand;
+								msg % *current_child_dmu_plus_count.first.code % *current_child_dmu_plus_count.first.longhand;
 								SetFailureErrorMessage(msg.str());
 							}
 							else
 							{
 								boost::format
 								msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% cannot currently be 1 if the K-value within the UOA of the top-level variable group/s is greater than 1 when that DMU category does not have multiplicity greater than 1 for the top-level variable group.");
-								msg % *current_dmu_plus_count.first.code;
+								msg % *current_child_dmu_plus_count.first.code;
 								SetFailureErrorMessage(msg.str());
 							}
 
@@ -4369,8 +4377,6 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 				case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
 					{
-
-						// Lookup into "ignored DMU" map to see if this branch should be skipped
 
 						Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid), sorting_row_of_data.leaf_has_excluded_dmu);
 						Branch branch(dmus_branch);

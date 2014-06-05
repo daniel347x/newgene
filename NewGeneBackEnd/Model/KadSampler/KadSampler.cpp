@@ -591,7 +591,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 						// If the branch itself has a restricted DMU member,
 						// this function will never be called.
 						// If there are no leaf slots but the branch is completely valid
-						// (i.e., has no restricted leaves), then we will be called
+						// (i.e., has no restricted DMU's), then we will be called
 						// in the usual way with an empty leaf (a leaf with no DMU's)
 						// which will MATCH in the operator<() function used in the doesLeafExist() implementation,
 						// and which will then pass its index as desired inside the following block.
@@ -1649,7 +1649,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 	// This function builds a cache:
 	// A single map for this entire branch that
 	// maps a CHILD primary key set (i.e., a single row of child data,
-	// including the child's branch and the 0 or 1 child leaf)
+	// including the child's 0 or more branch DMU keys and the 0 or 1 child leaf DMU key)
 	// to a particular output row in a particular time unit in this branch,
 	// for rapid lookup later.  The map also includes the *child* leaf number in the *output*
 	// for the given row.
@@ -1684,11 +1684,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector_branch_components;
 		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector;
 
-		// Some child leaves map, in part, to branch leaves of the top-level UOA.
-		// If there is no leaf data for these leaves (which can happen in the K>N case),
-		// there cannot possibly be a match for any of the child leaves for this output row.
+		// Some child branch columns can map to leaves of the top-level UOA.
+		// If there is no leaf data for some of these top-level leaf columns (which can happen in the K>N case),
+		// there cannot possibly be a match for the corresponding child branch columns
+		// for the given output row in the "hits" vector (irrelevant to the time unit in that vector).
 		// Set the following flag to capture this case.
-		bool branch_component_bad = false;
+		bool branch_in_child__cannot_match_all_leaf_slots_in_primary = false;
 
 		std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & time_unit_output_rows)
 		{
@@ -1698,7 +1699,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 			// We proceed to build the cache
 			// ***************************************************************************************** //
 
-			if (branch_component_bad)
+			if (branch_in_child__cannot_match_all_leaf_slots_in_primary)
 			{
 				// No luck for this output row for any child leaf.
 				// Try the next row.
@@ -1752,15 +1753,21 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
 						{
 
-							// leaf_number tells us which leaf
-							// index tells us which index in that leaf
-
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+
+							// leaf_number tells us which leaf in the top-level DMU
+							// index tells us which index in that leaf
 
 							if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
 								(outputRow.primary_leaves_cache.size()))
 							{
-								branch_component_bad = true;
+								// EVERY output row selects the same number of leaves and places them into its primary_leaves_cache.
+								// So EVERY output row's primary_leaves_cache is the same size.
+
+								// If one output row has fewer leaves in its primary_leaves_cache than is sufficient to fill
+								// the necessary leaf slots required to form the branch slots for the child,
+								// then all output rows also don't.
+								branch_in_child__cannot_match_all_leaf_slots_in_primary = true;
 								break;
 							}
 
@@ -1908,10 +1915,11 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				{
 					if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 					{
+						// Note: The DMU lookup includes both the branch (if any) and the leaf (if any) DMU keys
 						boost::format msg("Null child DMU key lookup cache in merge.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
-					(*helper_lookup__from_child_key_set__to_matching_output_rows)[child_hit_vector][&outputRow].push_back(0); // When there are no leaves, there is always one leaf of index 0
+					(*helper_lookup__from_child_key_set__to_matching_output_rows)[child_hit_vector][&outputRow].push_back(0); // When there are no leaf DMU slots, there is always one leaf of index 0 with an empty DMU list
 				}
 
 			}
