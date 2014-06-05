@@ -656,10 +656,10 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & incoming_variable_grou
 					// child leaf in the incoming data, because it's straight from the raw data table,
 					// even if there are multiple child leaf slots in the output data for this child's UOA
 
-					ChildDMUInstanceDataVector<hits_tag> dmu_keys_child;
+					ChildDMUInstanceDataVector<hits_tag> all_dmu_keys_child;
 
-					dmu_keys_child.insert(dmu_keys_child.end(), incoming_variable_group_branch_dmu_values.primary_keys.begin(), incoming_variable_group_branch_dmu_values.primary_keys.end());
-					dmu_keys_child.insert(dmu_keys_child.end(), incoming_variable_group_time_slice_leaf.second.primary_keys.begin(), incoming_variable_group_time_slice_leaf.second.primary_keys.end());
+					all_dmu_keys_child.insert(all_dmu_keys_child.end(), incoming_variable_group_branch_dmu_values.primary_keys.begin(), incoming_variable_group_branch_dmu_values.primary_keys.end());
+					all_dmu_keys_child.insert(all_dmu_keys_child.end(), incoming_variable_group_time_slice_leaf.second.primary_keys.begin(), incoming_variable_group_time_slice_leaf.second.primary_keys.end());
 
 					// *********************************************************************************** //
 					// Loop through all BRANCHES for the PRIMARY variable group in this time slice
@@ -701,12 +701,12 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & incoming_variable_grou
 
 						// Also, std::binary_search only returns true or false, not an iterator to the match, if any,
 						// so this must be followed up by std::lower_bound if there is a match, which does.
-						bool found = std::binary_search(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), dmu_keys_child);
+						bool found = std::binary_search(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), all_dmu_keys_child);
 
 						if (found)
 						{
 
-							auto const & matchingOutputRows = std::lower_bound(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), dmu_keys_child);
+							auto const & matchingOutputRows = std::lower_bound(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), all_dmu_keys_child);
 
 							// Loop through all matching output rows
 							for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
