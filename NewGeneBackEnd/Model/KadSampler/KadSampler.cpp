@@ -1767,7 +1767,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 			{
 
 				// ******************************************************************************************************** //
-				// We have a new hit we're dealing with.
+				// We have a new output row we're dealing with.
 				// This is a single output row corresponding to:
 				// - A single time slice
 				// - A single primary (top-level) branch within that time slice (this object)
@@ -2051,6 +2051,16 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 								boost::format msg("Null child DMU key lookup cache in merge.");
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
+
+							// ****************************************************************************************************************** //
+							// Note!
+							// A possibly DIFFERENT "potential_future__child_hit_vector" set of keys
+							// is being added here
+							// WITHIN THE SAME OUTPUT ROW
+							//
+							// I.e., we are accessing a possibly DIFFERENT vector in the next line of code
+							// than in other iterations of this loop.
+							// ****************************************************************************************************************** //
 							(*helper_lookup__from_child_key_set__to_matching_output_rows)[potential_future__child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 						}
 
@@ -2078,6 +2088,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						boost::format msg("Null child DMU key lookup cache in merge.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
+
+					// ****************************************************************************************************************** //
+					// Note:
+					// There is only one possible child that can match on this output row,
+					// and its "leaf index" is always 0.
+					// ****************************************************************************************************************** //
 					(*helper_lookup__from_child_key_set__to_matching_output_rows)[potential_future__child_hit_vector][&outputRow].push_back(0); // When there are no leaf DMU slots, there is always one leaf of index 0 with an empty DMU list
 				}
 
