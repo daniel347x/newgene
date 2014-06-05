@@ -25,7 +25,6 @@ enum TIME_GRANULARITY
 
 };
 
-std::int64_t AvgMsperUnit(TIME_GRANULARITY const time_granularity);
 std::string GetTimeGranularityText(TIME_GRANULARITY const time_granularity);
 
 #endif

@@ -46,7 +46,7 @@ KadSampler::~KadSampler()
 }
 
 std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf,
-		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling,
+		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, bool const consolidate_rows, bool const random_sampling,
 		TimeSlices<hits_tag>::iterator mapIterator_, bool const useIterator)
 {
 
@@ -201,7 +201,7 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 		// The right edge of the incoming new slice could lie anywhere greater than the left edge -
 		// it could lie either inside the map element, at the right edge of the map element,
 		// or past the right edge of the map element.
-		bool no_more_time_slice = HandleTimeSliceNormalCase(added, branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode, AvgMsperUnit, consolidate_rows,
+		bool no_more_time_slice = HandleTimeSliceNormalCase(added, branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode, consolidate_rows,
 								  random_sampling);
 
 		if (no_more_time_slice)
@@ -259,7 +259,7 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 //   of the map entry
 // - An iterator to the next map entry.
 bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr,
-		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+		int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, bool const consolidate_rows, bool const random_sampling)
 {
 
 	bool added_new = false;
@@ -291,7 +291,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 			// Merge the first piece with the new time slice.
 			// Leave the second piece unchanged.
 
-			SliceMapEntry(mapElementPtr, newTimeSlice.getEnd(), newMapElementLeftPtr, newMapElementRightPtr, AvgMsperUnit, consolidate_rows, random_sampling);
+			SliceMapEntry(mapElementPtr, newTimeSlice.getEnd(), newMapElementLeftPtr, newMapElementRightPtr, consolidate_rows, random_sampling);
 			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = newMapElementLeftPtr;
@@ -351,7 +351,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 			// The second merges with the new time slice.
 			// The third is unchanged.
 
-			SliceMapEntry(mapElementPtr, newTimeSlice.getStart(), newTimeSlice.getEnd(), newMapElementMiddlePtr, AvgMsperUnit, consolidate_rows, random_sampling);
+			SliceMapEntry(mapElementPtr, newTimeSlice.getStart(), newTimeSlice.getEnd(), newMapElementMiddlePtr, consolidate_rows, random_sampling);
 			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_number, merge_mode);
 
 			mapElementPtr = newMapElementMiddlePtr;
@@ -371,7 +371,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 			// The second merges with the new time slice
 			// (with the right edge equal to the right edge of the map element).
 
-			SliceMapEntry(mapElementPtr, newTimeSlice.getStart(), newMapElementLeftPtr, newMapElementRightPtr, AvgMsperUnit, consolidate_rows, random_sampling);
+			SliceMapEntry(mapElementPtr, newTimeSlice.getStart(), newMapElementLeftPtr, newMapElementRightPtr, consolidate_rows, random_sampling);
 			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = newMapElementRightPtr;
@@ -394,7 +394,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 			// The remainder of the new time slice (at the right) is now in the variable "newTimeSliceLeaf" and ready for the next iteration.
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.getEnd(), new_left_slice);
-			SliceMapEntry(mapElementPtr, new_left_slice.first.getStart(), newMapElementLeftPtr, newMapElementRightPtr, AvgMsperUnit, consolidate_rows, random_sampling);
+			SliceMapEntry(mapElementPtr, new_left_slice.first.getStart(), newMapElementLeftPtr, newMapElementRightPtr, consolidate_rows, random_sampling);
 			added_new = MergeTimeSliceDataIntoMap(branch, new_left_slice, newMapElementRightPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = ++newMapElementRightPtr;
@@ -414,7 +414,7 @@ bool KadSampler::HandleTimeSliceNormalCase(bool & added, Branch const & branch, 
 
 // breaks an existing map entry into two pieces and returns an iterator to both
 void KadSampler::SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices<hits_tag>::iterator & newMapElementLeftPtr,
-							   TimeSlices<hits_tag>::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+							   TimeSlices<hits_tag>::iterator & newMapElementRightPtr, bool const consolidate_rows, bool const random_sampling)
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
@@ -426,14 +426,14 @@ void KadSampler::SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMa
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setEnd(middle);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, consolidate_rows, random_sampling);
 
 	newMapElementLeftPtr = timeSlices.find(timeSlice);
 
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setStart(middle);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, consolidate_rows, random_sampling);
 
 	newMapElementRightPtr = timeSlices.find(timeSlice);
 
@@ -441,7 +441,7 @@ void KadSampler::SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMa
 
 // breaks an existing map entry into three pieces and returns an iterator to the middle piece
 void KadSampler::SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right,
-							   TimeSlices<hits_tag>::iterator & newMapElementMiddlePtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+							   TimeSlices<hits_tag>::iterator & newMapElementMiddlePtr, bool const consolidate_rows, bool const random_sampling)
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
@@ -453,19 +453,19 @@ void KadSampler::SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMa
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setEnd(left);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, consolidate_rows, random_sampling);
 
 	timeSlice = originalMapTimeSlice;
 	timeSlice.Reshape(left, right);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, consolidate_rows, random_sampling);
 
 	newMapElementMiddlePtr = timeSlices.find(timeSlice);
 
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setStart(right);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, consolidate_rows, random_sampling);
 
 }
 
@@ -737,7 +737,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 }
 
-void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit_time)
+void KadSampler::CalculateWeightings(int const K)
 {
 
 	// first, calculate the number of branches that need to have weightings calculated
@@ -1032,7 +1032,7 @@ void KadSampler::CalculateWeightings(int const K, std::int64_t const ms_per_unit
 
 				// Holes between time slices are handled here, as well as the standard case of no holes between time slices -
 				// There is no gap in the sequence of discretized weight values in branches.
-				branchWeighting.setWeighting(timeSlice.WidthForWeighting(ms_per_unit_time) * branch.number_branch_combinations);
+				branchWeighting.setWeighting(timeSlice.WidthForWeighting() * branch.number_branch_combinations);
 				branchWeighting.setWeightingRangeStart(currentWeighting);
 				currentWeighting += branchWeighting.getWeighting();
 
@@ -2601,19 +2601,8 @@ void SpitLeaves(std::string & sdata, Branch const & branch)
 
 //#endif
 
-void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice,
-		std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, bool const consolidate_rows, bool const random_sampling)
 {
-
-	// ********************************************************************************************** //
-	// ********************************************************************************************** //
-	//
-	// This is arguably the trickiest function in the entire application.
-	//
-	// Detailed comments follow.
-	//
-	// ********************************************************************************************** //
-	// ********************************************************************************************** //
 
 	// ********************************************************************************************** //
 	// This function is called when time slices (and corresponding output row data) are SPLIT.
@@ -2807,10 +2796,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 
 	long double start = currentTimeSlice.getStart();
 	long double end = currentTimeSlice.getEnd();
-	long double AvgMsperUnitFloat = static_cast<long double>(AvgMsperUnit);
-
-	std::int64_t starting_time = originalTimeSlice.getStart();
-	starting_time = TimeRange::determineAligningTimestamp(starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
 
 	fast__int64__to__fast_branch_output_row_set<remaining_tag> new_hits;
 	VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *branches_and_leaves;
@@ -2828,33 +2813,24 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 
 			auto & hits = current_branch.hits;
 
-			long double current_end_position = starting_time;
-
 			std::int64_t hit_number = 0;
-			std::int64_t total_hits = hits.size();
-			std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<hits_tag>::value_type const & hit)
+			std::int64_t new_hit_number = 0;
+
+			// granulated output, full sampling
+			currentTimeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 			{
-
-				// ************************************************************** //
-				// Single time unit in branch, with its own set of rows
-				// ************************************************************** //
-
-				long double hit_start_position = current_end_position;
-				long double hit_end_position = hit_start_position + static_cast<long double>(AvgMsperUnit);
-				current_end_position = hit_end_position;
-
 				bool overlaps = false;
-				if (hit_start_position < end && hit_end_position > start)
+				if (time_to_use_for_start < end && time_to_use_for_end > start)
 				{
 					overlaps = true;
 				}
 				if (overlaps)
 				{
-					new_hits[hit_number].insert(hit.second.cbegin(), hit.second.cend());
-					++hit_number;
+					new_hits[new_hit_number].insert(hits[hit_number].cbegin(), hits[hit_number].cend());
+					++new_hit_number;
 				}
-
-			});
+				++hit_number;
+			}));
 
 			hits.clear();
 			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const & new_hit)

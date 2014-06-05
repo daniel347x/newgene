@@ -541,7 +541,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Calculate the number of possible K-ad combinations for each branch, given the leaves available.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Calculate the total number of K-adic combinations for the given DMU selection/s...")).str().c_str(), this);
-		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
+		allWeightings.CalculateWeightings(K);
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
@@ -4385,7 +4385,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 						{
 							first = false;
 							std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
-									AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+									consolidate_rows, random_sampling, mapIterator, call_again);
 							bool added_recurse = std::get<0>(ret);
 
 							if (added_recurse)
@@ -4431,7 +4431,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 						{
 							first = false;
 							std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
-									AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+									consolidate_rows, random_sampling, mapIterator, call_again);
 							bool added_recurse = std::get<0>(ret);
 
 							if (added_recurse)
@@ -4484,7 +4484,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 						{
 							first = false;
 							std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
-									AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+									consolidate_rows, random_sampling, mapIterator, call_again);
 							bool added_recurse = std::get<0>(ret);
 
 							if (added_recurse)
@@ -6005,11 +6005,11 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 					{
 
 						auto const & output_rows_for_this_full_time_slice = branch.hits[-1];
+						size_t number_rows_this_time_slice = output_rows_for_this_full_time_slice.size();
 
 						// granulated output, full sampling
-						timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start, std::int64_t const time_to_use_for_end)
+						timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
-							size_t number_rows_this_time_slice = output_rows_for_this_full_time_slice.size();
 							total_number_output_rows += static_cast<std::int64_t>(number_rows_this_time_slice);
 						}));
 
@@ -6086,40 +6086,34 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 					// If the time slice has no time range granularity, just spit out the rows once
 
-					for (auto const & time_unit_hit : branch.hits)
+					// *********************************************************************************** //
+					// There should be only one hit unit at index -1
+					// *********************************************************************************** //
+
+					auto const & time_unit_hit = hits[-1];
+					auto const & output_rows_for_this_full_time_slice = time_unit_hit.second;
+					std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow<hits_tag> const & outputRow)
 					{
 
-						// *********************************************************************************** //
-						// There should be only one hit unit at index -1
-						// ... so this loop should only be entered once
-						// *********************************************************************************** //
+						// We have a row to output
 
-						auto const & output_rows_for_this_full_time_slice = time_unit_hit.second;
-
-						std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow<hits_tag> const & outputRow)
+						if (failed || CheckCancelled())
 						{
+							return;
+						}
 
-							// We have a row to output
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
+						create_output_row_visitor::output_file = &output_file;
+						CreateOutputRow(branch, outputRow, allWeightings);
+						create_output_row_visitor::output_file = nullptr;
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 
-							if (failed || CheckCancelled())
-							{
-								return;
-							}
+						output_file << std::endl;
 
-							create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
-							create_output_row_visitor::output_file = &output_file;
-							CreateOutputRow(branch, outputRow, allWeightings);
-							create_output_row_visitor::output_file = nullptr;
-							create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+						++rows_written;
+						meter.UpdateProgressBarValue(rows_written);
 
-							output_file << std::endl;
-
-							++rows_written;
-							meter.UpdateProgressBarValue(rows_written);
-
-						});
-
-					}
+					});
 
 				}
 				else
@@ -6128,75 +6122,36 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 					if (random_sampling)
 					{
 
-						std::int64_t avgMsperUnit = AvgMsperUnit(allWeightings.time_granularity);
-
-						std::int64_t starting_time = timeSlice.getStart();
-						std::int64_t starting_aligned_down_time = TimeRange::determineAligningTimestamp(starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
-
-						std::int64_t ending_time = timeSlice.getEnd();
-						std::int64_t ending_aligned_up_time = TimeRange::determineAligningTimestamp(ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
-
-						long double hit_current_position = starting_aligned_down_time;
-
 						// random sampling; not consolidated
-						for (auto const & time_unit_hit : branch.hits)
+						auto & hits = branch.hits;
+						std::int64_t hit_number = 0;
+						timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
-
-							// ********************************************************** //
-							// We do *not* call the loop_through_time_units() function here
-							// because that function assumes the data is the same
-							// for each time unit in the "hits" vector.
-							//
-							// Here, the data is *different* for each time unit in the "hits" vector,
-							// so we implement equivalent time width logic here,
-							// but do without the "loop_through_time_units()" function.
-							// ********************************************************** //
-
-							long double hit_start_position = hit_current_position;
-							long double current_hit_width = static_cast<long double>(avgMsperUnit);
-							long double hit_end_position = hit_start_position + current_hit_width;
-							hit_current_position = hit_end_position;
-
+							auto const & time_unit_hit = hits[hit_number];
 							auto const & output_rows_for_this_time_unit = time_unit_hit.second;
-
-							long double starting_time_in_time_slice = hit_start_position;
-							long double ending_time_in_time_slice = hit_end_position;
-							if (starting_time_in_time_slice < starting_time)
-							{
-								starting_time_in_time_slice = starting_time;
-							}
-							if (ending_time_in_time_slice > ending_time)
-							{
-								ending_time_in_time_slice = ending_time;
-							}
-							TimeSlice current_slice(static_cast<std::int64_t>(starting_time_in_time_slice + 0.5), static_cast<std::int64_t>(ending_time_in_time_slice + 0.5));
+							TimeSlice current_slice(time_to_use_for_start, time_to_use_for_end);
 							OutputGranulatedRow(current_slice, output_rows_for_this_time_unit, output_file, branch, allWeightings, rows_written);
-
 							meter.UpdateProgressBarValue(rows_written);
-
-						}
+							++hit_number;
+						}));
 
 					}
 					else
 					{
 
-						for (auto const & time_unit_hit : branch.hits)
+						// *********************************************************************************** //
+						// There should be only one hit unit at index -1
+						// *********************************************************************************** //
+
+						// full sampling; not consolidated
+						auto const & time_unit_hit = hits[-1];
+						auto const & output_rows_for_this_full_time_slice = time_unit_hit.second;
+						timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
-
-							// *********************************************************************************** //
-							// There should be only one hit unit at index -1
-							// ... so this loop should only be entered once
-							// *********************************************************************************** //
-
-							auto const & output_rows_for_this_full_time_slice = time_unit_hit.second;
-							timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
-							{
-								TimeSlice current_slice(time_to_use_for_start, time_to_use_for_end);
-								OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
-								meter.UpdateProgressBarValue(rows_written);
-							}));
-
-						}
+							TimeSlice current_slice(time_to_use_for_start, time_to_use_for_end);
+							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
+							meter.UpdateProgressBarValue(rows_written);
+						}));
 
 					}
 				}

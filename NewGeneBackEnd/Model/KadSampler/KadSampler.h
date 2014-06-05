@@ -388,7 +388,7 @@ class TimeSlice
 		// ***************************************************************************** //
 		// Return the number of time slots corresponding to the given time unit
 		// ***************************************************************************** //
-		std::int64_t WidthForWeighting(std::int64_t const ms_per_unit_time) const
+		std::int64_t WidthForWeighting() const
 		{
 
 			if (none)
@@ -2447,7 +2447,7 @@ class VariableGroupTimeSliceData
 		Weighting weighting; // sum over all branches and leaves in all variable groups
 
 		void ResetBranchCachesSingleTimeSlice(KadSampler & allWeightings, bool const reset_child_dmu_lookup);
-		void PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit,
+		void PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice,
 							bool const consolidate_rows, bool const random_sampling);
 
 		static bool when_destructing_do_not_delete;
@@ -2919,9 +2919,9 @@ class KadSampler
 
 		// Returns "added", "continue handling slice", and "next map iterator"
 		std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number,
-				VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling,
+				VARIABLE_GROUP_MERGE_MODE const merge_mode, bool const consolidate_rows, bool const random_sampling,
 				TimeSlices<hits_tag>::iterator mapIterator_ = TimeSlices<hits_tag>::iterator(), bool const useIterator = false);
-		void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
+		void CalculateWeightings(int const K);
 		void PrepareRandomNumbers(std::int64_t how_many);
 		void PrepareRandomSamples(int const K);
 		void PrepareFullSamples(int const K);
@@ -3062,17 +3062,16 @@ class KadSampler
 	protected:
 
 		bool HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
-									   VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
+									   VARIABLE_GROUP_MERGE_MODE const merge_mode, bool const consolidate_rows, bool const random_sampling);
 
 		void AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf);
 
 		// Breaks an existing map entry into two pieces and returns an iterator to both.
 		void SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices<hits_tag>::iterator & newMapElementLeftPtr,
-			TimeSlices<hits_tag>::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
+			TimeSlices<hits_tag>::iterator & newMapElementRightPtr, bool const consolidate_rows, bool const random_sampling);
 
 		// Breaks an existing map entry into three pieces and returns an iterator to the middle piece.
-		void SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices<hits_tag>::iterator & newMapElementMiddlePtr,
-						   std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
+		void SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices<hits_tag>::iterator & newMapElementMiddlePtr, bool const consolidate_rows, bool const random_sampling);
 
 		// Slices off the left part of the "incoming_slice" TimeSliceLeaf and returns it in the "new_left_slice" TimeSliceLeaf.
 		// The "incoming_slice" TimeSliceLeaf is adjusted to become equal to the remaining part on the right.
