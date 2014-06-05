@@ -1922,7 +1922,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 								if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
 									(outputRow.primary_leaves_cache.size()))
 								{
-									// The current child leaf maps to a top-level leaf that has no data.
+									// The current child leaf maps to a top-level leaf that has no data in this output row.
 									// We therefore cannot match.
 									missing_top_level_leaf = true;
 									break;
