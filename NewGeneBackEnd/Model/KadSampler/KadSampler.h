@@ -2214,15 +2214,16 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		void ConstructChildCombinationCache(KadSampler & allWeightings, int const variable_group_number, bool const force,
 											bool const is_consolidating = false) const; // Populate the above data structure
 
-		void InsertLeaf(Leaf const & leaf) const
+		bool InsertLeaf(Leaf const & leaf) const
 		{
 			if (leaf.has_excluded_dmu_member)
 			{
 				this->has_excluded_leaves = true;
-				return;
+				return false;
 			}
 			leaves.insert(leaf);
 			ResetLeafCache();
+			return true;
 		}
 
 		void ClearLeaves()

@@ -56,7 +56,8 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 
 	// "added" has one purpose:
 	// It determines whether to add the SECONDARY data
-	// into the (class-)global cache
+	// into the (class-)global cache (keyed off rowid,
+	// which is always available, even for branch-only primary variable group data)
 	// (whether child, top-level, or primary).
 	//
 	// The actual leaf DMU values are irrelevant.
@@ -486,7 +487,7 @@ void KadSampler::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const
 }
 
 // Merge time slice data into a map element
-bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_group_branch_dmu_values, TimeSliceLeaf const & incoming_variable_group_time_slice_leaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
+bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_group_branch, TimeSliceLeaf const & incoming_variable_group_time_slice_leaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
 		VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
@@ -525,12 +526,15 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 			// ****************************************************************************************************************** //
 			// The leaf already contains lookup data into the PRIMARY variable group's cache
 			// ****************************************************************************************************************** //
-			incoming_variable_group_branch_dmu_values.InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch
+			bool did_add = incoming_variable_group_branch.InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch
 
-			newBranchesAndLeaves.insert(incoming_variable_group_branch_dmu_values);
+			newBranchesAndLeaves.insert(incoming_variable_group_branch);
 			variableGroupBranchesAndLeavesVector.push_back(newPrimaryVariableGroupBranch);
 
-			added = true;
+			if (did_add)
+			{
+				added = true;
+			}
 		}
 
 		else
@@ -563,11 +567,11 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 					// ... (the first one - emplace does nothing if the entry already exists).
 					// ... (Note that the leaf points to a specific row of secondary data.)
 					// *********************************************************************************** //
-					auto primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(incoming_variable_group_branch_dmu_values);
+					auto primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(incoming_variable_group_branch);
 
 					if (primaryVariableGroupBranchPtr == primaryVariableGroupBranches.cend())
 					{
-						auto inserted = primaryVariableGroupBranches.insert(incoming_variable_group_branch_dmu_values);
+						auto inserted = primaryVariableGroupBranches.insert(incoming_variable_group_branch);
 						primaryVariableGroupBranchPtr = inserted.first;
 					}
 
@@ -586,7 +590,7 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 
 					// Let's take a peek and see if our branch is already present
 
-					Branches<hits_tag>::iterator primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(incoming_variable_group_branch_dmu_values);
+					Branches<hits_tag>::iterator primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(incoming_variable_group_branch);
 
 					if (primaryVariableGroupBranchPtr != primaryVariableGroupBranches.end())
 					{
@@ -666,7 +670,7 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 
 					ChildDMUInstanceDataVector<hits_tag> all_dmu_keys_child;
 
-					all_dmu_keys_child.insert(all_dmu_keys_child.end(), incoming_variable_group_branch_dmu_values.primary_keys.begin(), incoming_variable_group_branch_dmu_values.primary_keys.end());
+					all_dmu_keys_child.insert(all_dmu_keys_child.end(), incoming_variable_group_branch.primary_keys.begin(), incoming_variable_group_branch.primary_keys.end());
 					all_dmu_keys_child.insert(all_dmu_keys_child.end(), incoming_variable_group_time_slice_leaf.second.primary_keys.begin(), incoming_variable_group_time_slice_leaf.second.primary_keys.end());
 
 					// *********************************************************************************** //
