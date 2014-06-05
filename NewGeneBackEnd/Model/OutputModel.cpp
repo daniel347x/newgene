@@ -4274,6 +4274,21 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 			return;
 		}
 
+		// All data populated into the row corresponds to
+		// the VARIABLE GROUP CURRENTLY BEING LOADED
+		// (specifically, the "primary key columns" refer to those of the
+		// variable group being loaded, NOT the primary variable group).
+		//
+		// The branch vs. leaf columns are flagged as such,
+		// and these refer to the VARIABLE GROUP BEING LOADED,
+		// not the primary variable group (unless that's the one being loaded).
+		//
+		// Note that only 1 leaf is available here, even when
+		// (for THIS variable group) the multiplicity is greater than 1
+		// (which it has to be in order for the columns to be identified as leaf columns).
+		// We have not yet mapped these leaf columns to specific outer multiplicities yet -
+		// that will occur only when actual output rows are generated.
+		// For now, the leaf data will simply be loaded into a (class-)global map.
 		sorting_row_of_data.PopulateFromCurrentRowInDatabase(variable_group_selected_columns_schema, stmt_result, *model);
 
 		// Construct branch and leaf

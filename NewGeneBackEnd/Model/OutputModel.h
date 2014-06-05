@@ -496,7 +496,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_columns;
 
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1; // There can be only 1 leaf loaded, even if this leaf corresponds to multiplicity > 1
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_secondary_key_columns;
 
