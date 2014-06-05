@@ -745,6 +745,17 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & incoming_variable_grou
 										outputRow.child_indices_into_raw_data[variable_group_number] = fast_short_to_int_map__loaded<hits_tag>();
 									}
 
+									// ****************************************************************************************************************** //
+									//
+									// In the following code, we simply add the index into the global cache of child secondary data
+									// to the current output row's map (using as key the child leaf index).
+									//
+									// Later, when we output the row, we simply look at the output row's map,
+									// and for each key-value pair we know both the index of the child leaf to populate in the output,
+									// and the place to look for the data that goes there.
+									//
+									// ****************************************************************************************************************** //
+
 									auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
 									outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = incoming_variable_group_time_slice_leaf.second.index_into_raw_data;
 
