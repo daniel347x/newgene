@@ -3240,12 +3240,11 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	// A A A   B B B B   C C C   C C C   C C C   C C C
 	//
 	// The child group MUST have either 0 or an identical number of DMU columns for A, and B.
-	// But for C, it can have 0, 1, 3, or 12.
+	// But for C, it can have 0, 1, or 3.
 	// Child:
 	// A A A   B B B B
 	// A A A   B B B B   C
 	// A A A   B B B B   C C C
-	// A A A   B B B B   C C C   C C C   C C C   C C C
 	// ... are all acceptable.
 	//
 	// Also fine: The primary has multiplicity 1
