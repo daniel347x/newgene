@@ -2056,6 +2056,11 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 
 				// Cover the case where there are no child-leaf-to-primary mappings,
 				// only child-branch-to-primary mappings
+				//
+				// This means the child is all branch and no leaf.
+				// Equivalently, it means that this set of child DMU keys
+				// should point to this particular output row, and within that row
+				// it should point to "leaf #0"
 				if (allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].size() == 0)
 				{
 					if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
