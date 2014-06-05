@@ -651,7 +651,10 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 			case VARIABLE_GROUP_MERGE_MODE__CHILD:
 				{
 
-					// Construct the child's DMU keys, including leaf
+					// Create a vector containing all of the child's DMU keys,
+					// both child branch and child leaf (there being only one
+					// child leaf in the incoming data, because it's straight from the raw data table,
+					// even if there are multiple child leaf slots in the output data for this child's UOA
 
 					ChildDMUInstanceDataVector<hits_tag> dmu_keys;
 
