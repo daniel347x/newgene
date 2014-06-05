@@ -699,6 +699,20 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & incoming_variable_grou
 						// so a simple "find" will not compile.
 						//auto const & matchingOutputRows = the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->find(dmu_keys);
 
+						// ****************************************************************************************************************** //
+						//
+						// See "ConstructChildCombinationCache()"
+						// ... for the filling of the "helper_lookup__from_child_key_set__to_matching_output_rows" map.
+						//
+						// This map allows us to pull up all of the output rows for which the current child data being merged matches
+						// somewhere in that output row
+						// (a SINGLE child branch + leaf match, even if there are MULTIPLE child leaf slots in the output row).
+						// Once the output rows are pulled up (in a single data structure),
+						// in turn they are looped through, and within each of THOSE is a vector that lists
+						// the CHILD LEAF index within that given output row that matches the incoming child data.
+						//
+						// ****************************************************************************************************************** //
+
 						// Also, std::binary_search only returns true or false, not an iterator to the match, if any,
 						// so this must be followed up by std::lower_bound if there is a match, which does.
 						bool found = std::binary_search(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), all_dmu_keys_child);
