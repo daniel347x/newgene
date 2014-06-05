@@ -597,20 +597,32 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 						// Note regarding the Limit DMU functionality:
 						// If the branch itself has a restricted DMU member,
 						// this function will never be called.
-						// If there are no leaf slots but the branch is completely valid
+						// If there are no leaf slots in the given UOA
+						// but the branch is completely valid
 						// (i.e., has no restricted DMU's), then we will be called
 						// in the usual way with an empty leaf (a leaf with no DMU's)
 						// which will MATCH in the operator<() function used in the doesLeafExist() implementation,
-						// and which will then pass its index as desired inside the following block.
+						// and which will then pass its index to use for secondary data
+						// as normal inside the following block.
 						// If the branch is valid and there ARE leaf slots (in which case
 						// there must be at least two leaf slots), then
 						// "doesLeafExist()" will return false because the PRIMARY
-						// variable group, which preceeded this, will not have
+						// variable group, which preceded this, will not have
 						// added the leaf.
 						if (current_branch.doesLeafExist(timeSliceLeaf.second))
 						{
 
 							// This branch *does* contain the incoming leaf!
+
+							// For any given leaf, including the "empty" leaf with no DMU columns
+							// (corresponding to the top-level UOA being all branch and no leaves with outer K=1)
+							// this function should only be called once - assuming the raw data
+							// is valid (i.e., assuming that the raw data contains only one row
+							// for the given time slice with a unique set of branch + leaf DMU values).
+							// If the raw data - which is out of our control and is imported by the user -
+							// contains multiple rows for the same keys in the same time slice,
+							// then the last row loaded wins.
+
 							// Set the data in the leaf for this non-primary top-level variable group.
 
 							// Note that many different OUTPUT ROWS might reference this leaf;
