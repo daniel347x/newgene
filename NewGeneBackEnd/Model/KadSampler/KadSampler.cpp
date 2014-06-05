@@ -1705,7 +1705,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 			helper_lookup__from_child_key_set__to_matching_output_rows->clear();
 		}
 
-		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector_branch_components;
+		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components;
 		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector;
 
 		// Some child branch columns can map to leaves of the top-level UOA.
@@ -1754,7 +1754,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				if (first_time_in_branch)
 				{
 
-					child_hit_vector_branch_components.clear();
+					child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.clear();
 
 					// First in the "child DMU" metadata vector is the metadata for the child's BRANCH DMU's
 					std::for_each(allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cbegin(),
@@ -1770,7 +1770,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						{
 
 							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-							child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+							child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
 						}
 						break;
@@ -1859,11 +1859,11 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 							// stores the DMU instance data corresponding to the proper internal column inside the 
 							// PRIMARY VARIABLE GROUP leaf
 							// at the proper index inside the global PRIMARY VARIABLE GROUP leaf cache,
-							// in the "child_hit_vector_branch_components"
+							// in the "child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components"
 							//
 							// ************************************************************************************** //
 							// ************************************************************************************** //
-							child_hit_vector_branch_components.push_back(DMUInstanceData(
+							child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(
 								leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
 						}
@@ -1887,7 +1887,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				int current_child_leaf_number = 0;
 				bool missing_top_level_leaf = false;
 				child_hit_vector.clear();
-				child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector_branch_components.begin(), child_hit_vector_branch_components.end());
+				child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
 				std::for_each(allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cbegin(),
 							  allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
@@ -1900,6 +1900,11 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
 							{
 
+								// **************************************************************************************** //
+								// TODO: This can be moved into the section that only performs the calculation once,
+								// rather than performing it for every output row...
+								// **************************************************************************************** //
+																		 
 								// The next DMU in the child leaf's DMU sequence maps to a branch in the top-level DMU sequence
 								child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
@@ -1979,7 +1984,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						child_leaf_index_within_a_single_child_leaf = 0;
 						missing_top_level_leaf = false;
 						child_hit_vector.clear();
-						child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector_branch_components.begin(), child_hit_vector_branch_components.end());
+						child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
 					}
 
 				});
