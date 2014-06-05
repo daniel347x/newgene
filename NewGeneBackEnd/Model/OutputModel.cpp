@@ -3355,8 +3355,12 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					// Current UOA's current DMU category has 1 column and the same DMU category in the primary group has more than one column
 					// (due to the first "if" block above and the fact that the child cannot have more columns than the primary),
 					// so if this is NOT the DMU category with multiplicity > 1 (implying that there *IS* a DMU category
-					// with multiplicity greater than 1),
-					// then we exclude it
+					// with multiplicity greater than 1), then we exclude it.
+					//
+					// If the following block is not reached, it's because the primary UOA has a multiplicity of 1 (i.e., it's all branch);
+					// and therefore this is an acceptable condition - the child has 1 column in this DMU, and the primary has more than 1
+					// (but a primary multiplicity of 1),
+					// so drop through.
 					else if ( ! boost::iequals(*current_child_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code) )
 					{
 
