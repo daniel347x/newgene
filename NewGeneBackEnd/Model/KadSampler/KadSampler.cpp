@@ -1780,6 +1780,22 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
 
+							// ************************************************************************** //
+							//
+							// This is currently unsupported
+							//
+							// If it ever becomes supported, we have to do this calculation
+							// EVERY TIME THROUGH THE LOOP
+							// (i.e., for every output row associated with the primary group's branch),
+							// rather than just the first time through the loop
+							//
+							// ************************************************************************** //
+							if (true)
+							{
+								boost::format msg("Logic error: It is currently unsupported for a child variable group's branch column to map to a primary variable group leaf column.");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+
 							// leaf_number tells us which leaf in the top-level DMU
 							// index tells us which index in that leaf
 
