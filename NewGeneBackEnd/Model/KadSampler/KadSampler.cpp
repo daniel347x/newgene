@@ -1813,6 +1813,39 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
 
+							// ************************************************************************************** //
+							// ************************************************************************************** //
+							//
+							// The following index lookup is one of the trickiest in the entire application.
+							//
+							//
+							// Note that "leaves_cache" belongs GLOBALLY to the PRIMARY VARIABLE GROUP branch object.
+							//
+							// And that "outputRow.primary_leaves_cache" is just a fast lookup into the same data,
+							// with the same index into the data structure via iterating, as "outputRow.primary_leaves".
+							//
+							// And that "childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf"
+							// is the index into the above OUTPUT-ROW SPECIFIC leaf cache.
+							//
+							// And that the value stored in the OUTPUT-ROW SPECIFIC leaf cache
+							// is, itself, just an INDEX into the GLOBAL leaf cache "leaved_cache" noted above.
+							//
+							// Once the actual cached leaf in the GLOBAL leaf cache "leaves_cache" is retrieved via
+							// "leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]]",
+							// the primary key columns of this leaf (because a single leaf can have multiple primary key columns)
+							// is stored in the "primary_keys" data member.
+							//
+							// How do we know which INTERNAL column of DMU instance data inside the individual leaf to retrieve?
+							// That is stored in "childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf".
+							//
+							// If you put all of the above pieces together, you find that the following line of code
+							// stores the DMU instance data corresponding to the proper internal column inside the 
+							// PRIMARY VARIABLE GROUP leaf
+							// at the proper index inside the global PRIMARY VARIABLE GROUP leaf cache,
+							// in the "child_hit_vector_branch_components"
+							//
+							// ************************************************************************************** //
+							// ************************************************************************************** //
 							child_hit_vector_branch_components.push_back(DMUInstanceData(
 								leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
