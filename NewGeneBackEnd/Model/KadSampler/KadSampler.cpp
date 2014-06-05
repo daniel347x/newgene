@@ -507,9 +507,9 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 	// Note: Currently, only one primary top-level variable group is supported.
 	// It will be the "begin()" element, if it exists.
-	VariableGroupBranchesAndLeavesVector<hits_tag>::iterator VariableGroupBranchesAndLeavesPtr = variableGroupBranchesAndLeavesVector.begin();
+	VariableGroupBranchesAndLeavesVector<hits_tag>::iterator PrimaryVariableGroupBranchesAndLeavesPtr = variableGroupBranchesAndLeavesVector.begin();
 
-	if (VariableGroupBranchesAndLeavesPtr == variableGroupBranchesAndLeavesVector.end())
+	if (PrimaryVariableGroupBranchesAndLeavesPtr == variableGroupBranchesAndLeavesVector.end())
 	{
 
 		// add new variable group entry,
@@ -519,11 +519,11 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 		if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 		{
-			VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_number);
-			Branches<hits_tag> & newBranchesAndLeaves = newVariableGroupBranch.branches;
+			VariableGroupBranchesAndLeaves newPrimaryVariableGroupBranch(variable_group_number);
+			Branches<hits_tag> & newBranchesAndLeaves = newPrimaryVariableGroupBranch.branches;
 			branch.InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
 			newBranchesAndLeaves.insert(branch);
-			variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
+			variableGroupBranchesAndLeavesVector.push_back(newPrimaryVariableGroupBranch);
 
 			added = true;
 		}
@@ -542,8 +542,8 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 		// The incoming branch might match one of these, or it might not.
 		// In any case, retrieve the existing set of branches.
 
-		VariableGroupBranchesAndLeaves & variableGroupBranch = *VariableGroupBranchesAndLeavesPtr;
-		Branches<hits_tag> & branches = variableGroupBranch.branches;
+		VariableGroupBranchesAndLeaves & primaryVariableGroupBranchesAndLeaves = *PrimaryVariableGroupBranchesAndLeavesPtr;
+		Branches<hits_tag> & primaryVariableGroupBranches = primaryVariableGroupBranchesAndLeaves.branches;
 
 		switch (merge_mode)
 		{
@@ -558,15 +558,15 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 					// ... (the first one - emplace does nothing if the entry already exists).
 					// ... (Note that the leaf points to a specific row of secondary data.)
 					// *********************************************************************************** //
-					auto branchPtr = branches.find(branch);
+					auto primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(branch);
 
-					if (branchPtr == branches.cend())
+					if (primaryVariableGroupBranchPtr == primaryVariableGroupBranches.cend())
 					{
-						auto inserted = branches.insert(branch);
-						branchPtr = inserted.first;
+						auto inserted = primaryVariableGroupBranches.insert(branch);
+						primaryVariableGroupBranchPtr = inserted.first;
 					}
 
-					branchPtr->InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
+					primaryVariableGroupBranchPtr->InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
 
 					added = true;
 
@@ -578,9 +578,9 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 					// Let's take a peek and see if our branch is already present
 
-					Branches<hits_tag>::iterator branchPtr = branches.find(branch);
+					Branches<hits_tag>::iterator primaryVariableGroupBranchPtr = primaryVariableGroupBranches.find(branch);
 
-					if (branchPtr != branches.end())
+					if (primaryVariableGroupBranchPtr != primaryVariableGroupBranches.end())
 					{
 
 						// *********************************************************************************** //
@@ -588,7 +588,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 						// We want to see if this branch contains the incoming leaf, or not.
 						// *********************************************************************************** //
 
-						Branch const & current_branch = *branchPtr;
+						Branch const & current_primary_variable_group_branch = *primaryVariableGroupBranchPtr;
 
 						// If the leaf does not exist, don't add it ... we're merging a non-primary group,
 						// which should never add new leaves.
@@ -609,7 +609,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 						// "doesLeafExist()" will return false because the PRIMARY
 						// variable group, which preceded this, will not have
 						// added the leaf.
-						if (current_branch.doesLeafExist(timeSliceLeaf.second))
+						if (current_primary_variable_group_branch.doesLeafExist(timeSliceLeaf.second))
 						{
 
 							// This branch *does* contain the incoming leaf!
@@ -637,7 +637,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 							// Note that in the case of NO LEAF, there is still a single "leaf" (with no DMU associated with it)
 							// that nonetheless contains the data index lookup into the raw data for this branch
 							// (the branch, in this case, having only one possible data lookup).
-							current_branch.setTopGroupIndexIntoRawData(timeSliceLeaf.second, variable_group_number, timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
+							current_primary_variable_group_branch.setTopGroupIndexIntoRawData(timeSliceLeaf.second, variable_group_number, timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
 
 							added = true;
 
@@ -666,7 +666,7 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 					// For each, we have a set of output rows.
 					// *********************************************************************************** //
 
-					for (auto branchesPtr = branches.begin(); branchesPtr != branches.end(); ++branchesPtr)
+					for (auto branchesPtr = primaryVariableGroupBranches.begin(); branchesPtr != primaryVariableGroupBranches.end(); ++branchesPtr)
 					{
 
 						Branch const & the_current_map_branch = *branchesPtr;
