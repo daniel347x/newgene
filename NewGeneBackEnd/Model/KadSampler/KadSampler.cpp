@@ -1739,12 +1739,13 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				// We have a new hit we're dealing with.
 				// This is a single output row corresponding to:
 				// - A single time slice
-				// - A single primary (top-level) branch within that time slice
+				// - A single primary (top-level) branch within that time slice (this object)
 				// - A single time unit within that time slice
 				// - A single output row in that time unit in that time slice for that top-level branch
 				//
 				// Now, from our own data (there is no child data yet), let's find all of the child data that
-				// *could* match on this row for the current child variable group under construction.
+				// *could* match on this row for the current child variable group under construction
+				// (given by "variable_group_number".
 				// (There could be more than one match of child data in this row.)
 				// ******************************************************************************************************** //
 
