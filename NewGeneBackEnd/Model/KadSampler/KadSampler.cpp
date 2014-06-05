@@ -1460,6 +1460,13 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch)
 {
 
+	// ************************************************************************************************ //
+	// This function will never be called unless there are MORE THAN ONE leaf slot
+	// for the PRIMARY VARIABLE GROUP
+	// (i.e., there must be actual leaves in addition to branches;
+	// not just a branch + 1 empty leaf representing that branch)
+	// ************************************************************************************************ //
+
 	newgene_cpp_int total_added = 0;
 
 	branch.remaining[which_time_unit].clear();
@@ -1497,10 +1504,26 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 void KadSampler::AddPositionToRemaining(std::int64_t const & which_time_unit, std::vector<int> const & position, Branch const & branch)
 {
 
+	// ************************************************************************************************ //
+	// This function will never be called unless there are MORE THAN ONE leaf slot
+	// for the PRIMARY VARIABLE GROUP
+	// (i.e., there must be actual leaves in addition to branches;
+	// not just a branch + 1 empty leaf representing that branch)
+	// ************************************************************************************************ //
+
 	BranchOutputRow<remaining_tag> new_remaining;
 	std::for_each(position.cbegin(), position.cend(), [&](int const position_index)
 	{
+
+		// ************************************************************************************************ //
+		// This function will never be called unless there are MORE THAN ONE leaf slot
+		// for the PRIMARY VARIABLE GROUP
+		// (i.e., there must be actual leaves in addition to branches;
+		// not just a branch + 1 empty leaf representing that branch)
+		// ************************************************************************************************ //
+
 		new_remaining.Insert(position_index);
+
 	});
 
 	if (branch.hits[which_time_unit].count(new_remaining) == 0)
