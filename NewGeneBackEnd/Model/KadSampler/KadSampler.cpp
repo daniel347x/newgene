@@ -1923,6 +1923,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 							  allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
+					// ************************************************************************************************************** //
+					// We have a SINGLE COLUMN - 
+					// a single child LEAF (out of potentially more than one),
+					// and within that child leaf a single COLUMN (out of potentially more than one)
+					// ************************************************************************************************************** //
+
 					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the leaf)
 
 					switch (childToPrimaryMapping.mapping)
@@ -2035,6 +2041,9 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 
 					if (child_leaf_index_within_a_single_child_leaf == allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1[variable_group_number])
 					{
+
+						// missing_top_level_leaf is only possible
+						// if there are > 1 top level leaf slots
 						if (!missing_top_level_leaf)
 						{
 							if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
@@ -2060,7 +2069,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				// This means the child is all branch and no leaf.
 				// Equivalently, it means that this set of child DMU keys
 				// should point to this particular output row, and within that row
-				// it should point to "leaf #0"
+				// it should point to "leaf #0".
 				if (allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].size() == 0)
 				{
 					if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
