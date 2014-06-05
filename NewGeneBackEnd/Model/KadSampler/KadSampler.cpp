@@ -1924,6 +1924,18 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 								{
 									// The current child leaf maps to a top-level leaf that has no data in this output row.
 									// We therefore cannot match.
+
+									// *********************************************************************************************** //
+									// NOTE THAT ALL OUTPUT ROWS FOR A GIVEN PRIMARY BRANCH
+									// contain the same number of leaves in their "primary_leaves_cache",
+									// so if ONE output row is missing a top level leaf at what would be 
+									// a given index in the child_hit_vector, then ALL output rows will be
+									// missing a top level leaf at what would be the same index,
+									// so the indexing will remain consistent and correct
+									// (i.e., each index in child_hit_vector will always correspond to the
+									// same output column for this primary variable group branch and time slice).
+									// *********************************************************************************************** //
+
 									missing_top_level_leaf = true;
 									break;
 								}
