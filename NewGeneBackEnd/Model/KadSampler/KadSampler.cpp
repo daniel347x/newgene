@@ -1398,6 +1398,14 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 					int index_of_leaf = remaining_leaves[index_of_index];
 					auto remainingPtr = remaining_leaves.begin() + index_of_index;
 					remaining_leaves.erase(remainingPtr);
+
+					// ************************************************************************************************ //
+					// This block will never be called unless there are MORE THAN ONE leaf slot
+					// for the PRIMARY VARIABLE GROUP
+					// (i.e., there must be actual leaves in addition to branches;
+					// not just a branch + 1 empty leaf representing that branch)
+					// ************************************************************************************************ //
+
 					test_leaf_combination.Insert(index_of_leaf);
 				}
 
