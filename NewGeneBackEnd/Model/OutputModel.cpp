@@ -4291,8 +4291,6 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		// For now, the leaf data will simply be loaded into a (class-)global map.
 		sorting_row_of_data.PopulateFromCurrentRowInDatabase(variable_group_selected_columns_schema, stmt_result, *model);
 
-		// Construct branch and leaf
-
 		failed = sorting_row_of_data.failed;
 
 		if (failed)
@@ -4301,8 +4299,10 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 			return;
 		}
 
+		// Construct branch and leaf
+
 		// Construct Leaf
-		DMUInstanceDataVector<hits_tag> dmus_leaf;
+		DMUInstanceDataVector<hits_tag> dmus_leaf__of_uoa_being_merged;
 
 		bool bad = false;
 		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.cbegin(),
@@ -4324,19 +4324,19 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 				case SQLExecutor::INT64:
 					{
-						dmus_leaf.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
+						dmus_leaf__of_uoa_being_merged.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
 					}
 					break;
 
 				case SQLExecutor::FLOAT:
 					{
-						dmus_leaf.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
+						dmus_leaf__of_uoa_being_merged.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
 					}
 					break;
 
 				case SQLExecutor::STRING:
 					{
-						dmus_leaf.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+						dmus_leaf__of_uoa_being_merged.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
 					}
 					break;
 
@@ -4353,7 +4353,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		});
 
 		// Construct Branch
-		DMUInstanceDataVector<hits_tag> dmus_branch;
+		DMUInstanceDataVector<hits_tag> dmus_branch__of_uoa_being_merged;
 
 		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.cbegin(),
 					  sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
@@ -4374,19 +4374,19 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 				case SQLExecutor::INT64:
 					{
-						dmus_branch.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
+						dmus_branch__of_uoa_being_merged.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
 					}
 					break;
 
 				case SQLExecutor::FLOAT:
 					{
-						dmus_branch.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
+						dmus_branch__of_uoa_being_merged.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
 					}
 					break;
 
 				case SQLExecutor::STRING:
 					{
-						dmus_branch.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+						dmus_branch__of_uoa_being_merged.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
 					}
 					break;
 
@@ -4466,8 +4466,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 				case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
 					{
 
-						Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid), sorting_row_of_data.leaf_has_excluded_dmu);
-						Branch branch(dmus_branch);
+						Leaf leaf(dmus_leaf__of_uoa_being_merged, static_cast<std::int32_t>(sorting_row_of_data.rowid), sorting_row_of_data.leaf_has_excluded_dmu);
+						Branch branch(dmus_branch__of_uoa_being_merged);
 
 						bool call_again = false;
 						bool added = false;
@@ -4508,8 +4508,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 							break;
 						}
 
-						Leaf leaf(dmus_leaf);
-						Branch branch(dmus_branch);
+						Leaf leaf(dmus_leaf__of_uoa_being_merged);
+						Branch branch(dmus_branch__of_uoa_being_merged);
 
 						// Set the secondary data index into the above cache for this non-primary top-level variable group
 						// so that it can be set in the corresponding leaf already present for the branch
@@ -4556,8 +4556,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 						// pack the child data index into the main leaf for use in the function called below - because this leaf is TEMPORARY
 						// (this data will be unpacked from the temporary leaf and put into the proper place in the function called below)
-						Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid));
-						Branch branch(dmus_branch);
+						Leaf leaf(dmus_leaf__of_uoa_being_merged, static_cast<std::int32_t>(sorting_row_of_data.rowid));
+						Branch branch(dmus_branch__of_uoa_being_merged);
 
 						// ************************************************************************************************** //
 						// Important!
