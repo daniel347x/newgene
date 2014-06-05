@@ -1737,7 +1737,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 		}
 
 		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components;
-		ChildDMUInstanceDataVector<child_dmu_lookup_tag> child_hit_vector;
+		ChildDMUInstanceDataVector<child_dmu_lookup_tag> potential_future__child_hit_vector;
 
 		// Some child branch columns can map to leaves of the top-level UOA.
 		// If there is no leaf data for some of these top-level leaf columns (which can happen in the K>N case),
@@ -1917,8 +1917,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				int child_leaf_index_within_a_single_child_leaf = 0;
 				int current_child_leaf_number = 0;
 				bool missing_top_level_leaf = false;
-				child_hit_vector.clear();
-				child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
+				potential_future__child_hit_vector.clear();
+				potential_future__child_hit_vector.insert(potential_future__child_hit_vector.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
 				std::for_each(allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cbegin(),
 							  allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
@@ -1937,7 +1937,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 								// **************************************************************************************** //
 																		 
 								// The next DMU in the child leaf's DMU sequence maps to a branch in the top-level DMU sequence
-								child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+								potential_future__child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
 							}
 							break;
@@ -1960,10 +1960,10 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 									// NOTE THAT ALL OUTPUT ROWS FOR A GIVEN PRIMARY BRANCH
 									// contain the same number of leaves in their "primary_leaves_cache",
 									// so if ONE output row is missing a top level leaf at what would be 
-									// a given index in the child_hit_vector, then ALL output rows will be
+									// a given index in the potential_future__child_hit_vector, then ALL output rows will be
 									// missing a top level leaf at what would be the same index,
 									// so the indexing will remain consistent and correct
-									// (i.e., each index in child_hit_vector will always correspond to the
+									// (i.e., each index in potential_future__child_hit_vector will always correspond to the
 									// same output column for this primary variable group branch and time slice).
 									// *********************************************************************************************** //
 
@@ -1978,9 +1978,24 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 
+								// We should never map to a leaf with no DMU's (an empty leaf) -
+								//
+								// neither a "Limit DMU's" scenario will ever add an empty leaf
+								//   (and this possibility is only present when there is > 1 leaf slot;
+								//    otherwise it's a branch-only scenario in which case in the "Limit DMU's" scenario 
+								//    a branch with any leaves in the restricted list will NOT be added
+								//    to the list of branches and this function will not be called),
+								// nor a "branch-only primary variable group" scenario will ever
+								// cause a branch column to *be mapped to* by a leaf lookup
 								if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
 									== 0)
 								{
+
+
+									// *********************************************************************************************** //
+									// Note: The following comments apply including the "Limit DMU's" functionality
+									// *********************************************************************************************** //
+
 									// This is the K=1 case - the matching leaf of the *top-level* UOA
 									// has no primary keys.  This is a logic error, as we should never match
 									// a "leaf" in the top-level UOA in this case.
@@ -1996,7 +2011,14 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 
-								child_hit_vector.push_back(DMUInstanceData(
+								// In the branch-only scenario (for the primary variable group),
+								// this block will never be reached because in this block
+								// we map to LEAF in the primary variable group.
+								//
+								// So this is a scenario with > 1 leaf in the primary variable group.
+								// In which case all leaves are valid
+								// (no restricted leaves from the "Limit DMU's" settings will ever be added).
+								potential_future__child_hit_vector.push_back(DMUInstanceData(
 															   leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
 							}
@@ -2020,19 +2042,20 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 								boost::format msg("Null child DMU key lookup cache in merge.");
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
-							(*helper_lookup__from_child_key_set__to_matching_output_rows)[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
+							(*helper_lookup__from_child_key_set__to_matching_output_rows)[potential_future__child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 						}
 
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
 						missing_top_level_leaf = false;
-						child_hit_vector.clear();
-						child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
+						potential_future__child_hit_vector.clear();
+						potential_future__child_hit_vector.insert(potential_future__child_hit_vector.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
 					}
 
 				});
 
-				// Cover the case where there are no leaf mappings, only branch
+				// Cover the case where there are no child-leaf-to-primary mappings,
+				// only child-branch-to-primary mappings
 				if (allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].size() == 0)
 				{
 					if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
@@ -2041,7 +2064,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						boost::format msg("Null child DMU key lookup cache in merge.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
-					(*helper_lookup__from_child_key_set__to_matching_output_rows)[child_hit_vector][&outputRow].push_back(0); // When there are no leaf DMU slots, there is always one leaf of index 0 with an empty DMU list
+					(*helper_lookup__from_child_key_set__to_matching_output_rows)[potential_future__child_hit_vector][&outputRow].push_back(0); // When there are no leaf DMU slots, there is always one leaf of index 0 with an empty DMU list
 				}
 
 			}
