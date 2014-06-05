@@ -697,6 +697,12 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 						// Find all matching output rows that contain the same DMU data on the matching columns.
 						// *********************************************************************************** //
 						// ... never use "consolidating rows" version here, because consolidation always happens after all rows are merged
+						//
+						// ****************************************************************************************************************** //
+						// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+						// THAT ARE BLANKS -
+						// every child [branch + leaf] MUST map to real values
+						// ****************************************************************************************************************** //
 						if (the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 						{
 ;							boost::format msg("Null child DMU key lookup cache.");
@@ -723,11 +729,22 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 
 						// Also, std::binary_search only returns true or false, not an iterator to the match, if any,
 						// so this must be followed up by std::lower_bound if there is a match, which does.
+
+						// ****************************************************************************************************************** //
+						// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+						// THAT ARE BLANKS -
+						// every child [branch + leaf] MUST map to real values
+						// ****************************************************************************************************************** //
 						bool found = std::binary_search(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), all_dmu_keys_child);
 
 						if (found)
 						{
 
+							// ****************************************************************************************************************** //
+							// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+							// THAT ARE BLANKS -
+							// every child [branch + leaf] MUST map to real values
+							// ****************************************************************************************************************** //
 							auto const & matchingOutputRows = std::lower_bound(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), all_dmu_keys_child);
 
 							// Loop through all matching output rows
@@ -1690,6 +1707,12 @@ void KadSampler::ClearBranchCaches()
 		{
 
 			// Do not delete!  Let the Boost Pool system handle this memory
+
+			// ****************************************************************************************************************** //
+			// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+			// THAT ARE BLANKS -
+			// every child [branch + leaf] MUST map to real values
+			// ****************************************************************************************************************** //
 			branch.helper_lookup__from_child_key_set__to_matching_output_rows = nullptr;
 
 		});
@@ -1747,16 +1770,32 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 	//  for a single output row.)
 	// ************************************************************************************************************************************************** //
 
+	// ****************************************************************************************************************** //
+	// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+	// THAT ARE BLANKS -
+	// every child [branch + leaf] MUST map to real values
+	// ****************************************************************************************************************** //
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 	{
 
 		// The cache has yet to be filled, or we are specifically being requested to refresh it
 
+		// ****************************************************************************************************************** //
+		// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+		// THAT ARE BLANKS -
+		// every child [branch + leaf] MUST map to real values
+		// ****************************************************************************************************************** //
 		if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 		{
 			// This scenario occurs before a child variable group is being merged.
 			// To save memory, the cache from any previous child variable group merges
 			// is discarded (elsewhere) from the Memory Pool, and recreated here.
+
+			// ****************************************************************************************************************** //
+			// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+			// THAT ARE BLANKS -
+			// every child [branch + leaf] MUST map to real values
+			// ****************************************************************************************************************** //
 			helper_lookup__from_child_key_set__to_matching_output_rows = InstantiateUsingTopLevelObjectsPool<tag__fast__lookup__from_child_dmu_set__to__output_rows<child_dmu_lookup_tag>>();
 		}
 		else
@@ -1766,6 +1805,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 			// so the child DMU lookup cache needs to be rebuilt,
 			// since BranchOutputRows have been copied into a new instance,
 			// invalidating all previous pointers.
+
+			// ****************************************************************************************************************** //
+			// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+			// THAT ARE BLANKS -
+			// every child [branch + leaf] MUST map to real values
+			// ****************************************************************************************************************** //
 			helper_lookup__from_child_key_set__to_matching_output_rows->clear();
 		}
 
@@ -2079,6 +2124,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						// if there are > 1 top level leaf slots
 						if (!missing_top_level_leaf)
 						{
+
+							// ****************************************************************************************************************** //
+							// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+							// THAT ARE BLANKS -
+							// every child [branch + leaf] MUST map to real values
+							// ****************************************************************************************************************** //
 							if (helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 							{
 								boost::format msg("Null child DMU key lookup cache in merge.");
@@ -2093,6 +2144,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 							//
 							// I.e., we are accessing a possibly DIFFERENT vector in the next line of code
 							// than in other iterations of this loop.
+							// ****************************************************************************************************************** //
+							//
+							// ****************************************************************************************************************** //
+							// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+							// THAT ARE BLANKS -
+							// every child [branch + leaf] MUST map to real values
 							// ****************************************************************************************************************** //
 							(*helper_lookup__from_child_key_set__to_matching_output_rows)[potential_future__child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 						}
@@ -2126,6 +2183,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 					// Note:
 					// There is only one possible child that can match on this output row,
 					// and its "leaf index" is always 0.
+					// ****************************************************************************************************************** //
+					//
+					// ****************************************************************************************************************** //
+					// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+					// THAT ARE BLANKS -
+					// every child [branch + leaf] MUST map to real values
 					// ****************************************************************************************************************** //
 					(*helper_lookup__from_child_key_set__to_matching_output_rows)[potential_future__child_hit_vector][&outputRow].push_back(0); // When there are no leaf DMU slots, there is always one leaf of index 0 with an empty DMU list
 				}

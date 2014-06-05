@@ -2198,6 +2198,12 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// when it writes the given row to the output.
 		// **************************************************************************************** //
 		// **************************************************************************************** //
+		//
+		// ****************************************************************************************************************** //
+		// "helper_lookup__from_child_key_set__to_matching_output_rows" CAN NEVER HAVE MAP KEYS
+		// THAT ARE BLANKS -
+		// every child [branch + leaf] MUST map to real values
+		// ****************************************************************************************************************** //
 		mutable fast__lookup__from_child_dmu_set__to__output_rows<child_dmu_lookup_tag> * helper_lookup__from_child_key_set__to_matching_output_rows;
 
 		// Cache for use with "consolidating rows" phase, if it is ever necessary!
