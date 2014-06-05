@@ -583,6 +583,23 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 
 						Branch const & current_branch = *branchPtr;
 
+						// If the leaf does not exist, don't add it ... we're merging a non-primary group,
+						// which should never add new leaves.
+						// Instead, the only purpose of the merge is to set data for any *existing* leaves.
+						//
+						// Note regarding the Limit DMU functionality:
+						// If the branch itself has a restricted DMU member,
+						// this function will never be called.
+						// If there are no leaf slots but the branch is completely valid
+						// (i.e., has no restricted leaves), then we will be called
+						// in the usual way with an empty leaf (a leaf with no DMU's)
+						// which will MATCH in the operator<() function used in the doesLeafExist() implementation,
+						// and which will then pass its index as desired inside the following block.
+						// If the branch is valid and there ARE leaf slots (in which case
+						// there must be at least two leaf slots), then
+						// "doesLeafExist()" will return false because the PRIMARY
+						// variable group, which preceeded this, will not have
+						// added the leaf.
 						if (current_branch.doesLeafExist(timeSliceLeaf.second))
 						{
 
@@ -592,9 +609,15 @@ bool KadSampler::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf 
 							// Note that many different OUTPUT ROWS might reference this leaf;
 							// perhaps even multiple times within a single output row.  Fine!
 
-							// pass the index over from the incoming leaf (which contains only the index for the current top-level variable group being merged in)
+							// pass the index into the raw data for the current variable group being merged
+							// from the incoming leaf (which contains only the index for the
+							// current top-level variable group being merged in)
 							// into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
 							// (This active leaf may also have been called previously to set other top-level variable group rows.)
+							//
+							// Note that in the case of NO LEAF, there is still a single "leaf" (with no DMU associated with it)
+							// that nonetheless contains the data index lookup into the raw data for this branch
+							// (the branch, in this case, having only one possible data lookup).
 							current_branch.setTopGroupIndexIntoRawData(timeSliceLeaf.second, variable_group_number, timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
 
 							added = true;
@@ -2789,9 +2812,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	std::int64_t starting_time = originalTimeSlice.getStart();
 	starting_time = TimeRange::determineAligningTimestamp(starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
 
-	std::int64_t ending_time = originalTimeSlice.getEnd();
-	ending_time = TimeRange::determineAligningTimestamp(ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
-
 	fast__int64__to__fast_branch_output_row_set<remaining_tag> new_hits;
 	VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *branches_and_leaves;
 	std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
@@ -2819,9 +2839,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 				// Single time unit in branch, with its own set of rows
 				// ************************************************************** //
 
-				++hit_number;
-
-
 				long double hit_start_position = current_end_position;
 				long double hit_end_position = hit_start_position + static_cast<long double>(AvgMsperUnit);
 				current_end_position = hit_end_position;
@@ -2833,8 +2850,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 				}
 				if (overlaps)
 				{
-					new_hits[hit_number - 1].clear();
-					new_hits[hit_number - 1].insert(hit.second.cbegin(), hit.second.cend());
+					new_hits[hit_number].insert(hit.second.cbegin(), hit.second.cend());
+					++hit_number;
 				}
 
 			});
@@ -2842,7 +2859,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 			hits.clear();
 			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const & new_hit)
 			{
-				hits[new_hit.first].clear();
 				hits[new_hit.first].insert(new_hit.second.cbegin(), new_hit.second.cend());
 			});
 

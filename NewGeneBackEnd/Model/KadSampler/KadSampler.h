@@ -350,6 +350,41 @@ class TimeSlice
 			return getEnd() - getStart();
 		}
 
+		void loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)> & misc_function)
+		{
+			// ************************************************************************** //
+			// This function is called in the case where ALL we need to do is 
+			// determine the time widths (starting & ending values) of the
+			// sub-time-units in each TimeSlice - and then call a
+			// miscellaneous function with these values for each such sub-time-unit.
+			// 
+			// Note that all such time widths of sub-time-units (each corresponding
+			// to an entry in the "hits" array of the given branch) will have
+			// the width of the basic time unit of the time granularity of the 
+			// unit of analysis associated with the primary variable group,
+			// EXCEPT possibly for the FIRST and LAST sub-time-units, which may
+			// be cropped.
+			// ************************************************************************** //
+
+			// Just do the calculation of how many
+			// absolute total time units are overlapped by the current time slice.
+			// Start at the beginning, and loop through.
+			std::int64_t current_time_start = time_start;
+
+			while (current_time_start < time_end)
+			{
+				std::int64_t time_to_use_for_start = current_time_start;
+				std::int64_t current_start_time_incremented_by_1_ms = time_to_use_for_start + 1;
+				std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
+				std::int64_t time_to_use_for_end = time_start_aligned_higher;
+				if (time_to_use_for_end > time_end) { time_to_use_for_end = time_end; }
+
+				misc_function(time_to_use_for_start, time_to_use_for_end);
+
+				current_time_start = time_to_use_for_end;
+			}
+		};
+
 		// ***************************************************************************** //
 		// Return the number of time slots corresponding to the given time unit
 		// ***************************************************************************** //
@@ -368,38 +403,26 @@ class TimeSlice
 				return 1;
 			}
 
-			std::int64_t absolute = time_end - time_start;
-			std::int64_t mod = absolute % ms_per_unit_time;
-			std::int64_t val = absolute - mod;
-			std::int64_t ret = val / ms_per_unit_time;
-
-			// We expect only even multiples of the time unit for the primary variable group,
-			// so only the following block is currently hit
-			// (since only the primary variable group calls this function)
-			BOOST_ASSERT_MSG(mod == 0, "The time slice is not an even multiple of the time unit!");
-			//if (mod < ms_per_unit_time / 2)
-			if (mod == 0)
+			int number_of_time_units = 0;
+			loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 			{
-				return ret;
-			}
+				++number_of_time_units;
+			}));
 
-			// The following is never reached and, if the program changes
-			// to support fractions of a time unit here,
-			// we must handle that logic outside this function
-			return ret + 1;
+			return number_of_time_units;
 
 		}
 
-		static long double WidthForWeighting(std::int64_t const leftVal, std::int64_t const rightVal, std::int64_t const ms_per_unit_time)
-		{
-			std::int64_t absolute = rightVal - leftVal;
-			return WidthForWeighting(absolute, ms_per_unit_time);
-		}
+		//static long double WidthForWeighting(std::int64_t const leftVal, std::int64_t const rightVal, std::int64_t const ms_per_unit_time)
+		//{
+		//	std::int64_t absolute = rightVal - leftVal;
+		//	return WidthForWeighting(absolute, ms_per_unit_time);
+		//}
 
-		static long double WidthForWeighting(std::int64_t const absolute, std::int64_t const ms_per_unit_time)
-		{
-			return boost::lexical_cast<long double>(absolute) / boost::lexical_cast<long double>(ms_per_unit_time);
-		}
+		//static long double WidthForWeighting(std::int64_t const absolute, std::int64_t const ms_per_unit_time)
+		//{
+		//	return boost::lexical_cast<long double>(absolute) / boost::lexical_cast<long double>(ms_per_unit_time);
+		//}
 
 		TimeSlice & operator=(TimeSlice const & rhs)
 		{
@@ -2187,7 +2210,6 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		void InsertLeaf(Leaf const & leaf) const
 		{
-			// Lookup into "ignored DMU" map to see if this leaf should be skipped and the boolean flag set
 			if (leaf.has_excluded_dmu_member)
 			{
 				this->has_excluded_leaves = true;

@@ -5958,38 +5958,6 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		std::int64_t total_number_output_rows = 0;
 
-		// ************************************************************************************************************************ //
-		// Define a lambda that wraps the following loop that calculates the starting and ending times of the individual time units
-		// (or fractions thereof) within a given time slice.
-		// Every time unit or fraction thereof within a time slice has the same width
-		// (equal to the width of the time granularity associated with the unit of analysis),
-		// except possibly for the first piece and last piece within the time slice, which might be fractional.
-		// ************************************************************************************************************************ //
-		auto loop_through_time_units = [&](TimeSlice const & timeSlice, fast_branch_output_row_set<hits_tag> const & output_rows_for_this_full_time_slice,
-										   boost::function<void(std::int64_t const, std::int64_t const)> & c)
-		{
-			// Just do the calculation of how many total time units are overlapped by the current time slice.
-			// This is the same calculation that is used below.
-			// The time slice has time granularity.
-			// Start at the beginning, and loop through.
-			std::int64_t const time_start = timeSlice.getStart();
-			std::int64_t const time_end = timeSlice.getEnd();
-			std::int64_t current_time_start = time_start;
-
-			while (current_time_start < time_end)
-			{
-				std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
-				std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
-				std::int64_t time_to_use_for_end = time_start_aligned_higher;
-
-				c(current_time_start, time_to_use_for_end);
-
-				if (time_start_aligned_higher > time_end) { time_to_use_for_end = time_end; }
-
-				current_time_start = time_to_use_for_end;
-			}
-		};
-
 		// Do a first pass to calculate the number of output rows that will be generated
 		// ... this is for the progress bar
 		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices<hits_tag>::value_type const & timeSliceData)
@@ -6039,8 +6007,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						auto const & output_rows_for_this_full_time_slice = branch.hits[-1];
 
 						// granulated output, full sampling
-						loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start,
-												std::int64_t const time_to_use_for_end)
+						timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start, std::int64_t const time_to_use_for_end)
 						{
 							size_t number_rows_this_time_slice = output_rows_for_this_full_time_slice.size();
 							total_number_output_rows += static_cast<std::int64_t>(number_rows_this_time_slice);
@@ -6163,66 +6130,46 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 						std::int64_t avgMsperUnit = AvgMsperUnit(allWeightings.time_granularity);
 
-						bool first_hit_is_a_sliver = false;
-						bool last_hit_is_a_sliver = false;
+						std::int64_t starting_time = timeSlice.getStart();
+						std::int64_t starting_aligned_down_time = TimeRange::determineAligningTimestamp(starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
 
-						std::int64_t current_starting_time = timeSlice.getStart();
-						std::int64_t current_aligned_down_time = TimeRange::determineAligningTimestamp(current_starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
-						long double start_sliver_width = 0.0;
+						std::int64_t ending_time = timeSlice.getEnd();
+						std::int64_t ending_aligned_up_time = TimeRange::determineAligningTimestamp(ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
 
-						if (current_aligned_down_time < current_starting_time)
-						{
-							first_hit_is_a_sliver = true;
-							start_sliver_width = static_cast<long double>(current_starting_time - current_aligned_down_time);
-						}
-
-						std::int64_t current_ending_time = timeSlice.getEnd();
-						std::int64_t current_aligned_up_time = TimeRange::determineAligningTimestamp(current_ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
-						long double end_sliver_width = 0.0;
-
-						if (current_aligned_up_time > current_ending_time)
-						{
-							last_hit_is_a_sliver = true;
-							end_sliver_width = static_cast<long double>(current_aligned_up_time - current_ending_time);
-						}
-
-						long double hit_total_distance_so_far = 0.0;
-						std::int64_t hit_number = 0;
-						std::int64_t total_hits = branch.hits.size();
+						long double hit_current_position = starting_aligned_down_time;
 
 						// random sampling; not consolidated
 						for (auto const & time_unit_hit : branch.hits)
 						{
 
-							// *********************************************************************************** //
-							// Expect this loop to be hit many times
-							// *********************************************************************************** //
+							// ********************************************************** //
+							// We do *not* call the loop_through_time_units() function here
+							// because that function assumes the data is the same
+							// for each time unit in the "hits" vector.
+							//
+							// Here, the data is *different* for each time unit in the "hits" vector,
+							// so we implement equivalent time width logic here,
+							// but do without the "loop_through_time_units()" function.
+							// ********************************************************** //
 
-							++hit_number;
-
-
-							long double hit_start_position = hit_total_distance_so_far;
-							long double current_hit_width = 0.0;
-
-							if (hit_number == 1 && first_hit_is_a_sliver)
-							{
-								current_hit_width = start_sliver_width;
-							}
-							else if (hit_number == total_hits && last_hit_is_a_sliver)
-							{
-								current_hit_width = end_sliver_width;
-							}
-							else
-							{
-								current_hit_width = static_cast<long double>(avgMsperUnit);
-							}
-
+							long double hit_start_position = hit_current_position;
+							long double current_hit_width = static_cast<long double>(avgMsperUnit);
 							long double hit_end_position = hit_start_position + current_hit_width;
-							hit_total_distance_so_far = hit_end_position;
+							hit_current_position = hit_end_position;
 
 							auto const & output_rows_for_this_time_unit = time_unit_hit.second;
 
-							TimeSlice current_slice(static_cast<std::int64_t>(hit_start_position + 0.5), static_cast<std::int64_t>(hit_end_position + 0.5));
+							long double starting_time_in_time_slice = hit_start_position;
+							long double ending_time_in_time_slice = hit_end_position;
+							if (starting_time_in_time_slice < starting_time)
+							{
+								starting_time_in_time_slice = starting_time;
+							}
+							if (ending_time_in_time_slice > ending_time)
+							{
+								ending_time_in_time_slice = ending_time;
+							}
+							TimeSlice current_slice(static_cast<std::int64_t>(starting_time_in_time_slice + 0.5), static_cast<std::int64_t>(ending_time_in_time_slice + 0.5));
 							OutputGranulatedRow(current_slice, output_rows_for_this_time_unit, output_file, branch, allWeightings, rows_written);
 
 							meter.UpdateProgressBarValue(rows_written);
@@ -6242,10 +6189,9 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 							// *********************************************************************************** //
 
 							auto const & output_rows_for_this_full_time_slice = time_unit_hit.second;
-							loop_through_time_units(timeSlice, output_rows_for_this_full_time_slice, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const current_time_start,
-													std::int64_t const time_to_use_for_end)
+							timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 							{
-								TimeSlice current_slice(current_time_start, time_to_use_for_end);
+								TimeSlice current_slice(time_to_use_for_start, time_to_use_for_end);
 								OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
 								meter.UpdateProgressBarValue(rows_written);
 							}));
