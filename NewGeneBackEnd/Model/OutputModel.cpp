@@ -4406,7 +4406,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		// Note that this is stored in a cache.
 		// In the future, this cache can be enhanced to become an intelligent LIFO memory/disk cache
 		// to support huge input datasets.
-		DMUInstanceDataVector<hits_tag> secondary_data;
+		DMUInstanceDataVector<hits_tag> secondary_data__for_the_current_vg;
 
 		std::for_each(sorting_row_of_data.indices_of_secondary_key_columns.cbegin(),
 					  sorting_row_of_data.indices_of_secondary_key_columns.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
@@ -4427,19 +4427,19 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 				case SQLExecutor::INT64:
 					{
-						secondary_data.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
+						secondary_data__for_the_current_vg.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
 					}
 					break;
 
 				case SQLExecutor::FLOAT:
 					{
-						secondary_data.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
+						secondary_data__for_the_current_vg.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
 					}
 					break;
 
 				case SQLExecutor::STRING:
 					{
-						secondary_data.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+						secondary_data__for_the_current_vg.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
 					}
 					break;
 
@@ -4494,7 +4494,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 						if (added)
 						{
 							// Add the secondary data for this primary variable group to the cache
-							allWeightings.dataCache[static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
+							allWeightings.dataCache[static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data__for_the_current_vg;
 						}
 
 					}
@@ -4540,7 +4540,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 						if (added)
 						{
 							// Add the secondary data for this non-primary top-level variable group to the cache
-							allWeightings.otherTopLevelCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
+							allWeightings.otherTopLevelCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data__for_the_current_vg;
 						}
 
 					}
@@ -4593,7 +4593,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 						if (added)
 						{
 							// Add the secondary data for this child variable group to the cache
-							allWeightings.childCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
+							allWeightings.childCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data__for_the_current_vg;
 						}
 
 					}

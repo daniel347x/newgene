@@ -54,8 +54,15 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 
 	newTimeSlice.Validate();
 
+	// "added" has one purpose:
+	// It determines whether to add the SECONDARY data
+	// into the (class-)global cache
+	// (whether child, top-level, or primary).
+	//
+	// The actual leaf DMU values are irrelevant.
+	// The secondary values are all that matter, and they 
+	// are added to the cache based on the rowid.
 	bool added = false; // true if there is a match
-
 	if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 	{
 		// Always add data for primary variable group
