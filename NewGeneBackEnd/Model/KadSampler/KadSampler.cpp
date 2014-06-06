@@ -1382,7 +1382,8 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 		PopulateAllLeafCombinations(which_time_unit_full_sampling__MINUS_ONE, K, branch);
 	}
 
-	// If Limit DMU's prevented anything from being generated,
+	// If Limit DMU's prevented anything from being generated
+	// (even if this function wasn't previously exited in this case),
 	// then nothing will be inserted here - begin() == end()
 	branch.hits[which_time_unit_full_sampling__MINUS_ONE].insert(branch.remaining[which_time_unit_full_sampling__MINUS_ONE].begin(), branch.remaining[which_time_unit_full_sampling__MINUS_ONE].end());
 	
