@@ -1382,6 +1382,8 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 		PopulateAllLeafCombinations(which_time_unit_full_sampling__MINUS_ONE, K, branch);
 	}
 
+	// If Limit DMU's prevented anything from being generated,
+	// then nothing will be inserted here - begin() == end()
 	branch.hits[which_time_unit_full_sampling__MINUS_ONE].insert(branch.remaining[which_time_unit_full_sampling__MINUS_ONE].begin(), branch.remaining[which_time_unit_full_sampling__MINUS_ONE].end());
 	
 	// No! Will be cleared by the memory pool en-bulk after generation of output rows
@@ -1418,9 +1420,18 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 	{
 		skip = true;
 
-		for (int n = 0; n < branch.numberLeaves(); ++n)
+		bool dmu_limited = false;
+		if (K > 1 && K > branch.numberLeaves() && branch.has_excluded_leaves)
 		{
-			test_leaf_combination.Insert(n);
+			dmu_limited = true;
+		}
+
+		if (!dmu_limited)
+		{
+			for (int n = 0; n < branch.numberLeaves(); ++n)
+			{
+				test_leaf_combination.Insert(n);
+			}
 		}
 	}
 
