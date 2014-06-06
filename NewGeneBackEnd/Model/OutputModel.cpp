@@ -4480,6 +4480,22 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 				case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
 					{
 
+						int m;
+
+						// *************************************************************************************************** //
+						// All cases of a BAD LEAF (due to Limit DMU functionality)
+						// are properly handled within "HandleIncomingNewBranchAndLeaf()"
+						// (and the functions that it calls).
+						//
+						// Specifically, a bad leaf is handled in two places.
+						//
+						// (1) "AddNewTimeSlice()" will call "InsertLeaf()" and reject the leaf
+						//     (but flag that a bad leaf was attempted to be added).
+						//
+						// (2) "MergeNewDataIntoTimeSlice()" will also, eventually, call "InsertLeaf()"
+						//     and reject the leaf (but also flag that a bad leaf was attempted to be added).
+						// *************************************************************************************************** //
+
 						Leaf leaf(dmus_leaf__of_uoa_being_merged, static_cast<std::int32_t>(sorting_row_of_data.rowid), sorting_row_of_data.leaf_has_excluded_dmu);
 						Branch branch(dmus_branch__of_uoa_being_merged);
 
