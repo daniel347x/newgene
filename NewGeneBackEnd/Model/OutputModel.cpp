@@ -4455,6 +4455,12 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 
 		});
 
+		// Currently, due to UOA validation, all CHILD (as well as primary and top-level)
+		// BRANCH columns map to BRANCH columns in the primary UOA.
+		//
+		// Therefore, if the sorting_row_of_data has a bad branch and it's a CHILD variable group being loaded,
+		// then the corresponding bad branch column/s in the PRIMARY variable group that MIGHT have been loaded would NOT have been,
+		// so skip out now.
 		if (!bad && !sorting_row_of_data.branch_has_excluded_dmu)
 		{
 
