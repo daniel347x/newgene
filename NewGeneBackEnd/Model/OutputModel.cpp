@@ -4480,8 +4480,6 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 				case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
 					{
 
-						int m;
-
 						// *************************************************************************************************** //
 						// All cases of a BAD LEAF (due to Limit DMU functionality)
 						// are properly handled within "HandleIncomingNewBranchAndLeaf()"
