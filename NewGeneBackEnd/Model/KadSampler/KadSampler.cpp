@@ -1424,6 +1424,17 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 
 		if (K > 1 && K > branch.numberLeaves() && branch.has_excluded_leaves)
 		{
+			// This test should be redundant, as the weighting for the branch
+			// in case of DMU limiting should be 0 and therefore the random number
+			// should never land on this branch.
+			// But leave the relevant code in place as an FYI.
+
+			if (true)
+			{
+				boost::format msg("Random K-ad being requested from a branch which should have 0 weight!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
 			dmu_limited = true;
 		}
 
