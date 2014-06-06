@@ -67,7 +67,7 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 	if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 	{
 		// Always add data for primary variable group
-		added = true;
+		//added = true; // Not with Limit DMU functionality!!!
 	}
 
 	// determine which case we are in terms of the relationship of the incoming new 'timeSliceLeaf'
@@ -92,7 +92,11 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 		{
 			// No entries in the 'TimeSlices<hits_tag>' map yet
 			// Add the entire new time slice as the first entry in the map
-			AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+			bool did_add = AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+			if (did_add)
+			{
+				added = true;
+			}
 		}
 	}
 	else
@@ -129,7 +133,11 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 			{
 				// The new slice is entirely past the end of the map.
 				// Add new map entry consisting solely of the new slice.
-				AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+				bool did_add = AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+				if (did_add)
+				{
+					added = true;
+				}
 			}
 		}
 		else
@@ -155,7 +163,11 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 						// The entire new time slice is less than the map element returned by upper_bound.
 						// (But past previous map elements, if any.)
 						// Add the entire new time slice as a unit to the map.
-						AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+						bool did_add = AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+						if (did_add)
+						{
+							added = true;
+						}
 					}
 				}
 				else
@@ -172,7 +184,11 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 
 					if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 					{
-						AddNewTimeSlice(variable_group_number, branch, new_left_slice);
+						bool did_add = AddNewTimeSlice(variable_group_number, branch, new_left_slice);
+						if (did_add)
+						{
+							added = true;
+						}
 					}
 
 					// For the remainder of the slice, proceed with normal case
@@ -222,7 +238,11 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 			if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 			{
 				// Add it solo to the end of the map.
-				AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+				bool did_add = AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+				if (did_add)
+				{
+					added = true;
+				}
 			}
 		}
 		else
@@ -1177,7 +1197,7 @@ void KadSampler::CalculateWeightings(int const K)
 
 }
 
-void KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)
+bool KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)
 {
 	VariableGroupTimeSliceData variableGroupTimeSliceData;
 	VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
@@ -1185,9 +1205,17 @@ void KadSampler::AddNewTimeSlice(int const & variable_group_number, Branch const
 	Branches<hits_tag> & newBranchesAndLeaves = newVariableGroupBranch.branches;
 	newBranchesAndLeaves.insert(branch);
 	Branch const & current_branch = *(newBranchesAndLeaves.find(branch));
-	current_branch.InsertLeaf(newTimeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
+
+	bool added = current_branch.InsertLeaf(newTimeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
+
+	// Even if the leaf was not added due to Limit DMU functionality,
+	// we must add the branch itself,
+	// so that in the future if the same branch is added, we have maintained
+	// the "a bad DMU had been attempted to be added" flag.
 	variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
 	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
+
+	return added;
 }
 
 void KadSampler::PrepareRandomNumbers(std::int64_t how_many)

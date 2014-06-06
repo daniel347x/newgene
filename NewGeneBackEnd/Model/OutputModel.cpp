@@ -4463,6 +4463,12 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		// and it's a CHILD variable group being loaded,
 		// then the corresponding bad branch column/s in the PRIMARY variable group that MIGHT have been loaded would NOT have been,
 		// so skip out now.
+		//
+		// Child LEAVES, on the other hand, can currently map to
+		// EITHER primary branches OR primary leaves.
+		// IF a child LEAF is bad (due to Limit DMU functionality),
+		// however, it has merge_mode = VARIABLE_GROUP_MERGE_MODE__CHILD
+		// and will be instantly rejected in that case, below.
 		if (!bad && !sorting_row_of_data.branch_has_excluded_dmu)
 		{
 
@@ -4511,6 +4517,11 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 				case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
 					{
 
+						// If ANY columns are bad for non-primary data loading,
+						// (due to Limit DMU functionality)
+						// then corresponding columns would never have been loaded (or rows generated from leaves)
+						// when the primary group was previously loaded,
+						// so skip out now.
 						if (sorting_row_of_data.leaf_has_excluded_dmu)
 						{
 							break;
@@ -4557,6 +4568,11 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 				case VARIABLE_GROUP_MERGE_MODE__CHILD:
 					{
 
+						// If ANY columns are bad for non-primary data loading,
+						// (due to Limit DMU functionality)
+						// then corresponding columns would never have been loaded (or rows generated from leaves)
+						// when the primary group was previously loaded,
+						// so skip out now.
 						if (sorting_row_of_data.leaf_has_excluded_dmu)
 						{
 							break;
