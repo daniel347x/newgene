@@ -1011,7 +1011,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 						indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.push_back(binding);
 						if (is_excluded_dmu_set_member)
 						{
-							branch_has_excluded_dmu = true;
+							leaf_has_excluded_dmu = true;
 						}
 					}
 
@@ -1020,7 +1020,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(binding);
 						if (is_excluded_dmu_set_member)
 						{
-							leaf_has_excluded_dmu = true;
+							branch_has_excluded_dmu = true;
 						}
 					}
 
@@ -1052,7 +1052,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 								std::make_pair((int)current_parameter_floats.size() - 1, current_column)));
 						if (is_excluded_dmu_set_member)
 						{
-							branch_has_excluded_dmu = true;
+							leaf_has_excluded_dmu = true;
 						}
 					}
 
@@ -1062,7 +1062,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 								std::make_pair((int)current_parameter_floats.size() - 1, current_column)));
 						if (is_excluded_dmu_set_member)
 						{
-							leaf_has_excluded_dmu = true;
+							branch_has_excluded_dmu = true;
 						}
 					}
 
@@ -1100,7 +1100,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 								std::make_pair((int)current_parameter_strings.size() - 1, current_column)));
 						if (is_excluded_dmu_set_member)
 						{
-							branch_has_excluded_dmu = true;
+							leaf_has_excluded_dmu = true;
 						}
 					}
 
@@ -1110,7 +1110,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 								std::make_pair((int)current_parameter_strings.size() - 1, current_column)));
 						if (is_excluded_dmu_set_member)
 						{
-							leaf_has_excluded_dmu = true;
+							branch_has_excluded_dmu = true;
 						}
 					}
 
