@@ -528,6 +528,10 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 			// ****************************************************************************************************************** //
 			bool did_add = incoming_variable_group_branch.InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch
 
+			// ****************************************************************************************************************** //
+			// This needs to always be added - even if it does not exist yet AND the leaf is invalid due to "Limit DMU" options -
+			// so that if a VALID leaf is ever added in the future, it knows that an INVALID leaf was attempted
+			// ****************************************************************************************************************** //
 			newBranchesAndLeaves.insert(incoming_variable_group_branch);
 			variableGroupBranchesAndLeavesVector.push_back(newPrimaryVariableGroupBranch);
 
@@ -578,9 +582,12 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 					// ****************************************************************************************************************** //
 					// The leaf already contains lookup data into the PRIMARY variable group's cache
 					// ****************************************************************************************************************** //
-					primaryVariableGroupBranchPtr->InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
+					bool did_add = primaryVariableGroupBranchPtr->InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
 
-					added = true;
+					if (did_add)
+					{
+						added = true;
+					}
 
 				}
 				break;
@@ -662,6 +669,21 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 
 			case VARIABLE_GROUP_MERGE_MODE__CHILD:
 				{
+
+					// *********************************************************************************** //
+					// *********************************************************************************** //
+					//
+					// Output rows have ALREADY BEEN GENERATED,
+					// and all of these output rows contain VALID (not limited) DMU KEYS
+					// (in all primary branch and leaf slots that are represented in leaves_cache for the branch)
+					//
+					// ... Also the helper_lookup__from_child_key_set__to_matching_output_rows cache
+					// has already been populated and again contains only VALID (not limited) DMU values.
+					//
+					// So the LIMIT DMU functionality is fully covered here.  See further notes below.
+					//
+					// *********************************************************************************** //
+					// *********************************************************************************** //
 
 					// Create a vector containing all of the child's DMU keys,
 					// both child branch and child leaf (there being only one
