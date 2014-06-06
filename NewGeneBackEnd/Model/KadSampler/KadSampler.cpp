@@ -1347,12 +1347,12 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 
 	bool skip = false;
 
+	bool dmu_limited = false;
 	if (K >= branch.numberLeaves())
 	{
 
 		skip = true;
 
-		bool dmu_limited = false;
 		if (K > 1 && K > branch.numberLeaves() && branch.has_excluded_leaves)
 		{
 			dmu_limited = true;
@@ -1372,7 +1372,7 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 
 	}
 
-	if (K <= 0)
+	if (K <= 0 || dmu_limited)
 	{
 		return;
 	}
@@ -1416,11 +1416,11 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 
 	bool skip = false;
 
+	bool dmu_limited = false;
 	if (K >= branch.numberLeaves())
 	{
 		skip = true;
 
-		bool dmu_limited = false;
 		if (K > 1 && K > branch.numberLeaves() && branch.has_excluded_leaves)
 		{
 			dmu_limited = true;
@@ -1435,7 +1435,7 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 		}
 	}
 
-	if (K <= 0)
+	if (K <= 0 || dmu_limited)
 	{
 		return;
 	}
