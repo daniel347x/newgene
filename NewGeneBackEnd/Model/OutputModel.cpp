@@ -475,7 +475,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		// From the schema for the selected columns for the primary variable group,
 		// create a temporary table and store just the selected columns over just the selected time range.
-		// This function just creates the table; it does not populate any data into the table.
+		// This function both creates the table, and loads it with just the desired columns (and time range)
+		// from the permanent raw data tables.
 		// ********************************************************************************************************************************************************* //
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[primary_vg_index__in__top_level_vg_vector], primary_vg_index__in__top_level_vg_vector);
 		if (failed || CheckCancelled()) { return; }
@@ -5329,6 +5330,8 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// ********************************************************************************************************************************************************* //
 		// From the schema for the selected columns for the non-primary top-level variable group,
 		// create a temporary table to store just the selected columns over just the selected time range.
+		// This function both creates the table, and loads it with just the desired columns (and time range)
+		// from the permanent raw data tables.
 		// ********************************************************************************************************************************************************* //
 		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_group_raw_data_columns, current_top_level_vg_index);
 
