@@ -487,7 +487,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Create TIME SLICES.
 		// This is the first stage of K-ad generation.
 		// It loads the raw data (as stored in the temporary table, above)
+		// for the PRIMARY variable group
 		// into the K-ad sampler, broken into time slices, to be made ready for following processing by the sampler.
+		//
+		// Later steps will load the other top-level, and the child, variable groups.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
