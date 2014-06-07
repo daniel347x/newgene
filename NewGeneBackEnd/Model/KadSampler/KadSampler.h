@@ -351,7 +351,7 @@ class TimeSlice
 			return getEnd() - getStart();
 		}
 
-		void loop_through_time_units(TIME_GRANULARITY const & time_granularity, boost::function<void(std::int64_t const, std::int64_t const)> & misc_function)
+		void loop_through_time_units(TIME_GRANULARITY const & time_granularity, boost::function<void(std::int64_t const, std::int64_t const)> & misc_function) const
 		{
 			// ************************************************************************** //
 			// This function is called in the case where ALL we need to do is 

@@ -1081,7 +1081,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_excluded_dmu_category)
 					{
-						is_excluded_dmu_set_member = model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_string);
+						is_excluded_dmu_set_member = model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_string.c_str());
 					}
 
 					current_parameter_strings.push_back(data_string);
@@ -6222,8 +6222,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 					// There should be only one hit unit at index -1
 					// *********************************************************************************** //
 
-					auto const & time_unit_hit = hits[-1];
-					auto const & output_rows_for_this_full_time_slice = time_unit_hit.second;
+					//auto const & time_unit_hit = branch.hits[-1];
+					auto const & output_rows_for_this_full_time_slice = branch.hits[-1];
 					std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow<hits_tag> const & outputRow)
 					{
 
@@ -6255,12 +6255,42 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 					{
 
 						// random sampling; not consolidated
+
+						// *********************************************************************************** //
+						// There should be multiple "hits";
+						// i.e., sub-time-units, each spanning
+						// an exact amount of time corresponding to the time granularity
+						// of the primary variable group's unit of analysis,
+						// and each starting and ending exactly on an absolute timestamp
+						// that is an integer multiple of such time widths relative to the
+						// Unix timestamp 0-point (Jan 1, 1970 less than a moment past
+						// the tick of midnight leading into that day).
+						// This includes all necessary adjustments for leap years and leap seconds -
+						// the calculation internal to "loop_through_time_units" ensures that.
+						//
+						// Each such "hit" contains 0, 1, or more output rows that have
+						// been randomly sampled from the total set of available rows
+						// for this particular branch.
+						//
+						// All available rows are the same for each sub-time-unit,
+						// so if this were sampling 100% of random rows,
+						// then the set of output rows for each sub-time-unit in this branch
+						// would be identical.
+						//
+						// But for the general case of random sampling,
+						// only a random subset (properly randomly distributed)
+						// from each sub-time-unit will be selected.
+						//
+						// This approach guarantees that the random rows generated in the output
+						// are weighted according to their time window.
+						// *********************************************************************************** //
+
 						auto & hits = branch.hits;
 						std::int64_t hit_number = 0;
 						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
-							auto const & time_unit_hit = hits[hit_number];
-							auto const & output_rows_for_this_time_unit = time_unit_hit.second;
+							//auto const & time_unit_hit = hits[hit_number];
+							auto const & output_rows_for_this_time_unit = hits[hit_number];
 							TimeSlice current_slice(time_to_use_for_start, time_to_use_for_end);
 							OutputGranulatedRow(current_slice, output_rows_for_this_time_unit, output_file, branch, allWeightings, rows_written);
 							meter.UpdateProgressBarValue(rows_written);
@@ -6271,13 +6301,15 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 					else
 					{
 
+						// full sampling; not consolidated
+
 						// *********************************************************************************** //
-						// There should be only one hit unit at index -1
+						// There should be only one hit unit at index -1,
+						// representing the full set of available output rows
+						// for the given branch.
 						// *********************************************************************************** //
 
-						// full sampling; not consolidated
-						auto const & time_unit_hit = hits[-1];
-						auto const & output_rows_for_this_full_time_slice = time_unit_hit.second;
+						auto const & output_rows_for_this_full_time_slice = branch.hits[-1];
 						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
 							TimeSlice current_slice(time_to_use_for_start, time_to_use_for_end);

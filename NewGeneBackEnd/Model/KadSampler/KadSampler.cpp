@@ -3150,8 +3150,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	//
 	// It's all about counting.
 
-	long double start = currentTimeSlice.getStart();
-	long double end = currentTimeSlice.getEnd();
+	std::int64_t start = currentTimeSlice.getStart();
+	std::int64_t end = currentTimeSlice.getEnd();
 
 	fast__int64__to__fast_branch_output_row_set<remaining_tag> new_hits;
 	VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *branches_and_leaves;
