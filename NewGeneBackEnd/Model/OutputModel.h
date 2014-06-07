@@ -525,7 +525,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulateVariableGroups();
 				void PopulatePrimaryKeySequenceInfo();
 
-				size_t top_level_vg_index; // in case there are multiple top-level variable groups, which one to use as primary (the others will be treated as children)
+				size_t primary_vg_index__in__top_level_vg_vector; // in case there are multiple top-level variable groups, which one to use as primary (the others will be treated as children)
 				int K; // the multiplicity
 
 				// Random sampling
@@ -731,7 +731,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// (independent of time granularity; different time granularities can appear here)
 				// (Also, multiple, identical UOA's are acceptable, possibly differing in time granularity)
 				// I.e., possibly multiple PRIMARY variable groups, all corresponding to the same primary UOA (regardless of time granularity and/or UOA multiplicity)
-				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector primary_variable_groups_vector; // both primary and non-primary top level variable groups
+				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector top_level_variable_groups_vector; // both primary and non-primary top level variable groups
 				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector child_variable_groups_vector; // all child variable groups
 
 				// Information about *all* primary key columns, in the sequence they appear in the output
@@ -912,7 +912,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 	// See comments for identical scenario above, where the leaf primary data is being output.
 	if (which_primary_index_has_multiplicity_greater_than_1 != -1)
 	{
-		int numberSecondaryColumns = top_level_number_secondary_columns[top_level_vg_index];
+		int numberSecondaryColumns = top_level_number_secondary_columns[primary_vg_index__in__top_level_vg_vector];
 
 		for (int n = numberLeavesHandled; n < K; ++n)
 		{
@@ -930,7 +930,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 	// then by multiplicity.
 	// There might be multiple fields for each variable group and within each multiplicity,
 	// ... so the logic is a bit non-trivial to get the display order right.
-	int numberTopLevelGroups = static_cast<int>(primary_variable_groups_vector.size());
+	int numberTopLevelGroups = static_cast<int>(top_level_variable_groups_vector.size());
 
 	for (int vgNumber = 0; vgNumber < numberTopLevelGroups; ++vgNumber)
 	{
@@ -1014,7 +1014,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 				// We must fill in all secondary keys for this multiplicity with blanks
 				if (!matchedVariableGroup)
 				{
-					if (vgNumber != top_level_vg_index)
+					if (vgNumber != primary_vg_index__in__top_level_vg_vector)
 					{
 						// Missing a variable group.  Fill with blanks.
 						int numberSecondaries = top_level_number_secondary_columns[vgNumber];
@@ -1036,7 +1036,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 				// we must now fill in the secondary keys.
 				// This "else" block could be merged with
 				// the "if" block, but for conceptual clarity it is separated.
-				if (vgNumber != top_level_vg_index)
+				if (vgNumber != primary_vg_index__in__top_level_vg_vector)
 				{
 					int numberSecondaries = top_level_number_secondary_columns[vgNumber];
 

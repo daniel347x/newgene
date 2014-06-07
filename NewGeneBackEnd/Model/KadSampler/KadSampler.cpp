@@ -1152,7 +1152,7 @@ void KadSampler::CalculateWeightings(int const K)
 
 				// Holes between time slices are handled here, as well as the standard case of no holes between time slices -
 				// There is no gap in the sequence of discretized weight values in branches.
-				branchWeighting.setWeighting(timeSlice.WidthForWeighting() * branch.number_branch_combinations);
+				branchWeighting.setWeighting(timeSlice.WidthForWeighting(time_granularity) * branch.number_branch_combinations);
 				branchWeighting.setWeightingRangeStart(currentWeighting);
 				currentWeighting += branchWeighting.getWeighting();
 
@@ -3173,7 +3173,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 			std::int64_t new_hit_number = 0;
 
 			// granulated output, full sampling
-			currentTimeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+			currentTimeSlice.loop_through_time_units(allWeightings.time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 			{
 				bool overlaps = false;
 				if (time_to_use_for_start < end && time_to_use_for_end > start)

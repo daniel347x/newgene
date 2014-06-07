@@ -15,6 +15,7 @@
 #	include <boost/pool/pool_alloc.hpp>
 #endif
 #include "../../Utilities/NewGeneException.h"
+#include "../../Utilities/TimeRangeHelper.h"
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 #include "../TimeGranularity.h"
 #include "../../Messager/Messager.h"
@@ -350,7 +351,7 @@ class TimeSlice
 			return getEnd() - getStart();
 		}
 
-		void loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)> & misc_function)
+		void loop_through_time_units(TIME_GRANULARITY const & time_granularity, boost::function<void(std::int64_t const, std::int64_t const)> & misc_function)
 		{
 			// ************************************************************************** //
 			// This function is called in the case where ALL we need to do is 
@@ -388,7 +389,7 @@ class TimeSlice
 		// ***************************************************************************** //
 		// Return the number of time slots corresponding to the given time unit
 		// ***************************************************************************** //
-		std::int64_t WidthForWeighting() const
+		std::int64_t WidthForWeighting(TIME_GRANULARITY const & time_granularity) const
 		{
 
 			if (none)
@@ -404,7 +405,7 @@ class TimeSlice
 			}
 
 			int number_of_time_units = 0;
-			loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+			loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 			{
 				++number_of_time_units;
 			}));
@@ -2352,7 +2353,9 @@ using Branches = FastSetMemoryTag<Branch, MEMORY_TAG>;
 // ******************************************************************************************************** //
 
 
-
+// Thin wrapper for all of the branches (and their leaves)
+// associated with any given time slice.
+// This class does not contain any information about its associated time slice.
 class VariableGroupBranchesAndLeaves
 {
 
@@ -2387,6 +2390,7 @@ struct tag__branches_and_leaves
 	typedef VariableGroupBranchesAndLeavesVector<MEMORY_TAG> type;
 };
 
+// Instances of this class wrap all data associated with a given time slice.
 class VariableGroupTimeSliceData
 {
 
@@ -2505,9 +2509,9 @@ class create_output_row_visitor : public boost::static_visitor<>
 		enum MODE
 		{
 			CREATE_ROW_MODE__NONE = 0
-									, CREATE_ROW_MODE__OUTPUT_FILE = 1
-											, CREATE_ROW_MODE__INSTANCE_DATA_VECTOR = 2
-													, CREATE_ROW_MODE__PREPARED_STATEMENT = 4
+			, CREATE_ROW_MODE__OUTPUT_FILE = 1
+			, CREATE_ROW_MODE__INSTANCE_DATA_VECTOR = 2
+			, CREATE_ROW_MODE__PREPARED_STATEMENT = 4
 		};
 
 		create_output_row_visitor(bool & first_)
@@ -2911,7 +2915,7 @@ class KadSampler
 		fast_int_to_childtoprimarymappingvector<hits_tag> mappings_from_child_leaf_to_primary;
 		fast_short_to_short_map<hits_tag> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 		int numberChildVariableGroups;
-		TIME_GRANULARITY time_granularity;
+		TIME_GRANULARITY time_granularity; // The time granularity of the primary variable group
 		std::int64_t random_rows_added;
 		Messager & messager;
 

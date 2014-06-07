@@ -180,7 +180,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, consolidate_rows(true)
 	, random_sampling_number_rows(1)
 	, random_sampling(false)
-	, top_level_vg_index(0)
+	, primary_vg_index__in__top_level_vg_vector(0)
 	, K(0)
 	, overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf(0)
 	, has_non_primary_top_level_groups { 0 }
@@ -476,7 +476,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// From the schema for the selected columns for the primary variable group,
 		// create a temporary table and store just the selected columns over just the selected time range.
 		// ********************************************************************************************************************************************************* //
-		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
+		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[primary_vg_index__in__top_level_vg_vector], primary_vg_index__in__top_level_vg_vector);
 		if (failed || CheckCancelled()) { return; }
 
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
@@ -491,9 +491,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Load raw data for primary variable group \"%1%\" over the selected time range...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Load raw data for primary variable group \"%1%\" over the selected time range...") % Table_VG_CATEGORY::GetVgDisplayTextShort(top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
-		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
+		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, primary_vg_index__in__top_level_vg_vector, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 
 		if (failed || CheckCancelled())
 		{
@@ -533,7 +533,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Do not build the child DMU key lookup cache here.
 		// Do that prior to loading each child variable group.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Build cache of available data for variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Build cache of available data for variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first)).str().c_str(), this);
 		allWeightings.ResetBranchCaches(-1, false);
 		if (failed || CheckCancelled()) { return; }
 
@@ -2274,13 +2274,13 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 
 	PopulateVariableGroups();
 
-	top_level_vg_index = 0;
+	primary_vg_index__in__top_level_vg_vector = 0;
 
-	if (primary_variable_groups_vector.size() > 1)
+	if (top_level_variable_groups_vector.size() > 1)
 	{
 		std::vector<WidgetInstanceIdentifier> variableGroupOptions;
-		std::for_each(primary_variable_groups_vector.cbegin(),
-					  primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
+		std::for_each(top_level_variable_groups_vector.cbegin(),
+					  top_level_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
 		{
 			variableGroupOptions.push_back(vg_to_selected.first);
 		});
@@ -2289,9 +2289,9 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 		msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.\nPlease select one to use as the primary variable group for this run:");
 
 		// 0-based
-		top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
+		primary_vg_index__in__top_level_vg_vector = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
 
-		if (top_level_vg_index == -1)
+		if (primary_vg_index__in__top_level_vg_vector == -1)
 		{
 			// user cancelled
 			failed = true;
@@ -2299,7 +2299,7 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 		}
 	}
 
-	top_level_vg = primary_variable_groups_vector[top_level_vg_index].first;
+	top_level_vg = top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first;
 
 	if (failed || CheckCancelled())
 	{
@@ -2313,7 +2313,7 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 		return;
 	}
 
-	allWeightings.time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
+	allWeightings.time_granularity = top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first.time_granularity;
 
 	// ************************************************************ //
 	// IMPORTANT:
@@ -2337,13 +2337,13 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 	// ***************************************************************************************************************** //
 	int primary_view_count = 0;
 	int primary_or_secondary_view_index = 0;
-	std::for_each(primary_variable_groups_vector.cbegin(),
-				  primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
+	std::for_each(top_level_variable_groups_vector.cbegin(),
+				  top_level_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
 	{
 		PopulateSchemaForRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, primary_or_secondary_view_index);
 
 		// Store the number of branch & leaf columns for the primary variable group
-		if (primary_or_secondary_view_index == top_level_vg_index)
+		if (primary_or_secondary_view_index == primary_vg_index__in__top_level_vg_vector)
 		{
 			allWeightings.number_branch_columns = 0;
 			allWeightings.number_primary_variable_group_single_leaf_columns = 0;
@@ -2384,7 +2384,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 
 	K = 0;
 	int highest_multiplicity = 1;
-	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[top_level_vg_index];
+	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[primary_vg_index__in__top_level_vg_vector];
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
 				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 	{
@@ -2433,7 +2433,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 	if (is_primary)
 	{
-		if (primary_or_secondary_view_index == top_level_vg_index)
+		if (primary_or_secondary_view_index == primary_vg_index__in__top_level_vg_vector)
 		{
 			columns_in_variable_group_view.schema_type = ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY;
 		}
@@ -2474,7 +2474,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 	// we know about or care about the sequence of primary key fields
 	// in the output.
 	// It is time to set this information in the global "sequence" metadata object.
-	if (primary_or_secondary_view_index == top_level_vg_index)
+	if (primary_or_secondary_view_index == primary_vg_index__in__top_level_vg_vector)
 	{
 
 		int primary_vg_output_column_sequence = 0;
@@ -2488,7 +2488,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 			for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 			{
-				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
 				{
 					++count_of_this_raw_variable_column_in_final_output;
 				}
@@ -2502,7 +2502,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 				for (auto & primary_key_entry__output__including_multiplicities : sequence.primary_key_sequence_info)
 				{
 					if (*variable_group_set_member.code ==
-						primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+						primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
 					{
 						primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = primary_vg_output_column_sequence;
 						++primary_vg_output_column_sequence;
@@ -2524,7 +2524,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 			for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 			{
-				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
 				{
 					++count_of_this_raw_variable_column_in_final_output;
 				}
@@ -2556,7 +2556,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 				for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 				{
-					if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+					if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
 					{
 						++count_of_this_raw_variable_column_in_final_output;
 					}
@@ -2571,7 +2571,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 					for (auto & primary_key_entry__output__including_multiplicities : sequence.primary_key_sequence_info)
 					{
 						if (*variable_group_set_member.code ==
-							primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+							primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
 						{
 							if (test_multiplicity == current_multiplicity)
 							{
@@ -3604,7 +3604,7 @@ void OutputModel::OutputGenerator::PopulateVariableGroups()
 	{
 		// Get all the variable groups corresponding to the primary UOA (identical except possibly for time granularity)
 		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = (*the_map)[uoa__to__dmu_category_counts.first];
-		primary_variable_groups_vector.insert(primary_variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
+		top_level_variable_groups_vector.insert(top_level_variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
 	});
 	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
 	{
@@ -3667,8 +3667,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 			std::map<WidgetInstanceIdentifier, int> map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group;
 
 			int view_count = 0;
-			std::for_each(primary_variable_groups_vector.cbegin(),
-						  primary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category,
+			std::for_each(top_level_variable_groups_vector.cbegin(),
+						  top_level_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category,
 								  &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys,
 								  &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](
 							  std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
@@ -4472,7 +4472,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 		if (!bad && !sorting_row_of_data.branch_has_excluded_dmu)
 		{
 
-			TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
+			TIME_GRANULARITY time_granularity = top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first.time_granularity;
 
 			switch (merge_mode)
 			{
@@ -4684,7 +4684,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	result_columns.has_no_datetime_columns = false;
 
 
-	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[top_level_vg_index];
+	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[primary_vg_index__in__top_level_vg_vector];
 
 	// **************************************************************************************** //
 	// Start with the primary key columns of multiplicity 1.
@@ -4784,7 +4784,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 	{
 
-		ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[top_level_vg_index];
+		ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[primary_vg_index__in__top_level_vg_vector];
 
 		WidgetInstanceIdentifiers const & variables_selected =
 			(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
@@ -4855,7 +4855,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 				  primary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
 
-		if (primary_group_number == top_level_vg_index)
+		if (primary_group_number == primary_vg_index__in__top_level_vg_vector)
 		{
 			++primary_group_number;
 			return; // already handled - the primary top-level variable group's secondary data always goes first
@@ -5311,7 +5311,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 
 		if (failed || CheckCancelled()) { return; }
 
-		if (current_top_level_vg_index == top_level_vg_index)
+		if (current_top_level_vg_index == primary_vg_index__in__top_level_vg_vector)
 		{
 			// Skip the primary top-level variable group;
 			// we are only populating columns of secondary data
@@ -5340,7 +5340,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 		// load the selected columns of raw data into the temporary table created with the same schema.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Merge variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(primary_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Merge variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(top_level_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
 
@@ -5433,7 +5433,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 
 				// Grab the primary key information for the TOP LEVEL variable group
 				PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_primary_not_child_variable_group =
-					full_kad_key_info.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index];
+					full_kad_key_info.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector];
 
 				// Now grab the primary key information for the current CHILD variable group
 				PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_child_variable_group =
@@ -6086,7 +6086,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 		// (or sub-time-unit, in case child data has split rows into pieces).
 		// The proper splitting of rows has already occurred.
 
-		TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
+		TIME_GRANULARITY time_granularity = top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first.time_granularity;
 
 		std::int64_t total_number_output_rows = 0;
 
@@ -6140,7 +6140,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						size_t number_rows_this_time_slice = output_rows_for_this_full_time_slice.size();
 
 						// granulated output, full sampling
-						timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
 							total_number_output_rows += static_cast<std::int64_t>(number_rows_this_time_slice);
 						}));
@@ -6257,7 +6257,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						// random sampling; not consolidated
 						auto & hits = branch.hits;
 						std::int64_t hit_number = 0;
-						timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
 							auto const & time_unit_hit = hits[hit_number];
 							auto const & output_rows_for_this_time_unit = time_unit_hit.second;
@@ -6278,7 +6278,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						// full sampling; not consolidated
 						auto const & time_unit_hit = hits[-1];
 						auto const & output_rows_for_this_full_time_slice = time_unit_hit.second;
-						timeSlice.loop_through_time_units(boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
 							TimeSlice current_slice(time_to_use_for_start, time_to_use_for_end);
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
