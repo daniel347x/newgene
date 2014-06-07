@@ -226,7 +226,8 @@
           <item>
            <widget class="QCheckBox" name="mergeIdenticalRows">
             <property name="text">
-             <string>Merge identical adjacent output rows (recommended)</string>
+             <string>Merge identical adjacent output rows
+(recommended except for exact statistical analysis)</string>
             </property>
            </widget>
           </item>
