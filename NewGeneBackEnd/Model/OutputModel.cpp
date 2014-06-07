@@ -525,7 +525,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// So do a one-time pass to copy the leaves from the set into the vector
 		// for rapid lookup access WHEN CONSTRUCTING OUTPUT ROWS.
 		//
-		// The code that constructs the output rows looks in each "BranchOutputRow" instance within (a time unit within) the branch
+		// The code that constructs the output rows looks in each "BranchOutputRow" instance within (a sub-time unit within) the branch
 		// for an INDEX into a leaf, so that it can look into that leaf and retrieve
 		// the actual DMU data for the leaf, AND indexes into the non-primary top-level data cache
 		// for that data.
