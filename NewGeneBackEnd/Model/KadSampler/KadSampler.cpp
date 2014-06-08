@@ -769,7 +769,7 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 						// (a SINGLE child branch + leaf match, even if there are MULTIPLE child leaf slots in the output row).
 						// Once the output rows are pulled up (in a single data structure),
 						// in turn they are looped through, and within each of THOSE is a vector that lists
-						// the CHILD LEAF index within that given output row that matches the incoming child data.
+						// the CHILD LEAF index/es within that given output row that matches the incoming child data.
 						//
 						// ****************************************************************************************************************** //
 
