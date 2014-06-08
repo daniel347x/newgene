@@ -858,6 +858,9 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	is_index_a_secondary_key.clear();
 	indices_of_secondary_key_columns.clear();
 	indices_of_all_columns.clear();
+	rowid = n0;
+	branch_has_excluded_dmu = false;
+	leaf_has_excluded_dmu = false;
 }
 
 void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGreaterThanOne(KadSampler & allWeightings, ColumnsInTempView const & column_schema,
