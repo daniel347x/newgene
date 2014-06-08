@@ -995,7 +995,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_excluded_dmu_category)
 					{
-						is_excluded_dmu_set_member = model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_int64);
+						is_excluded_dmu_set_member = ! model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_int64);
 					}
 
 					std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> binding;
@@ -1086,7 +1086,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_excluded_dmu_category)
 					{
-						is_excluded_dmu_set_member = model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_string.c_str());
+						is_excluded_dmu_set_member = ! model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_string.c_str());
 					}
 
 					current_parameter_strings.push_back(data_string);
