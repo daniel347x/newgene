@@ -277,12 +277,12 @@ void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_
 
 bool Table__Limit_DMUs__Elements::ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
 {
-	return getIdentifier(dmu_member_uuid, *dmu_category.code, true).IsEmpty();
+	return ! getIdentifier(dmu_member_uuid, *dmu_category.code, true).IsEmpty();
 }
 
 bool Table__Limit_DMUs__Elements::ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::int64_t const & dmu_member_uuid)
 {
-	return getIdentifier(boost::lexical_cast<std::string>(dmu_member_uuid), *dmu_category.code, true).IsEmpty();
+	return ! getIdentifier(boost::lexical_cast<std::string>(dmu_member_uuid), *dmu_category.code, true).IsEmpty();
 }
 
 bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, bool const also_confirm_using_cache)
