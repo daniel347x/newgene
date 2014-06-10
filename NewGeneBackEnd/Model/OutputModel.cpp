@@ -461,6 +461,37 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		Prepare(allWeightings);
 		if (failed || CheckCancelled()) { return; }
 
+		// Now that the time granularity has been set (in "Prepare()"),
+		// make sure the time range begins and ends at the closest absolute granularity
+		std::int64_t timerange_start_test_down = TimeRange::determineAligningTimestamp(timerange_start, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
+		std::int64_t timerange_start_test_up = TimeRange::determineAligningTimestamp(timerange_start, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
+		std::int64_t timerange_end_test_down = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
+		std::int64_t timerange_end_test_up = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
+		if (timerange_start != timerange_start_test_down)
+		{
+			// round
+			if (timerange_start - timerange_start_test_down > timerange_start_test_up - timerange_start)
+			{
+				timerange_start = timerange_start_test_up;
+			}
+			else
+			{
+				timerange_start = timerange_start_test_down;
+			}
+		}
+		if (timerange_end != timerange_end_test_up)
+		{
+			// round
+			if (timerange_end - timerange_end_test_down >= timerange_end_test_up - timerange_end)
+			{
+				timerange_end = timerange_end_test_up;
+			}
+			else
+			{
+				timerange_end = timerange_end_test_down;
+			}
+		}
+
 		// ********************************************************************************************************************************************************* //
 		// Build a schema object, one per variable group with selected data,
 		// intended for internal use by the K-ad algorithm (i.e., converted from the raw format used in the database
