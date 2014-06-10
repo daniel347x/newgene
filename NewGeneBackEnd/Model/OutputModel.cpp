@@ -4307,6 +4307,29 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsIn
 			return;
 		}
 
+		// Data always starts and ends on the proper granularity
+		// for any given variable group.
+		//
+		// Also, timerange_start and timerange_end
+		// both currently lie on a valid absolute point for ALL time granularities
+		// (currently)
+		//
+		// If you consider both of the above, you'll see that the following logic works
+		if (sorting_row_of_data.datetime_start < timerange_start)
+		{
+			sorting_row_of_data.datetime_start = timerange_start;
+		}
+
+		if (sorting_row_of_data.datetime_end > timerange_end)
+		{
+			sorting_row_of_data.datetime_end = timerange_end;
+		}
+
+		if (sorting_row_of_data.datetime_start >= sorting_row_of_data.datetime_end)
+		{
+			continue;
+		}
+
 		// Construct branch and leaf
 
 		// Construct Leaf
