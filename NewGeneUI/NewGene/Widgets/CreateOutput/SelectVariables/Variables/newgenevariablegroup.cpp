@@ -327,3 +327,8 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
 	return true;
 
 }
+
+QListView * NewGeneVariableGroup::GetListView()
+{
+    return ui->listView;
+}
