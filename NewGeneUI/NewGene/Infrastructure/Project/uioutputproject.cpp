@@ -107,7 +107,25 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 				return false;
 			}
 
-			QModelIndex selectedIndex = listpane_selectionModel->currentIndex();
+			QModelIndexes selectedIndexes = listpane_selectionModel->selectedIndexes();
+
+			if (selectedIndexes.empty())
+			{
+				// No selection
+				return false;
+			}
+		
+			if (selectedIndexes.size() > 1)
+			{
+				boost::format msg("Simultaneous selections not allowed.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+		
+			QModelIndex selectedIndex = selectedIndexes[0];
+		
 			if (!selectedIndex.isValid())
 			{
 				boost::format msg("A variable group must be selected.");

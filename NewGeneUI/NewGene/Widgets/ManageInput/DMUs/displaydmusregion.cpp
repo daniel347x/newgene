@@ -1226,7 +1226,25 @@ bool DisplayDMUsRegion::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 		return false;
 	}
 
-	QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+	QModelIndexList selectedIndexes = dmu_selectionModel->selectedIndexes();
+
+	if (selectedIndexes.empty())
+	{
+		// No selection
+		return false;
+	}
+
+	if (selectedIndexes.size() > 1)
+	{
+		boost::format msg("Simultaneous selections not allowed.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
+
+	QModelIndex selectedIndex = selectedIndexes[0];
+
 	if (!selectedIndex.isValid())
 	{
 		// No selection

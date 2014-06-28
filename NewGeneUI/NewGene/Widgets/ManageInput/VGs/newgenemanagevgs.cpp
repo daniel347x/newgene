@@ -398,7 +398,25 @@ bool NewGeneManageVGs::GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstan
 		return false;
 	}
 
-	QModelIndex selectedIndex = vg_selectionModel->currentIndex();
+	QModelIndexList selectedIndexes = vg_selectionModel->selectedIndexes();
+
+	if (selectedIndexes.empty())
+	{
+		// No selection
+		return false;
+	}
+
+	if (selectedIndexes.size() > 1)
+	{
+		boost::format msg("Simultaneous selections not allowed in NewGeneManageVGs DMU category widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
+
+	QModelIndex selectedIndex = selectedIndexes[0];
+
 	if (!selectedIndex.isValid())
 	{
 		// No selection
@@ -576,7 +594,25 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 				return false;
 			}
 
-			QModelIndex selectedIndex = listpane_selectionModel->currentIndex();
+			QModelIndexList selectedIndexes = listpane_selectionModel->selectedIndexes();
+
+			if (selectedIndexes.empty())
+			{
+				// No selection
+				return false;
+			}
+		
+			if (selectedIndexes.size() > 1)
+			{
+				boost::format msg("Simultaneous selections not allowed.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+		
+			QModelIndex selectedIndex = selectedIndexes[0];
+
 			if (!selectedIndex.isValid())
 			{
 				boost::format msg("A unit of analysis must be associated with the new variable group.");
