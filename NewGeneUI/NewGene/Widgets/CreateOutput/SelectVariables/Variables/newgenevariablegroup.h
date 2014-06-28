@@ -5,6 +5,7 @@
 #include "../../../newgenewidget.h"
 
 class QStandardItem;
+class QListView;
 
 namespace Ui
 {
@@ -32,8 +33,8 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 		void ReceiveVariableItemChanged(QStandardItem*);
 
-        // For Squish only: exception to rule regarding slots; return something here
-        QListView * GetListView();
+		// For Squish only: exception to rule regarding slots; return something here
+		QListView * GetListView();
 
 	protected:
 		void changeEvent( QEvent * e );
