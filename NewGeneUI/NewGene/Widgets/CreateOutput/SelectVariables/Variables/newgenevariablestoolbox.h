@@ -28,7 +28,10 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX); // us, parent
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE); // child
 
-	private:
+        // For Squish only: exception to rule regarding slots; return something here
+        QListView * GetActiveListView(int const index);
+
+    private:
 
 		NewGeneVariableGroup * groups;
 
