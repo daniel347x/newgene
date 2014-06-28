@@ -199,5 +199,6 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 
 QListView * NewGeneVariablesToolbox::GetListView(int const index)
 {
-    return static_cast<QListView*>(widget(index));
+	NewGeneVariableGroup * vg = static_cast<NewGeneVariableGroup*>(widget(index));
+	return vg->GetListView();
 }
