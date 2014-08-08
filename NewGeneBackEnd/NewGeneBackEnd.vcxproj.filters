@@ -318,12 +318,6 @@
     <ClInclude Include="Model\Tables\FieldTypes.h">
       <Filter>Header Files\Model\Tables</Filter>
     </ClInclude>
-    <ClInclude Include="Model\Tables\Executor.h">
-      <Filter>Header Files\Model\Tables</Filter>
-    </ClInclude>
-    <ClInclude Include="Model\Tables\Fields.h">
-      <Filter>Header Files\Model\Tables</Filter>
-    </ClInclude>
     <ClInclude Include="Model\Tables\TableInstances\VariableGroupData.h">
       <Filter>Header Files\Model\Tables\TableInstances</Filter>
     </ClInclude>
@@ -362,6 +356,12 @@
     </ClInclude>
     <ClInclude Include="Model\Tables\TableInstances\Limit_DMUs.h">
       <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\Executor.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\Fields.h">
+      <Filter>Header Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
