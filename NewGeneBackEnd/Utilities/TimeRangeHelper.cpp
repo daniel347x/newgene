@@ -180,12 +180,26 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 
 		case TIME_GRANULARITY__YEAR:
 			{
-				result = date_year;
-				if (difference_between_incoming_and_year.total_milliseconds() != 0)
+
+				//result = date_year;
+				//if (difference_between_incoming_and_year.total_milliseconds() != 0)
+				//{
+				//	// round to next year
+				//	result += boost::gregorian::years(1);
+				//}
+
+				bool exact_match = false;
+				if (difference_between_incoming_and_year.total_milliseconds() == 0)
 				{
-					// round to next year
+					exact_match = true;
+				}
+
+				result = date_year;
+				if (!exact_match && align_mode == ALIGN_MODE_UP)
+				{
 					result += boost::gregorian::years(1);
 				}
+		
 			}
 			break;
 
