@@ -524,20 +524,24 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 						// Now add raw data to the table
 						errorMsg.clear();
+						std::string msgBoxErrors;
 						success = table_importer.DoImport(errorMsg, messager);
 						if (table_importer.badreadlines > 0)
 						{
 							boost::format msg("Number rows of data failed to read from import file: %1%");
 							msg % boost::lexical_cast<std::string>(table_importer.badreadlines);
 							table_importer.errors.push_back(msg.str());
+							msgBoxErrors += msg.str();
+							msgBoxErrors += "\n";
 						}
 						if (table_importer.badwritelines > 0)
 						{
 							boost::format msg("Number rows of data failed to write to database: %1%");
 							msg % boost::lexical_cast<std::string>(table_importer.badwritelines);
 							table_importer.errors.push_back(msg.str());
+							msgBoxErrors += msg.str();
+							msgBoxErrors += "\n";
 						}
-						std::string allErrors;
 						boost::posix_time::ptime current_date_time = boost::posix_time::second_clock::local_time();
 						if (!success)
 						{
@@ -545,6 +549,8 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							msg % boost::posix_time::to_simple_string(current_date_time).c_str() % errorMsg;
 							std::string new_error(msg.str());
 							table_importer.errors.push_back(new_error);
+							msgBoxErrors += msg.str();
+							msgBoxErrors += "\n";
 						}
 						if (!table_importer.errors.empty())
 						{
@@ -552,6 +558,9 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							msg % boost::posix_time::to_simple_string(current_date_time).c_str();
 							std::string errorMsg = msg.str();
 							table_importer.errors.push_back(errorMsg);
+							msgBoxErrors += msg.str();
+							msgBoxErrors += "\n";
+
 							std::fstream importlog;
 							importlog.open("newgene.import.log", std::ios::out | std::ios::app);
 							std::for_each(table_importer.errors.crbegin(), table_importer.errors.crend(), [&](std::string const & the_error)
@@ -560,17 +569,15 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								{
 									importlog << the_error << std::endl;
 								}
-								allErrors += the_error;
-								allErrors += "\n";
 							});
 							importlog.close();
-							messager.ShowMessageBox(allErrors);
+							messager.ShowMessageBox(msgBoxErrors);
 						}
 						if (!success)
 						{
 							new_table->DeleteDataTable(input_model.getDb(), &input_model);
 							boost::format msg("%1%");
-							msg % allErrors;
+							msg % msgBoxErrors;
 							throw NewGeneException() << newgene_error_description(msg.str());
 						}
 

@@ -672,7 +672,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	badreadlines = table_importer.badreadlines;
 	badwritelines = table_importer.badwritelines;
 
-	std::string allErrors;
+	std::string msgBoxErrors;
 	boost::posix_time::ptime current_date_time = boost::posix_time::second_clock::local_time();
 	if (!success)
 	{
@@ -681,6 +681,8 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 		msg % errorMsg;
 		std::string new_error(msg.str());
 		table_importer.errors.push_back(new_error);
+		msgBoxErrors += msg.str();
+		msgBoxErrors += "\n";
 	}
 	if (!table_importer.errors.empty())
 	{
@@ -688,6 +690,9 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 		msg % boost::posix_time::to_simple_string(current_date_time).c_str();
 		std::string errorMsg = msg.str();
 		table_importer.errors.push_back(errorMsg);
+		msgBoxErrors += msg.str();
+		msgBoxErrors += "\n";
+
 		std::fstream importlog;
 		importlog.open("newgene.import.log", std::ios::out | std::ios::app);
 		std::for_each(table_importer.errors.crbegin(), table_importer.errors.crend(), [&](std::string const & the_error)
@@ -696,16 +701,14 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 			{
 				importlog << the_error << std::endl;
 			}
-			allErrors += the_error;
-			allErrors += "\n";
 		});
 		importlog.close();
-		messager.ShowMessageBox(allErrors);
+		messager.ShowMessageBox(msgBoxErrors);
 	}
 	if (!success)
 	{
 		boost::format msg("%1%");
-		msg % allErrors;
+		msg % msgBoxErrors;
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
