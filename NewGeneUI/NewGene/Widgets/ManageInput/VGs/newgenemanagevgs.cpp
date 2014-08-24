@@ -892,12 +892,12 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
     form.addRow(new QLabel("    (Note: A row with the names of the given columns is required.)"));
 
-    QString labelIncludeColumnDescriptions = QString("Data file includes a row with column descriptions");
+    QString labelIncludeColumnDescriptions = QString("Data file includes an additional row with column descriptions");
 	QCheckBox * checkboxIncludeColumnDescriptions = new QCheckBox(labelIncludeColumnDescriptions, &dialog);
 	form.addRow(checkboxIncludeColumnDescriptions);
 	fieldsCheckboxes << checkboxIncludeColumnDescriptions;
 
-	QString labelIncludeDataTypes = QString("Data file includes a row with column data types (default is 'int')");
+    QString labelIncludeDataTypes = QString("Data file includes an additional row with column data types (default is 'int')");
 	QCheckBox * checkboxIncludeDataTypes = new QCheckBox(labelIncludeDataTypes, &dialog);
 	form.addRow(checkboxIncludeDataTypes);
 	fieldsCheckboxes << checkboxIncludeDataTypes;
