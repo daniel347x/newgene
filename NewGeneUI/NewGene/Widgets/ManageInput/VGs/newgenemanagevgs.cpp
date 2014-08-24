@@ -890,8 +890,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	// Add rows that allow the user to state whether the input file has rows containing the column descriptions, or describing the column data types
 	QList<QCheckBox *> fieldsCheckboxes;
 
-    QString labelColumnNamesMustBeIncluded = QString("    (Note: A row with the names of the given columns is required.)");
-    form.addRow(labelColumnNamesMustBeIncluded);
+    form.addRow(new QLabel("    (Note: A row with the names of the given columns is required.)"));
 
     QString labelIncludeColumnDescriptions = QString("Data file includes a row with column descriptions");
 	QCheckBox * checkboxIncludeColumnDescriptions = new QCheckBox(labelIncludeColumnDescriptions, &dialog);
