@@ -137,6 +137,11 @@ class NewGeneWidget
 
 		virtual void Empty() {}
 
+    protected:
+
+        bool inputConnected;
+        bool outputConnected;
+
 };
 
 class WidgetCreationInfo

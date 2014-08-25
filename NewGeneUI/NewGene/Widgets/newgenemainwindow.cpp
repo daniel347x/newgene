@@ -62,7 +62,7 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 			pTWmain->NewGeneUIInitialize();
 		}
 
-	}
+    }
 	catch ( boost::exception & e )
 	{
 
@@ -100,7 +100,16 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 NewGeneMainWindow::~NewGeneMainWindow()
 {
 
-	projectManagerUI().EndAllLoops();
+    if (outp)
+    {
+        outp->UnregisterInterestInChanges(this);
+    }
+    if (inp)
+    {
+        inp->UnregisterInterestInChanges(this);
+    }
+
+    projectManagerUI().EndAllLoops();
 
 	// Manage global settings in main thread
 	settingsManagerUI().globalSettings().EndLoopAndBackgroundPool();
@@ -134,7 +143,44 @@ void NewGeneMainWindow::doInitialize()
 	settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
 	settingsManagerUI().globalSettings().WriteSettingsToFile(messager); // Write any defaults back to disk, along with values just read from disk
 
-	projectManagerUI().LoadOpenProjects(this, this);
+    PrepareInputWidget();
+    PrepareOutputWidget();
+
+    projectManagerUI().LoadOpenProjects(this, this);
+
+}
+
+void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+{
+
+    NewGeneWidget::UpdateOutputConnections(connection_type, project);
+
+    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+    {
+        ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset - ";
+    }
+
+    if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+    {
+        ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset";
+    }
+
+}
+
+void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+
+    NewGeneWidget::UpdateInputConnections(connection_type, project);
+
+    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
+    {
+        ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset - ";
+    }
+
+    if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
+    {
+        ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset";
+    }
 
 }
 

@@ -20,6 +20,8 @@ NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
 	, widget_type(creation_info.widget_type)
 	, data_instance(creation_info.data_instance)
 	, top_level(creation_info.top_level)
+    , inputConnected(false)
+    , outputConnected(false)
 {
 }
 
@@ -68,10 +70,15 @@ void NewGeneWidget::PrepareInputWidget(bool const also_link_output)
 	{
 		return;
 	}
-	self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
-	if (also_link_output)
+    if (!inputConnected)
+    {
+        self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
+        inputConnected = true;
+    }
+    if (also_link_output && !outputConnected)
 	{
 		self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
+        outputConnected = true;
 	}
 }
 
@@ -81,8 +88,16 @@ void NewGeneWidget::PrepareOutputWidget()
 	{
 		return;
 	}
-	self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
-	self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
+    if (!inputConnected)
+    {
+        self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
+        inputConnected = true;
+    }
+    if (!outputConnected)
+    {
+        self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
+        outputConnected = true;
+    }
 }
 
 NewGeneMainWindow & NewGeneWidget::mainWindow()
