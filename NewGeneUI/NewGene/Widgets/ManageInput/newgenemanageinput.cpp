@@ -56,7 +56,7 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
     QString newLabel { titleBarBaseText };
     if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
 	{
-        newLabel += "<span style=\"font-size: 10px; font-weight: normal; vertical-align: super;\"> - ";
+        newLabel += "<span style=\"font-size: 12px; font-weight: normal; vertical-align: super;\"> - ";
 		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
         newLabel += "</span>";
 		ui->LabelManageInput->setText(newLabel);
