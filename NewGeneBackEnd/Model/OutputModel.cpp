@@ -784,7 +784,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// when trying to allocate memory for the strings if there's hundreds of MB's worth of XML
 		//
 		// std::vector<std::string> sdata_;
-		// SpitAllWeightings(sdata_, allWeightings, true, "file_name_appending_text");
+		// SpitAllWeightings(allWeightings, "filename"); // ".xml" automatically appended to the filename
 		//
 		// ********************************************************************************************************************************************************* //
 		// ********************************************************************************************************************************************************* //

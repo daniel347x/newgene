@@ -1255,7 +1255,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 		{
 		}
 
-			PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0, bool const has_excluded_dmu_member_ = false)
+		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0, bool const has_excluded_dmu_member_ = false)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data { index_into_raw_data_ }
 			, has_excluded_dmu_member{ has_excluded_dmu_member_ }
@@ -2262,7 +2262,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		void setTopGroupIndexIntoRawData(Leaf const & existingLeaf, int const variable_group_number, std::int32_t const other_top_level_index_into_raw_data) const
 		{
-			auto const leafPtr = leaves.find(existingLeaf);
+			auto const & leafPtr = leaves.find(existingLeaf);
 			leafPtr->other_top_level_indices_into_raw_data[variable_group_number] = other_top_level_index_into_raw_data;
 			ResetLeafCache();
 		}
