@@ -157,12 +157,14 @@ void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 
     if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
     {
-        ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset - ";
+        // Let the pane itself handle this.
+        //ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset - ";
     }
 
     if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
     {
-        ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset";
+        // Let the pane itself handle this.
+        //ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset";
     }
 
 }
@@ -174,12 +176,14 @@ void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 
     if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
     {
-        ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset - ";
+        // Let the pane itself handle this.
+        //ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset - ";
     }
 
     if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
     {
-        ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset";
+        // Let the pane itself handle this.
+        //ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset";
     }
 
 }

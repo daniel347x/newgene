@@ -18,6 +18,8 @@ NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 		pTWoutput->NewGeneUIInitialize();
 	}
 
+    PrepareOutputWidget();
+
 }
 
 NewGeneCreateOutput::~NewGeneCreateOutput()
@@ -38,4 +40,21 @@ void NewGeneCreateOutput::changeEvent( QEvent * e )
 		default:
 			break;
 	}
+}
+
+void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+{
+
+    NewGeneWidget::UpdateOutputConnections(connection_type, project);
+
+    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+    {
+        ui->LabelCreateOutput->text = "Create Output Dataset - ";
+    }
+
+    if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+    {
+        ui->LabelCreateOutput->text = "Create Output Dataset";
+    }
+
 }
