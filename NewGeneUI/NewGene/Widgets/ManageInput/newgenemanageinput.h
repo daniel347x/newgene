@@ -28,8 +28,7 @@ class NewGeneManageInput : public QWidget, public NewGeneWidget // do not reorde
 	signals:
 
 	public slots:
-        void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
-        void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 
 	private:
 
