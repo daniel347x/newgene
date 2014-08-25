@@ -4,7 +4,7 @@
 #include "newgenetabwidgetmanageinput.h"
 #include "uiinputproject.h"
 
-QString NewGeneManageInput::titleBarBaseText { "<span style=\"font-size: 20px; font-weight: bold;\">Manage Input Dataset</span>" };
+QString NewGeneManageInput::titleBarBaseText { "<span style=\"font-size: 18px; font-weight: normal;\">Manage Input Dataset</span>" };
 
 NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 	QWidget( parent ),
@@ -56,7 +56,7 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
     QString newLabel { titleBarBaseText };
     if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
 	{
-        newLabel += "<span style=\"font-size: 10px; font-weight: normal;\"> - ";
+        newLabel += "<span style=\"font-size: 10px; font-weight: normal; vertical-align: middle;\"> - ";
 		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
         newLabel += "</span>";
 		ui->LabelManageInput->setText(newLabel);

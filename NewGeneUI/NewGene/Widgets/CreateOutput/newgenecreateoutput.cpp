@@ -4,7 +4,7 @@
 #include "newgenetabwidget.h"
 #include "uioutputproject.h"
 
-QString NewGeneCreateOutput::titleBarBaseText { "<span style=\"font-size: 20px; font-weight: bold;\">Create Output Dataset</span>" };
+QString NewGeneCreateOutput::titleBarBaseText { "<span style=\"font-size: 18px; font-weight: normal;\">Create Output Dataset</span>" };
 
 NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 	QWidget( parent ),
@@ -56,10 +56,11 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 	QString newLabel { titleBarBaseText };
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
 	{
-		newLabel += "<span style=\"font-size: 10px; font-weight: normal;\"> - ";
+        newLabel += "<span style=\"font-size: 10px; font-weight: normal; vertical-align: middle;\"> - ";
 		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
 		newLabel += "</span>";
-	}
+        ui->LabelCreateOutput->setText(newLabel);
+    }
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
