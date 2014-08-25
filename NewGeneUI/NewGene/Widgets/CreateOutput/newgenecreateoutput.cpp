@@ -2,6 +2,7 @@
 #include "ui_newgenecreateoutput.h"
 
 #include "newgenetabwidget.h"
+#include "uioutputproject.h"
 
 NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 	QWidget( parent ),
@@ -47,17 +48,17 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-    Qstring newLabel { "Create Output Dataset" };
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
+	QString newLabel { "Create Output Dataset" };
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
 	{
-        newLabel += " - ";
-        newLabel += project->backend()->projectSettings().GetSettingsPath().string().c_str();
-        ui->LabelCreateOutput->setText(newLabel);
-    }
+		newLabel += " - ";
+		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
+		ui->LabelCreateOutput->setText(newLabel);
+	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
-        ui->LabelCreateOutput->setText(newLabel);
+		ui->LabelCreateOutput->setText(newLabel);
 	}
 
 }

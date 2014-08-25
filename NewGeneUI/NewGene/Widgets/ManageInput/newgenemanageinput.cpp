@@ -2,6 +2,7 @@
 #include "ui_newgenemanageinput.h"
 
 #include "newgenetabwidgetmanageinput.h"
+#include "uiinputproject.h"
 
 NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 	QWidget( parent ),
@@ -47,17 +48,17 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 
-    Qstring newLabel { "Manage Input Dataset" };
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
+	QString newLabel { "Manage Input Dataset" };
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
 	{
-        newLabel += " - ";
-        newLabel += project->backend()->projectSettings().GetSettingsPath().string().c_str();
-        ui->LabelManageInput->setText(newLabel);
+		newLabel += " - ";
+		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
+		ui->LabelManageInput->setText(newLabel);
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
-        ui->LabelManageInput->setText(newLabel);
+		ui->LabelManageInput->setText(newLabel);
 	}
 
 }
