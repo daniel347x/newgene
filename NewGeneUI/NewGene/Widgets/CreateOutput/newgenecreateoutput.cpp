@@ -23,8 +23,8 @@ NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 
 	PrepareOutputWidget();
 
-    ui->LabelCreateOutput->setTextFormat(Qt::TextFormat::RichText);
-    ui->LabelManageInput->setText(titleBarBaseText);
+	ui->LabelCreateOutput->setTextFormat(Qt::TextFormat::RichText);
+	ui->LabelCreateOutput->setText(titleBarBaseText);
 
 }
 
@@ -53,13 +53,13 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-    QString newLabel { titleBarBaseText };
+	QString newLabel { titleBarBaseText };
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
 	{
-        newLabel += "<span style=\"font-size: 10px; font-weight: normal;\"> - ";
-        newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
-        newLabel += "</span>";
-    }
+		newLabel += "<span style=\"font-size: 10px; font-weight: normal;\"> - ";
+		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
+		newLabel += "</span>";
+	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
