@@ -21,6 +21,10 @@ NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 
 	PrepareInputWidget();
 
+    ui->LabelManageInput->setTextFormat(Qt::TextFormat::RichText);
+    QString newLabel { "<span style=\"font-size: 24px; font-weight: bold;\">Manage Input Dataset</span>" };
+    ui->LabelManageInput->setText(newLabel);
+
 }
 
 NewGeneManageInput::~NewGeneManageInput()
@@ -51,8 +55,9 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 	QString newLabel { "Manage Input Dataset" };
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
 	{
-		newLabel += " - ";
+        newLabel += " - <span style=\"font-size: 12px; font-weight: normal;\">";
 		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
+        newLabel += "</span>";
 		ui->LabelManageInput->setText(newLabel);
 	}
 

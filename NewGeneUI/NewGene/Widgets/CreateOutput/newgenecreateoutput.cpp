@@ -21,6 +21,8 @@ NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 
 	PrepareOutputWidget();
 
+    ui->LabelCreateOutput->setTextFormat(Qt::TextFormat::RichText);
+
 }
 
 NewGeneCreateOutput::~NewGeneCreateOutput()
