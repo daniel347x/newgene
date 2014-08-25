@@ -34,6 +34,10 @@ class NewGeneManageInput : public QWidget, public NewGeneWidget // do not reorde
 
 		Ui::NewGeneManageInput * ui;
 
+    protected:
+
+        static QString titleBarBaseText;
+
 };
 
 #endif // NEWGENEMANAGEINPUT_H

@@ -4,6 +4,8 @@
 #include "newgenetabwidget.h"
 #include "uioutputproject.h"
 
+QString NewGeneCreateOutput::titleBarBaseText { "<span style=\"font-size: 20px; font-weight: bold;\">Create Output Dataset</span>" };
+
 NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 	QWidget( parent ),
 	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
@@ -22,6 +24,7 @@ NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 	PrepareOutputWidget();
 
     ui->LabelCreateOutput->setTextFormat(Qt::TextFormat::RichText);
+    ui->LabelManageInput->setText(titleBarBaseText);
 
 }
 
@@ -50,13 +53,13 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-	QString newLabel { "Create Output Dataset" };
+    QString newLabel { titleBarBaseText };
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
 	{
-		newLabel += " - ";
-		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
-		ui->LabelCreateOutput->setText(newLabel);
-	}
+        newLabel += "<span style=\"font-size: 10px; font-weight: normal;\"> - ";
+        newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
+        newLabel += "</span>";
+    }
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{

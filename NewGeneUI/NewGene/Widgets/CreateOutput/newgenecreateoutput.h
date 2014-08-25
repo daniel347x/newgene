@@ -34,6 +34,11 @@ class NewGeneCreateOutput : public QWidget, public NewGeneWidget // do not reord
 
 		Ui::NewGeneCreateOutput * ui;
 
+    protected:
+
+        static QString titleBarBaseText;
+
+
 };
 
 #endif // NEWGENECREATEOUTPUT_H

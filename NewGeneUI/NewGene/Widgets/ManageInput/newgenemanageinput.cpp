@@ -4,6 +4,8 @@
 #include "newgenetabwidgetmanageinput.h"
 #include "uiinputproject.h"
 
+QString NewGeneManageInput::titleBarBaseText { "<span style=\"font-size: 20px; font-weight: bold;\">Manage Input Dataset</span>" };
+
 NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 	QWidget( parent ),
 	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_INPUT_WIDGET) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
@@ -22,8 +24,7 @@ NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 	PrepareInputWidget();
 
     ui->LabelManageInput->setTextFormat(Qt::TextFormat::RichText);
-    QString newLabel { "<span style=\"font-size: 24px; font-weight: bold;\">Manage Input Dataset</span>" };
-    ui->LabelManageInput->setText(newLabel);
+    ui->LabelManageInput->setText(titleBarBaseText);
 
 }
 
@@ -52,10 +53,10 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 
-	QString newLabel { "Manage Input Dataset" };
-	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
+    QString newLabel { titleBarBaseText };
+    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
 	{
-        newLabel += " - <span style=\"font-size: 12px; font-weight: normal;\">";
+        newLabel += "<span style=\"font-size: 10px; font-weight: normal;\"> - ";
 		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
         newLabel += "</span>";
 		ui->LabelManageInput->setText(newLabel);
