@@ -767,6 +767,8 @@ void UIProjectManager::RawCloseInputProject(UIInputProject * input_project)
 	input_project->projectSettings().EndLoopAndBackgroundPool(); // blocks
 	input_project->EndLoopAndBackgroundPool(); // blocks
 
+    NewGeneWidget::theMainWindow->ui->ManageInputPane->text = "Closed input project";
+
 	input_project->deleteLater();
 
 }

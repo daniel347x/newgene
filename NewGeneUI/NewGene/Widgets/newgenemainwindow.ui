@@ -96,7 +96,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
        <enum>QTabWidget::Triangular</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -125,7 +125,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
          <number>0</number>
         </property>
         <item>
-         <widget class="NewGeneCreateOutput" name="widget" native="true"/>
+         <widget class="NewGeneCreateOutput" name="CreateOutputPane" native="true"/>
         </item>
        </layout>
       </widget>
@@ -150,7 +150,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
          <number>0</number>
         </property>
         <item>
-         <widget class="NewGeneManageInput" name="widget_2" native="true"/>
+         <widget class="NewGeneManageInput" name="ManageInputPane" native="true"/>
         </item>
        </layout>
       </widget>
