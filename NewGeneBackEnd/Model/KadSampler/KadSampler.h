@@ -2262,6 +2262,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		void setTopGroupIndexIntoRawData(Leaf const & existingLeaf, int const variable_group_number, std::int32_t const other_top_level_index_into_raw_data) const
 		{
+			// The following does not need to be a reference - it was added during a paranoid debugging session, but it doesn't hurt
 			auto const & leafPtr = leaves.find(existingLeaf);
 			leafPtr->other_top_level_indices_into_raw_data[variable_group_number] = other_top_level_index_into_raw_data;
 			ResetLeafCache();
