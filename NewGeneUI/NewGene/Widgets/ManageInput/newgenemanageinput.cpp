@@ -47,14 +47,17 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 
-	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
+    Qstring newLabel { "Manage Input Dataset" };
+    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
 	{
-		ui->LabelManageInput->setText("Manage Input Dataset - ");
+        newLabel += " - ";
+        newLabel += project->backend()->projectSettings().GetSettingsPath().string().c_str();
+        ui->LabelManageInput->setText(newLabel);
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
-		ui->LabelManageInput->setText("Manage Input Dataset");
+        ui->LabelManageInput->setText(newLabel);
 	}
 
 }

@@ -47,14 +47,17 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+    Qstring newLabel { "Create Output Dataset" };
+    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
 	{
-		ui->LabelCreateOutput->setText("Create Output Dataset - ");
-	}
+        newLabel += " - ";
+        newLabel += project->backend()->projectSettings().GetSettingsPath().string().c_str();
+        ui->LabelCreateOutput->setText(newLabel);
+    }
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
-		ui->LabelCreateOutput->setText("Create Output Dataset");
+        ui->LabelCreateOutput->setText(newLabel);
 	}
 
 }
