@@ -18,7 +18,7 @@ NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 		pTWinput->NewGeneUIInitialize();
 	}
 
-    PrepareInputWidget();
+	PrepareInputWidget();
 
 }
 
@@ -45,16 +45,16 @@ void NewGeneManageInput::changeEvent( QEvent * e )
 void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 
-    NewGeneWidget::UpdateInputConnections(connection_type, project);
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
 
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
-    {
-        ui->LabelManageInput->text = "Manage Input Dataset - ";
-    }
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
+	{
+		ui->LabelManageInput->setText("Manage Input Dataset - ");
+	}
 
-    if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
-    {
-        ui->LabelManageInput->text = "Manage Input Dataset";
-    }
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
+	{
+		ui->LabelManageInput->setText("Manage Input Dataset");
+	}
 
 }
