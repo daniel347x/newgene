@@ -24,7 +24,7 @@ NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 	PrepareOutputWidget();
 
 	ui->LabelCreateOutput->setTextFormat(Qt::TextFormat::RichText);
-    ui->LabelCreateOutput->setAlignment(Qt::Alignment::AlignHCenter);
+    ui->LabelCreateOutput->setAlignment(Qt::AlignCenter);
     QString newLabel { "<table><tbody><tr><td style=\"font-size: 18px; font-weight: normal; vertical-align: middle;\">" };
     newLabel += titleBarBaseText;
     newLabel += "</td></tr></tbody></table>";
