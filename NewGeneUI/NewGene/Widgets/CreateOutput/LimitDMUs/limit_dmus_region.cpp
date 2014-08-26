@@ -853,7 +853,9 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 		dmuCategoriesToMoveToLimitingList.push_back(dmu_category);
 	}
 
-    if (dmuCategoriesToMoveToLimitingList.size() > 100)
+    countRight = ui->listView_limit_dmus_bottom_right_pane->model()->rowCount();
+
+    if (dmuCategoriesToMoveToLimitingList.size() + countRight > 100)
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(nullptr, QString("Excessive number of DMU's"), QString("You have selected a large number of DMU's to limit by.  NewGene is not intended to support a large number of limiting DMU's.  If you proceed, this operation may take a long time after you click 'Yes'.  Proceed?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
