@@ -335,41 +335,41 @@ QListView * NewGeneVariableGroup::GetListView()
 	return ui->listView;
 }
 
-void NewGeneVariableGroup::on_pushButtonSelectAll_clicked()
+void NewGeneVariableGroup::on_toolButtonSelectAll_clicked()
 {
 
-	if (!ui->listView)
-	{
-		boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
+    if (!ui->listView)
+    {
+        boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
 
-	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-	int rows = model->rowCount();
-	for (int row = 0; row < rows; ++row)
-	{
-		QStandardItem * item = model->item(row);
-		item->setCheckState(Qt::Checked);
-	}
+    QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+    int rows = model->rowCount();
+    for (int row = 0; row < rows; ++row)
+    {
+        QStandardItem * item = model->item(row);
+        item->setCheckState(Qt::Checked);
+    }
 
 }
 
-void NewGeneVariableGroup::on_pushButtonSelectNone_clicked()
+void NewGeneVariableGroup::on_toolButtonDeselectAll_clicked()
 {
 
-	if (!ui->listView)
-	{
-		boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
+    if (!ui->listView)
+    {
+        boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
 
-	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+    QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
     int rows = model->rowCount();
     for (int row = 0; row < rows; ++row)
     {

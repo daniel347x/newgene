@@ -14,20 +14,44 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>3</number>
+   </property>
+   <property name="bottomMargin">
+    <number>3</number>
+   </property>
    <item>
     <widget class="QWidget" name="selectionButtons" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>2</number>
+      </property>
       <item>
-       <widget class="QPushButton" name="pushButtonSelectAll">
+       <widget class="QToolButton" name="toolButtonSelectAll">
         <property name="text">
          <string>Select All</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButtonSelectNone">
+       <widget class="QToolButton" name="toolButtonDeselectAll">
         <property name="text">
-         <string>Select None</string>
+         <string>Deselect All</string>
         </property>
        </widget>
       </item>
