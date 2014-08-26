@@ -21,7 +21,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <spacer name="verticalSpacer_2">
+    <spacer name="verticalSpacerMiddle">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -30,37 +30,43 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>30</height>
+       <width>17</width>
+       <height>27</height>
       </size>
      </property>
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <widget class="TimeRangeBox" name="optionsBox">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayoutOutputFileLocation">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QLabel" name="labelOutputFile">
-         <property name="text">
-          <string>Output file:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="lineEditFilePathToKadOutput">
-         <property name="minimumSize">
-          <size>
-           <width>500</width>
-           <height>0</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="labelOutputFile">
+       <property name="text">
+        <string>Output file:</string>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QLineEdit" name="lineEditFilePathToKadOutput">
+       <property name="minimumSize">
+        <size>
+         <width>500</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonChooseLocation">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -75,7 +81,7 @@
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer_3">
+    <spacer name="verticalSpacerBottom">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -84,16 +90,16 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>15</height>
+       <width>17</width>
+       <height>13</height>
       </size>
      </property>
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayoutGenerateOutput">
      <item>
-      <spacer name="horizontalSpacer">
+      <spacer name="horizontalSpacerGenerateOutputLeft">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -131,7 +137,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
+      <spacer name="horizontalSpacerGenerateOutputRight">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -146,7 +152,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <layout class="QVBoxLayout" name="verticalLayoutStatus">
      <item>
       <widget class="QLabel" name="labelStatus">
        <property name="text">
@@ -197,7 +203,7 @@
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer">
+    <spacer name="verticalSpacerTop">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -206,14 +212,22 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>15</height>
+       <width>17</width>
+       <height>13</height>
       </size>
      </property>
     </spacer>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TimeRangeBox</class>
+   <extends>QFrame</extends>
+   <header>timerangebox.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
