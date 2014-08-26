@@ -1021,7 +1021,7 @@ void limit_dmus_region::on_toolButtonSelectAllBottomLeft_clicked()
 
 	ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(false);
 
-	selectionModelBottomLeft->select(QItemSelection(topLeftProxy, bottomRightProxy), QItemSelectionModel::Select);
+    selectionModelBottomLeft->select(QItemSelection(topLeftProxy, bottomRightProxy), QItemSelectionModel::SelectCurrent);
 
 	//for (int row = 0; row < rows; ++row)
 	//{
