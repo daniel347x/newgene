@@ -53,19 +53,19 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 
-    QString newLabel { "<table><tbody><tr><td style=\"font-size: 18px; font-weight: normal; vertical-align: middle;\">" };
+    QString newLabel { "<div align: center;><table><tbody><tr><td style=\"font-size: 18px; font-weight: normal; vertical-align: middle;\">" };
     newLabel += titleBarBaseText;
     if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
 	{
         newLabel += "</td><td style=\"font-size: 12px; font-weight: normal; vertical-align: middle;\"> - ";
 		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
-        newLabel += "</td></tr></tbody></table>";
+        newLabel += "</td></tr></tbody></table></div>";
 		ui->LabelManageInput->setText(newLabel);
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
-        newLabel += "</td></tr></tbody></table>";
+        newLabel += "</td></tr></tbody></table></div>";
         ui->LabelManageInput->setText(newLabel);
 	}
 
