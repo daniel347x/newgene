@@ -1059,28 +1059,28 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 			if (warnEmptyEndingTimeCols)
 			{
 				QString ymd;
-                QString fin;
+				QString fin;
 				QString colOrCols;
 				QString isOrAre;
 				if (YButton->isChecked())
 				{
 					ymd = "year ";
-                    fin = "year";
+					fin = "year";
 					colOrCols = "column ";
 					isOrAre = "is ";
 				}
 				else if (YMButton->isChecked())
 				{
 					ymd = "year and month ";
-                    fin = "month";
-                    colOrCols = "columns ";
+					fin = "month";
+					colOrCols = "columns ";
 					isOrAre = "are ";
 				}
 				else
 				{
 					ymd = "year, month, and day ";
-                    fin = "day";
-                    colOrCols = "columns ";
+					fin = "day";
+					colOrCols = "columns ";
 					isOrAre = "are ";
 				}
 
@@ -1089,17 +1089,17 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				msg += "You have opted to leave the ending ";
 				msg += ymd;
 				msg += colOrCols;
-                msg += "blank.";
-                msg += "\n";
-                msg += NewGene will automatically set the ending ";
-                msg += fin;
-                msg += " of each row to precisely the end of the ";
-                msg += fin;
-                msg += " specified by the starting ";
+				msg += "blank.";
+				msg += "\n";
+				msg += "NewGene will automatically set the ending ";
+				msg += fin;
+				msg += " of each row to precisely the end of the ";
+				msg += fin;
+				msg += " specified by the starting ";
 				msg += ymd;
 				msg += colOrCols;
-                msg += ".\n";
-                msg += "Please confirm this is what you would like by clicking Yes.  Otherwise, to cancel, click No.";
+				msg += ".\n";
+				msg += "Please confirm this is what you would like by clicking Yes.  Otherwise, to cancel, click No.";
 
 				QString title;
 				title += "Ending ";
