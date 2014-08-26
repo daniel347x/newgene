@@ -46,7 +46,15 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
 		void on_checkBox_limit_dmus_toggled(bool checked);
 
-	protected:
+        void on_toolButtonSelectAllBottomLeft_clicked();
+
+        void on_toolButtonDeselectAllBottomLeft_clicked();
+
+        void on_toolButtonSelectAllBottomRight_clicked();
+
+        void on_toolButtonDeselectAllBottomRight_clicked();
+
+protected:
 
 		void changeEvent( QEvent * e );
 		void Empty();
