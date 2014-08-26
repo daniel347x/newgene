@@ -24,11 +24,13 @@ NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 	PrepareInputWidget();
 
     ui->LabelManageInput->setTextFormat(Qt::TextFormat::RichText);
+    ui->LabelManageInput->setAlignment(Qt::AlignVCenter);
+
     QString newLabel { "<div align: center;><span style=\"font-size: 18px; font-weight: normal;\">" };
 
-    newLabel += "<table><tbody><tr><td valign: center;>";
+    //newLabel += "<table><tbody><tr><td valign: center;>";
     newLabel += titleBarBaseText;
-    newLabel + "</td></tr></tbody></table>";
+    //newLabel + "</td></tr></tbody></table>";
 
     newLabel += "</span></div>";
     ui->LabelManageInput->setText(newLabel);
@@ -62,18 +64,18 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 
     QString newLabel { "<div align: center;><span style=\"font-size: 18px; font-weight: normal;\">" };
 
-    newLabel += "<table><tbody><tr><td valign: center;>";
+    //newLabel += "<table><tbody><tr><td valign: center;>";
     newLabel += titleBarBaseText;
-    newLabel + "</td></tr></tbody></table>";
+    //newLabel + "</td></tr></tbody></table>";
 
     if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
 	{
         newLabel += "</span><span style=\"font-size: 12px; font-weight: normal;\">";
 
-        newLabel += "<table><tbody><tr><td valign: center;>";
+        //newLabel += "<table><tbody><tr><td valign: center;>";
         newLabel += "  - "; // spacer
         newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
-        newLabel + "</td></tr></tbody></table>";
+        //newLabel + "</td></tr></tbody></table>";
 
         newLabel += "</span></div>";
         ui->LabelManageInput->setText(newLabel);
