@@ -710,7 +710,7 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 
 										QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
 										QModelIndex newDmuMemberIndexProxy = modelRight->mapFromSource(newDmuMemberIndex);
-										selectionModelBottomRight->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
+                                        //selectionModelBottomRight->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
 									}
                                     ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(true);
 
