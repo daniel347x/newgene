@@ -348,11 +348,7 @@ void NewGeneVariableGroup::on_pushButtonSelectAll_clicked()
 	}
 
 	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-	QItemSelectionModel * selectionModel = ui->listView->selectionModel();
-	selectionModel->clear();
-
 	int rows = model->rowCount();
-
 	for (int row = 0; row < rows; ++row)
 	{
 		QStandardItem * item = model->item(row);
@@ -374,7 +370,11 @@ void NewGeneVariableGroup::on_pushButtonSelectNone_clicked()
 	}
 
 	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-	QItemSelectionModel * selectionModel = ui->listView->selectionModel();
-	selectionModel->clear();
+    int rows = model->rowCount();
+    for (int row = 0; row < rows; ++row)
+    {
+        QStandardItem * item = model->item(row);
+        item->setCheckState(Qt::Unchecked);
+    }
 
 }
