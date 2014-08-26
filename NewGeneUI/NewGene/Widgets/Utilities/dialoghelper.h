@@ -81,6 +81,7 @@ namespace DialogHelper
 
 			TIME_GRANULARITY const & time_range_granularity,
 			std::vector<std::string> & dataTimeRange,
+            bool & warnEmptyEndingTimeCols,
 			std::string & errorMsg
 
 			);

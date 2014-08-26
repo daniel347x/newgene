@@ -1008,7 +1008,10 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		{
 			valid = DialogHelper::ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
 		}
-		if (valid)
+
+        bool warnEmptyEndingTimeCols = false;
+
+        if (valid)
 		{
 			if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 			{
@@ -1040,11 +1043,75 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 																   uoa.time_granularity,
 																   dataTimeRange,
+                                                                   warnEmptyEndingTimeCols,
 																   errorMsg
 
 																   );
 			}
 		}
+
+        QRadioButton * YButton = radioButtonsTimeRange[0];
+        QRadioButton * YMDButton = radioButtonsTimeRange[1];
+        QRadioButton * YMButton = radioButtonsTimeRange[2];
+
+        if (valid)
+        {
+            if (warnEmptyEndingTimeCols)
+            {
+                QString ymd;
+                QString colOrCols;
+                QString isOrAre;
+                if (YButton->isChecked())
+                {
+                    ymd = "year ";
+                    colOrCols = "column ";
+                    isOrAre = "is ";
+                }
+                else if (YMButton->isChecked())
+                {
+                    ymd = "year and month ";
+                    colOrCols = "columns ";
+                    isOrAre = "are ";
+                }
+                else
+                {
+                    ymd = "year, month, and day ";
+                    colOrCols = "columns";
+                    isOrAre = "are ";
+                }
+
+                QMessageBox::StandardButton reply;
+                QString msg;
+                msg += "You have opted to leave the ending ";
+                msg += ymd;
+                msg += colOrCols;
+                msg += "blank.  NewGene will automatically set the ending ";
+                msg += ymd;
+                msg += "of each row to precisely the end of the "};
+                msg += ymd;
+                msg += "specified by the starting ";
+                msg += ymd;
+                msg += colOrCols;
+                msg += ".  Please confirm this is what you would like by clicking Yes.  Otherwise, to cancel, click No.";
+
+                QString title;
+                title += "Ending ";
+                title += ymd;
+                title += colOrCols;
+                title += isOrAre;
+                title += "blank.";
+
+                reply = QMessageBox::question(nullptr, title, msg, QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+                if (reply != QMessageBox::Yes)
+                {
+                    valid = false;
+                    errorMsg = "Canceled import because ending time ";
+                    errorMsg += colOrCols;
+                    errorMsg += isOrAre;
+                    errorMsg += "blank.";
+                }
+            }
+        }
 
 		if (valid)
 		{

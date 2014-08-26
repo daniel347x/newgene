@@ -504,9 +504,12 @@ bool DialogHelper::ValidateTimeRangeBlock
 
 		TIME_GRANULARITY const & time_range_granularity,
 		std::vector<std::string> & dataTimeRange,
+        bool & warnEmptyEndingTimeCols,
 		std::string & errorMsg
 )
 {
+
+    warnEmptyEndingTimeCols = false;
 
 	dataTimeRange.clear();
 
@@ -577,6 +580,10 @@ bool DialogHelper::ValidateTimeRangeBlock
 					return false;
 				}
 			}
+            else
+            {
+                warnEmptyEndingTimeCols = true;
+            }
 		}
 
 		if (valid)
@@ -683,6 +690,10 @@ bool DialogHelper::ValidateTimeRangeBlock
 			{
 				dataTimeRange.push_back(ymd_End);
 			}
+            else
+            {
+                warnEmptyEndingTimeCols = true;
+            }
 		}
 		else if (valid)
 		{
@@ -695,7 +706,11 @@ bool DialogHelper::ValidateTimeRangeBlock
 				dataTimeRange.push_back(ymd_monthEnd);
 				dataTimeRange.push_back(ymd_dayEnd);
 			}
-		}
+            else
+            {
+                warnEmptyEndingTimeCols = true;
+            }
+        }
 
 		if (valid)
 		{
@@ -793,7 +808,11 @@ bool DialogHelper::ValidateTimeRangeBlock
 			{
 				dataTimeRange.push_back(ym_End);
 			}
-		}
+            else
+            {
+                warnEmptyEndingTimeCols = true;
+            }
+        }
 		else if (valid)
 		{
 			dataTimeRange.push_back(ym_yearStart);
@@ -803,7 +822,11 @@ bool DialogHelper::ValidateTimeRangeBlock
 				dataTimeRange.push_back(ym_yearEnd);
 				dataTimeRange.push_back(ym_monthEnd);
 			}
-		}
+            else
+            {
+                warnEmptyEndingTimeCols = true;
+            }
+        }
 
 		if (valid)
 		{
