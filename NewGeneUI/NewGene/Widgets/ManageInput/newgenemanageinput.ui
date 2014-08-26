@@ -147,6 +147,7 @@ border-bottom: 5px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
 border-bottom: 0px;;
 }</string>
          </property>
+         <zorder>quickWidget</zorder>
         </widget>
        </item>
       </layout>

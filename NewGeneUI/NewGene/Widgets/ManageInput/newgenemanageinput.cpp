@@ -26,7 +26,7 @@ NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
     ui->LabelManageInput->setTextFormat(Qt::TextFormat::RichText);
     ui->LabelManageInput->setAlignment(Qt::AlignVCenter);
 
-    QString newLabel { "<div align: center;><span style=\"font-size: 18px; font-weight: normal;\">" };
+    QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
 
     //newLabel += "<table><tbody><tr><td valign: center;>";
     newLabel += titleBarBaseText;
@@ -62,7 +62,7 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 
-    QString newLabel { "<div align: center;><span style=\"font-size: 18px; font-weight: normal;\">" };
+    QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
 
     //newLabel += "<table><tbody><tr><td valign: center;>";
     newLabel += titleBarBaseText;
