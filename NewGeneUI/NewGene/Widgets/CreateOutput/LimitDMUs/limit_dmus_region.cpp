@@ -1019,7 +1019,7 @@ void limit_dmus_region::on_toolButtonSelectAllBottomLeft_clicked()
 	QModelIndex bottomRight = dmusModelBottomLeft->index(rows-1, 0);
 	QModelIndex bottomRightProxy = modelLeft->mapFromSource(bottomRight);
 
-	ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(false);
+    //ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(false);
 
     selectionModelBottomLeft->select(QItemSelection(topLeftProxy, bottomRightProxy), QItemSelectionModel::SelectCurrent);
 
@@ -1032,7 +1032,7 @@ void limit_dmus_region::on_toolButtonSelectAllBottomLeft_clicked()
 		//selectionModelBottomLeft->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
 	//}
 
-	ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(true);
+    //ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(true);
 
 }
 
