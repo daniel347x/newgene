@@ -127,6 +127,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 		reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 		if (reply == QMessageBox::No)
 		{
+			loading = false;
 			return;
 		}
 
@@ -222,7 +223,7 @@ void UIProjectManager::SignalMessageBox(STD_STRING msg)
 void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObject * mainWindowObject)
 {
 
-	bool was_loading = loading;
+	bool was_loading = loading; // Initial (automatic) load when NewGene runs?  If so, 'loading' is true.  If user chose to open the input dataset by hand, 'loading' is false.
 	loading = false;
 
 	UIMessagerSingleShot messager;
@@ -345,6 +346,7 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObject * mainWindowObject)
 {
 
+	loading = false;
 	UIMessagerSingleShot messager;
 
 	if (!getActiveUIOutputProject()->is_model_equivalent(messager.get(), model_))
@@ -497,6 +499,7 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		msg % input_project_settings_path.string();
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
+		loading = false;
 		return;
 	}
 
@@ -542,7 +545,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	}
 	catch (boost::exception & e)
 	{
-		if ( std::string const * error_desc = boost::get_error_info<newgene_error_description>( e ) )
+		loading = false;
+		if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
 		{
 			boost::format msg( error_desc->c_str() );
 			QMessageBox msgBox;
@@ -571,11 +575,13 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	}
 	catch (std::bad_cast &)
 	{
+		loading = false;
 		return;
 	}
 
 	if (mainWindow == nullptr)
 	{
+		loading = false;
 		return;
 	}
 
@@ -595,6 +601,7 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	{
 		boost::format msg("No input dataset is open.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+		loading = false;
 		return;
 	}
 
@@ -625,6 +632,7 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		msg % output_project_settings_path.string();
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
+		loading = false;
 		return;
 	}
 
@@ -656,6 +664,7 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	{
 		boost::format msg("NULL input project during attempt to instantiate output project.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+		loading = false;
 		return;
 	}
 
@@ -697,6 +706,7 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		}
 		boost::format msg("Unable to create output project database.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
+		loading = false;
 		return;
 	}
 	std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
@@ -708,11 +718,13 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	}
 	catch (std::bad_cast &)
 	{
+		loading = false;
 		return;
 	}
 
 	if (mainWindow == nullptr)
 	{
+		loading = false;
 		return;
 	}
 
@@ -725,10 +737,10 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	UIOutputProject * project = getActiveUIOutputProject();
 
 	if (!project)
-
 	{
 		boost::format msg("NULL output project during attempt to instantiate project.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+		loading = false;
 		return;
 	}
 
