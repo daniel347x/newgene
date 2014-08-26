@@ -349,11 +349,13 @@ void NewGeneVariableGroup::on_toolButtonSelectAll_clicked()
 
     QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
     int rows = model->rowCount();
+    ui->listView->setUpdatesEnabled(false);
     for (int row = 0; row < rows; ++row)
     {
         QStandardItem * item = model->item(row);
         item->setCheckState(Qt::Checked);
     }
+    ui->listView->setUpdatesEnabled(true);
 
 }
 
@@ -371,10 +373,12 @@ void NewGeneVariableGroup::on_toolButtonDeselectAll_clicked()
 
     QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
     int rows = model->rowCount();
+    ui->listView->setUpdatesEnabled(false);
     for (int row = 0; row < rows; ++row)
     {
         QStandardItem * item = model->item(row);
         item->setCheckState(Qt::Unchecked);
     }
+    ui->listView->setUpdatesEnabled(true);
 
 }
