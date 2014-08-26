@@ -1103,6 +1103,4 @@ void limit_dmus_region::on_toolButtonDeselectAllBottomRight_clicked()
 
 	selectionModelBottomRight->clearSelection();
 
-	selectionModelBottomRight->
-
 }
