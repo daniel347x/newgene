@@ -260,6 +260,29 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 			  break;
 	  }
   });
+
+  HideShow();
+
+}
+
+void NewGeneVariableSummaryGroup::HideShow()
+{
+
+    QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+    if (model == nullptr)
+    {
+        return;
+    }
+
+    if (model->rowCount() == 0)
+    {
+        this->hide();
+    }
+    else
+    {
+        this->show();
+    }
+
 }
 
 bool NewGeneVariableSummaryGroup::ResetAll(WidgetInstanceIdentifiers const & vg_members)
@@ -307,5 +330,7 @@ bool NewGeneVariableSummaryGroup::ResetAll(WidgetInstanceIdentifiers const & vg_
 
 	ui->listView->setModel(model);
 	if (oldSelectionModel) delete oldSelectionModel;
+
+    HideShow();
 
 }

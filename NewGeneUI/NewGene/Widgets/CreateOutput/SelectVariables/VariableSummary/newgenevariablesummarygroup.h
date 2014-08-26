@@ -51,6 +51,10 @@ class NewGeneVariableSummaryGroup : public QGroupBox, public NewGeneWidget // do
 		void changeEvent( QEvent * e );
 		bool ResetAll(WidgetInstanceIdentifiers const & vg_members);
 
+    private:
+
+        void HideShow(); // shows or hides the widget depending on whether there are any variable selected
+
 	private:
 
 		Ui::NewGeneVariableSummaryGroup * ui;
