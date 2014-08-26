@@ -334,3 +334,47 @@ QListView * NewGeneVariableGroup::GetListView()
 {
     return ui->listView;
 }
+
+void NewGeneVariableGroup::on_pushButtonSelectAll_clicked()
+{
+
+    if (!ui->listView)
+    {
+        boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return false;
+    }
+
+    QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+    QItemSelectionModel * selectionModel = ui->listView->selectionModel();
+    selectionModel->clear();
+
+    int rows = model->rowCount();
+
+    for (int row : rows)
+    {
+        QStandardItem * item = model->item(row);
+        item->setCheckState(Qt::Checked);
+    }
+
+}
+
+void NewGeneVariableGroup::on_pushButtonSelectNone_clicked()
+{
+
+    if (!ui->listView)
+    {
+        boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return false;
+    }
+
+    QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+    QItemSelectionModel * selectionModel = ui->listView->selectionModel();
+    selectionModel->clear();
+
+}

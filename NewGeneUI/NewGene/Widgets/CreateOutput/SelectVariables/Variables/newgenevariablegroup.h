@@ -40,7 +40,12 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		void changeEvent( QEvent * e );
 		bool ResetAll(std::vector<std::pair<WidgetInstanceIdentifier, bool>> const & vg_members_and_bools);
 
-	private:
+private slots:
+        void on_pushButtonSelectAll_clicked();
+
+        void on_pushButtonSelectNone_clicked();
+
+private:
 		Ui::NewGeneVariableGroup * ui;
 };
 
