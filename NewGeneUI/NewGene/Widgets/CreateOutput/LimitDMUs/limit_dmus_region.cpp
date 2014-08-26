@@ -687,20 +687,20 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 
 									QItemSelectionModel * selectionModelBottomLeft = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
 									selectionModelBottomLeft->clearSelection();
-                                    ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(false);
-                                    for (auto const & dmu_set_member : dmu_set_members__not_limited__to_add)
+									ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(false);
+									for (auto const & dmu_set_member : dmu_set_members__not_limited__to_add)
 									{
 										QStandardItem * item = new QStandardItem();
 										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
 										PrepareItem(item, text, dmu_set_member, false);
 										dmusModelBottomLeft->appendRow( item );
 									}
-                                    ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(true);
+									ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(true);
 
 									QItemSelectionModel * selectionModelBottomRight = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
 									selectionModelBottomRight->clearSelection();
 
-                                    ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(false);
+									ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(false);
 									for (auto const & dmu_set_member : dmu_set_members__limited__to_add)
 									{
 										QStandardItem * item = new QStandardItem();
@@ -710,9 +710,9 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 
 										QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
 										QModelIndex newDmuMemberIndexProxy = modelRight->mapFromSource(newDmuMemberIndex);
-                                        //selectionModelBottomRight->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
+										//selectionModelBottomRight->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
 									}
-                                    ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(true);
+									ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(true);
 
 								}
 
@@ -853,17 +853,17 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 		dmuCategoriesToMoveToLimitingList.push_back(dmu_category);
 	}
 
-    countRight = ui->listView_limit_dmus_bottom_right_pane->model()->rowCount();
+	int countRight = ui->listView_limit_dmus_bottom_right_pane->model()->rowCount();
 
-    if (dmuCategoriesToMoveToLimitingList.size() + countRight > 100)
-    {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(nullptr, QString("Excessive number of DMU's"), QString("You have selected a large number of DMU's to limit by.  NewGene is not intended to support a large number of limiting DMU's.  If you proceed, this operation may take a long time after you click 'Yes'.  Proceed?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-        if (reply != QMessageBox::Yes)
-        {
-            return;
-        }
-    }
+	if (dmuCategoriesToMoveToLimitingList.size() + countRight > 100)
+	{
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(nullptr, QString("Excessive number of DMU's"), QString("You have selected a large number of DMU's to limit by.  NewGene is not intended to support a large number of limiting DMU's.  If you proceed, this operation may take a long time after you click 'Yes'.  Proceed?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+		if (reply != QMessageBox::Yes)
+		{
+			return;
+		}
+	}
 
 	if (!dmuCategoriesToMoveToLimitingList.empty())
 	{
