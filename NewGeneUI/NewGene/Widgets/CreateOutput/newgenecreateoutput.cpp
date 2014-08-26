@@ -24,11 +24,11 @@ NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 	PrepareOutputWidget();
 
 	ui->LabelCreateOutput->setTextFormat(Qt::TextFormat::RichText);
-    ui->LabelCreateOutput->setAlignment(Qt::AlignCenter);
-    QString newLabel { "<table><tbody><tr><td style=\"font-size: 18px; font-weight: normal; vertical-align: middle;\">" };
-    newLabel += titleBarBaseText;
-    newLabel += "</td></tr></tbody></table>";
-    ui->LabelManageInput->setText(newLabel);
+	ui->LabelCreateOutput->setAlignment(Qt::AlignCenter);
+	QString newLabel { "<table><tbody><tr><td style=\"font-size: 18px; font-weight: normal; vertical-align: middle;\">" };
+	newLabel += titleBarBaseText;
+	newLabel += "</td></tr></tbody></table>";
+	ui->LabelCreateOutput->setText(newLabel);
 
 }
 
@@ -57,20 +57,20 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-    QString newLabel { "<table><tbody><tr><td style=\"font-size: 18px; font-weight: normal; vertical-align: middle;\">" };
-    newLabel += titleBarBaseText;
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
+	QString newLabel { "<table><tbody><tr><td style=\"font-size: 18px; font-weight: normal; vertical-align: middle;\">" };
+	newLabel += titleBarBaseText;
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
 	{
-        newLabel += "</td><td style=\"font-size: 12px; font-weight: normal; vertical-align: middle;\"> - ";
-        newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
-        newLabel += "</td></tr></tbody></table>";
-        ui->LabelCreateOutput->setText(newLabel);
-    }
+		newLabel += "</td><td style=\"font-size: 12px; font-weight: normal; vertical-align: middle;\"> - ";
+		newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
+		newLabel += "</td></tr></tbody></table>";
+		ui->LabelCreateOutput->setText(newLabel);
+	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
-        newLabel += "</td></tr></tbody></table>";
-        ui->LabelCreateOutput->setText(newLabel);
+		newLabel += "</td></tr></tbody></table>";
+		ui->LabelCreateOutput->setText(newLabel);
 	}
 
 }
