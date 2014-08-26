@@ -35,8 +35,8 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIden
 		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, true, *data_instance.uuid);
 		project->getUIInputProject()->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE, true, *data_instance.uuid);
 
-        // Call manually, rather than waiting for signal, because the signal was already emitted prior to this widget being instantiated.
-        // This widget is being instantiated in response to the signal being received by a higher-level widget.
+		// Call manually, rather than waiting for signal, because the signal was already emitted prior to this widget being instantiated.
+		// This widget is being instantiated in response to the signal being received by a higher-level widget.
 		UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 		WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
 		emit RefreshWidget(request);
@@ -332,49 +332,49 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
 
 QListView * NewGeneVariableGroup::GetListView()
 {
-    return ui->listView;
+	return ui->listView;
 }
 
 void NewGeneVariableGroup::on_pushButtonSelectAll_clicked()
 {
 
-    if (!ui->listView)
-    {
-        boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return false;
-    }
+	if (!ui->listView)
+	{
+		boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
 
-    QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-    QItemSelectionModel * selectionModel = ui->listView->selectionModel();
-    selectionModel->clear();
+	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+	QItemSelectionModel * selectionModel = ui->listView->selectionModel();
+	selectionModel->clear();
 
-    int rows = model->rowCount();
+	int rows = model->rowCount();
 
-    for (int row : rows)
-    {
-        QStandardItem * item = model->item(row);
-        item->setCheckState(Qt::Checked);
-    }
+	for (int row = 0; row < rows; ++row)
+	{
+		QStandardItem * item = model->item(row);
+		item->setCheckState(Qt::Checked);
+	}
 
 }
 
 void NewGeneVariableGroup::on_pushButtonSelectNone_clicked()
 {
 
-    if (!ui->listView)
-    {
-        boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return false;
-    }
+	if (!ui->listView)
+	{
+		boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
 
-    QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-    QItemSelectionModel * selectionModel = ui->listView->selectionModel();
-    selectionModel->clear();
+	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+	QItemSelectionModel * selectionModel = ui->listView->selectionModel();
+	selectionModel->clear();
 
 }
