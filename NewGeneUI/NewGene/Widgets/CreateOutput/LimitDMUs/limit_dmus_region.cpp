@@ -367,6 +367,8 @@ void limit_dmus_region::ResetDmuMembersPanes(WidgetInstanceIdentifier const & dm
 void limit_dmus_region::ResetBottomLeftPane(WidgetInstanceIdentifiers const & dmu_set_members__not_limited)
 {
 
+	ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(false);
+
 	QItemSelectionModel * oldSelectionModel = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
 	QStandardItemModel * model = new QStandardItemModel();
 
@@ -393,10 +395,14 @@ void limit_dmus_region::ResetBottomLeftPane(WidgetInstanceIdentifiers const & dm
 	ui->listView_limit_dmus_bottom_left_pane->setModel(proxyModel);
 	if (oldSelectionModel) delete oldSelectionModel;
 
+	ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(true);
+
 }
 
 void limit_dmus_region::ResetBottomRightPane(WidgetInstanceIdentifiers const & dmu_set_members__limited)
 {
+
+	ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(false);
 
 	QItemSelectionModel * oldSelectionModel = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
 	QStandardItemModel * model = new QStandardItemModel();
@@ -423,6 +429,8 @@ void limit_dmus_region::ResetBottomRightPane(WidgetInstanceIdentifiers const & d
 	proxyModel->sort(0);
 	ui->listView_limit_dmus_bottom_right_pane->setModel(proxyModel);
 	if (oldSelectionModel) delete oldSelectionModel;
+
+	ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(true);
 
 }
 
@@ -1014,25 +1022,8 @@ void limit_dmus_region::on_toolButtonSelectAllBottomLeft_clicked()
 	int rows = dmusModelBottomLeft->rowCount();
 
 	QModelIndex topLeft = dmusModelBottomLeft->index(0, 0);
-	QModelIndex topLeftProxy = modelLeft->mapFromSource(topLeft);
-
 	QModelIndex bottomRight = dmusModelBottomLeft->index(rows-1, 0);
-	QModelIndex bottomRightProxy = modelLeft->mapFromSource(bottomRight);
-
-    //ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(false);
-
-    selectionModelBottomLeft->select(QItemSelection(topLeftProxy, bottomRightProxy), QItemSelectionModel::SelectCurrent);
-
-	//for (int row = 0; row < rows; ++row)
-	//{
-		//QModelIndex newDmuMemberIndex = dmusModelBottomLeft->index(row, 0);
-		////QStandardItem * item = dmusModelBottomLeft->item(row);
-		////QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
-		//QModelIndex newDmuMemberIndexProxy = modelLeft->mapFromSource(newDmuMemberIndex);
-		//selectionModelBottomLeft->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
-	//}
-
-    //ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(true);
+	selectionModelBottomLeft->select(QItemSelection(topLeft, bottomRight), QItemSelectionModel::Select);
 
 }
 
@@ -1089,16 +1080,9 @@ void limit_dmus_region::on_toolButtonSelectAllBottomRight_clicked()
 
 	int rows = dmusModelBottomRight->rowCount();
 
-	ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(false);
-	for (int row = 0; row < rows; ++row)
-	{
-		QModelIndex newDmuMemberIndex = dmusModelBottomRight->index(row, 0);
-		//QStandardItem * item = dmusModelBottomRight->item(row);
-		//QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
-		QModelIndex newDmuMemberIndexProxy = modelRight->mapFromSource(newDmuMemberIndex);
-		selectionModelBottomRight->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
-	}
-	ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(true);
+	QModelIndex topLeft = dmusModelBottomRight->index(0, 0);
+	QModelIndex bottomRight = dmusModelBottomRight->index(rows-1, 0);
+	selectionModelBottomRight->select(QItemSelection(topLeft, bottomRight), QItemSelectionModel::Select);
 
 }
 
