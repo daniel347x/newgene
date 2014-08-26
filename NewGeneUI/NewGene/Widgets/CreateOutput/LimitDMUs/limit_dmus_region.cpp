@@ -976,10 +976,63 @@ void limit_dmus_region::on_checkBox_limit_dmus_toggled(bool checked)
 void limit_dmus_region::on_toolButtonSelectAllBottomLeft_clicked()
 {
 
+    QSortFilterProxyModel_NumbersLast * modelLeft = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_limit_dmus_bottom_left_pane->model());
+    if (modelLeft == nullptr)
+    {
+        return;
+    }
+
+    QAbstractItemModel * sourceModelLeft = modelLeft->sourceModel();
+    if (sourceModelLeft == nullptr)
+    {
+        return;
+    }
+
+    QStandardItemModel * dmusModelBottomLeft = nullptr;
+    try
+    {
+        dmusModelBottomLeft = dynamic_cast<QStandardItemModel*>(sourceModelLeft);
+    }
+    catch (std::bad_cast &)
+    {
+        // guess not
+        boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    QItemSelectionModel * selectionModelBottomLeft = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
+    if (selectionModelBottomLeft == nullptr)
+    {
+        return;
+    }
+
+    selectionModelBottomLeft->clearSelection();
+
+    int rows = dmusModelBottomLeft->rowCount();
+
+    for (int row = 0; row < rows; ++row)
+    {
+        QStandardItem * item = dmusModelBottomLeft->item(row);
+        QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
+        QModelIndex newDmuMemberIndexProxy = modelLeft->mapFromSource(newDmuMemberIndex);
+        selectionModelBottomLeft->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
+    }
+
 }
 
 void limit_dmus_region::on_toolButtonDeselectAllBottomLeft_clicked()
 {
+
+    QItemSelectionModel * selectionModelBottomLeft = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
+    if (selectionModelBottomLeft == nullptr)
+    {
+        return;
+    }
+
+    selectionModelBottomLeft->clearSelection();
 
 }
 
