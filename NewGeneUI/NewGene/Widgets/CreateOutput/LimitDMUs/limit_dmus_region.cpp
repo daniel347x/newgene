@@ -1036,4 +1036,12 @@ void limit_dmus_region::on_toolButtonSelectAllBottomRight_clicked()
 void limit_dmus_region::on_toolButtonDeselectAllBottomRight_clicked()
 {
 
+    QItemSelectionModel * selectionModelBottomRight = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
+    if (selectionModelBottomRight == nullptr)
+    {
+        return;
+    }
+
+    selectionModelBottomRight->clearSelection();
+
 }
