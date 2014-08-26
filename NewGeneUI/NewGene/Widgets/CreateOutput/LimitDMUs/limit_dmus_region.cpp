@@ -1016,8 +1016,9 @@ void limit_dmus_region::on_toolButtonSelectAllBottomLeft_clicked()
     ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(false);
     for (int row = 0; row < rows; ++row)
     {
-        QStandardItem * item = dmusModelBottomLeft->item(row);
-        QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
+        QModelIndex newDmuMemberIndex = dmusModelBottomRight->index(row);
+        //QStandardItem * item = dmusModelBottomLeft->item(row);
+        //QModelIndex newDmuMemberIndex = dmusModelBottomLeft->indexFromItem(item);
         QModelIndex newDmuMemberIndexProxy = modelLeft->mapFromSource(newDmuMemberIndex);
         selectionModelBottomLeft->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
     }
@@ -1081,8 +1082,9 @@ void limit_dmus_region::on_toolButtonSelectAllBottomRight_clicked()
     ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(false);
     for (int row = 0; row < rows; ++row)
     {
-        QStandardItem * item = dmusModelBottomRight->item(row);
-        QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
+        QModelIndex newDmuMemberIndex = dmusModelBottomRight->index(row);
+        //QStandardItem * item = dmusModelBottomRight->item(row);
+        //QModelIndex newDmuMemberIndex = dmusModelBottomRight->indexFromItem(item);
         QModelIndex newDmuMemberIndexProxy = modelRight->mapFromSource(newDmuMemberIndex);
         selectionModelBottomRight->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
     }
@@ -1100,5 +1102,7 @@ void limit_dmus_region::on_toolButtonDeselectAllBottomRight_clicked()
     }
 
     selectionModelBottomRight->clearSelection();
+
+    selectionModelBottomRight->
 
 }
