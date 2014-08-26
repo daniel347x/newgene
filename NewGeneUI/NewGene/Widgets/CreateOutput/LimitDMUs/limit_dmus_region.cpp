@@ -687,16 +687,20 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 
 									QItemSelectionModel * selectionModelBottomLeft = ui->listView_limit_dmus_bottom_left_pane->selectionModel();
 									selectionModelBottomLeft->clearSelection();
-									for (auto const & dmu_set_member : dmu_set_members__not_limited__to_add)
+                                    ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(false);
+                                    for (auto const & dmu_set_member : dmu_set_members__not_limited__to_add)
 									{
 										QStandardItem * item = new QStandardItem();
 										std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_set_member);
 										PrepareItem(item, text, dmu_set_member, false);
 										dmusModelBottomLeft->appendRow( item );
 									}
+                                    ui->listView_limit_dmus_bottom_left_pane->setUpdatesEnabled(true);
 
 									QItemSelectionModel * selectionModelBottomRight = ui->listView_limit_dmus_bottom_right_pane->selectionModel();
 									selectionModelBottomRight->clearSelection();
+
+                                    ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(false);
 									for (auto const & dmu_set_member : dmu_set_members__limited__to_add)
 									{
 										QStandardItem * item = new QStandardItem();
@@ -708,6 +712,7 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 										QModelIndex newDmuMemberIndexProxy = modelRight->mapFromSource(newDmuMemberIndex);
 										selectionModelBottomRight->select(newDmuMemberIndexProxy, QItemSelectionModel::Select);
 									}
+                                    ui->listView_limit_dmus_bottom_right_pane->setUpdatesEnabled(true);
 
 								}
 
