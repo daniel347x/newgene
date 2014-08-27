@@ -280,8 +280,6 @@ void UIMessagerOutputProject::SetRunStatus(RUN_STATUS_ENUM const & runStatus)
 			default:
 				break;
 		}
-
-		get()->tab_widget->setTabText(2, "");
 	}
 }
 
