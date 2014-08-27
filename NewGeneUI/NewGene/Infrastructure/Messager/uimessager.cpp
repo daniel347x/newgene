@@ -263,26 +263,26 @@ int UIMessagerOutputProject::ShowOptionMessageBox(std::string msg_title, std::st
 
 void UIMessagerOutputProject::SetRunStatus(RUN_STATUS_ENUM const & runStatus)
 {
-    if (get()->tab_widget != nullptr)
-    {
-        switch (runStatus)
-        {
-            case RUN_STATUS__RUNNING:
-                {
-                    get()->tab_widget->setTabText(2, " Running...");
-                }
-                break;
-            case RUN_STATUS__RUNNING:
-                {
-                    get()->tab_widget->setTabText(2, " Prepare run");
-                }
-                break;
-            default:
-                break;
-        }
+	if (get()->tab_widget != nullptr)
+	{
+		switch (runStatus)
+		{
+			case RUN_STATUS__RUNNING:
+				{
+					get()->tab_widget->setTabText(2, " Running...");
+				}
+				break;
+			case RUN_STATUS__NOT_RUNNING:
+				{
+					get()->tab_widget->setTabText(2, " Prepare run");
+				}
+				break;
+			default:
+				break;
+		}
 
-        tab_widget->setTabText(2, "");
-    }
+		get()->tab_widget->setTabText(2, "");
+	}
 }
 
 void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)
