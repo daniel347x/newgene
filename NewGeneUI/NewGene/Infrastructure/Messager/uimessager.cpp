@@ -133,7 +133,7 @@ void UIMessagerInputProject::set(UIInputProject * inp_)
 				try
 				{
 					NewGeneMainWindow * mainWindow = dynamic_cast<NewGeneMainWindow *>(get()->mainWindowObject);
-					if (theMainWindow)
+					if (mainWindow)
 					{
 						connect(this, SIGNAL(SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)));
 						connect(this, SIGNAL(SignalEndProgressBar(int)), mainWindow, SLOT(ReceiveSignalStopProgressBar(int)));
@@ -168,13 +168,13 @@ void UIMessagerOutputProject::set(UIOutputProject * outp_)
 				try
 				{
 					NewGeneMainWindow * mainWindow = dynamic_cast<NewGeneMainWindow *>(get()->mainWindowObject);
-					if (theMainWindow)
+					if (mainWindow)
 					{
 						connect(this, SIGNAL(SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)));
 						connect(this, SIGNAL(SignalEndProgressBar(int)), mainWindow, SLOT(ReceiveSignalStopProgressBar(int)));
 						connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
 						connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
-						get()->output_pane = theMainWindow->findChild<NewGeneGenerateOutput *>("widgetOutputPane");
+						get()->output_pane = mainWindow->findChild<NewGeneGenerateOutput *>("widgetOutputPane");
 						if (get()->output_pane)
 						{
 							connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
