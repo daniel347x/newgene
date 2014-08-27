@@ -196,7 +196,7 @@ border-bottom: 5px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
 }</string>
       </property>
       <attribute name="title">
-       <string>Prepare run</string>
+       <string> Prepare run</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <property name="leftMargin">

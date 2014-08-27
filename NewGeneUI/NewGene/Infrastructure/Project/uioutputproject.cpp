@@ -23,7 +23,8 @@ UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const 
 	, messager(messager_)
 	, number_timerange_widgets_created(0)
 	, output_pane(nullptr)
-	, _inp(inp)
+    , tab_widget(nullptr)
+    , _inp(inp)
 	{
 		messager.set(this);
 	}

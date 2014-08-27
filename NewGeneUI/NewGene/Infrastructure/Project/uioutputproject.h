@@ -11,6 +11,7 @@
 #include "outputprojectworkqueue.h"
 
 class NewGeneGenerateOutput;
+class NewGeneTabWidget;
 class UIInputProject;
 
 class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>
@@ -50,6 +51,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		int number_timerange_widgets_created;
 
 		NewGeneGenerateOutput * output_pane;
+        NewGeneTabWidget * tab_widget;
 
 		UIInputProject * getUIInputProject()
 		{

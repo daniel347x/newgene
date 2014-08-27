@@ -202,7 +202,10 @@ class UIProjectManager : public QObject,
 		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM, typename UI_MESSAGER_CLASS>
 		struct ProjectTab
 		{
-			//typedef std::pair<ProjectPaths, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>>> type;
+            // ************************************************************************************************************************************* //
+            // Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
+            // ************************************************************************************************************************************* //
+            //typedef std::pair<ProjectPaths, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>>> type;
 			typedef ProjectTabContents<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS> type;
 		};
 

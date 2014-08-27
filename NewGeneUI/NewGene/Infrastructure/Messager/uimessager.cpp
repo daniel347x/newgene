@@ -74,7 +74,6 @@ void UIMessager::displayStatusMessages()
 
 	if (!first)
 	{
-		//statusManagerUI().PostStatus(msg.c_str());
 		emit PostStatus(msg, (int)(UIStatusManager::IMPORTANCE_STANDARD), false);
 	}
 
@@ -260,6 +259,30 @@ int UIMessagerOutputProject::ShowOptionMessageBox(std::string msg_title, std::st
 	int selection = -1;
 	QMetaObject::invokeMethod(get(), "OptionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( int, selection ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_question ), Q_ARG( STD_VECTOR_WIDGETINSTANCEIDENTIFIER, option_list ));
 	return selection;
+}
+
+void UIMessagerOutputProject::SetRunStatus(RUN_STATUS_ENUM const & runStatus)
+{
+    if (get()->tab_widget != nullptr)
+    {
+        switch (runStatus)
+        {
+            case RUN_STATUS__RUNNING:
+                {
+                    get()->tab_widget->setTabText(2, " Running...");
+                }
+                break;
+            case RUN_STATUS__RUNNING:
+                {
+                    get()->tab_widget->setTabText(2, " Prepare run");
+                }
+                break;
+            default:
+                break;
+        }
+
+        tab_widget->setTabText(2, "");
+    }
 }
 
 void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)

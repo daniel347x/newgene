@@ -86,7 +86,7 @@ class UIMessager : public QObject, public Messager
 		void InitializeSingleShot();
 		void FinalizeSingleShot();
 
-		void EmitChangeMessage(DataChangeMessage & widgetData);
+        void EmitChangeMessage(DataChangeMessage & widgetData);
 
 		virtual void UpdateStatusBarText(std::string const &, void *);
 		virtual void AppendKadStatusText(std::string const &, void *);
@@ -179,7 +179,10 @@ class UIMessagerOutputProject : public UIMessager
 		void ShowMessageBox(std::string, bool block = false);
 		bool ShowQuestionMessageBox(std::string, std::string); // title, question text
 		int  ShowOptionMessageBox(std::string, std::string, std::vector<WidgetInstanceIdentifier>); // title, question, option list
-		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
+
+        void SetRunStatus(RUN_STATUS_ENUM const &);
+
+        virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
 		virtual void UpdateProgressBarValue(std::int64_t const);
 		virtual void UpdateStatusBarText(std::string const & status_bar_text, void *);

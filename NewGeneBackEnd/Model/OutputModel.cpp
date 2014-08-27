@@ -265,10 +265,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		is_generating_output = true;
 	}
 
+	messager.SetRunStatus(RUN_STATUS__RUNNING);
 	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager)
 	{
 		is_generating_output = false;
 		messager.SetPerformanceLabel("");
+		messager.SetRunStatus(RUN_STATUS__NOT_RUNNING);
 	} BOOST_SCOPE_EXIT_END
 
 	messager.AppendKadStatusText("", nullptr); // This will clear the pane
