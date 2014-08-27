@@ -2112,8 +2112,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 				if (!validated)
 				{
-					boost::format msg("Bad column name in input file.");
-					errorMsg = msg.str();
 					bad = true;
 				}
 
@@ -2128,8 +2126,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 				if (!validated)
 				{
-					boost::format msg("Bad column description in input file.");
-					errorMsg = msg.str();
 					bad = true;
 				}
 

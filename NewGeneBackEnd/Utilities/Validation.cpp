@@ -267,7 +267,7 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 				}
 				else
 				{
-					boost::format msg("The '%1%' column name is invalid.  It can contain only letters, numbers, and underscores.");
+					boost::format msg("The '%1%' column name is invalid.  It can contain only letters, numbers, underscores and dashes.");
 					msg % column_description_for_invalid_message;
 					errorMsg = msg.str();
 					valid = false;
@@ -276,7 +276,7 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 			}
 			else
 			{
-				boost::format msg("The '%1%' column name is invalid.  It can contain only letters, numbers, and underscores.");
+				boost::format msg("The '%1%' column name is invalid.  It can contain only letters, numbers, underscores and dashes.");
 				msg % column_description_for_invalid_message;
 				errorMsg = msg.str();
 				valid = false;
@@ -284,7 +284,7 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 		}
 		else
 		{
-			boost::format msg("The '%1%' column name is invalid.  It can contain only letters, numbers, and underscores.");
+			boost::format msg("The '%1%' column name is invalid.  It can contain only letters, numbers, underscores and dashes.");
 			msg % column_description_for_invalid_message;
 			errorMsg = msg.str();
 			valid = false;
