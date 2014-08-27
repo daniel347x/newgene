@@ -8,6 +8,7 @@
 #include "uiloggingmanager.h"
 #include "newgenemainwindow.h"
 #include "newgenegenerateoutput.h"
+#include "newgenetabwidget.h"
 
 #include <vector>
 
@@ -180,6 +181,7 @@ void UIMessagerOutputProject::set(UIOutputProject * outp_)
 							connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
 							connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
 						}
+						get()->tab_widget = mainWindow->findChild<NewGeneTabWidget *>("tabWidgetOutput");
 					}
 				}
 				catch (std::bad_cast &)
