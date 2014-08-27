@@ -54,6 +54,12 @@ enum MESSAGER_MESSAGE_ENUM
 	, MESSAGER_MESSAGE__LAST
 };
 
+enum RUN_STATUS_ENUM
+{
+	  RUN_STATUS__NOT_RUNNING = 0
+	, RUN_STATUS__RUNNING
+};
+
 enum MESSAGER_MESSAGE_CATEGORY_ENUM
 {
 	  MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE = 0x00000001
@@ -172,6 +178,7 @@ class Messager
 		virtual void AppendKadStatusText(std::string const &) {}
 		virtual void AppendKadStatusText(std::string const &, void *);
 		virtual void SetPerformanceLabel(std::string const &) {}
+		virtual void SetRunStatus(RUN_STATUS_ENUM const &) {}
 
         // Output
         virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA &) {}
