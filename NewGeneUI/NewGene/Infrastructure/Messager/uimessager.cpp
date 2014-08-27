@@ -269,12 +269,12 @@ void UIMessagerOutputProject::SetRunStatus(RUN_STATUS_ENUM const & runStatus)
 		{
 			case RUN_STATUS__RUNNING:
 				{
-					get()->tab_widget->setTabText(2, " Running...");
+                    get()->tab_widget->setTabText(2, QString(" Running..."));
 				}
 				break;
 			case RUN_STATUS__NOT_RUNNING:
 				{
-					get()->tab_widget->setTabText(2, " Prepare run");
+                    get()->tab_widget->setTabText(2, QString(" Prepare run");
 				}
 				break;
 			default:
