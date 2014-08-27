@@ -599,7 +599,11 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 			if (selectedIndexes.empty())
 			{
 				// No selection
-				return false;
+                boost::format msg("You must select a unit of analysis (UOA) for the variable group.");
+                QMessageBox msgBox;
+                msgBox.setText( msg.str().c_str() );
+                msgBox.exec();
+                return false;
 			}
 
 			if (selectedIndexes.size() > 1)
