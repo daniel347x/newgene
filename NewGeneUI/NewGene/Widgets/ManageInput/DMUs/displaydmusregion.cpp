@@ -700,7 +700,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 
 		if (valid)
 		{
-			valid = Validation::ValidateDmuMemberCode(proposed_dmu_member_description, errorMsg);
+			valid = Validation::ValidateDmuMemberDescription(proposed_dmu_member_description, errorMsg);
 		}
 
 		if (!valid)
