@@ -338,6 +338,10 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 				}
 			}
 		}
+        else
+        {
+            getActiveUIInputProject()->DoRefreshAllWidgets();
+        }
 
 	}
 
