@@ -406,13 +406,18 @@ void NewGeneMainWindow::on_actionSave_Input_Dataset_As_triggered()
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied input dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene input settings file (*.newgene.in.xml)");
 	if (the_file.size())
 	{
-		if (!boost::filesystem::exists(the_file.toStdString()))
-		{
-			boost::filesystem::path file_path(the_file.toStdString());
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, file_path.parent_path()));
 
-			emit SignalSaveCurrentInputDatasetAs(the_file.toStdString(), this);
+		boost::filesystem::path file_path(the_file.toStdString());
+
+		if (boost::filesystem::exists(file_path))
+		{
+			// Delete - user has already confirmed they want to overwrite
+			boost::filesystem::remove(file_path);
 		}
+
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, file_path.parent_path()));
+		emit SignalSaveCurrentInputDatasetAs(the_file.toStdString(), this);
+
 	}
 
 }
@@ -425,13 +430,18 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene output settings file (*.newgene.out.xml)");
 	if (the_file.size())
 	{
-		if (!boost::filesystem::exists(the_file.toStdString()))
-		{
-			boost::filesystem::path file_path(the_file.toStdString());
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
 
-			emit SignalSaveCurrentOutputDatasetAs(the_file.toStdString(), this);
+		boost::filesystem::path file_path(the_file.toStdString());
+
+		if (boost::filesystem::exists(file_path))
+		{
+			// Delete - user has already confirmed they want to overwrite
+			boost::filesystem::remove(file_path);
 		}
+
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
+		emit SignalSaveCurrentOutputDatasetAs(the_file.toStdString(), this);
+
 	}
 
 }
