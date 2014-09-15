@@ -48,7 +48,6 @@ public:
 	friend class SettingRepository;
 
 	virtual std::string ToString() const = 0;
-	virtual void FromString(std::string const & str) = 0;
 
 	virtual void DoSpecialParse(Messager &) {}
 
