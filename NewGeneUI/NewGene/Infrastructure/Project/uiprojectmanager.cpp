@@ -249,6 +249,7 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 	}
 
 	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager.get(), input_project->projectSettings().getUISettings().GetSettingsPath().string()));
+    settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager.get(), input_project_path.parent_path()));
 
 	getActiveUIInputProject()->DoRefreshAllWidgets();
 
