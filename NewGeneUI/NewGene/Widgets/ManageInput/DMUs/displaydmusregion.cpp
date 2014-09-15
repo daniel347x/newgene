@@ -636,7 +636,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 	form.addRow(new QLabel(title.str().c_str()));
 	QList<QLineEdit *> fields;
 	QLineEdit *lineEditCode = new QLineEdit(&dialog);
-	QString labelCode = QString("Enter uniquely identirying DMU member code:");
+	QString labelCode = QString("Enter uniquely identifying DMU member code:");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
 	QLineEdit *lineEditName = new QLineEdit(&dialog);
