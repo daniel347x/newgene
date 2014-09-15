@@ -865,11 +865,13 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 			}
 		}
 
+        // Set the new path for the project settings in the currently open project
+        active_input_project->SetProjectPaths(input_project_settings_path, path_to_model_settings);
+
         settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_settings_path.string().c_str()));
         settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, input_project_settings_path.parent_path()));
-
-        // Set the new path for the project settings in the currently open project
-		active_input_project->SetProjectPaths(input_project_settings_path, path_to_model_settings);
+        active_input_project->projectSettings().getBackendSettings().UpdateSetting(messager, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, InputProjectPathToModel(messager, input_project_settings_path.string().c_str()));
+        active_input_project->modelSettings().getBackendSettings().UpdateSetting(messager, INPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, InputModelPathToDatabase(messager, path_to_model_database.string().c_str()));
 
 		// Write the project settings to file
 		active_input_project->projectSettings().WriteSettingsToFile(messager);
@@ -953,11 +955,13 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 			}
 		}
 
+        // Set the new path for the project settings in the currently open project
+        active_output_project->SetProjectPaths(output_project_settings_path, path_to_model_settings);
+
         settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_settings_path.string().c_str()));
         settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, output_project_settings_path.parent_path()));
-
-        // Set the new path for the project settings in the currently open project
-		active_output_project->SetProjectPaths(output_project_settings_path, path_to_model_settings);
+        active_output_project->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, OutputProjectPathToModel(messager, output_project_settings_path.string().c_str()));
+        active_output_project->modelSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, OutputModelPathToDatabase(messager, path_to_model_database.string().c_str()));
 
 		// Write the project settings to file
 		active_output_project->projectSettings().WriteSettingsToFile(messager);
