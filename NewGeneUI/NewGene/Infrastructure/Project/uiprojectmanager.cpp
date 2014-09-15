@@ -865,7 +865,10 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 			}
 		}
 
-		// Set the new path for the project settings in the currently open project
+        settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_settings_path.string().c_str()));
+        settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, input_project_settings_path.parent_path()));
+
+        // Set the new path for the project settings in the currently open project
 		active_input_project->SetProjectPaths(input_project_settings_path, path_to_model_settings);
 
 		// Write the project settings to file
@@ -876,9 +879,6 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 
 		// Copy the database
 		active_input_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
-
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_settings_path.string().c_str()));
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, input_project_settings_path.parent_path()));
 
 		NewGeneMainWindow * mainWindow = nullptr;
 		try
@@ -953,7 +953,10 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 			}
 		}
 
-		// Set the new path for the project settings in the currently open project
+        settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_settings_path.string().c_str()));
+        settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, output_project_settings_path.parent_path()));
+
+        // Set the new path for the project settings in the currently open project
 		active_output_project->SetProjectPaths(output_project_settings_path, path_to_model_settings);
 
 		// Write the project settings to file
@@ -964,9 +967,6 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 
 		// Copy the database
 		active_output_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
-
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_settings_path.string().c_str()));
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, output_project_settings_path.parent_path()));
 
 		NewGeneMainWindow * mainWindow = nullptr;
 		try
