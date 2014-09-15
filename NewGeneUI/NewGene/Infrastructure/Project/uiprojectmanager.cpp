@@ -310,7 +310,9 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 
 		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager.get(), input_project->projectSettings().getUISettings().GetSettingsPath().string()));
 
-		QMessageBox::StandardButton reply;
+        getActiveUIInputProject()->DoRefreshAllWidgets();
+
+        QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(nullptr, QString("Open output project?"), QString("Would you also like to open an associated output project?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 		if (reply == QMessageBox::Yes)
 		{
@@ -338,10 +340,6 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 				}
 			}
 		}
-        else
-        {
-            getActiveUIInputProject()->DoRefreshAllWidgets();
-        }
 
 	}
 
@@ -375,7 +373,7 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObje
 
 	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(), output_project->projectSettings().getUISettings().GetSettingsPath().string()));
 
-	getActiveUIInputProject()->DoRefreshAllWidgets();
+    //getActiveUIInputProject()->DoRefreshAllWidgets();
 	getActiveUIOutputProject()->DoRefreshAllWidgets();
 
 }
