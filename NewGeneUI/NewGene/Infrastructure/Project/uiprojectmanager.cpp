@@ -874,6 +874,20 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		// Copy the database
 		active_input_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
 
+        NewGeneMainWindow * mainWindow = nullptr;
+        try
+        {
+            mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+            mainWindow->ui->ManageInputPane.SetInputDatasetText();
+        }
+        catch (std::bad_cast &)
+        {
+            boost::format msg("The project was successfully saved to a different name, but the text at the top of the Manage Input pane failed to change (oops!).");
+            QMessageBox msgBox;
+            msgBox.setText((msg.str().c_str()));
+            msgBox.exec();
+        }
+
 	}
 
 }
@@ -945,6 +959,20 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 		// Copy the database
 		active_output_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
 
-	}
+        NewGeneMainWindow * mainWindow = nullptr;
+        try
+        {
+            mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+            mainWindow->ui->CreateOutputPane.SetOutputDatasetText();
+        }
+        catch (std::bad_cast &)
+        {
+            boost::format msg("The project was successfully saved to a different name, but the text at the top of the Manage Input pane failed to change (oops!).");
+            QMessageBox msgBox;
+            msgBox.setText((msg.str().c_str()));
+            msgBox.exec();
+        }
+
+    }
 
 }

@@ -25,6 +25,8 @@ class NewGeneCreateOutput : public QWidget, public NewGeneWidget // do not reord
 
 	public:
 
+        void SetOutputDatasetText();
+
 	signals:
 
 	public slots:

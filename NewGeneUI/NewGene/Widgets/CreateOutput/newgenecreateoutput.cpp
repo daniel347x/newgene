@@ -28,9 +28,7 @@ NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 
     QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
 
-    //newLabel += "<table><tbody><tr><td valign: center;>";
     newLabel += titleBarBaseText;
-    //newLabel + "</td></tr></tbody></table>";
 
     newLabel += "</span></div>";
     ui->LabelCreateOutput->setText(newLabel);
@@ -62,29 +60,34 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-    QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
-
-    //newLabel += "<table><tbody><tr><td valign: center;>";
-    newLabel += titleBarBaseText;
-    //newLabel + "</td></tr></tbody></table>";
-
     if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
 	{
-        newLabel += "</span><span style=\"font-size: 12px; font-weight: normal;\">";
-
-        //newLabel += "<table><tbody><tr><td valign: center;>";
-        newLabel += "  - "; // spacer
-        newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
-        //newLabel + "</td></tr></tbody></table>";
-
-        newLabel += "</span></div>";
-		ui->LabelCreateOutput->setText(newLabel);
+        SetOutputDatasetText();
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
+        QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+        newLabel += titleBarBaseText;
+
         newLabel += "</span></div>";
 		ui->LabelCreateOutput->setText(newLabel);
 	}
+
+}
+
+void NewGeneCreateOutput::SetOutputDatasetText()
+{
+
+    QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+    newLabel += titleBarBaseText;
+
+    newLabel += "</span><span style=\"font-size: 12px; font-weight: normal;\">";
+
+    newLabel += "  - "; // spacer
+    newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
+
+    newLabel += "</span></div>";
+    ui->LabelCreateOutput->setText(newLabel);
 
 }
