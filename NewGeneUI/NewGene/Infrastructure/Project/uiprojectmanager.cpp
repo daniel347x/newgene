@@ -861,6 +861,19 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
             {
                 return;
             }
+
+            if (project_settings_exist)
+            {
+                boost::filesystem::remove(input_project_settings_path);
+            }
+            if (model_settings_exist)
+            {
+                boost::filesystem::remove(path_to_model_settings);
+            }
+            if (model_database_exists)
+            {
+                boost::filesystem::remove(path_to_model_database);
+            }
         }
 
         // Set the new path for the project settings in the currently open project
@@ -948,6 +961,19 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
             if (reply == QMessageBox::No)
             {
                 return;
+            }
+
+            if (project_settings_exist)
+            {
+                boost::filesystem::remove(output_project_settings_path);
+            }
+            if (model_settings_exist)
+            {
+                boost::filesystem::remove(path_to_model_settings);
+            }
+            if (model_database_exists)
+            {
+                boost::filesystem::remove(path_to_model_database);
             }
         }
 
