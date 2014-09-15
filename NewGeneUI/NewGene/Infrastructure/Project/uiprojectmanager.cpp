@@ -829,41 +829,39 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		// Create a path object for the path to the model database file
 		boost::filesystem::path path_to_model_database(input_project_settings_path.parent_path() / (input_project_settings_path.stem().string() + ".db"));
 
-		if (boost::filesystem::exists(input_project_settings_path))
-		{
-			QMessageBox::StandardButton reply;
-			boost::format msg("The input project file \"%1%\" already exists.  Would you like to overwrite it?");
-			msg % input_project_settings_path.string();
-			reply = QMessageBox::question(nullptr, QString("Overwrite input project?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-			if (reply == QMessageBox::No)
-			{
-				return;
-			}
-		}
+        bool project_settings_exist = boost::filesystem::exists(input_project_settings_path);
+        bool model_settings_exist = boost::filesystem::exists(path_to_model_settings);
+        bool model_database_exists =boost::filesystem::exists(path_to_model_database);
 
-		if (boost::filesystem::exists(path_to_model_settings))
-		{
-			QMessageBox::StandardButton reply;
-			boost::format msg("The input model file \"%1%\" already exists.  Would you like to overwrite it?");
-			msg % path_to_model_settings.string();
-			reply = QMessageBox::question(nullptr, QString("Overwrite input model?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-			if (reply == QMessageBox::No)
-			{
-				return;
-			}
-		}
-
-		if (boost::filesystem::exists(path_to_model_database))
-		{
-			QMessageBox::StandardButton reply;
-			boost::format msg("The input model database file \"%1%\" already exists.  Would you like to overwrite it?");
-			msg % path_to_model_database.string();
-			reply = QMessageBox::question(nullptr, QString("Overwrite input model database?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-			if (reply == QMessageBox::No)
-			{
-				return;
-			}
-		}
+        if (project_settings_exist || model_settings_exist || model_database_exists)
+        {
+            QMessageBox::StandardButton reply;
+            std::string formatting("The following files will be overwritten:\n");
+            int count = 0;
+            if (project_settings_exist)
+            {
+                formatting += "%1%\n";
+                ++count;
+            }
+            if (model_settings_exist)
+            {
+                formatting += "%2%\n";
+                ++count;
+            }
+            if (model_database_exists)
+            {
+                formatting += "%3%\n";
+                ++count;
+            }
+            formatting += "Would you like to overwrite ";
+            formatting += (count > 1 ? " these files?" : "this file?");
+            msg % input_project_settings_path.string() % path_to_model_settings.string() % path_to_model_database.string();
+            reply = QMessageBox::question(nullptr, QString("Overwrite files?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+            if (reply == QMessageBox::No)
+            {
+                return;
+            }
+        }
 
         // Set the new path for the project settings in the currently open project
         active_input_project->SetProjectPaths(input_project_settings_path, path_to_model_settings);
@@ -919,41 +917,39 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 		// Create a path object for the path to the model database file
 		boost::filesystem::path path_to_model_database(output_project_settings_path.parent_path() / (output_project_settings_path.stem().string() + ".db"));
 
-		if (boost::filesystem::exists(output_project_settings_path))
-		{
-			QMessageBox::StandardButton reply;
-			boost::format msg("The output project file \"%1%\" already exists.  Would you like to overwrite it?");
-			msg % output_project_settings_path.string();
-			reply = QMessageBox::question(nullptr, QString("Overwrite output project?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-			if (reply == QMessageBox::No)
-			{
-				return;
-			}
-		}
+        bool project_settings_exist = boost::filesystem::exists(output_project_settings_path);
+        bool model_settings_exist = boost::filesystem::exists(path_to_model_settings);
+        bool model_database_exists =boost::filesystem::exists(path_to_model_database);
 
-		if (boost::filesystem::exists(path_to_model_settings))
-		{
-			QMessageBox::StandardButton reply;
-			boost::format msg("The output model file \"%1%\" already exists.  Would you like to overwrite it?");
-			msg % path_to_model_settings.string();
-			reply = QMessageBox::question(nullptr, QString("Overwrite output model?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-			if (reply == QMessageBox::No)
-			{
-				return;
-			}
-		}
-
-		if (boost::filesystem::exists(path_to_model_database))
-		{
-			QMessageBox::StandardButton reply;
-			boost::format msg("The output model database file \"%1%\" already exists.  Would you like to overwrite it?");
-			msg % path_to_model_database.string();
-			reply = QMessageBox::question(nullptr, QString("Overwrite output model database?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-			if (reply == QMessageBox::No)
-			{
-				return;
-			}
-		}
+        if (project_settings_exist || model_settings_exist || model_database_exists)
+        {
+            QMessageBox::StandardButton reply;
+            std::string formatting("The following files will be overwritten:\n");
+            int count = 0;
+            if (project_settings_exist)
+            {
+                formatting += "%1%\n";
+                ++count;
+            }
+            if (model_settings_exist)
+            {
+                formatting += "%2%\n";
+                ++count;
+            }
+            if (model_database_exists)
+            {
+                formatting += "%3%\n";
+                ++count;
+            }
+            formatting += "Would you like to overwrite ";
+            formatting += (count > 1 ? " these files?" : "this file?");
+            msg % output_project_settings_path.string() % path_to_model_settings.string() % path_to_model_database.string();
+            reply = QMessageBox::question(nullptr, QString("Overwrite files?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+            if (reply == QMessageBox::No)
+            {
+                return;
+            }
+        }
 
         // Set the new path for the project settings in the currently open project
         active_output_project->SetProjectPaths(output_project_settings_path, path_to_model_settings);
