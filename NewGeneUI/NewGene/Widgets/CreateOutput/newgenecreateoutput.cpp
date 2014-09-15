@@ -23,15 +23,15 @@ NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 
 	PrepareOutputWidget();
 
-    ui->LabelCreateOutput->setTextFormat(Qt::TextFormat::RichText);
-    ui->LabelCreateOutput->setAlignment(Qt::AlignVCenter);
+	ui->LabelCreateOutput->setTextFormat(Qt::TextFormat::RichText);
+	ui->LabelCreateOutput->setAlignment(Qt::AlignVCenter);
 
-    QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+	QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
 
-    newLabel += titleBarBaseText;
+	newLabel += titleBarBaseText;
 
-    newLabel += "</span></div>";
-    ui->LabelCreateOutput->setText(newLabel);
+	newLabel += "</span></div>";
+	ui->LabelCreateOutput->setText(newLabel);
 
 }
 
@@ -60,17 +60,17 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
 	{
-        SetOutputDatasetText();
+		SetOutputDatasetText();
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
-        QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
-        newLabel += titleBarBaseText;
+		QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+		newLabel += titleBarBaseText;
 
-        newLabel += "</span></div>";
+		newLabel += "</span></div>";
 		ui->LabelCreateOutput->setText(newLabel);
 	}
 
@@ -79,15 +79,20 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 void NewGeneCreateOutput::SetOutputDatasetText()
 {
 
-    QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
-    newLabel += titleBarBaseText;
+	if (outp)
+	{
 
-    newLabel += "</span><span style=\"font-size: 12px; font-weight: normal;\">";
+		QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+		newLabel += titleBarBaseText;
 
-    newLabel += "  - "; // spacer
-    newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
+		newLabel += "</span><span style=\"font-size: 12px; font-weight: normal;\">";
 
-    newLabel += "</span></div>";
-    ui->LabelCreateOutput->setText(newLabel);
+		newLabel += "  - "; // spacer
+		newLabel += outp->backend().projectSettings().GetSettingsPath().string().c_str();
+
+		newLabel += "</span></div>";
+		ui->LabelCreateOutput->setText(newLabel);
+
+	}
 
 }

@@ -23,15 +23,15 @@ NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 
 	PrepareInputWidget();
 
-    ui->LabelManageInput->setTextFormat(Qt::TextFormat::RichText);
-    ui->LabelManageInput->setAlignment(Qt::AlignVCenter);
+	ui->LabelManageInput->setTextFormat(Qt::TextFormat::RichText);
+	ui->LabelManageInput->setAlignment(Qt::AlignVCenter);
 
-    QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+	QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
 
-    newLabel += titleBarBaseText;
+	newLabel += titleBarBaseText;
 
-    newLabel += "</span></div>";
-    ui->LabelManageInput->setText(newLabel);
+	newLabel += "</span></div>";
+	ui->LabelManageInput->setText(newLabel);
 
 }
 
@@ -60,17 +60,17 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
 	{
-        SetInputDatasetText();
+		SetInputDatasetText();
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
-        QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
-        newLabel += titleBarBaseText;
-        newLabel += "</span></div>";
-        ui->LabelManageInput->setText(newLabel);
+		QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+		newLabel += titleBarBaseText;
+		newLabel += "</span></div>";
+		ui->LabelManageInput->setText(newLabel);
 	}
 
 }
@@ -78,14 +78,19 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 void NewGeneManageInput::SetInputDatasetText()
 {
 
-    QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
-    newLabel += titleBarBaseText;
-    newLabel += "</span><span style=\"font-size: 12px; font-weight: normal;\">";
+	if (inp)
+	{
 
-    newLabel += "  - "; // spacer
-    newLabel += project->backend().projectSettings().GetSettingsPath().string().c_str();
+		QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+		newLabel += titleBarBaseText;
+		newLabel += "</span><span style=\"font-size: 12px; font-weight: normal;\">";
 
-    newLabel += "</span></div>";
-    ui->LabelManageInput->setText(newLabel);
+		newLabel += "  - "; // spacer
+		newLabel += inp->backend().projectSettings().GetSettingsPath().string().c_str();
+
+		newLabel += "</span></div>";
+		ui->LabelManageInput->setText(newLabel);
+
+	}
 
 }

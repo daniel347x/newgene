@@ -62,7 +62,7 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 			pTWmain->NewGeneUIInitialize();
 		}
 
-    }
+	}
 	catch ( boost::exception & e )
 	{
 
@@ -100,16 +100,16 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 NewGeneMainWindow::~NewGeneMainWindow()
 {
 
-    if (outp)
-    {
-        outp->UnregisterInterestInChanges(this);
-    }
-    if (inp)
-    {
-        inp->UnregisterInterestInChanges(this);
-    }
+	if (outp)
+	{
+		outp->UnregisterInterestInChanges(this);
+	}
+	if (inp)
+	{
+		inp->UnregisterInterestInChanges(this);
+	}
 
-    projectManagerUI().EndAllLoops();
+	projectManagerUI().EndAllLoops();
 
 	// Manage global settings in main thread
 	settingsManagerUI().globalSettings().EndLoopAndBackgroundPool();
@@ -143,48 +143,48 @@ void NewGeneMainWindow::doInitialize()
 	settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
 	settingsManagerUI().globalSettings().WriteSettingsToFile(messager); // Write any defaults back to disk, along with values just read from disk
 
-    PrepareInputWidget();
-    PrepareOutputWidget();
+	PrepareInputWidget();
+	PrepareOutputWidget();
 
-    projectManagerUI().LoadOpenProjects(this, this);
+	projectManagerUI().LoadOpenProjects(this, this);
 
 }
 
 void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
-    NewGeneWidget::UpdateOutputConnections(connection_type, project);
+	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
-    {
-        // Let the pane itself handle this.
-        //ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset - ";
-    }
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		// Let the pane itself handle this.
+		//ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset - ";
+	}
 
-    if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
-    {
-        // Let the pane itself handle this.
-        //ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset";
-    }
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		// Let the pane itself handle this.
+		//ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset";
+	}
 
 }
 
 void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 
-    NewGeneWidget::UpdateInputConnections(connection_type, project);
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
 
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
-    {
-        // Let the pane itself handle this.
-        //ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset - ";
-    }
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
+	{
+		// Let the pane itself handle this.
+		//ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset - ";
+	}
 
-    if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
-    {
-        // Let the pane itself handle this.
-        //ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset";
-    }
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
+	{
+		// Let the pane itself handle this.
+		//ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset";
+	}
 
 }
 
@@ -434,4 +434,14 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 		}
 	}
 
+}
+
+void NewGeneMainWindow::SetInputDatasetText()
+{
+	ui->ManageInputPane->SetInputDatasetText();
+}
+
+void NewGeneMainWindow::SetOutputDatasetText()
+{
+	ui->CreateOutputPane->SetOutputDatasetText();
 }

@@ -34,6 +34,11 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void SignalSaveCurrentInputDatasetAs(STD_STRING, QObject *);
 		void SignalSaveCurrentOutputDatasetAs(STD_STRING, QObject *);
 
+	public:
+
+		void SetInputDatasetText();
+		void SetOutputDatasetText();
+
 	public slots:
 		void doInitialize();
 		void SignalMessageBox(STD_STRING);
@@ -41,8 +46,8 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void ReceiveSignalStopProgressBar(int);
 		void ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const);
 		void ReceiveSignalUpdateStatusBarText(int, STD_STRING const);
-        void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
-        void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 
 	protected:
 		void changeEvent( QEvent * e );
