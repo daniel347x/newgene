@@ -248,8 +248,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 		return;
 	}
 
-	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager.get(), input_project->projectSettings().getUISettings().GetSettingsPath().string()));
-    settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager.get(), input_project_path.parent_path()));
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager.get(), input_project->projectSettings().getUISettings().GetSettingsPath().string().c_str()));
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager.get(), input_project->projectSettings().getUISettings().GetSettingsPath().parent_path()));
 
 	getActiveUIInputProject()->DoRefreshAllWidgets();
 
@@ -313,7 +313,7 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 	else
 	{
 
-        QMessageBox::StandardButton reply;
+		QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(nullptr, QString("Open output project?"), QString("Would you also like to open an associated output project?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 		if (reply == QMessageBox::Yes)
 		{
@@ -374,7 +374,7 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObje
 
 	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(), output_project->projectSettings().getUISettings().GetSettingsPath().string()));
 
-    //getActiveUIInputProject()->DoRefreshAllWidgets();
+	//getActiveUIInputProject()->DoRefreshAllWidgets();
 	getActiveUIOutputProject()->DoRefreshAllWidgets();
 
 }
@@ -877,6 +877,9 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		// Copy the database
 		active_input_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
 
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_settings_path.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, input_project_settings_path.parent_path()));
+
 		NewGeneMainWindow * mainWindow = nullptr;
 		try
 		{
@@ -961,6 +964,9 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 
 		// Copy the database
 		active_output_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
+
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_settings_path.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, output_project_settings_path.parent_path()));
 
 		NewGeneMainWindow * mainWindow = nullptr;
 		try
