@@ -829,60 +829,61 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		// Create a path object for the path to the model database file
 		boost::filesystem::path path_to_model_database(input_project_settings_path.parent_path() / (input_project_settings_path.stem().string() + ".db"));
 
-        bool project_settings_exist = boost::filesystem::exists(input_project_settings_path);
-        bool model_settings_exist = boost::filesystem::exists(path_to_model_settings);
-        bool model_database_exists =boost::filesystem::exists(path_to_model_database);
+		bool project_settings_exist = boost::filesystem::exists(input_project_settings_path);
+		bool model_settings_exist = boost::filesystem::exists(path_to_model_settings);
+		bool model_database_exists =boost::filesystem::exists(path_to_model_database);
 
-        if (project_settings_exist || model_settings_exist || model_database_exists)
-        {
-            QMessageBox::StandardButton reply;
-            std::string formatting("The following files will be overwritten:\n");
-            int count = 0;
-            if (project_settings_exist)
-            {
-                formatting += "%1%\n";
-                ++count;
-            }
-            if (model_settings_exist)
-            {
-                formatting += "%2%\n";
-                ++count;
-            }
-            if (model_database_exists)
-            {
-                formatting += "%3%\n";
-                ++count;
-            }
-            formatting += "Would you like to overwrite ";
-            formatting += (count > 1 ? " these files?" : "this file?");
-            msg % input_project_settings_path.string() % path_to_model_settings.string() % path_to_model_database.string();
-            reply = QMessageBox::question(nullptr, QString("Overwrite files?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-            if (reply == QMessageBox::No)
-            {
-                return;
-            }
+		if (project_settings_exist || model_settings_exist || model_database_exists)
+		{
+			QMessageBox::StandardButton reply;
+			std::string formatting("The following files will be overwritten:\n");
+			int count = 0;
+			if (project_settings_exist)
+			{
+				formatting += "%1%\n";
+				++count;
+			}
+			if (model_settings_exist)
+			{
+				formatting += "%2%\n";
+				++count;
+			}
+			if (model_database_exists)
+			{
+				formatting += "%3%\n";
+				++count;
+			}
+			formatting += "Would you like to overwrite ";
+			formatting += (count > 1 ? " these files?" : "this file?");
+			boost::format msg(formatting.c_str());
+			msg % input_project_settings_path.string() % path_to_model_settings.string() % path_to_model_database.string();
+			reply = QMessageBox::question(nullptr, QString("Overwrite files?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				return;
+			}
 
-            if (project_settings_exist)
-            {
-                boost::filesystem::remove(input_project_settings_path);
-            }
-            if (model_settings_exist)
-            {
-                boost::filesystem::remove(path_to_model_settings);
-            }
-            if (model_database_exists)
-            {
-                boost::filesystem::remove(path_to_model_database);
-            }
-        }
+			if (project_settings_exist)
+			{
+				boost::filesystem::remove(input_project_settings_path);
+			}
+			if (model_settings_exist)
+			{
+				boost::filesystem::remove(path_to_model_settings);
+			}
+			if (model_database_exists)
+			{
+				boost::filesystem::remove(path_to_model_database);
+			}
+		}
 
-        // Set the new path for the project settings in the currently open project
-        active_input_project->SetProjectPaths(input_project_settings_path, path_to_model_settings);
+		// Set the new path for the project settings in the currently open project
+		active_input_project->SetProjectPaths(input_project_settings_path, path_to_model_settings);
 
-        settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_settings_path.string().c_str()));
-        settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, input_project_settings_path.parent_path()));
-        active_input_project->projectSettings().getBackendSettings().UpdateSetting(messager, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, InputProjectPathToModel(messager, input_project_settings_path.string().c_str()));
-        active_input_project->modelSettings().getBackendSettings().UpdateSetting(messager, INPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, InputModelPathToDatabase(messager, path_to_model_database.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_settings_path.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, input_project_settings_path.parent_path()));
+		active_input_project->projectSettings().getBackendSettings().UpdateSetting(messager, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, InputProjectPathToModel(messager, input_project_settings_path.string().c_str()));
+		active_input_project->modelSettings().getBackendSettings().UpdateSetting(messager, INPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, InputModelPathToDatabase(messager, path_to_model_database.string().c_str()));
 
 		// Write the project settings to file
 		active_input_project->projectSettings().WriteSettingsToFile(messager);
@@ -930,60 +931,61 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 		// Create a path object for the path to the model database file
 		boost::filesystem::path path_to_model_database(output_project_settings_path.parent_path() / (output_project_settings_path.stem().string() + ".db"));
 
-        bool project_settings_exist = boost::filesystem::exists(output_project_settings_path);
-        bool model_settings_exist = boost::filesystem::exists(path_to_model_settings);
-        bool model_database_exists =boost::filesystem::exists(path_to_model_database);
+		bool project_settings_exist = boost::filesystem::exists(output_project_settings_path);
+		bool model_settings_exist = boost::filesystem::exists(path_to_model_settings);
+		bool model_database_exists =boost::filesystem::exists(path_to_model_database);
 
-        if (project_settings_exist || model_settings_exist || model_database_exists)
-        {
-            QMessageBox::StandardButton reply;
-            std::string formatting("The following files will be overwritten:\n");
-            int count = 0;
-            if (project_settings_exist)
-            {
-                formatting += "%1%\n";
-                ++count;
-            }
-            if (model_settings_exist)
-            {
-                formatting += "%2%\n";
-                ++count;
-            }
-            if (model_database_exists)
-            {
-                formatting += "%3%\n";
-                ++count;
-            }
-            formatting += "Would you like to overwrite ";
-            formatting += (count > 1 ? " these files?" : "this file?");
-            msg % output_project_settings_path.string() % path_to_model_settings.string() % path_to_model_database.string();
-            reply = QMessageBox::question(nullptr, QString("Overwrite files?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-            if (reply == QMessageBox::No)
-            {
-                return;
-            }
+		if (project_settings_exist || model_settings_exist || model_database_exists)
+		{
+			QMessageBox::StandardButton reply;
+			std::string formatting("The following files will be overwritten:\n");
+			int count = 0;
+			if (project_settings_exist)
+			{
+				formatting += "%1%\n";
+				++count;
+			}
+			if (model_settings_exist)
+			{
+				formatting += "%2%\n";
+				++count;
+			}
+			if (model_database_exists)
+			{
+				formatting += "%3%\n";
+				++count;
+			}
+			formatting += "Would you like to overwrite ";
+			formatting += (count > 1 ? " these files?" : "this file?");
+			boost::format msg(formatting.c_str());
+			msg % output_project_settings_path.string() % path_to_model_settings.string() % path_to_model_database.string();
+			reply = QMessageBox::question(nullptr, QString("Overwrite files?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				return;
+			}
 
-            if (project_settings_exist)
-            {
-                boost::filesystem::remove(output_project_settings_path);
-            }
-            if (model_settings_exist)
-            {
-                boost::filesystem::remove(path_to_model_settings);
-            }
-            if (model_database_exists)
-            {
-                boost::filesystem::remove(path_to_model_database);
-            }
-        }
+			if (project_settings_exist)
+			{
+				boost::filesystem::remove(output_project_settings_path);
+			}
+			if (model_settings_exist)
+			{
+				boost::filesystem::remove(path_to_model_settings);
+			}
+			if (model_database_exists)
+			{
+				boost::filesystem::remove(path_to_model_database);
+			}
+		}
 
-        // Set the new path for the project settings in the currently open project
-        active_output_project->SetProjectPaths(output_project_settings_path, path_to_model_settings);
+		// Set the new path for the project settings in the currently open project
+		active_output_project->SetProjectPaths(output_project_settings_path, path_to_model_settings);
 
-        settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_settings_path.string().c_str()));
-        settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, output_project_settings_path.parent_path()));
-        active_output_project->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, OutputProjectPathToModel(messager, output_project_settings_path.string().c_str()));
-        active_output_project->modelSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, OutputModelPathToDatabase(messager, path_to_model_database.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_settings_path.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, output_project_settings_path.parent_path()));
+		active_output_project->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, OutputProjectPathToModel(messager, output_project_settings_path.string().c_str()));
+		active_output_project->modelSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, OutputModelPathToDatabase(messager, path_to_model_database.string().c_str()));
 
 		// Write the project settings to file
 		active_output_project->projectSettings().WriteSettingsToFile(messager);
