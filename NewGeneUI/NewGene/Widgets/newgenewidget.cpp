@@ -121,6 +121,7 @@ void NewGeneWidget::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 		if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 		{
 			Empty();
+			inp = nullptr;
 			return;
 		}
 	}
