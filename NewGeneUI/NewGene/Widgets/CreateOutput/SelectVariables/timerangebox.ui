@@ -233,6 +233,14 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="showAbsoluteTimeOutputColumns">
+            <property name="text">
+             <string>Show absolute time columns for every row
+(useful for exact statistical analysis)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="verticalSpacer_6">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
