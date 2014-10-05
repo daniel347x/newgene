@@ -1264,17 +1264,17 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
-			, index_into_raw_data { rhs.index_into_raw_data }
-			, other_top_level_indices_into_raw_data{ rhs.other_top_level_indices_into_raw_data }
-			, has_excluded_dmu_member{rhs.has_excluded_dmu_member}
+			, index_into_raw_data ( rhs.index_into_raw_data )
+			, other_top_level_indices_into_raw_data ( rhs.other_top_level_indices_into_raw_data )
+			, has_excluded_dmu_member ( rhs.has_excluded_dmu_member )
 		{
 		}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
 			: PrimaryKeysGrouping(std::move(rhs))
-			, index_into_raw_data { rhs.index_into_raw_data }
-			, other_top_level_indices_into_raw_data { std::move(rhs.other_top_level_indices_into_raw_data) }
-			, has_excluded_dmu_member{ rhs.has_excluded_dmu_member }
+			, index_into_raw_data ( rhs.index_into_raw_data )
+			, other_top_level_indices_into_raw_data ( std::move(rhs.other_top_level_indices_into_raw_data) )
+			, has_excluded_dmu_member ( rhs.has_excluded_dmu_member )
 		{
 		}
 
@@ -1988,14 +1988,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
-			, weighting { rhs.weighting }
-			, hits { rhs.hits }
+			, weighting ( rhs.weighting )
+			, hits ( rhs.hits )
 			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
 			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
-			, number_branch_combinations{ rhs.number_branch_combinations }
-			, leaves { rhs.leaves }
-			, leaves_cache { rhs.leaves_cache }
+			, number_branch_combinations ( rhs.number_branch_combinations )
+			, leaves ( rhs.leaves )
+			, leaves_cache ( rhs.leaves_cache )
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 			, has_excluded_leaves(rhs.has_excluded_leaves)
 		{
@@ -2003,14 +2003,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne && rhs)
 			: PrimaryKeysGrouping(rhs)
-			, weighting{ rhs.weighting }
-			, hits{ rhs.hits }
+			, weighting ( rhs.weighting )
+			, hits ( rhs.hits )
 			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
-			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
-			, remaining(*remaining_)
-			, number_branch_combinations{ rhs.number_branch_combinations }
-			, leaves{ rhs.leaves }
-			, leaves_cache{ rhs.leaves_cache }
+			, remaining_ (InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
+			, remaining (*remaining_)
+			, number_branch_combinations ( rhs.number_branch_combinations )
+			, leaves ( rhs.leaves )
+			, leaves_cache ( rhs.leaves_cache )
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 			, has_excluded_leaves(rhs.has_excluded_leaves)
 		{
