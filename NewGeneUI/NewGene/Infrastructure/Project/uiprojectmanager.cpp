@@ -121,15 +121,21 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 
 	if (input_project_list->files.size() == 0)
 	{
-		boost::format msg_title("Open input project at default location?");
-		boost::format msg_text("You have no input project open.  Would you like to open the project at the default location?");
-		QMessageBox::StandardButton reply;
-		reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-		if (reply == QMessageBox::No)
-		{
-			loading = false;
-			return;
-		}
+
+        // Disable the following block:
+        // For now, do not prompt to open input dataset if none is found.
+        if (false)
+        {
+            boost::format msg_title("Open input project at default location?");
+            boost::format msg_text("You have no input project open.  Would you like to open the project at the default location?");
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+            if (reply == QMessageBox::No)
+            {
+                loading = false;
+                return;
+            }
+        }
 
 		boost::filesystem::path input_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Input", NewGeneFileNames::defaultInputProjectFileName);
 		if (input_project_path != boost::filesystem::path())
