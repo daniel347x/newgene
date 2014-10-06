@@ -233,7 +233,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="showAbsoluteTimeOutputColumns">
+           <widget class="QCheckBox" name="displayAbsoluteTimeColumns">
             <property name="text">
              <string>Show absolute time columns for every row
 (useful for exact statistical analysis)</string>
