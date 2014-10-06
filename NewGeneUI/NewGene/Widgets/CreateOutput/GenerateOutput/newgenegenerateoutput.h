@@ -38,7 +38,7 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 		void RefreshAllWidgets();
 		void ReceiveSignalAppendKadStatusText(int, STD_STRING const);
 		void ReceiveSignalSetPerformanceLabel(int, STD_STRING const);
-		void on_pushButton_clicked();
+        void on_pushButtonChooseLocation_clicked();
 
 	private slots:
 		void on_lineEditFilePathToKadOutput_editingFinished();

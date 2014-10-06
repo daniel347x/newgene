@@ -139,7 +139,7 @@ void NewGeneGenerateOutput::ReceiveSignalSetPerformanceLabel(int /* progress_bar
 	}
 }
 
-void NewGeneGenerateOutput::on_pushButton_clicked()
+void NewGeneGenerateOutput::on_pushButtonChooseLocation_clicked()
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
