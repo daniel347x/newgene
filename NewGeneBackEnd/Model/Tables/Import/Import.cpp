@@ -1780,7 +1780,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 {
 	int current_lines_read = 0;
 
-	while (data_file.getline(line, MAX_LINE_SIZE - 1) && data_file.good())
+	while (data_file.getline(line, MAX_LINE_SIZE - 1) && !data_file.fail() && !data_file.bad() && (!data_file.eof() || boost::algorithm::trim_copy_if(std::string(line), boost::algorithm::is_any_of(" \t")).size() > 0))
 	{
 
 		if (CheckCancelled())
