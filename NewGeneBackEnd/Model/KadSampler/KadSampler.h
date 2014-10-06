@@ -8,13 +8,13 @@
 #include <tuple>
 #include <memory>
 #include <stdio.h>
-#include <time.h>
 #ifndef Q_MOC_RUN
 #	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
 #	include <boost/multiprecision/cpp_dec_float.hpp>
 #	include <boost/variant.hpp>
 #	include <boost/pool/pool_alloc.hpp>
+#	include "boost/date_time/posix_time/posix_time.hpp"
 #endif
 #include "../../Utilities/NewGeneException.h"
 #include "../../Utilities/TimeRangeHelper.h"
@@ -163,13 +163,7 @@ class TimeSlice
 
 			if (do_calc)
 			{
-				char buf[80];
-				std::int64_t time_ms = time_start * 1000;
-				struct tm tstruct = *localtime(&time_ms);
-				// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
-				// for more information about date/time format
-				strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
-				return buf;
+				return TimeRange::convertMsSinceEpochToString(time_start, true);
 			}
 
 			return std::string();
@@ -192,13 +186,7 @@ class TimeSlice
 
 			if (do_calc)
 			{
-				char buf[80];
-				std::int64_t time_ms = time_end * 1000;
-				struct tm tstruct = *localtime(&time_ms);
-				// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
-				// for more information about date/time format
-				strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
-				return buf;
+				return TimeRange::convertMsSinceEpochToString(time_end, true);
 			}
 
 			return std::string();

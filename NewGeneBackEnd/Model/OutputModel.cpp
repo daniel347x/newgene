@@ -464,34 +464,37 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		Prepare(allWeightings);
 		if (failed || CheckCancelled()) { return; }
 
-		// Now that the time granularity has been set (in "Prepare()"),
-		// make sure the time range begins and ends at the closest absolute granularity
-		std::int64_t timerange_start_test_down = TimeRange::determineAligningTimestamp(timerange_start, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
-		std::int64_t timerange_start_test_up = TimeRange::determineAligningTimestamp(timerange_start, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
-		std::int64_t timerange_end_test_down = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
-		std::int64_t timerange_end_test_up = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
-		if (timerange_start != timerange_start_test_down)
+		if (allWeightings.time_granularity != TIME_GRANULARITY__NONE)
 		{
-			// round
-			if (timerange_start - timerange_start_test_down > timerange_start_test_up - timerange_start)
+			// Now that the time granularity has been set (in "Prepare()"),
+			// make sure the time range begins and ends at the closest absolute granularity
+			std::int64_t timerange_start_test_down = TimeRange::determineAligningTimestamp(timerange_start, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
+			std::int64_t timerange_start_test_up = TimeRange::determineAligningTimestamp(timerange_start, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
+			std::int64_t timerange_end_test_down = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
+			std::int64_t timerange_end_test_up = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
+			if (timerange_start != timerange_start_test_down)
 			{
-				timerange_start = timerange_start_test_up;
+				// round
+				if (timerange_start - timerange_start_test_down > timerange_start_test_up - timerange_start)
+				{
+					timerange_start = timerange_start_test_up;
+				}
+				else
+				{
+					timerange_start = timerange_start_test_down;
+				}
 			}
-			else
+			if (timerange_end != timerange_end_test_up)
 			{
-				timerange_start = timerange_start_test_down;
-			}
-		}
-		if (timerange_end != timerange_end_test_up)
-		{
-			// round
-			if (timerange_end - timerange_end_test_down >= timerange_end_test_up - timerange_end)
-			{
-				timerange_end = timerange_end_test_up;
-			}
-			else
-			{
-				timerange_end = timerange_end_test_down;
+				// round
+				if (timerange_end - timerange_end_test_down >= timerange_end_test_up - timerange_end)
+				{
+					timerange_end = timerange_end_test_up;
+				}
+				else
+				{
+					timerange_end = timerange_end_test_down;
+				}
 			}
 		}
 
@@ -5964,7 +5967,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 		else if (column_index == static_cast<int>(final_result.second.columns_in_view.size()))
 		{
 			// ending date / time of time slice
-			output_file << "row_ends_after";
+			output_file << "row_ends_at";
 		}
 		else
 		{

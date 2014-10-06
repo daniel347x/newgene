@@ -2588,7 +2588,7 @@ void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 
 	if (!startinf)
 	{
-		sdata += TimeRange::convertTimestampToString(time_slice.getStart());
+		sdata += TimeRange::convertMsSinceEpochToString(time_slice.getStart());
 	}
 
 	sdata += "</DATETIME_START>";
@@ -2597,7 +2597,7 @@ void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 
 	if (!endinf)
 	{
-		sdata += TimeRange::convertTimestampToString(time_slice.getEnd());
+		sdata += TimeRange::convertMsSinceEpochToString(time_slice.getEnd());
 	}
 
 	sdata += "</DATETIME_END>";

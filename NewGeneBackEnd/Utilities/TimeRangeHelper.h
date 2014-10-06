@@ -6,6 +6,7 @@
 
 #ifndef Q_MOC_RUN
 #	include <boost/date_time/local_time/local_time.hpp>
+#	include "boost/date_time/posix_time/posix_time.hpp"
 #endif
 #include "../Model/TimeGranularity.h"
 
@@ -27,11 +28,16 @@ namespace TimeRange
 		, ALIGN_MODE_DOWN
 	};
 
-	inline std::string convertTimestampToString(std::int64_t const timestamp)
+	inline std::string convertMsSinceEpochToString(std::int64_t const ms, bool const only_date = false)
 	{
-		boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-		boost::posix_time::ptime time_start_database = time_t_epoch__1970 + boost::posix_time::milliseconds(timestamp);
-		return boost::posix_time::to_simple_string(time_start_database);
+		boost::posix_time::ptime time_epoch(boost::gregorian::date(1970, 1, 1));
+		boost::posix_time::ptime t = time_epoch + boost::posix_time::milliseconds(ms);
+		if (only_date)
+		{
+			boost::gregorian::date d = t.date();
+			return boost::gregorian::to_simple_string(d);
+		}
+		return boost::posix_time::to_simple_string(t);
 	}
 
 	// Returns the closest Unix timestamp that is equal to or higher than test_timestamp,
