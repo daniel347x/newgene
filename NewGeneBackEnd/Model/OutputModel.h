@@ -531,6 +531,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// Random sampling
 				WidgetInstanceIdentifier top_level_vg;
 				bool consolidate_rows;
+				bool display_absolute_time_columns;
+				bool general_info;
 				bool random_sampling;
 				std::int64_t random_sampling_number_rows;
 				bool has_non_primary_top_level_groups;
@@ -544,12 +546,11 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages);
 				SqlAndColumnSet KadSamplerBuildOutputSchema();
 				void KadSamplerCreateOutputTable();
-				void KadSamplerWriteToOutputTable(KadSampler & allWeightings, std::vector<std::string> & errorMessages);
 				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
 				void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex);
 
 				template <typename MEMORY_TAG>
-				void CreateOutputRow(Branch const & branch, BranchOutputRow<MEMORY_TAG> const & outputRow, KadSampler & allWeightings);
+				bool CreateOutputRow(Branch const & branch, BranchOutputRow<MEMORY_TAG> const & outputRow, KadSampler & allWeightings); // returns whether no columns of data were added
 
 				void ConsolidateData(bool const random_sampling, KadSampler & allWeightings);
 				void ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(KadSampler & allWeightings);
@@ -824,7 +825,7 @@ bool OutputModelImportTableFn(Importer * importer, Model_basemost * model_, Impo
 							  int const number_rows, long & linenum, long & badwritelines, std::vector<std::string> & errors);
 
 template <typename MEMORY_TAG>
-void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, BranchOutputRow<MEMORY_TAG> const & outputRow, KadSampler & allWeightings)
+bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, BranchOutputRow<MEMORY_TAG> const & outputRow, KadSampler & allWeightings)
 {
 	bool first = true;
 
@@ -1142,6 +1143,8 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 			}
 		}
 	}
+
+	return first;
 }
 
 template <typename MEMORY_TAG_OUTPUT_ROW, typename MEMORY_TAG_SET_OF_ROWS>
@@ -1180,9 +1183,21 @@ void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current
 
 		create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
 		create_output_row_visitor::output_file = &output_file;
-		CreateOutputRow(branch, outputRow, allWeightings);
+		bool first = CreateOutputRow(branch, outputRow, allWeightings);
 		create_output_row_visitor::output_file = nullptr;
 		create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+		if (display_absolute_time_columns)
+		{
+			if (!first)
+			{
+				output_file << ",";
+			}
+			first = false;
+			output_file << current_time_slice.toStringStart().c_str();
+			output_file << ",";
+			output_file << current_time_slice.toStringEnd().c_str();
+		}
 
 		output_file << std::endl;
 		++rows_written;

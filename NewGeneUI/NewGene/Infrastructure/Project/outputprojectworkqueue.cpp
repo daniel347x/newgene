@@ -188,6 +188,14 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 }
 
 /************************************************************************/
+// ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE
+/************************************************************************/
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE action_request)
+{
+	get()->getWorkService().post(DoDisplayAbsoluteTimeColumnsChange(action_request, this));
+}
+
+/************************************************************************/
 // ACTION_DATETIME_RANGE_CHANGE
 /************************************************************************/
 void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE action_request)

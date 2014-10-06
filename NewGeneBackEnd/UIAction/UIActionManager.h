@@ -23,6 +23,7 @@ class UIActionManager : public Manager<UIActionManager, MANAGER_DESCRIPTION_NAME
 		void DoDoKadSamplerChange(Messager & messager, WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE const & action_request, OutputProject & project);
 		void DoKadSamplerCountPerStageChange(Messager & messager, WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE const & action_request, OutputProject & project);
 		void DoConsolidateRowsChange(Messager & messager, WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE const & action_request, OutputProject & project);
+		void DoDisplayAbsoluteTimeColumnsChange(Messager & messager, WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE const & action_request, OutputProject & project);
 		void DoTimeRangeChange(Messager & messager, WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE const & action_request, OutputProject & project);
 		void DoGenerateOutput(Messager & messager, WidgetActionItemRequest_ACTION_GENERATE_OUTPUT const & action_request, OutputProject & project);
 		void DoLimitDmusChange(Messager & messager, WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE const & action_request, OutputProject & project);

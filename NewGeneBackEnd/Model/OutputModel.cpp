@@ -178,6 +178,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, delete_tables(true)
 	, debug_ordering(false)
 	, consolidate_rows(true)
+	, display_absolute_time_columns(false)
 	, random_sampling_number_rows(1)
 	, random_sampling(false)
 	, primary_vg_index__in__top_level_vg_vector(0)
@@ -2273,10 +2274,11 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 
 	initialized = true;
 
-	std::tuple<bool, std::int64_t, bool> info_random_sampling = model->t_general_options.getKadSamplerInfo(model->getDb());
-	random_sampling = std::get<0>(info_random_sampling);
-	random_sampling_number_rows = std::get<1>(info_random_sampling);
-	consolidate_rows = std::get<2>(info_random_sampling);
+	std::tuple<bool, std::int64_t, bool, bool> general_info = model->t_general_options.getKadSamplerInfo(model->getDb());
+	random_sampling = std::get<0>(general_info);
+	random_sampling_number_rows = std::get<1>(general_info);
+	consolidate_rows = std::get<2>(general_info);
+	display_absolute_time_columns = std::get<3>(general_info);
 
 	if (random_sampling && (random_sampling_number_rows <= 0))
 	{
@@ -5167,138 +5169,6 @@ void OutputModel::OutputGenerator::KadSamplerCreateOutputTable()
 
 }
 
-void OutputModel::OutputGenerator::KadSamplerWriteToOutputTable(KadSampler & allWeightings, std::vector<std::string> & errorMessages)
-{
-
-
-
-	// ************************************************************************************************* //
-	// ************************************************************************************************* //
-	// ************************************************************************************************* //
-	// ************************************************************************************************* //
-	//
-	// THIS FUNCTION IS NEVER CALLED AND MAY NEED TO BE MODIFIED TO ACCOUNT FOR CONSOLIDATED VS.
-	// UNCONSOLIDATED OUTPUT, AND CORRESPONDINGLY PROPER HANDLING OF THE TIME UNITS
-	//
-	// ************************************************************************************************* //
-	// ************************************************************************************************* //
-	// ************************************************************************************************* //
-	// ************************************************************************************************* //
-
-	ColumnsInTempView const & random_sampling_columns = random_sampling_schema.second;
-
-	int const    minimum_desired_rows_per_transaction = 1024 * 16;
-	std::int64_t current_rows_in_error = 0;
-	std::int64_t current_rows_stepped = 0;
-
-	BeginNewTransaction();
-
-	BOOST_SCOPE_EXIT(this_, &allWeightings)
-	{
-		// Transaction is for efficiency;
-		// rollback not yet enabled
-		if (allWeightings.insert_random_sample_stmt != nullptr)
-		{
-			sqlite3_finalize(allWeightings.insert_random_sample_stmt);
-			allWeightings.insert_random_sample_stmt = nullptr;
-		}
-
-		this_->EndTransaction();
-	} BOOST_SCOPE_EXIT_END
-
-	PrepareInsertStatement(allWeightings.insert_random_sample_stmt, random_sampling_columns);
-
-	std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices<hits_tag>::value_type const & timeSliceData)
-	{
-
-		if (failed || CheckCancelled())
-		{
-			return;
-		}
-
-		TimeSlice const & timeSlice = timeSliceData.first;
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
-
-		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
-
-		// For now, assume only one variable group
-		if (variableGroupBranchesAndLeavesVector.size() > 1)
-		{
-			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-
-		VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-		Branches<hits_tag> const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
-
-		std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](Branch const & branch)
-		{
-
-			if (failed || CheckCancelled())
-			{
-				return;
-			}
-
-			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<hits_tag>::value_type const & time_unit_and_rows)
-			{
-
-				if (failed || CheckCancelled())
-				{
-					return;
-				}
-
-				auto const & outputRows = time_unit_and_rows.second;
-
-				std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow<hits_tag> const & outputRow)
-				{
-
-					int bind_index = 0;
-
-					create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__PREPARED_STATEMENT;
-					create_output_row_visitor::bind_index = &bind_index;
-					create_output_row_visitor::insert_stmt = allWeightings.insert_random_sample_stmt;
-					CreateOutputRow(branch, outputRow, allWeightings);
-					create_output_row_visitor::output_file = nullptr;
-					create_output_row_visitor::bind_index = nullptr;
-					create_output_row_visitor::insert_stmt = nullptr;
-					create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
-
-					int step_result = 0;
-
-					// Execute the insert of the row into the table
-					if ((step_result = sqlite3_step(allWeightings.insert_random_sample_stmt)) != SQLITE_DONE)
-					{
-						sql_error = sqlite3_errmsg(db);
-						boost::format msg("Unable to execute prepared insert query to insert a new random sample: %1%");
-						msg % sql_error;
-						errorMessages.push_back(msg.str());
-						++current_rows_in_error;
-					}
-
-					// Prepare statement for next row
-					sqlite3_clear_bindings(allWeightings.insert_random_sample_stmt);
-					sqlite3_reset(allWeightings.insert_random_sample_stmt);
-
-					++current_rows_stepped;
-
-					if (current_rows_stepped % minimum_desired_rows_per_transaction == 0)
-					{
-						EndTransaction();
-						BeginNewTransaction();
-					}
-
-				});
-
-			});
-
-		});
-
-	});
-
-	EndTransaction();
-
-}
-
 void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns)
 {
 
@@ -6073,7 +5943,10 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		if (column_index >= static_cast<int>(final_result.second.columns_in_view.size()) - 1)
 		{
-			return; // for now, do not output datetime columns
+			if (!display_absolute_time_columns)
+			{
+				return;
+			}
 		}
 
 		if (!first)
@@ -6083,12 +5956,25 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		first = false;
 
-		output_file << unformatted_column.column_name_in_original_data_table;
-
-		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+		if (column_index == static_cast<int>(final_result.second.columns_in_view.size()) - 1)
 		{
-			output_file << "_";
-			output_file << boost::lexical_cast<std::string>(unformatted_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group);
+			// starting date / time of time slice
+			output_file << "row_starts_at";
+		}
+		else if (column_index == static_cast<int>(final_result.second.columns_in_view.size()))
+		{
+			// ending date / time of time slice
+			output_file << "row_ends_after";
+		}
+		else
+		{
+			output_file << unformatted_column.column_name_in_original_data_table;
+
+			if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+			{
+				output_file << "_";
+				output_file << boost::lexical_cast<std::string>(unformatted_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group);
+			}
 		}
 
 	});
@@ -6102,7 +5988,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		// In this case, "ConsolidateRows()" has already been called,
 		// and has already populate "consolidated_rows".
-		// "consolidated_rows" contains an EXACT representation of the output,
+		// "consolidated_rows" contains an EXACT representation of the output (except for explicit timerange columns),
 		// column-for-column in the correct order, with blanks populated properly,
 		// including all primary, top-level, and child secondary data
 		// (as well as all primary key data for both branch and leaves),
@@ -6135,6 +6021,18 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 				output_file << data;
 
 			});
+
+			if (display_absolute_time_columns)
+			{
+				if (!first)
+				{
+					output_file << ",";
+				}
+				first = false;
+				output_file << output_row.time_slice.toStringStart().c_str();
+				output_file << ",";
+				output_file << output_row.time_slice.toStringEnd().c_str();
+			}
 
 			output_file << std::endl;
 
@@ -6302,9 +6200,21 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
 						create_output_row_visitor::output_file = &output_file;
-						CreateOutputRow(branch, outputRow, allWeightings);
+						bool first = CreateOutputRow(branch, outputRow, allWeightings);
 						create_output_row_visitor::output_file = nullptr;
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+						if (display_absolute_time_columns)
+						{
+							if (!first)
+							{
+								output_file << ",";
+							}
+							first = false;
+							output_file << timeSlice.toStringStart().c_str();
+							output_file << ",";
+							output_file << timeSlice.toStringEnd().c_str();
+						}
 
 						output_file << std::endl;
 

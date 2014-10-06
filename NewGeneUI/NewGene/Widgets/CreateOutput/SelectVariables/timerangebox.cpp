@@ -65,6 +65,7 @@ void TimeRangeBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 		connect(this, SIGNAL(UpdateDoKadSampler(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)));
 		connect(this, SIGNAL(UpdateKadSamplerCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)));
 		connect(this, SIGNAL(UpdateConsolidateRows(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)));
+		connect(this, SIGNAL(UpdateDisplayAbsoluteTimeColumns(WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE)));
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
@@ -104,6 +105,7 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 	bool do_random_sampling = widget_data.do_random_sampling;
 	std::int64_t random_sampling_count_per_stage = widget_data.random_sampling_count_per_stage;
 	bool consolidate_rows = widget_data.consolidate_rows;
+	bool display_absolute_time_columns = widget_data.display_absolute_time_columns;
 
 	{
 		QCheckBox * checkBox = this->findChild<QCheckBox*>("doKadSampler");
@@ -142,6 +144,18 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 			if (is_checked != consolidate_rows)
 			{
 				checkBox->setChecked(consolidate_rows);
+			}
+		}
+	}
+
+	{
+		QCheckBox * checkBox = this->findChild<QCheckBox*>("displayAbsoluteTimeColumns");
+		if (checkBox)
+		{
+			bool is_checked = checkBox->isChecked();
+			if (is_checked != display_absolute_time_columns)
+			{
+				checkBox->setChecked(display_absolute_time_columns);
 			}
 		}
 	}
@@ -212,5 +226,26 @@ void TimeRangeBox::on_mergeIdenticalRows_stateChanged(int arg1)
 		WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 		emit UpdateConsolidateRows(action_request);
 	}
+
+}
+
+void TimeRangeBox::on_displayAbsoluteTimeColumns_stateChanged(int arg1)
+{
+
+    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    QCheckBox * checkBox = this->findChild<QCheckBox*>("displayAbsoluteTimeColumns");
+    if (checkBox)
+    {
+        bool is_checked = checkBox->isChecked();
+        InstanceActionItems actionItems;
+        actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
+        WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
+        emit UpdateDisplayAbsoluteTimeColumns(action_request);
+    }
 
 }

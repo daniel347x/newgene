@@ -7,6 +7,8 @@
 #include <map>
 #include <tuple>
 #include <memory>
+#include <stdio.h>
+#include <time.h>
 #ifndef Q_MOC_RUN
 #	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
@@ -142,6 +144,64 @@ class TimeSlice
 		{
 			CheckForAndSetNoTimeRangeGranularity();
 			Validate();
+		}
+
+		std::string toStringStart() const
+		{
+			bool do_calc = false;
+			if (none)
+			{
+				if (!minus_infinity)
+				{
+					do_calc = true;
+				}
+			}
+			else
+			{
+				do_calc = true;
+			}
+
+			if (do_calc)
+			{
+				char buf[80];
+				std::int64_t time_ms = time_start * 1000;
+				struct tm tstruct = *localtime(&time_ms);
+				// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+				// for more information about date/time format
+				strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
+				return buf;
+			}
+
+			return std::string();
+		}
+
+		std::string toStringEnd() const
+		{
+			bool do_calc = false;
+			if (none)
+			{
+				if (!plus_infinity)
+				{
+					do_calc = true;
+				}
+			}
+			else
+			{
+				do_calc = true;
+			}
+
+			if (do_calc)
+			{
+				char buf[80];
+				std::int64_t time_ms = time_end * 1000;
+				struct tm tstruct = *localtime(&time_ms);
+				// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+				// for more information about date/time format
+				strftime(buf, sizeof(buf), "%Y-%m-%d", &tstruct);
+				return buf;
+			}
+
+			return std::string();
 		}
 
 		void Merge(TimeSlice const & rhs)

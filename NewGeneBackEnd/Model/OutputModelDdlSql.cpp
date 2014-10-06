@@ -8,11 +8,11 @@ std::string OutputModelDDLSQL()
 
 
 
-/**************************/
-/*                        */
-/* OutputModelDefault.SQL */
-/*                        */
-/**************************/
+/***************************/
+/*                         */
+/* IOutputModelDefault.SQL */
+/*                         */
+/***************************/
 
 /* Disable Foreign Keys */
 pragma foreign_keys = off;
@@ -31,10 +31,11 @@ drop table if exists [main].[GENERAL_OPTIONS];
 CREATE TABLE [main].[GENERAL_OPTIONS] (
   [DO_RANDOM_SAMPLING] INT NOT NULL ON CONFLICT FAIL DEFAULT 0, 
   [RANDOM_SAMPLING_COUNT_PER_STAGE] INT NOT NULL ON CONFLICT FAIL DEFAULT 0, 
-  [CONSOLIDATE_ROWS] INT NOT NULL ON CONFLICT FAIL DEFAULT 0);
+  [CONSOLIDATE_ROWS] INT NOT NULL ON CONFLICT FAIL DEFAULT 1, 
+  [DISPLAY_ABSOLUTE_TIME_COLUMNS] INT NOT NULL ON CONFLICT FAIL DEFAULT 0);
 
 /* Data [main].[GENERAL_OPTIONS] */
-insert into [main].[GENERAL_OPTIONS] values(0, 500, 1);
+insert into [main].[GENERAL_OPTIONS] values(0, 500, 1, 0);
 
 
 /* Drop table [main].[KAD_COUNT] */
@@ -89,8 +90,6 @@ commit transaction;
 
 /* Enable Foreign Keys */
 pragma foreign_keys = on;
-
-
 
 
 
