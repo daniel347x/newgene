@@ -420,18 +420,26 @@ class TimeSlice
 			// Start at the beginning, and loop through.
 			std::int64_t current_time_start = time_start;
 
-			while (current_time_start < time_end)
+			if (time_granularity == TIME_GRANULARITY__NONE)
 			{
-				std::int64_t time_to_use_for_start = current_time_start;
-				std::int64_t current_start_time_incremented_by_1_ms = time_to_use_for_start + 1;
-				std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
-				std::int64_t time_to_use_for_end = time_start_aligned_higher;
-				if (time_to_use_for_end > time_end) { time_to_use_for_end = time_end; }
-
-				misc_function(time_to_use_for_start, time_to_use_for_end);
-
-				current_time_start = time_to_use_for_end;
+				misc_function(time_start, time_end);
 			}
+			else
+			{
+				while (current_time_start < time_end)
+				{
+					std::int64_t time_to_use_for_start = current_time_start;
+					std::int64_t current_start_time_incremented_by_1_ms = time_to_use_for_start + 1;
+					std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
+					std::int64_t time_to_use_for_end = time_start_aligned_higher;
+					if (time_to_use_for_end > time_end) { time_to_use_for_end = time_end; }
+
+					misc_function(time_to_use_for_start, time_to_use_for_end);
+
+					current_time_start = time_to_use_for_end;
+				}
+			}
+
 		};
 
 		// ***************************************************************************** //
