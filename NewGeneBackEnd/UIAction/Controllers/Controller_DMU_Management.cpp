@@ -496,12 +496,22 @@ void UIActionManager::AddDMUMembers(Messager & messager__, WidgetActionItemReque
 
 
 
+					//// ***************************************** //
+					//// Prepare data to send back to user interface
+					//// ***************************************** //
+					//DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+					//DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
+					//DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+
 					// ***************************************** //
 					// Prepare data to send back to user interface
 					// ***************************************** //
+
+					WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
+
 					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
-					DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__RESET_ALL;
+					DataChange change(type, intention, dmu_category, dmu_members);
 
 					change_response.changes.push_back(change);
 
@@ -581,12 +591,23 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 					input_model.t_dmu_setmembers.DeleteDmuMember(input_model.getDb(), input_model, dmu_member);
 
 
+					//// ***************************************** //
+					//// Prepare data to send back to user interface
+					//// ***************************************** //
+					//DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+					//DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+					//DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+
 					// ***************************************** //
 					// Prepare data to send back to user interface
 					// ***************************************** //
+
+					WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
+
 					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-					DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__RESET_ALL;
+					DataChange change(type, intention, dmu_category, dmu_members);
+
 					change_response.changes.push_back(change);
 
 					executor.success();
@@ -649,7 +670,6 @@ void UIActionManager::DeleteDMUMembersOutput(Messager & messager, WidgetActionIt
 					WidgetInstanceIdentifier const & dmu_category = *dmu_member.identifier_parent;
 
 					// Now remove the corresponding DMU members from the "Limit DMU's" members table
-					// empty string for last arg means "delete all members for this DMU category"
 					output_model.t_limit_dmus_set_members.RemoveDmuMember(output_model.getDb(), output_model, input_model, dmu_category, *dmu_member.uuid);
 
 					// ******************************************************************************************************** //

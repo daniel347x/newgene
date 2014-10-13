@@ -516,7 +516,7 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 	step_result = sqlite3_step(stmt);
 	if (step_result != SQLITE_DONE)
 	{
-		boost::format msg("Unable to prepare DELETE statement to delete DMU member: %1%");
+		boost::format msg("Unable to execute DELETE statement to delete DMU member: %1%");
 		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}

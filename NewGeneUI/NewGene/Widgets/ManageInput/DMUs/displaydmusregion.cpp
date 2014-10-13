@@ -1046,6 +1046,22 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 						return;
 					}
 
+					/*
+                     * This is being handled server-side to deal with UI glitches
+                     * when attempting to manage adding/removing individual DMU members
+                     * here - namely, we are currently not properly adding/removing the DMU's
+                     * from the upper pane's data structures, as well as the lower pane's.
+                     * Fixing this will wait for a later version of NewGene.
+                     * For now, just force a full refresh of the entire DMU category,
+                     * because the back end will send DATA_CHANGE_INTENTION__RESET_ALL,
+                     * rather than sending DATA_CHANGE_INTENTION__ADD or DATA_CHANGE_INTENTION__REMOVE.
+					*/
+                    if (false)
+					{
+						RefreshAllWidgets();
+						break;
+					}
+
 					switch (change.change_intention)
 					{
 
