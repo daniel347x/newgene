@@ -784,40 +784,89 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 					{
 						if (input_model.t_dmu_setmembers.badreadlines > 0 && input_model.t_dmu_setmembers.badwritelines > 0)
 						{
-							boost::format
-							msg("DMU category '%1%' refreshed %5% lines from file%4% (%6% written to, %7% updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
-							msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
-							% cancelAddendum
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodupdatelines);
-							messager__.ShowMessageBox(msg.str());
+							if (do_refresh_not_plain_insert)
+							{
+								// Handle incoming data row-by-row, distinguishing between inserts and updates
+								boost::format
+									msg("DMU category '%1%' refreshed %5% lines from file%4% (%6% written to, %7% updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodupdatelines);
+								messager__.ShowMessageBox(msg.str());
+							}
+							else
+							{
+								// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
+								boost::format
+									msg("DMU category '%1%' refreshed %5% lines from file%4% (%6% written to and/or updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines + input_model.t_dmu_setmembers.goodupdatelines);
+								messager__.ShowMessageBox(msg.str());
+							}
 						}
 						else if (input_model.t_dmu_setmembers.badreadlines == 0 && input_model.t_dmu_setmembers.badwritelines > 0)
 						{
-							boost::format
-							msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to, %6% updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
-							msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
-							% cancelAddendum
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodupdatelines);
-							messager__.ShowMessageBox(msg.str());
+							if (do_refresh_not_plain_insert)
+							{
+								// Handle incoming data row-by-row, distinguishing between inserts and updates
+								boost::format
+									msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to, %6% updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodupdatelines);
+								messager__.ShowMessageBox(msg.str());
+							}
+							else
+							{
+								// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
+								boost::format
+									msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to and/or updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines + input_model.t_dmu_setmembers.goodupdatelines);
+								messager__.ShowMessageBox(msg.str());
+							}
 						}
 						else if (input_model.t_dmu_setmembers.badreadlines > 0 && input_model.t_dmu_setmembers.badwritelines == 0)
 						{
-							boost::format
-							msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to, %6% updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
-							msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
-							% cancelAddendum
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines)
-							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodupdatelines);
-							messager__.ShowMessageBox(msg.str());
+							if (do_refresh_not_plain_insert)
+							{
+								// Handle incoming data row-by-row, distinguishing between inserts and updates
+								boost::format
+									msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to, %6% updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodupdatelines);
+								messager__.ShowMessageBox(msg.str());
+							}
+							else
+							{
+								// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
+								boost::format
+									msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to and/or updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
+									% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines + input_model.t_dmu_setmembers.goodupdatelines);
+								messager__.ShowMessageBox(msg.str());
+							}
 						}
 					}
 					else
@@ -830,8 +879,8 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 						}
 						boost::format msg("DMU '%1%' successfully refreshed %3% DMU members from file%2%.");
 						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
-						% cancelAddendum
-						% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines);
+							% cancelAddendum
+							% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines);
 						messager__.ShowMessageBox(msg.str());
 					}
 
