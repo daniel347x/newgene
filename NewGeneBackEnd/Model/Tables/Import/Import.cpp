@@ -1052,8 +1052,9 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 	, which_import(which_import_)
 	, badreadlines(0)
 	, badwritelines(0)
-	, goodrealines(0)
+	, goodreadlines(0)
 	, goodwritelines(0)
+	, goodupdatelines(0)
 	, block_size(0)
 {
 
@@ -2234,7 +2235,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			else
 			{
 				// Write rows to database here
-				table_write_callback(this, model, import_definition, table, output_block, currently_read_lines, saved_linenum, badwritelines, goodwritelines, errors);
+				table_write_callback(this, model, import_definition, table, output_block, currently_read_lines, saved_linenum, badwritelines, goodwritelines, goodupdatelines, errors);
 				if (CheckCancelled())
 				{
 					break;

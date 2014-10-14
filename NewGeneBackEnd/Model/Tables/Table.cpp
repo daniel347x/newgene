@@ -1,7 +1,7 @@
 #include "table.h"
 
 void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-	int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, std::vector<std::string> & errors)
+	int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -139,7 +139,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 }
 
 void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-	int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, long & numlinesupdated, std::vector<std::string> & errors)
+	int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, long & numlinesupdated, std::vector<std::string> & errors)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -176,6 +176,10 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 			// Update did not affect any row.  Insert a new row
 			TryInsertRow(block, row, failed, import_definition, db, errorMsg);
 		}
+		else
+		{
+			++goodupdatelines;
+		}
 
 		if (failed || !errorMsg.empty())
 		{
@@ -187,6 +191,10 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 			++linenum;
 			++badwritelines;
 			continue; // try some other rows
+		}
+		else
+		{
+			++goodwritelines;
 		}
 
 		++linenum;

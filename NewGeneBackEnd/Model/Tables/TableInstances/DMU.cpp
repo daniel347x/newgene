@@ -636,6 +636,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	badwritelines = 0;
 	goodreadlines = 0;
 	goodwritelines = 0;
+	goodupdatelines = 0;
 
 	std::string errorMsg;
 
@@ -675,6 +676,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	badwritelines = table_importer.badwritelines;
 	goodreadlines = table_importer.goodreadlines;
 	goodwritelines = table_importer.goodwritelines;
+	goodupdatelines = table_importer.goodupdatelines;
 
 	std::string msgBoxErrors;
 	boost::posix_time::ptime current_date_time = boost::posix_time::second_clock::local_time();

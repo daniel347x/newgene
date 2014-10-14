@@ -92,7 +92,7 @@ void InputModel::LoadTables()
 
 }
 
-bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, long & goodwritelines, std::vector<std::string> & errors)
+bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors)
 {
 
 	int number_errors_at_start = errors.size();
@@ -127,7 +127,7 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 				case Importer::INSERT_IN_BULK:
 				{
 					long numlinesupdated = 0;
-					table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, errors);
+					table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, goodwritelines, goodupdatelines, errors);
 					int number_errors_now = errors.size();
 					if (number_errors_now > number_errors_at_start)
 					{
@@ -139,7 +139,7 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 				case Importer::INSERT_OR_UPDATE:
 				{
 					long numlinesupdated = 0;
-					table_->ImportBlockUpdate(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, numlinesupdated, errors);
+					table_->ImportBlockUpdate(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, goodwritelines, goodupdatelines, numlinesupdated, errors);
 					int number_errors_now = errors.size();
 					if (number_errors_now > number_errors_at_start)
 					{

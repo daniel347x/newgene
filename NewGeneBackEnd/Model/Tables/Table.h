@@ -61,6 +61,7 @@ class Table_basemost
 			, badwritelines(0)
 			, goodreadlines(0)
 			, goodwritelines(0)
+			, goodupdatelines(0)
 		{
 
 		}
@@ -72,12 +73,13 @@ class Table_basemost
 		long badwritelines; // convenience: for data import
 		long goodreadlines; // convenience: for data import
 		long goodwritelines; // convenience: for data import
+		long goodupdatelines; // convenience: for data import
 
 		virtual void Load(sqlite3 *, InputModel * = nullptr) { };
 		virtual void Load(sqlite3 *, OutputModel * = nullptr, InputModel * = nullptr) { };
 		virtual bool ImportStart(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
-		virtual void ImportBlockBulk(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines, std::vector<std::string> & errors);
-		virtual void ImportBlockUpdate(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines, long & numlinesupdated, std::vector<std::string> & errors);
+		virtual void ImportBlockBulk(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors);
+		virtual void ImportBlockUpdate(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, long & numlinesupdated, std::vector<std::string> & errors);
 
 		int TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db, std::string & errorMsg);
 		void TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db, std::string & errorMsg);
