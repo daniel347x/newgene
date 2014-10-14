@@ -132,7 +132,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 		return;
 	}
 
-	goodwritelines += goodwritelines_current;
+	goodwritelines += writelines_current;
 
 	executor.success();
 

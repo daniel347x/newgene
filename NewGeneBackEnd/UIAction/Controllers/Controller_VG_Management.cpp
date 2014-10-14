@@ -612,7 +612,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 									% cancelAddendum
 									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
 									% boost::lexical_cast<std::string>(table_importer.goodwritelines)
-									% boost::lexical_cast<std::string>(table_importer.goodupdatedlines);
+									% boost::lexical_cast<std::string>(table_importer.goodupdatelines);
 								messager.ShowMessageBox(msg.str());
 							}
 							else
