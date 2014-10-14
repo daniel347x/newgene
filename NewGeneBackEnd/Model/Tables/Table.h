@@ -57,6 +57,10 @@ class Table_basemost
 
 		Table_basemost(TABLE_MODEL_TYPE const table_model_type_)
 			: table_model_type(table_model_type_)
+			, badreadlines(0)
+			, badwritelines(0)
+			, goodreadlines(0)
+			, goodwritelines(0)
 		{
 
 		}

@@ -553,6 +553,8 @@ class Importer
 		std::vector<std::string> errors;
 		long badreadlines;
 		long badwritelines;
+		long goodreadlines;
+		long goodwritelines;
 
 	public:
 

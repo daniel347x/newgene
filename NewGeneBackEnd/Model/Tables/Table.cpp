@@ -1,7 +1,7 @@
 #include "table.h"
 
 void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-	int const number_rows_in_block, long & linenum, long & badwritelines, std::vector<std::string> & errors)
+	int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, std::vector<std::string> & errors)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -99,6 +99,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 	//	return false;
 	//}
 
+	// BULK INSERT
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sql_insert.c_str(), static_cast<int>(sql_insert.size()) + 1, &stmt, NULL);
 
@@ -138,7 +139,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 }
 
 void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-	int const number_rows_in_block, long & linenum, long & badwritelines, long & numlinesupdated, std::vector<std::string> & errors)
+	int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, long & numlinesupdated, std::vector<std::string> & errors)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);

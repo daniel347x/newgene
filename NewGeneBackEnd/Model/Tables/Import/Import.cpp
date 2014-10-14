@@ -2234,7 +2234,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			else
 			{
 				// Write rows to database here
-				table_write_callback(this, model, import_definition, table, output_block, currently_read_lines, saved_linenum, badwritelines, errors);
+				table_write_callback(this, model, import_definition, table, output_block, currently_read_lines, saved_linenum, badwritelines, goodwritelines, errors);
 				if (CheckCancelled())
 				{
 					break;
