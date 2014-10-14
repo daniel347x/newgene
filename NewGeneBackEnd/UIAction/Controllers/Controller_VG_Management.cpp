@@ -593,37 +593,50 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						{
 							if (table_importer.badreadlines > 0 && table_importer.badwritelines > 0)
 							{
-								boost::format msg("Variable group '%1%' refreshed from file%4%, but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								boost::format msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
 								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badreadlines)
 									% boost::lexical_cast<std::string>(table_importer.badwritelines)
-									% cancelAddendum;
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines);
 								messager.ShowMessageBox(msg.str());
 							}
 							else
 							if (table_importer.badreadlines == 0 && table_importer.badwritelines > 0)
 							{
-								boost::format msg("Variable group '%1%' refreshed from file%3%, but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								boost::format msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
 								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badwritelines)
-									% cancelAddendum;
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines);
 								messager.ShowMessageBox(msg.str());
 							}
 							else
 							if (table_importer.badreadlines > 0 && table_importer.badwritelines == 0)
 							{
-								boost::format msg("Variable group '%1%' refreshed from file%3%, but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+								boost::format msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
 								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badreadlines)
-									% cancelAddendum;
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines);
 								messager.ShowMessageBox(msg.str());
 							}
 						}
 						else
 						{
-							boost::format msg("Variable group '%1%' successfully refreshed from file%2%.");
+							if (table_importer.goodreadlines != table_importer.goodwritelines)
+							{
+								boost::format msg("During refresh of variable group, although there were no read or write failures, nonetheless the number of successful lines read from input file (%1%) does not match the number of successful lines written to the database (%2%).");
+								msg % boost::lexical_cast<std::string>(table_importer.goodreadlines) % boost::lexical_cast<std::string>(table_importer.goodwritelines)
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+							boost::format msg("Variable group '%1%' successfully refreshed %3% rows from file%2%.");
 							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-								% cancelAddendum;
+								% cancelAddendum
+								% table_importer.goodreadlines;
 							messager.ShowMessageBox(msg.str());
 						}
 

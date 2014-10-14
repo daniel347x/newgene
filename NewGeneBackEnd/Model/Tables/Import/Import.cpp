@@ -1052,6 +1052,8 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 	, which_import(which_import_)
 	, badreadlines(0)
 	, badwritelines(0)
+	, goodrealines(0)
+	, goodwritelines(0)
 	, block_size(0)
 {
 
@@ -1828,6 +1830,10 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 			++linenum;
 			++badreadlines;
 			continue;
+		}
+		else
+		{
+			++goodreadlines;
 		}
 
 		// loop through mappings to generate output

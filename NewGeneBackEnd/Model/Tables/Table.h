@@ -64,8 +64,10 @@ class Table_basemost
 		std::string GetTableName() { return table_name; }
 		std::string table_name;
 
-		int badreadlines; // convenience: for data import
-		int badwritelines; // convenience: for data import
+		long badreadlines; // convenience: for data import
+		long badwritelines; // convenience: for data import
+		long goodreadlines; // convenience: for data import
+		long goodwritelines; // convenience: for data import
 
 		virtual void Load(sqlite3 *, InputModel * = nullptr) { };
 		virtual void Load(sqlite3 *, OutputModel * = nullptr, InputModel * = nullptr) { };
