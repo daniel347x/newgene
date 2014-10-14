@@ -101,7 +101,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 	//	return false;
 	//}
 
-	// BULK INSERT
+	// BULK INSERT OR REPLACE
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sql_insert.c_str(), static_cast<int>(sql_insert.size()) + 1, &stmt, NULL);
 
@@ -179,28 +179,30 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 
 		if (changes == 0)
 		{
+
 			// Update did not affect any row.  Insert a new row
 			TryInsertRow(block, row, failed, import_definition, db, errorMsg);
+
+			if (failed || !errorMsg.empty())
+			{
+				boost::format msg("Unable to insert line %1% during import: %2%");
+				msg % boost::lexical_cast<std::string>(linenum + 1) % errorMsg.c_str();
+				errorMsg = msg.str();
+				errors.push_back(errorMsg);
+				errorMsg.clear();
+				++linenum;
+				++badwritelines;
+				continue; // try some other rows
+			}
+			else
+			{
+				++goodwritelines;
+			}
+
 		}
 		else
 		{
 			++goodupdatelines;
-		}
-
-		if (failed || !errorMsg.empty())
-		{
-			boost::format msg("Unable to insert line %1% during import: %2%");
-			msg % boost::lexical_cast<std::string>(linenum + 1) % errorMsg.c_str();
-			errorMsg = msg.str();
-			errors.push_back(errorMsg);
-			errorMsg.clear();
-			++linenum;
-			++badwritelines;
-			continue; // try some other rows
-		}
-		else
-		{
-			++goodwritelines;
 		}
 
 		++linenum;
