@@ -593,35 +593,38 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						{
 							if (table_importer.badreadlines > 0 && table_importer.badwritelines > 0)
 							{
-								boost::format msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								boost::format msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to, %7% updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
 								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badreadlines)
 									% boost::lexical_cast<std::string>(table_importer.badwritelines)
 									% cancelAddendum
 									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-									% boost::lexical_cast<std::string>(table_importer.goodwritelines);
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines)
+									% boost::lexical_cast<std::string>(table_importer.goodupdatelines);
 								messager.ShowMessageBox(msg.str());
 							}
 							else
 							if (table_importer.badreadlines == 0 && table_importer.badwritelines > 0)
 							{
-								boost::format msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								boost::format msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to, %6% updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
 								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badwritelines)
 									% cancelAddendum
 									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-									% boost::lexical_cast<std::string>(table_importer.goodwritelines);
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines)
+									% boost::lexical_cast<std::string>(table_importer.goodupdatedlines);
 								messager.ShowMessageBox(msg.str());
 							}
 							else
 							if (table_importer.badreadlines > 0 && table_importer.badwritelines == 0)
 							{
-								boost::format msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+								boost::format msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to, %6% updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
 								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badreadlines)
 									% cancelAddendum
 									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-									% boost::lexical_cast<std::string>(table_importer.goodwritelines);
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines)
+									% boost::lexical_cast<std::string>(table_importer.goodupdatelines);
 								messager.ShowMessageBox(msg.str());
 							}
 						}
@@ -629,8 +632,8 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						{
 							if (table_importer.goodreadlines != table_importer.goodwritelines)
 							{
-								boost::format msg("During refresh of variable group, although there were no read or write failures, nonetheless the number of successful lines read from input file (%1%) does not match the number of successful lines written to the database (%2%).");
-								msg % boost::lexical_cast<std::string>(table_importer.goodreadlines) % boost::lexical_cast<std::string>(table_importer.goodwritelines)
+								boost::format msg("During refresh of variable group, although there were no read or write failures, nonetheless the number of successful lines read from input file (%1%) does not match the number of successful lines written to (%2%) and updated in (%3%) the database.");
+								msg % boost::lexical_cast<std::string>(table_importer.goodreadlines) % boost::lexical_cast<std::string>(table_importer.goodwritelines) % boost::lexical_cast<std::string>(table_importer.goodupdatelines);
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
 							boost::format msg("Variable group '%1%' successfully refreshed %3% rows from file%2%.");

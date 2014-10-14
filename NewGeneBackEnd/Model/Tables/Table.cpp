@@ -36,7 +36,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 	bool failed = false;
 	bool first_row = true;
-	long goodwritelines_current = 0;
+	long writelines_current = 0;
 
 	for (int row = 0; row < number_rows_in_block; ++row)
 	{
@@ -91,7 +91,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 		sql_insert += ")";
 
-		++goodwritelines_current;
+		++writelines_current;
 		++linenum;
 
 	}
@@ -111,6 +111,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 		boost::format msg("Unable to prepare SQL query: %1% (%2%)");
 		msg % sql_error.c_str() % sql_insert.c_str();
 		errors.push_back(msg.str());
+		badwritelines += writelines_current;
 		return;
 	}
 
@@ -127,6 +128,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 			stmt = nullptr;
 		}
 
+		badwritelines += writelines_current;
 		return;
 	}
 
