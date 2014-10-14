@@ -82,7 +82,7 @@ class Table_basemost
 		virtual void ImportBlockUpdate(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, long & numlinesupdated, std::vector<std::string> & errors);
 
 		int TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db, std::string & errorMsg);
-		void TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db, std::string & errorMsg);
+		int TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db, std::string & errorMsg);
 
 		void FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert, bool const no_quotes = false);
 

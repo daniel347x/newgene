@@ -181,7 +181,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 		{
 
 			// Update did not affect any row.  Insert a new row
-			TryInsertRow(block, row, failed, import_definition, db, errorMsg);
+			changes = TryInsertRow(block, row, failed, import_definition, db, errorMsg);
 
 			if (failed || !errorMsg.empty())
 			{
@@ -196,7 +196,14 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 			}
 			else
 			{
-				++goodwritelines;
+				if (changes == 0)
+				{
+					++goodupdatelines;
+				}
+				else
+				{
+					++goodwritelines;
+				}
 			}
 
 		}
@@ -505,7 +512,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 }
 
-void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db, std::string & errorMsg)
+int Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db, std::string & errorMsg)
 {
 
 	int bind_index = 1;
@@ -676,7 +683,11 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 		return;
 	}
 
+	int number_changes = sqlite3_changes(db);
+
 	sqlite3_clear_bindings(import_definition.stmt_insert);
 	sqlite3_reset(import_definition.stmt_insert);
+
+	return number_changes;
 
 }
