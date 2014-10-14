@@ -597,7 +597,7 @@ int Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed
 		if (innerFailed)
 		{
 			failed = true;
-			return;
+			return 0;
 		}
 
 		sqlite3_stmt * stmt = nullptr;
@@ -610,7 +610,7 @@ int Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed
 			msg % sql_error.c_str() % sql_insert.c_str();
 			errorMsg = msg.str();
 			failed = true;
-			return;
+			return 0;
 		}
 
 		import_definition.stmt_insert = stmt;
@@ -657,7 +657,7 @@ int Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed
 	if (innerFailed)
 	{
 		failed = true;
-		return;
+		return 0;
 	}
 
 	size_t numberFields = values.size();
@@ -680,7 +680,7 @@ int Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed
 		boost::format msg("Unable to execute prepared query in TryInsertRow");
 		errorMsg = msg.str();
 		failed = true;
-		return;
+		return 0;
 	}
 
 	int number_changes = sqlite3_changes(db);
