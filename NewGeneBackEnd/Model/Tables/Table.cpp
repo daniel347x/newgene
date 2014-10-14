@@ -36,6 +36,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 	bool failed = false;
 	bool first_row = true;
+	long goodwritelines_current = 0;
 
 	for (int row = 0; row < number_rows_in_block; ++row)
 	{
@@ -90,6 +91,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 		sql_insert += ")";
 
+		++goodwritelines_current;
 		++linenum;
 
 	}
@@ -127,6 +129,8 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 		return;
 	}
+
+	goodwritelines += goodwritelines_current;
 
 	executor.success();
 
