@@ -605,6 +605,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	import_definition.mappings = mappings;
 
+	if (!do_refresh_not_plain_insert)
 	{
 
 		Executor executor(input_model_.getDb());

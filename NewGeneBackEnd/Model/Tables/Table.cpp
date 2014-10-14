@@ -198,7 +198,14 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 			{
 				if (changes == 0)
 				{
-					++goodupdatelines;
+					boost::format msg("Unable to either update or insert line %1% during import");
+					msg % boost::lexical_cast<std::string>(linenum + 1);
+					errorMsg = msg.str();
+					errors.push_back(errorMsg);
+					errorMsg.clear();
+					++linenum;
+					++badwritelines;
+					continue; // try some other rows
 				}
 				else
 				{
