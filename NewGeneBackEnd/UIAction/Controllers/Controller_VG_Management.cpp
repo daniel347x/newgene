@@ -682,11 +682,26 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								msg % boost::lexical_cast<std::string>(table_importer.goodreadlines) % boost::lexical_cast<std::string>(table_importer.goodwritelines) % boost::lexical_cast<std::string>(table_importer.goodupdatelines);
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
-							boost::format msg("Variable group '%1%' successfully refreshed %3% rows from file%2%.");
-							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-								% cancelAddendum
-								% table_importer.goodreadlines;
-							messager.ShowMessageBox(msg.str());
+							if (do_refresh_not_plain_insert)
+							{
+								// Handle incoming data row-by-row, distinguishing between inserts and updates
+								boost::format msg("Variable group '%1%' successfully refreshed %3% rows from file (%4% updated and %5% inserted)%2%.");
+								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
+									% cancelAddendum
+									% table_importer.goodreadlines
+									% table_importer.goodupdatelines
+									% table_importer.goodwritelines;
+								messager.ShowMessageBox(msg.str());
+							}
+							else
+							{
+								// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
+								boost::format msg("Variable group '%1%' successfully refreshed %3% rows from file%2%.");
+								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
+									% cancelAddendum
+									% table_importer.goodreadlines;
+								messager.ShowMessageBox(msg.str());
+							}
 						}
 
 					}
