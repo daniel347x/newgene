@@ -1070,21 +1070,21 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				{
 					ymd = "year ";
 					fin = "year";
-					colOrCols = "column ";
+					colOrCols = "column";
 					isOrAre = "is ";
 				}
 				else if (YMButton->isChecked())
 				{
 					ymd = "year and month ";
 					fin = "month";
-					colOrCols = "columns ";
+					colOrCols = "columns";
 					isOrAre = "are ";
 				}
 				else
 				{
 					ymd = "year, month, and day ";
 					fin = "day";
-					colOrCols = "columns ";
+					colOrCols = "columns";
 					isOrAre = "are ";
 				}
 
@@ -1093,7 +1093,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				msg += "You have opted to leave the ending ";
 				msg += ymd;
 				msg += colOrCols;
-				msg += "blank.";
+				msg += " blank.";
 				msg += "\n";
 				msg += "NewGene will automatically set the ending ";
 				msg += fin;
@@ -1109,6 +1109,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				title += "Ending ";
 				title += ymd;
 				title += colOrCols;
+				title += " ";
 				title += isOrAre;
 				title += "blank.";
 
@@ -1118,6 +1119,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 					valid = false;
 					errorMsg = "Canceled import because ending time ";
 					errorMsg += colOrCols.toStdString();
+					errorMsg += " ";
 					errorMsg += isOrAre.toStdString();
 					errorMsg += "blank.";
 				}

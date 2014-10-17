@@ -153,6 +153,10 @@ void NewGeneGenerateOutput::on_pushButtonChooseLocation_clicked()
 	QString the_file = QFileDialog::getSaveFileName(this, "Choose output file");
 	if (the_file.size())
 	{
+        if (! the_file.endsWith(".csv", Qt::CaseInsensitive))
+        {
+            the_file += ".csv";
+        }
 		projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_file.toStdString()));
 		QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
 		if (editControl)
@@ -178,7 +182,11 @@ void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_editingFinished()
 	if (editControl)
 	{
 		QString the_path = editControl->text();
-		projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_path.toStdString()));
+        if (! the_path.endsWith(".csv", Qt::CaseInsensitive))
+        {
+            the_path += ".csv";
+        }
+        projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_path.toStdString()));
 	}
 
 }

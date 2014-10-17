@@ -21,6 +21,7 @@ int * create_output_row_visitor::bind_index = nullptr;
 sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
 bool MergedTimeSliceRow_RHS_wins = false;
 std::string create_output_row_visitor::row_in_process;
+fast_string create_output_row_visitor::converted_value;
 
 int Weighting::how_many_weightings = 0;
 

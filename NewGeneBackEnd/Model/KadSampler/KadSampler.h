@@ -2548,7 +2548,25 @@ class bind_visitor : public boost::static_visitor<>
 
 		void operator()(fast_string const & data)
 		{
-			sqlite3_bind_text(stmt, bindIndex, data.c_str(), static_cast<int>(data.size()), SQLITE_STATIC);
+			bool use_converted { false };
+			static fast_string converted_value;
+			converted_value = data;
+			if (converted_value.find(",") != std::string::npos)
+			{
+				// Comma in data: must surround entire field with double quotes
+				// Note: NewGene currently does not support double quote inside field
+				converted_value = ("\"" + converted_value + "\"");
+				use_converted = true;
+			}
+
+			if (use_converted)
+			{
+				sqlite3_bind_text(stmt, bindIndex, converted_value.c_str(), static_cast<int>(data.size()), SQLITE_STATIC);
+			}
+			else
+			{
+				sqlite3_bind_text(stmt, bindIndex, data.c_str(), static_cast<int>(data.size()), SQLITE_STATIC);
+			}
 		}
 
 		sqlite3_stmt * stmt;
@@ -2582,46 +2600,78 @@ class create_output_row_visitor : public boost::static_visitor<>
 			if (mode & CREATE_ROW_MODE__OUTPUT_FILE)
 			{
 
+				bool use_converted { false };
+				converted_value = boost::lexical_cast<fast_string>(data_value);
+				if (converted_value.find(",") != std::string::npos)
+				{
+					// Comma in data: must surround entire field with double quotes
+					// Note: NewGene currently does not support double quote inside field
+					converted_value = ("\"" + converted_value + "\"");
+					use_converted = true;
+				}
+
 				if (!first)
 				{
 					(*output_file) << ",";
 
-#				ifdef _DEBUG
-					row_in_process += ",";
-#				endif
+#					ifdef _DEBUG
+						row_in_process += ",";
+#					endif
 				}
 
-#			ifdef _DEBUG
+#				ifdef _DEBUG
+					else
+					{
+						row_in_process.clear();
+					}
+
+#				endif
+
+				if (use_converted)
+				{
+					(*output_file) << converted_value;
+				}
 				else
 				{
-					row_in_process.clear();
+					(*output_file) << data_value;
 				}
 
-#			endif
-
-				(*output_file) << data_value;
-
-#			ifdef _DEBUG
-				row_in_process += boost::lexical_cast<std::string>(data_value);
-				int m = 0;
-
-				if (row_in_process == "257,2,255,2,300,1918")
-				{
-					int n = 0;
-				}
-
-#			endif
+#				ifdef _DEBUG
+					row_in_process += boost::lexical_cast<std::string>(converted_value);
+					//int m = 0;
+					//if (row_in_process == "257,2,255,2,300,1918")
+					//{
+					//	int n = 0;
+					//}
+#				endif
 
 			}
 
 			if (mode & CREATE_ROW_MODE__INSTANCE_DATA_VECTOR)
 			{
-				data->push_back(data_value);
+				bool use_converted { false };
+				converted_value = boost::lexical_cast<fast_string>(data_value);
+				if (converted_value.find(",") != std::string::npos)
+				{
+					// Comma in data: must surround entire field with double quotes
+					// Note: NewGene currently does not support double quote inside field
+					converted_value = ("\"" + converted_value + "\"");
+					use_converted = true;
+				}
+
+				if (use_converted)
+				{
+					data->push_back(converted_value);
+				}
+				else
+				{
+					data->push_back(data_value);
+				}
 			}
 
 			if (mode & CREATE_ROW_MODE__PREPARED_STATEMENT)
 			{
-				BindTermToInsertStatement(insert_stmt, data_value, (*bind_index)++);
+				BindTermToInsertStatement(insert_stmt, converted_value, (*bind_index)++);
 			}
 
 			first = false;
@@ -2629,6 +2679,7 @@ class create_output_row_visitor : public boost::static_visitor<>
 		}
 
 		static std::string row_in_process;
+		static fast_string converted_value;
 		static std::fstream * output_file;
 		static InstanceDataVector<hits_tag> * data;
 		static int * bind_index;

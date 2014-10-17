@@ -350,11 +350,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (setting_path_to_kad_output.empty()) { return; }
 
-	if (!boost::filesystem::path(setting_path_to_kad_output).has_extension())
-	{
-		setting_path_to_kad_output = boost::filesystem::path(setting_path_to_kad_output).replace_extension("csv").string();
-	}
-
 	debug_sql_path = setting_path_to_kad_output;
 	debug_sql_path.replace_extension(".debugsql.txt");
 
@@ -6029,6 +6024,16 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 				}
 
 				first = false;
+
+				static std::string converted_value;
+				converted_value = boost::lexical_cast<std::string>(data);
+				if (converted_value.find(",") != std::string::npos)
+				{
+					// Comma in data: must surround entire field with double quotes
+					// Note: NewGene currently does not support double quote inside field
+					converted_value = ("\"" + converted_value + "\"");
+				}
+
 				output_file << data;
 
 			});
