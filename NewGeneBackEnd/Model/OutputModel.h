@@ -107,7 +107,7 @@ class PrimaryKeySequence
 
 };
 
-class ColumnsInTempView
+class NewGeneSchema
 {
 
 	public:
@@ -121,7 +121,7 @@ class ColumnsInTempView
 			, SCHEMA_TYPE__DEDUCED
 		};
 
-		class ColumnInTempView
+		class NewGeneColumnDefinition
 		{
 
 			public:
@@ -139,7 +139,7 @@ class ColumnsInTempView
 					, COLUMN_TYPE__DATETIMEEND__TIME_SLICE
 				};
 
-				ColumnInTempView()
+				NewGeneColumnDefinition()
 					: column_type(COLUMN_TYPE__UNKNOWN)
 					, primary_key_index_within_total_kad_for_dmu_category(-1)
 					, primary_key_index__within_uoa_corresponding_to_current_variable_group(-1)
@@ -190,20 +190,21 @@ class ColumnsInTempView
 
 		};
 
-		ColumnsInTempView()
+		NewGeneSchema()
 			: view_number(-1)
 			, has_no_datetime_columns(false)
 			, has_no_datetime_columns_originally(false)
 			, most_recent_sql_statement_executed__index(-1)
 			, make_table_permanent(false)
 			, not_first_variable_group_column_index(-1)
+			, is_primary_vg(false)
 			, schema_type(SCHEMA_TYPE__UNKNOWN)
 		{
 
 		}
 
-		ColumnsInTempView(ColumnsInTempView const & rhs)
-			: columns_in_view(rhs.columns_in_view)
+		NewGeneSchema(NewGeneSchema const & rhs)
+			: column_definitions(rhs.column_definitions)
 			, view_number(rhs.view_number)
 			, has_no_datetime_columns(rhs.has_no_datetime_columns)
 			, has_no_datetime_columns_originally(rhs.has_no_datetime_columns_originally)
@@ -217,6 +218,7 @@ class ColumnsInTempView
 			, current_block_datetime_column_types(rhs.current_block_datetime_column_types)
 			, most_recent_sql_statement_executed__index(rhs.most_recent_sql_statement_executed__index)
 			, make_table_permanent(rhs.make_table_permanent)
+			, is_primary_vg(false)
 			, schema_type(rhs.schema_type)
 		{
 			// For optimization variables
@@ -224,7 +226,7 @@ class ColumnsInTempView
 			not_first_variable_group_column_index = -1;
 		}
 
-		std::vector<ColumnInTempView> columns_in_view;
+		std::vector<NewGeneColumnDefinition> column_definitions;
 		int view_number;
 		bool has_no_datetime_columns;
 		bool has_no_datetime_columns_originally;
@@ -235,12 +237,14 @@ class ColumnsInTempView
 		std::string view_name;
 		std::string view_name_no_uuid;
 
-		std::pair<ColumnInTempView::COLUMN_TYPE, ColumnInTempView::COLUMN_TYPE> previous_block_datetime_column_types;
-		std::pair<ColumnInTempView::COLUMN_TYPE, ColumnInTempView::COLUMN_TYPE> current_block_datetime_column_types;
+		std::pair<NewGeneColumnDefinition::COLUMN_TYPE, NewGeneColumnDefinition::COLUMN_TYPE> previous_block_datetime_column_types;
+		std::pair<NewGeneColumnDefinition::COLUMN_TYPE, NewGeneColumnDefinition::COLUMN_TYPE> current_block_datetime_column_types;
 
 		int most_recent_sql_statement_executed__index;
 
 		bool make_table_permanent;
+
+		bool is_primary_vg;
 
 		SCHEMA_TYPE schema_type;
 
@@ -465,7 +469,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						}
 
 						void Clear();
-						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & column_schema, sqlite3_stmt * stmt_result, OutputModel & model);
+						void PopulateFromCurrentRowInDatabase(NewGeneSchema const & column_schema, sqlite3_stmt * stmt_result, OutputModel & model);
 
 						SavedRowData & GetSavedRowData() { return *this; }
 
@@ -511,7 +515,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				};
 
-				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;
+				typedef std::pair<std::vector<SQLExecutor>, NewGeneSchema> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
 
 				void SetFailureErrorMessage(std::string const & failure_message_);
@@ -527,6 +531,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				size_t primary_vg_index__in__top_level_vg_vector; // in case there are multiple top-level variable groups, which one to use as primary (the others will be treated as children)
 				int K; // the multiplicity
+				long N_grand_total; // A dumb variable - gives the total number of rows in the raw data table for the primary variable group over the chosen time range
 
 				// Random sampling
 				WidgetInstanceIdentifier top_level_vg;
@@ -540,13 +545,13 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// For each child variable group, a vector of mapping from the child key columns to the top-level key columns
 				std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 				int overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf;
-				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
-				void KadSamplerFillDataForChildGroups(KadSampler & allWeightings);
-				void KadSampler_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, KadSampler & allWeightings,
+				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(NewGeneSchema const & variable_group_raw_data_columns, int const group_number);
+				void KadSamplerFillDataForNonPrimaryGroups(KadSampler & allWeightings);
+				void KadSampler_ReadData_AddToTimeSlices(NewGeneSchema const & primary_variable_group_x1_columns, int const primary_group_number, KadSampler & allWeightings,
 						VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages);
 				SqlAndColumnSet KadSamplerBuildOutputSchema();
 				void KadSamplerCreateOutputTable();
-				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
+				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, NewGeneSchema const & random_sampling_columns);
 				void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex);
 
 				template <typename MEMORY_TAG>
@@ -566,23 +571,23 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 										 Branch const & branch,
 										 KadSampler & allWeightings, std::int64_t & rows_written);
 
-				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(KadSampler & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
+				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(KadSampler & allWeightings, NewGeneSchema const & column_schema, int const child_variable_group_index);
 
 				std::map<int, int> top_level_number_secondary_columns;
 				std::map<int, int> child_number_secondary_columns;
 
 				// Functions involved in different phases of generation
-				void PopulateSchemaForRawDataTables(KadSampler & allWeightings);
+				void PopulateSchemaForRawDataTables_And_SetK(KadSampler & allWeightings);
 				void PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
-												   std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index);
+												   std::vector<NewGeneSchema> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index);
 
 				// Helper functions used by the functions above
 				void BeginNewTransaction();
 				void EndTransaction();
 				void ExecuteSQL(SqlAndColumnSet & sql_and_column_set);
-				void ObtainData(ColumnsInTempView const & column_set, bool const obtain_rowid = false);
+				void ObtainData(NewGeneSchema const & column_set, bool const obtain_rowid = false);
 				void CloseObtainData();
-				std::int64_t ObtainCount(ColumnsInTempView const & column_set);
+				std::int64_t ObtainCount(NewGeneSchema const & column_set);
 				bool StepData();
 				void ClearTables(SqlAndColumnSets const & tables_to_clear);
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
@@ -750,8 +755,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// and "child" or "secondary" variable groups, which simply add additional
 				// columns of output variables, but do not add to the multiplicity of the
 				// DMU categories, which are obtained from the primary variable groups.
-				std::vector<ColumnsInTempView> primary_variable_groups_column_info;
-				std::vector<ColumnsInTempView> secondary_variable_groups_column_info;
+				std::vector<NewGeneSchema> top_level_variable_groups_schema;
+				std::vector<NewGeneSchema> secondary_variable_groups_schema;
 
 				// Basic variables used throughout different functions of this Generator
 				OutputModel * model;

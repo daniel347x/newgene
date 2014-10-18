@@ -183,6 +183,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, random_sampling(false)
 	, primary_vg_index__in__top_level_vg_vector(0)
 	, K(0)
+	, N_grand_total(0)
 	, overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf(0)
 	, has_non_primary_top_level_groups { 0 }
 	, has_child_groups{ 0 }
@@ -498,7 +499,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// intended for internal use by the K-ad algorithm (i.e., converted from the raw format used in the database
 		// into a handy set of schema instances)
 		// ********************************************************************************************************************************************************* //
-		PopulateSchemaForRawDataTables(allWeightings);
+		// Also, determine, and set, the value of K for this run
+		// (note: there is only a single DMU for which K can be greater than 1, currently)
+		// ********************************************************************************************************************************************************* //
+		PopulateSchemaForRawDataTables_And_SetK(allWeightings);
 		if (failed || CheckCancelled()) { return; }
 
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
@@ -507,15 +511,23 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		// From the schema for the selected columns for the primary variable group,
 		// create a temporary table and store just the selected columns over just the selected time range.
-		// This function both creates the table, and loads it with just the desired columns (and time range)
-		// from the permanent raw data tables.
+		// This function both creates the table, and loads it with raw data,
+		// but just for the desired columns (and time range), from the permanent raw data tables.
 		// ********************************************************************************************************************************************************* //
-		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[primary_vg_index__in__top_level_vg_vector], primary_vg_index__in__top_level_vg_vector);
+		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(top_level_variable_groups_schema[primary_vg_index__in__top_level_vg_vector], primary_vg_index__in__top_level_vg_vector);
 		if (failed || CheckCancelled()) { return; }
 
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
 		primary_group_column_sets.push_back(selected_raw_data_table_schema);
+
+		N_grand_total = ObtainCount(selected_raw_data_table_schema.second);
+		if (K > N_grand_total)
+		{
+			SetFailureErrorMessage((boost::format("The chosen value of K (%1%) exceeds the total number of rows of raw data (%2%) for the primary variable group \"%3%\" over the desired time range.  Please decrease the value of K.") % boost::lexical_cast<std::string>(K) % boost::lexical_cast<std::string>(N_grand_total) % selected_raw_data_table_schema.second.original_table_names[0]).str().c_str());
+			failed = true;
+			return;
+		}
 
 		// ********************************************************************************************************************************************************* //
 		// Create TIME SLICES.
@@ -705,7 +717,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
 			messager.AppendKadStatusText((boost::format("Note: Merging of additional variable groups could increase the number of output rows beyond the numbers indicated above.")).str().c_str(), this);
-			KadSamplerFillDataForChildGroups(allWeightings);
+			KadSamplerFillDataForNonPrimaryGroups(allWeightings);
 			if (failed || CheckCancelled()) { return; }
 
 			// ********************************************************************************************************************************************************* //
@@ -895,16 +907,16 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	leaf_has_excluded_dmu = false;
 }
 
-void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGreaterThanOne(KadSampler & allWeightings, ColumnsInTempView const & column_schema,
+void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGreaterThanOne(KadSampler & allWeightings, NewGeneSchema const & column_schema,
 		int const child_variable_group_index)
 {
 
 	int internal_leaf_dmu_count = 0;
-	std::for_each(column_schema.columns_in_view.cbegin(),
-				  column_schema.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & one_column)
+	std::for_each(column_schema.column_definitions.cbegin(),
+				  column_schema.column_definitions.cend(), [&](NewGeneSchema::NewGeneColumnDefinition const & one_column)
 	{
 
-		if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		if (one_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY)
 		{
 			if (one_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 			{
@@ -919,13 +931,13 @@ void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGr
 
 }
 
-void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & column_schema, sqlite3_stmt * stmt_result, OutputModel & model)
+void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(NewGeneSchema const & column_schema, sqlite3_stmt * stmt_result, OutputModel & model)
 {
 
 	Clear();
 
-	int datetime_start_column_index_of_possible_duplicate = (int)column_schema.columns_in_view.size() - 2;
-	int datetime_end_column_index_of_possible_duplicate = (int)column_schema.columns_in_view.size() - 1;
+	int datetime_start_column_index_of_possible_duplicate = (int)column_schema.column_definitions.size() - 2;
+	int datetime_end_column_index_of_possible_duplicate = (int)column_schema.column_definitions.size() - 1;
 	std::int64_t datetime_start_of_possible_duplicate = sqlite3_column_int64(stmt_result, datetime_start_column_index_of_possible_duplicate);
 	std::int64_t datetime_end_of_possible_duplicate = sqlite3_column_int64(stmt_result, datetime_end_column_index_of_possible_duplicate);
 	datetime_start = datetime_start_of_possible_duplicate;
@@ -939,8 +951,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 	int current_column = 0;
 
-	std::for_each(column_schema.columns_in_view.cbegin(),
-				  column_schema.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & one_column)
+	std::for_each(column_schema.column_definitions.cbegin(),
+				  column_schema.column_definitions.cend(), [&](NewGeneSchema::NewGeneColumnDefinition const & one_column)
 	{
 
 		if (failed || OutputModel::OutputGenerator::CheckCancelled())
@@ -953,7 +965,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 		bool add_as_primary_key_with_multiplicity_equal_to_1 = false;
 		bool add_as_secondary_key_column = false;
 
-		if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		if (one_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY)
 		{
 			add_as_primary_key_column = true;
 
@@ -967,7 +979,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			}
 		}
 
-		if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (one_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY)
 		{
 			add_as_secondary_key_column = true;
 		}
@@ -1258,7 +1270,7 @@ bool OutputModel::OutputGenerator::StepData()
 
 }
 
-void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_set, bool const obtain_rowid)
+void OutputModel::OutputGenerator::ObtainData(NewGeneSchema const & column_set, bool const obtain_rowid)
 {
 
 	CloseObtainData();
@@ -1308,7 +1320,7 @@ void OutputModel::OutputGenerator::CloseObtainData()
 	}
 }
 
-std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const & column_set)
+std::int64_t OutputModel::OutputGenerator::ObtainCount(NewGeneSchema const & column_set)
 {
 
 	BOOST_SCOPE_EXIT(this_)
@@ -1842,13 +1854,13 @@ bool OutputModel::OutputGenerator::SQLExecutor::Step()
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns,
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateTableOfSelectedVariablesFromRawData(NewGeneSchema const & variable_group_raw_data_columns,
 		int const group_number)
 {
 
-	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), NewGeneSchema());
 	std::vector<SQLExecutor> & sql_strings = result.first;
-	ColumnsInTempView & result_columns = result.second;
+	NewGeneSchema & result_columns = result.second;
 
 	// Note: The "columns_in_view" of result_columns will be CLEARED
 	// and REFILLED below!
@@ -1862,15 +1874,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	switch (variable_group_raw_data_columns.schema_type)
 	{
-		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
+		case NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
 			view_name = "NGTEMP__RAW__SELECTED_VARIABLES_PRIMARY";
 			break;
 
-		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
+		case NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
 			view_name = "NGTEMP__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY";
 			break;
 
-		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
+		case NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
 			view_name = "NGTEMP__RAW__SELECTED_VARIABLES_CHILD";
 			break;
 	}
@@ -1885,59 +1897,59 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	WidgetInstanceIdentifiers const & variables_selected =
 		(*the_map)[*variable_group_raw_data_columns.variable_groups[0].identifier_parent][variable_group_raw_data_columns.variable_groups[0]];
 
-	result_columns.columns_in_view.clear();
+	result_columns.column_definitions.clear();
 
 	// Create the schema columns from the raw data table into the temporary table.
 	// Start with the primary key columns.
-	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
-				  variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(variable_group_raw_data_columns.column_definitions.cbegin(),
+				  variable_group_raw_data_columns.column_definitions.cend(), [&result_columns, &variables_selected](NewGeneSchema::NewGeneColumnDefinition const & column_in_view)
 	{
-		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-			|| column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+		if (column_in_view.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART
+			|| column_in_view.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND)
 		{
 			return; // Enforce that datetime columns appear last.
 		}
 
 		bool match = true;
 
-		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (column_in_view.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY)
 		{
 			return; // Enforce that primary key columns appear first.
 		}
 
 		if (match)
 		{
-			result_columns.columns_in_view.push_back(column_in_view);
+			result_columns.column_definitions.push_back(column_in_view);
 		}
 	});
 
 	switch (variable_group_raw_data_columns.schema_type)
 	{
-		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
-		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
+		case NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
+		case NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
 			top_level_number_secondary_columns[group_number] = 0;
 			break;
 
-		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
+		case NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
 			child_number_secondary_columns[group_number] = 0;
 			break;
 	}
 
 	// Proceed to the secondary key columns.
-	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
-				  variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(variable_group_raw_data_columns.column_definitions.cbegin(),
+				  variable_group_raw_data_columns.column_definitions.cend(), [&](NewGeneSchema::NewGeneColumnDefinition const & column_in_view)
 	{
 		bool make_secondary_datetime_column = false;
 
-		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-			|| column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+		if (column_in_view.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART
+			|| column_in_view.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND)
 		{
 			// No!  If the user selects these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
 			//return; // Enforce that datetime columns appear last.
 			make_secondary_datetime_column = true;
 		}
 
-		if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (column_in_view.column_type != NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY)
 		{
 			// No!  If the user selects these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
 			if (!make_secondary_datetime_column)
@@ -1960,44 +1972,44 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			switch (variable_group_raw_data_columns.schema_type)
 			{
-				case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
-				case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
+				case NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
+				case NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
 					++top_level_number_secondary_columns[group_number];
 					break;
 
-				case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
+				case NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
 					++child_number_secondary_columns[group_number];
 					break;
 			}
 
 
-			result_columns.columns_in_view.push_back(column_in_view);
+			result_columns.column_definitions.push_back(column_in_view);
 
 			if (make_secondary_datetime_column)
 			{
-				result_columns.columns_in_view.back().column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
-				result_columns.columns_in_view.back().originally_datetime = true;
+				result_columns.column_definitions.back().column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY;
+				result_columns.column_definitions.back().originally_datetime = true;
 			}
 		}
 	});
 
 	// Proceed, finally, to the datetime columns, if they exist.  (If they don't, they will be added via ALTER TABLE to the temporary table under construction.)
-	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
-				  variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(variable_group_raw_data_columns.column_definitions.cbegin(),
+				  variable_group_raw_data_columns.column_definitions.cend(), [&result_columns](NewGeneSchema::NewGeneColumnDefinition const & column_in_view)
 	{
 		// Now do the datetime_start column
-		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART)
+		if (column_in_view.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART)
 		{
-			result_columns.columns_in_view.push_back(column_in_view);
+			result_columns.column_definitions.push_back(column_in_view);
 		}
 	});
-	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
-				  variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(variable_group_raw_data_columns.column_definitions.cbegin(),
+				  variable_group_raw_data_columns.column_definitions.cend(), [&result_columns](NewGeneSchema::NewGeneColumnDefinition const & column_in_view)
 	{
 		// Now do the datetime_end column
-		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+		if (column_in_view.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND)
 		{
-			result_columns.columns_in_view.push_back(column_in_view);
+			result_columns.column_definitions.push_back(column_in_view);
 		}
 	});
 
@@ -2007,8 +2019,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Make column names for this temporary table unique (not the same as the column names from the previous table that is being copied).
 	// Also, set the primary UOA flag.
 	bool first = true;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first, &variable_group_saved, &uoa_saved](
-					  ColumnsInTempView::ColumnInTempView & new_column)
+	std::for_each(result_columns.column_definitions.begin(), result_columns.column_definitions.end(), [&first, &variable_group_saved, &uoa_saved](
+					  NewGeneSchema::NewGeneColumnDefinition & new_column)
 	{
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 		new_column.column_name_in_temporary_table += "_";
@@ -2030,7 +2042,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += "SELECT ";
 
 	first = true;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	std::for_each(result_columns.column_definitions.begin(), result_columns.column_definitions.end(), [&sql_string, &first](NewGeneSchema::NewGeneColumnDefinition & new_column)
 	{
 		if (!first)
 		{
@@ -2039,7 +2051,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		first = false;
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
+		if (new_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += "CAST (";
 		}
@@ -2048,7 +2060,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
 		sql_string += "`";
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
+		if (new_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += " AS INTEGER)";
 		}
@@ -2069,25 +2081,25 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (!variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		sql_string += " WHERE ( CASE WHEN `";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += result_columns.column_definitions[result_columns.column_definitions.size() - 2].column_name_in_temporary_table;
 		sql_string += "` = 0 AND `";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += result_columns.column_definitions[result_columns.column_definitions.size() - 1].column_name_in_temporary_table;
 		sql_string += "` = 0 ";
 		sql_string += " THEN 1 ";
 		sql_string += " WHEN `";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += result_columns.column_definitions[result_columns.column_definitions.size() - 2].column_name_in_temporary_table;
 		sql_string += "` < ";
 		sql_string += boost::lexical_cast<std::string>(timerange_end);
 		sql_string += " THEN `";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += result_columns.column_definitions[result_columns.column_definitions.size() - 1].column_name_in_temporary_table;
 		sql_string += "` > ";
 		sql_string += boost::lexical_cast<std::string>(timerange_start);
 		sql_string += " WHEN `";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += result_columns.column_definitions[result_columns.column_definitions.size() - 1].column_name_in_temporary_table;
 		sql_string += "` > ";
 		sql_string += boost::lexical_cast<std::string>(timerange_start);
 		sql_string += " THEN `";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += result_columns.column_definitions[result_columns.column_definitions.size() - 2].column_name_in_temporary_table;
 		sql_string += "` < ";
 		sql_string += boost::lexical_cast<std::string>(timerange_end);
 		sql_string += " ELSE 0";
@@ -2109,9 +2121,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				continue;
 			}
 
-			for (auto const & column_in_view : variable_group_raw_data_columns.columns_in_view)
+			for (auto const & column_in_view : variable_group_raw_data_columns.column_definitions)
 			{
-				if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				if (column_in_view.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY)
 				{
 					WidgetInstanceIdentifier const & primary_dmu_category = column_in_view.primary_key_dmu_category_identifier;
 					if (!primary_dmu_category.IsEmpty())
@@ -2168,12 +2180,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	}
 
+	// Add SQL to count the number of results from the SELECT... right here
+
 	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
 	if (variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 
-		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL,
-				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL);
+		result_columns.current_block_datetime_column_types = std::make_pair(NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART_INTERNAL,
+				NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND_INTERNAL);
 
 		std::string datetime_start_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
 		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
@@ -2199,11 +2213,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			return result;
 		}
 
-		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+		result_columns.column_definitions.push_back(NewGeneSchema::NewGeneColumnDefinition());
+		NewGeneSchema::NewGeneColumnDefinition & datetime_start_column = result_columns.column_definitions.back();
 		datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 		datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
+		datetime_start_column.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART_INTERNAL;
 		datetime_start_column.current_variable_group = variable_group_saved;
 		datetime_start_column.uoa_associated_with_current_variable_group = uoa_saved;
 		datetime_start_column.column_name_in_original_data_table = "";
@@ -2233,11 +2247,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			return result;
 		}
 
-		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+		result_columns.column_definitions.push_back(NewGeneSchema::NewGeneColumnDefinition());
+		NewGeneSchema::NewGeneColumnDefinition & datetime_end_column = result_columns.column_definitions.back();
 		datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 		datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
+		datetime_end_column.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND_INTERNAL;
 		datetime_end_column.current_variable_group = variable_group_saved;
 		datetime_end_column.uoa_associated_with_current_variable_group = uoa_saved;
 		datetime_end_column.column_name_in_original_data_table = "";
@@ -2246,8 +2260,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 	else
 	{
-		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART,
-				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND);
+		result_columns.current_block_datetime_column_types = std::make_pair(NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART,
+				NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND);
 		at_least_one_variable_group_has_timerange = true;
 	}
 
@@ -2370,7 +2384,7 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 
 }
 
-void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & allWeightings)
+void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables_And_SetK(KadSampler & allWeightings)
 {
 
 	// ***************************************************************************************************************** //
@@ -2381,17 +2395,18 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 	std::for_each(top_level_variable_groups_vector.cbegin(),
 				  top_level_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
 	{
-		PopulateSchemaForRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, primary_or_secondary_view_index);
+		PopulateSchemaForRawDataTable(the_primary_variable_group, primary_view_count, top_level_variable_groups_schema, true, primary_or_secondary_view_index);
 
 		// Store the number of branch & leaf columns for the primary variable group
 		if (primary_or_secondary_view_index == primary_vg_index__in__top_level_vg_vector)
 		{
 			allWeightings.number_branch_columns = 0;
 			allWeightings.number_primary_variable_group_single_leaf_columns = 0;
-			ColumnsInTempView & columns_in_variable_group_view = primary_variable_groups_column_info.back();
-			for (auto const & column : columns_in_variable_group_view.columns_in_view)
+			NewGeneSchema & columns_in_variable_group_view = top_level_variable_groups_schema.back();
+			columns_in_variable_group_view.is_primary_vg = true;
+			for (auto const & column : columns_in_variable_group_view.column_definitions)
 			{
-				if (column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				if (column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY)
 				{
 					if (column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 					{
@@ -2417,17 +2432,17 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 	std::for_each(child_variable_groups_vector.cbegin(),
 				  child_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
 	{
-		PopulateSchemaForRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false, primary_or_secondary_view_index);
-		ColumnsInTempView const & childSchema = secondary_variable_groups_column_info.back();
+		PopulateSchemaForRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_schema, false, primary_or_secondary_view_index);
+		NewGeneSchema const & childSchema = secondary_variable_groups_schema.back();
 		DetermineInternalChildLeafCountMultiplicityGreaterThanOne(allWeightings, childSchema, primary_or_secondary_view_index);
 		++primary_or_secondary_view_index;
 	});
 
 	K = 0;
 	int highest_multiplicity = 1;
-	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[primary_vg_index__in__top_level_vg_vector];
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+	NewGeneSchema const & primary_variable_group_raw_data_columns = top_level_variable_groups_schema[primary_vg_index__in__top_level_vg_vector];
+	std::for_each(primary_variable_group_raw_data_columns.column_definitions.cbegin(),
+				  primary_variable_group_raw_data_columns.column_definitions.cend(), [&](NewGeneSchema::NewGeneColumnDefinition const & raw_data_table_column)
 	{
 
 		if (raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > highest_multiplicity)
@@ -2438,13 +2453,13 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(KadSampler & a
 	});
 
 	K = highest_multiplicity;
-	has_non_primary_top_level_groups = (primary_variable_groups_column_info.size() - 1) > 0;
-	has_child_groups = secondary_variable_groups_column_info.size() > 0;
+	has_non_primary_top_level_groups = (top_level_variable_groups_schema.size() - 1) > 0;
+	has_child_groups = secondary_variable_groups_schema.size() > 0;
 
 }
 
 void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group, int view_count,
-		std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index)
+		std::vector<NewGeneSchema> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index)
 {
 
 	// ************************************************************************************************ //
@@ -2469,23 +2484,23 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 	std::string vg_code = *the_variable_group.first.code;
 	std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
 
-	variable_groups_column_info.push_back(ColumnsInTempView());
-	ColumnsInTempView & columns_in_variable_group_view = variable_groups_column_info.back();
+	variable_groups_column_info.push_back(NewGeneSchema());
+	NewGeneSchema & columns_in_variable_group_view = variable_groups_column_info.back();
 
 	if (is_primary)
 	{
 		if (primary_or_secondary_view_index == primary_vg_index__in__top_level_vg_vector)
 		{
-			columns_in_variable_group_view.schema_type = ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY;
+			columns_in_variable_group_view.schema_type = NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY;
 		}
 		else
 		{
-			columns_in_variable_group_view.schema_type = ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY;
+			columns_in_variable_group_view.schema_type = NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY;
 		}
 	}
 	else
 	{
-		columns_in_variable_group_view.schema_type = ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD;
+		columns_in_variable_group_view.schema_type = NewGeneSchema::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD;
 	}
 
 
@@ -2672,8 +2687,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 	}
 	else
 	{
-		columns_in_variable_group_view.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART,
-				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND);
+		columns_in_variable_group_view.current_block_datetime_column_types = std::make_pair(NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART,
+				NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND);
 		columns_in_variable_group_view.previous_block_datetime_column_types = columns_in_variable_group_view.current_block_datetime_column_types;
 	}
 
@@ -2685,8 +2700,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 						  &variables_in_group_primary_keys_metadata](
 					  WidgetInstanceIdentifier const & variable_group_set_member)
 	{
-		columns_in_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-		ColumnsInTempView::ColumnInTempView & column_in_variable_group_data_table = columns_in_variable_group_view.columns_in_view.back();
+		columns_in_variable_group_view.column_definitions.push_back(NewGeneSchema::NewGeneColumnDefinition());
+		NewGeneSchema::NewGeneColumnDefinition & column_in_variable_group_data_table = columns_in_variable_group_view.column_definitions.back();
 
 		std::string column_name_no_uuid = *variable_group_set_member.code;
 		column_in_variable_group_data_table.column_name_in_temporary_table_no_uuid = column_name_no_uuid;
@@ -2725,11 +2740,11 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 		if (primary_key_field)
 		{
-			column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY;
+			column_in_variable_group_data_table.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY;
 		}
 		else
 		{
-			column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+			column_in_variable_group_data_table.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY;
 		}
 
 		if (datetime_columns.size())
@@ -2737,12 +2752,12 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 			if (datetime_columns[0].code && variable_group_set_member.code && *datetime_columns[0].code == *variable_group_set_member.code)
 			{
 				// The current column is the datetime_start column
-				column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART;
+				column_in_variable_group_data_table.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART;
 			}
 			else if (datetime_columns[1].code && variable_group_set_member.code && *datetime_columns[1].code == *variable_group_set_member.code)
 			{
 				// The current column is the datetime_end column
-				column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND;
+				column_in_variable_group_data_table.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND;
 			}
 		}
 
@@ -4267,7 +4282,7 @@ void OutputModel::OutputGenerator::SetFailureErrorMessage(std::string const & fa
 	messager.UpdateStatusBarText(report_failure_message, nullptr);
 }
 
-void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
+void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSchema const & variable_group_selected_columns_schema, int const variable_group_number,
 		KadSampler & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
 {
 
@@ -4739,9 +4754,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	// Initialize schema
 	// **************************************************************************************** //
 
-	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), NewGeneSchema());
 	std::vector<SQLExecutor> & sql_strings = result.first;
-	ColumnsInTempView & result_columns = result.second;
+	NewGeneSchema & result_columns = result.second;
 
 	result_columns.most_recent_sql_statement_executed__index = -1;
 
@@ -4756,31 +4771,31 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	result_columns.has_no_datetime_columns = false;
 
 
-	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[primary_vg_index__in__top_level_vg_vector];
+	NewGeneSchema const & primary_variable_group_raw_data_columns = top_level_variable_groups_schema[primary_vg_index__in__top_level_vg_vector];
 
 	// **************************************************************************************** //
 	// Start with the primary key columns of multiplicity 1.
 	// **************************************************************************************** //
 
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
-					  ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+	std::for_each(primary_variable_group_raw_data_columns.column_definitions.cbegin(),
+				  primary_variable_group_raw_data_columns.column_definitions.cend(), [&](
+					  NewGeneSchema::NewGeneColumnDefinition const & raw_data_table_column)
 	{
 
-		if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-			|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
-			|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
-			|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		if (raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART
+			|| raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART_INTERNAL
+			|| raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND
+			|| raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
 			return; // Add these columns last, if selected by user
 		}
 
-		if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY)
 		{
 			return; // Enforce that primary key columns appear first.
 		}
 
-		if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		if (raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY)
 		{
 
 			if (raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
@@ -4788,8 +4803,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 				return; // Add the multiplicity = 1 primary keys first
 			}
 
-			result_columns.columns_in_view.push_back(raw_data_table_column);
-			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+			result_columns.column_definitions.push_back(raw_data_table_column);
+			NewGeneSchema::NewGeneColumnDefinition & new_column = result_columns.column_definitions.back();
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
@@ -4806,24 +4821,24 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	for (int current_multiplicity = 1; current_multiplicity <= K; ++current_multiplicity)
 	{
 
-		std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-					  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
-						  ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+		std::for_each(primary_variable_group_raw_data_columns.column_definitions.cbegin(),
+					  primary_variable_group_raw_data_columns.column_definitions.cend(), [&](
+						  NewGeneSchema::NewGeneColumnDefinition const & raw_data_table_column)
 		{
-			if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-				|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
-				|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
-				|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+			if (raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART
+				|| raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART_INTERNAL
+				|| raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND
+				|| raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 			{
 				return; // Add these columns last, if selected by user
 			}
 
-			if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+			if (raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY)
 			{
 				return; // Enforce that primary key columns appear first.
 			}
 
-			if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			if (raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY)
 			{
 
 				if (raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
@@ -4831,8 +4846,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 					return; // Add the multiplicity = 1 primary keys first
 				}
 
-				result_columns.columns_in_view.push_back(raw_data_table_column);
-				ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+				result_columns.column_definitions.push_back(raw_data_table_column);
+				NewGeneSchema::NewGeneColumnDefinition & new_column = result_columns.column_definitions.back();
 				new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 				new_column.column_name_in_temporary_table += "_";
 				new_column.column_name_in_temporary_table += newUUID(true);
@@ -4856,7 +4871,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 	{
 
-		ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_column_info[primary_vg_index__in__top_level_vg_vector];
+		NewGeneSchema const & primary_variable_group_raw_data_columns = top_level_variable_groups_schema[primary_vg_index__in__top_level_vg_vector];
 
 		WidgetInstanceIdentifiers const & variables_selected =
 			(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
@@ -4865,20 +4880,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 		for (int current_multiplicity = 1; current_multiplicity <= K; ++current_multiplicity)
 		{
 
-			std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-						  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+			std::for_each(primary_variable_group_raw_data_columns.column_definitions.cbegin(),
+						  primary_variable_group_raw_data_columns.column_definitions.cend(), [&](NewGeneSchema::NewGeneColumnDefinition const & raw_data_table_column)
 			{
 
 				bool make_secondary_datetime_column = false;
 
-				if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-					|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+				if (raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART
+					|| raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND)
 				{
 					// Do not return!  If the user selects these columns, they should appear as regular secondary key columns.
 					make_secondary_datetime_column = true;
 				}
 
-				if (!make_secondary_datetime_column && raw_data_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+				if (!make_secondary_datetime_column && raw_data_table_column.column_type != NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY)
 				{
 					return; // We are populating secondary columns now, so exit if this isn't one
 				}
@@ -4894,8 +4909,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 				if (match)
 				{
-					result_columns.columns_in_view.push_back(raw_data_table_column);
-					ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+					result_columns.column_definitions.push_back(raw_data_table_column);
+					NewGeneSchema::NewGeneColumnDefinition & new_column = result_columns.column_definitions.back();
 					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
@@ -4904,7 +4919,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 					if (make_secondary_datetime_column)
 					{
-						new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+						new_column.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY;
 						new_column.originally_datetime = true;
 					}
 
@@ -4923,8 +4938,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	// **************************************************************************************** //
 
 	int primary_group_number = 0;
-	std::for_each(primary_variable_groups_column_info.cbegin(),
-				  primary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	std::for_each(top_level_variable_groups_schema.cbegin(),
+				  top_level_variable_groups_schema.cend(), [&](NewGeneSchema const & primary_variable_group_raw_data_columns)
 	{
 
 		if (primary_group_number == primary_vg_index__in__top_level_vg_vector)
@@ -4940,20 +4955,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 		for (int current_multiplicity = 1; current_multiplicity <= K; ++current_multiplicity)
 		{
 
-			std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-						  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+			std::for_each(primary_variable_group_raw_data_columns.column_definitions.cbegin(),
+						  primary_variable_group_raw_data_columns.column_definitions.cend(), [&](NewGeneSchema::NewGeneColumnDefinition const & raw_data_table_column)
 			{
 
 				bool make_secondary_datetime_column = false;
 
-				if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-					|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+				if (raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART
+					|| raw_data_table_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND)
 				{
 					// Do not return!  If the user selects these columns, they should appear as regular secondary key columns.
 					make_secondary_datetime_column = true;
 				}
 
-				if (!make_secondary_datetime_column && raw_data_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+				if (!make_secondary_datetime_column && raw_data_table_column.column_type != NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY)
 				{
 					return; // We are populating secondary columns now, so exit if this isn't one
 				}
@@ -4969,8 +4984,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 				if (match)
 				{
-					result_columns.columns_in_view.push_back(raw_data_table_column);
-					ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+					result_columns.column_definitions.push_back(raw_data_table_column);
+					NewGeneSchema::NewGeneColumnDefinition & new_column = result_columns.column_definitions.back();
 					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
@@ -4979,7 +4994,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 					if (make_secondary_datetime_column)
 					{
-						new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+						new_column.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY;
 						new_column.originally_datetime = true;
 					}
 
@@ -4999,8 +5014,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	// Child variable groups - secondary columns
 	// **************************************************************************************** //
 
-	std::for_each(secondary_variable_groups_column_info.cbegin(),
-				  secondary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & child_variable_group_raw_data_columns)
+	std::for_each(secondary_variable_groups_schema.cbegin(),
+				  secondary_variable_groups_schema.cend(), [&](NewGeneSchema const & child_variable_group_raw_data_columns)
 	{
 
 		if (failed || CheckCancelled())
@@ -5016,19 +5031,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 			WidgetInstanceIdentifiers const & variables_selected =
 				(*the_map)[*child_variable_group_raw_data_columns.variable_groups[0].identifier_parent][child_variable_group_raw_data_columns.variable_groups[0]];
 
-			std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(),
-						  child_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
+			std::for_each(child_variable_group_raw_data_columns.column_definitions.cbegin(),
+						  child_variable_group_raw_data_columns.column_definitions.cend(), [&](NewGeneSchema::NewGeneColumnDefinition const & new_column_secondary)
 			{
 				bool make_secondary_datetime_column = false;
 
-				if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-					|| new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+				if (new_column_secondary.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART
+					|| new_column_secondary.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMEEND)
 				{
 					// Do not return!  If the user selects these columns, they should appear as regular secondary key columns.
 					make_secondary_datetime_column = true;
 				}
 
-				if (!make_secondary_datetime_column && new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+				if (!make_secondary_datetime_column && new_column_secondary.column_type != NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY)
 				{
 					return; // We are populating secondary columns now, so exit if this isn't one
 				}
@@ -5044,8 +5059,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 				if (match)
 				{
-					result_columns.columns_in_view.push_back(new_column_secondary);
-					ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+					result_columns.column_definitions.push_back(new_column_secondary);
+					NewGeneSchema::NewGeneColumnDefinition & new_column = result_columns.column_definitions.back();
 					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
@@ -5054,7 +5069,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 
 					if (make_secondary_datetime_column)
 					{
-						new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+						new_column.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__SECONDARY;
 						new_column.originally_datetime = true;
 					}
 
@@ -5086,12 +5101,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	datetime_start_col_name += "_";
 	datetime_start_col_name += newUUID(true);
 
-	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+	result_columns.column_definitions.push_back(NewGeneSchema::NewGeneColumnDefinition());
+	NewGeneSchema::NewGeneColumnDefinition & datetime_start_column = result_columns.column_definitions.back();
 	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
 	datetime_start_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = K;
-	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
+	datetime_start_column.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_start_column.current_variable_group = WidgetInstanceIdentifier();
 	datetime_start_column.uoa_associated_with_current_variable_group = WidgetInstanceIdentifier();
 	datetime_start_column.column_name_in_original_data_table = "";
@@ -5101,19 +5116,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::KadS
 	datetime_end_col_name += "_";
 	datetime_end_col_name += newUUID(true);
 
-	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+	result_columns.column_definitions.push_back(NewGeneSchema::NewGeneColumnDefinition());
+	NewGeneSchema::NewGeneColumnDefinition & datetime_end_column = result_columns.column_definitions.back();
 	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
 	datetime_end_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group = K;
-	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
+	datetime_end_column.column_type = NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_end_column.current_variable_group = WidgetInstanceIdentifier();
 	datetime_end_column.uoa_associated_with_current_variable_group = WidgetInstanceIdentifier();
 	datetime_end_column.column_name_in_original_data_table = "";
 
 	result_columns.current_block_datetime_column_types = std::make_pair(
-				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE,
-				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE);
+				NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART__TIME_SLICE,
+				NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__DATETIMESTART__TIME_SLICE);
 	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 
 	ExecuteSQL(result); // Executes all SQL queries up to the current one
@@ -5131,7 +5146,7 @@ void OutputModel::OutputGenerator::KadSamplerCreateOutputTable()
 {
 
 	std::vector<SQLExecutor> & sql_strings = random_sampling_schema.first;
-	ColumnsInTempView & random_sampling_columns = random_sampling_schema.second;
+	NewGeneSchema & random_sampling_columns = random_sampling_schema.second;
 	random_sampling_columns.most_recent_sql_statement_executed__index = -1;
 
 	std::string sql_create_empty_table;
@@ -5141,9 +5156,9 @@ void OutputModel::OutputGenerator::KadSamplerCreateOutputTable()
 	sql_create_empty_table += " (";
 
 	bool first = true;
-	std::for_each(random_sampling_columns.columns_in_view.cbegin(),
-				  random_sampling_columns.columns_in_view.cend(), [&](
-					  ColumnsInTempView::ColumnInTempView const & random_sampling_column)
+	std::for_each(random_sampling_columns.column_definitions.cbegin(),
+				  random_sampling_columns.column_definitions.cend(), [&](
+					  NewGeneSchema::NewGeneColumnDefinition const & random_sampling_column)
 	{
 
 		if (!first)
@@ -5175,7 +5190,7 @@ void OutputModel::OutputGenerator::KadSamplerCreateOutputTable()
 
 }
 
-void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns)
+void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, NewGeneSchema const & random_sampling_columns)
 {
 
 	if (insert_random_sample_stmt == nullptr)
@@ -5187,9 +5202,9 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 		insert_random_sample_string += "\" (";
 
 		bool first = true;
-		std::for_each(random_sampling_columns.columns_in_view.cbegin(),
-					  random_sampling_columns.columns_in_view.cend(), [&](
-						  ColumnsInTempView::ColumnInTempView const & random_sampling_column)
+		std::for_each(random_sampling_columns.column_definitions.cbegin(),
+					  random_sampling_columns.column_definitions.cend(), [&](
+						  NewGeneSchema::NewGeneColumnDefinition const & random_sampling_column)
 		{
 
 			if (!first)
@@ -5207,7 +5222,7 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 
 		first = true;
 
-		for (size_t n = 0; n < random_sampling_columns.columns_in_view.size(); ++n)
+		for (size_t n = 0; n < random_sampling_columns.column_definitions.size(); ++n)
 		{
 
 			if (!first)
@@ -5237,16 +5252,15 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 
 }
 
-void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler & allWeightings)
+void OutputModel::OutputGenerator::KadSamplerFillDataForNonPrimaryGroups(KadSampler & allWeightings)
 {
 
 	// **************************************************************************************** //
-	// Top-level variable groups that are *not* primary are considered child data,
-	// and are handled here
+	// Top-level variable groups that are *not* the single primary variable group, are handled here
 	// **************************************************************************************** //
 
 	int current_top_level_vg_index = 0;
-	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	std::for_each(top_level_variable_groups_schema.cbegin(), top_level_variable_groups_schema.cend(), [&](NewGeneSchema const & primary_variable_group_raw_data_columns)
 	{
 
 		if (failed || CheckCancelled()) { return; }
@@ -5315,7 +5329,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 	// **************************************************************************************** //
 
 	int current_child_vg_index = 0;
-	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & child_variable_group_raw_data_columns)
+	std::for_each(secondary_variable_groups_schema.cbegin(), secondary_variable_groups_schema.cend(), [&](NewGeneSchema const & child_variable_group_raw_data_columns)
 	{
 
 		if (failed || CheckCancelled()) { return; }
@@ -5379,7 +5393,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups(KadSampler &
 
 				// Now grab the primary key information for the current CHILD variable group
 				PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_child_variable_group =
-					full_kad_key_info.variable_group_info_for_primary_keys__top_level_and_child[primary_variable_groups_column_info.size() + current_child_vg_index];
+					full_kad_key_info.variable_group_info_for_primary_keys__top_level_and_child[top_level_variable_groups_schema.size() + current_child_vg_index];
 
 				if (full_kad_key_info_child_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 0)
 				{
@@ -5941,13 +5955,13 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 	// Write columns headers
 	int column_index = 0;
 	bool first = true;
-	std::for_each(final_result.second.columns_in_view.begin(),
-				  final_result.second.columns_in_view.end(), [this, &output_file, &first, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(final_result.second.column_definitions.begin(),
+				  final_result.second.column_definitions.end(), [this, &output_file, &first, &column_index](NewGeneSchema::NewGeneColumnDefinition & unformatted_column)
 	{
 
 		++column_index;
 
-		if (column_index >= static_cast<int>(final_result.second.columns_in_view.size()) - 1)
+		if (column_index >= static_cast<int>(final_result.second.column_definitions.size()) - 1)
 		{
 			if (!display_absolute_time_columns)
 			{
@@ -5962,12 +5976,12 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 		first = false;
 
-		if (column_index == static_cast<int>(final_result.second.columns_in_view.size()) - 1)
+		if (column_index == static_cast<int>(final_result.second.column_definitions.size()) - 1)
 		{
 			// starting date / time of time slice
 			output_file << "row_starts_at";
 		}
-		else if (column_index == static_cast<int>(final_result.second.columns_in_view.size()))
+		else if (column_index == static_cast<int>(final_result.second.column_definitions.size()))
 		{
 			// ending date / time of time slice
 			output_file << "row_ends_at";
