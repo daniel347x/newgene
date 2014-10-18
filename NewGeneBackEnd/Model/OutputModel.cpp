@@ -524,7 +524,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		N_grand_total = ObtainCount(selected_raw_data_table_schema.second);
 		if (K > N_grand_total)
 		{
-			SetFailureErrorMessage((boost::format("The chosen value of K (%1%) exceeds the total number of rows of raw data (%2%) for the primary variable group \"%3%\" over the desired time range.  Please decrease the value of K.") % boost::lexical_cast<std::string>(K) % boost::lexical_cast<std::string>(N_grand_total) % selected_raw_data_table_schema.second.original_table_names[0]).str().c_str());
+			SetFailureErrorMessage((boost::format("The chosen value of K (%1%) exceeds the total number of rows of raw data (%2%) for the primary variable group \"%3%\" over the desired time range.  Please decrease the value of K.") % boost::lexical_cast<std::string>(K) % boost::lexical_cast<std::string>(N_grand_total) % selected_raw_data_table_schema.second.variable_group_longhand_names[0]).str().c_str());
 			failed = true;
 			return;
 		}

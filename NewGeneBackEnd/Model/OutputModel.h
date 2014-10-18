@@ -531,7 +531,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				size_t primary_vg_index__in__top_level_vg_vector; // in case there are multiple top-level variable groups, which one to use as primary (the others will be treated as children)
 				int K; // the multiplicity
-				long N_grand_total; // A dumb variable - gives the total number of rows in the raw data table for the primary variable group over the chosen time range
+				std::int64_t N_grand_total; // A dumb variable - gives the total number of rows in the raw data table for the primary variable group over the chosen time range
 
 				// Random sampling
 				WidgetInstanceIdentifier top_level_vg;
