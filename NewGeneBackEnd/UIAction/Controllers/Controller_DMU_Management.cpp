@@ -880,7 +880,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 						if (do_refresh_not_plain_insert)
 						{
 							// Handle incoming data row-by-row, distinguishing between inserts and updates
-							boost::format msg("DMU '%1%' successfully refreshed %3% DMU members from file (%4% updated and %5% inserted)%2%.");
+							boost::format msg("DMU '%1%' successfully read %3% DMU members from file (%4% updated and %5% inserted)%2%.");
 							msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 								% cancelAddendum
 								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
@@ -891,11 +891,12 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 						else
 						{
 							// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
-							boost::format msg("DMU '%1%' successfully refreshed %3% DMU members from file%2%.");
+							boost::format msg("DMU '%1%' successfully read %3% DMU members from file (%4% written to database)%2%.");
 							msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 								% cancelAddendum
-								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines);
-							messager__.ShowMessageBox(msg.str());
+								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines)
+								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodupdatelines + input_model.t_dmu_setmembers.goodwritelines);
+								messager__.ShowMessageBox(msg.str());
 						}
 					}
 
