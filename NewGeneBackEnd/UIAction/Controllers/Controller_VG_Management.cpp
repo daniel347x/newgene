@@ -676,7 +676,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						}
 						else
 						{
-							if (table_importer.goodreadlines != table_importer.goodwritelines + table_importer.goodupdatelines)
+							if (!table_importer.CheckCancelled() && (table_importer.goodreadlines != table_importer.goodwritelines + table_importer.goodupdatelines))
 							{
 								boost::format msg("During refresh of variable group, although there were no read or write failures, nonetheless the number of successful lines read from input file (%1%) does not match the number of successful lines written to (%2%) and updated in (%3%) the database.");
 								msg % boost::lexical_cast<std::string>(table_importer.goodreadlines) % boost::lexical_cast<std::string>(table_importer.goodwritelines) % boost::lexical_cast<std::string>(table_importer.goodupdatelines);

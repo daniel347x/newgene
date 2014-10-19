@@ -871,7 +871,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 					}
 					else
 					{
-						if (input_model.t_dmu_setmembers.goodreadlines != input_model.t_dmu_setmembers.goodwritelines + input_model.t_dmu_setmembers.goodupdatelines)
+						if (! Importer::CheckCancelled() && (input_model.t_dmu_setmembers.goodreadlines != input_model.t_dmu_setmembers.goodwritelines + input_model.t_dmu_setmembers.goodupdatelines))
 						{
 							boost::format msg("During import of DMU members, with no read or write failures, nonetheless the number of successful lines read from input file (%1%) does not match the number of successful lines written to (%2%) and updated in (%3%) the database.");
 							msg % boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodreadlines) % boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodwritelines) % boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.goodupdatelines);
