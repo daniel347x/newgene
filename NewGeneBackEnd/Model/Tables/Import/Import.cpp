@@ -2257,8 +2257,9 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 	if (CheckCancelled())
 	{
-		boost::format msg("Import operation cancelled.");
-		errors.push_back(msg.str());
+		// TODO: re-enable this when there is a distinction between import LOGFILE and import ERROR FILE
+		//boost::format msg("Import operation cancelled.");
+		//errors.push_back(msg.str());
 	}
 
 	// Return true even if cancelled
