@@ -452,7 +452,7 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 	// Now the DMU categories, if requested
 	if (!dmu_categories.empty())
 	{
-		displayText += " (";
+		displayText += " (DMU/s: ";
 		bool first = true;
 		std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
 		{
