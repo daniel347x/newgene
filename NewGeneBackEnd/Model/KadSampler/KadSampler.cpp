@@ -27,7 +27,7 @@ int Weighting::how_many_weightings = 0;
 
 bool VariableGroupTimeSliceData::when_destructing_do_not_delete = false;
 
-KadSampler::KadSampler(Messager & messager_)
+KadSampler::KadSampler(Messager & messager_, bool & cancelled_)
 	: insert_random_sample_stmt{ nullptr }
 	, numberChildVariableGroups{ 0 }
 	, time_granularity{ TIME_GRANULARITY__NONE }
@@ -38,6 +38,7 @@ KadSampler::KadSampler(Messager & messager_)
 	, number_primary_variable_group_single_leaf_columns{ 0 }
 	, debuggingflag{ false }
 	, rowsWritten{ 0 }
+	, cancelled{ cancelled_ }
 {
 }
 
@@ -725,6 +726,8 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 					for (auto primaryVariableGroupBranchesPtr = primaryVariableGroupBranches.begin(); primaryVariableGroupBranchesPtr != primaryVariableGroupBranches.end(); ++primaryVariableGroupBranchesPtr)
 					{
 
+						if (CheckCancelled()) { break; }
+
 						Branch const & the_current_primary_variable_group_branch = *primaryVariableGroupBranchesPtr;
 
 						// *********************************************************************************** //
@@ -798,6 +801,8 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 							for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
 							{
 
+								if (CheckCancelled()) { break; }
+
 								BranchOutputRow<hits_tag> const & outputRow = *matchingOutputRowPtr->first;
 								auto const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
 
@@ -807,6 +812,8 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 								// (This is *NOT* a loop through PRIMARY variable group leaves)
 								for (auto matchingOutputChildLeavesPtr = matchingOutputChildLeaves.cbegin(); matchingOutputChildLeavesPtr != matchingOutputChildLeaves.cend(); ++matchingOutputChildLeavesPtr)
 								{
+
+									if (CheckCancelled()) { break; }
 
 									std::int16_t const & matching_child_leaf_index = *matchingOutputChildLeavesPtr;
 
@@ -835,7 +842,11 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 
 								}
 
+								if (CheckCancelled()) { break; }
+
 							}
+
+							if (CheckCancelled()) { break; }
 
 						}
 
@@ -865,6 +876,8 @@ void KadSampler::CalculateWeightings(int const K)
 	std::int64_t total_branches = 0;
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type & timeSliceEntry)
 	{
+		if (CheckCancelled()) { return; }
+
 		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
 		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
 		Weighting & variableGroupTimeSliceDataWeighting = variableGroupTimeSliceData.weighting;
@@ -874,6 +887,8 @@ void KadSampler::CalculateWeightings(int const K)
 			total_branches += static_cast<std::int64_t>(branchesAndLeaves.size());
 		});
 	});
+
+	if (CheckCancelled()) { return; }
 
 	// Now calculate the weightings
 	weighting.setWeighting(0);
@@ -907,6 +922,9 @@ void KadSampler::CalculateWeightings(int const K)
 	// (It will be purged when the 'hits_tag' memory pool is purged, which only happens once - at the end of the entire K-ad run.)
 	auto calculateTotalConsolidatedRowsSortFunction = boost::function<bool(InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs)>([&](InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs) -> bool
 	{
+
+		if (CheckCancelled()) { return false; }
+
 		if (lhs.size() < 5 || rhs.size() < 5)
 		{
 			boost::format msg("Logic error: InstanceDataVector used to count the total number of consolidated rows has less than the necessary number of columns (time columns and at least one primary key column) in sort function.");
@@ -1031,6 +1049,8 @@ void KadSampler::CalculateWeightings(int const K)
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type & timeSliceEntry)
 	{
 
+		if (CheckCancelled()) { return; }
+
 		++time_slice_count;
 
 		TimeSlice const & timeSlice = timeSliceEntry.first;
@@ -1051,12 +1071,16 @@ void KadSampler::CalculateWeightings(int const K)
 		std::for_each(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
 		{
 
+			if (CheckCancelled()) { return; }
+
 			Branches<hits_tag> & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 			Weighting & variableGroupBranchesAndLeavesWeighting = variableGroupBranchesAndLeaves.weighting;
 			variableGroupBranchesAndLeavesWeighting.setWeightingRangeStart(currentWeighting);
 
 			std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
 			{
+
+				if (CheckCancelled()) { return; }
 
 				++branch_count;
 
@@ -1120,8 +1144,10 @@ void KadSampler::CalculateWeightings(int const K)
 				temp_branches_and_leaves.insert(temp_branches_and_leaves.cend(), branch.primary_keys.cbegin(), branch.primary_keys.cend());
 				for (auto const & leaf : leaves)
 				{
+					if (CheckCancelled()) { break; }
 					temp_branches_and_leaves.insert(temp_branches_and_leaves.cend(), leaf.primary_keys.cbegin(), leaf.primary_keys.cend());
 				}
+				if (CheckCancelled()) { return; }
 				branches_and_leaves_set.insert(temp_branches_and_leaves);
 
 				Weighting & branchWeighting = branch.weighting;
@@ -1167,6 +1193,8 @@ void KadSampler::CalculateWeightings(int const K)
 
 		});
 
+		if (CheckCancelled()) { return; }
+
 		weighting.addWeighting(variableGroupTimeSliceDataWeighting.getWeighting());
 
 	});
@@ -1175,6 +1203,8 @@ void KadSampler::CalculateWeightings(int const K)
 	// See comments above.
 	for (auto const & branch_and_leaves_combo : branches_and_leaves_set)
 	{
+		if (CheckCancelled()) { break; }
+
 		// How many leaves?
 		size_t total_number_cols = branch_and_leaves_combo.size() - 4; // -4 to account for the time columns
 		size_t total_number_leaf_cols = total_number_cols - number_branch_columns;
@@ -1383,6 +1413,8 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 		PopulateAllLeafCombinations(which_time_unit_full_sampling__MINUS_ONE, K, branch);
 	}
 
+	if (CheckCancelled()) { return; }
+
 	// If Limit DMU's prevented anything from being generated
 	// (even if this function wasn't previously exited in this case),
 	// then nothing will be inserted here - begin() == end()
@@ -1464,6 +1496,8 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 		while (test_leaf_combination.Empty() || branch.hits[which_time_unit].count(test_leaf_combination))
 		{
 
+			if (CheckCancelled()) { break; }
+
 			test_leaf_combination.Clear();
 
 			if (newgene_cpp_int(branch.hits[which_time_unit].size()) > branch.number_branch_combinations / 2)
@@ -1493,8 +1527,10 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 				auto remainingPtr = branch.remaining[which_time_unit].begin();
 				for (size_t n = 0; n < which_remaining_leaf_combination; ++n)
 				{
+					if (CheckCancelled()) { break; }
 					++remainingPtr;
 				}
+				if (CheckCancelled()) { break; }
 				test_leaf_combination = *remainingPtr;
 
 				branch.remaining[which_time_unit].erase(remainingPtr);
@@ -1508,12 +1544,16 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 				// "remaining_leaves" is initialized to include ALL leaves
 				for (int n = 0; n < branch.numberLeaves(); ++n)
 				{
+					if (CheckCancelled()) { break; }
 					remaining_leaves.push_back(n);
 				}
+				if (CheckCancelled()) { break; }
 
 				// Pull random leaves, one at a time, to create the random row
 				while (test_leaf_combination.Size() < static_cast<size_t>(K))
 				{
+
+					if (CheckCancelled()) { break; }
 
 					// ************************************************************************ //
 					// TODO:
@@ -1537,11 +1577,15 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 					test_leaf_combination.Insert(index_of_leaf);
 				}
 
+				if (CheckCancelled()) { break; }
+
 			}
 
 		}
 
 	}
+
+	if (CheckCancelled()) { return; }
 
 #	ifdef _DEBUG
 	std::for_each(test_leaf_combination.primary_leaves.cbegin(), test_leaf_combination.primary_leaves.cend(), [&](int const & index)
@@ -1620,6 +1664,8 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 	while (total_added < branch.number_branch_combinations)
 	{
 
+		if (CheckCancelled()) { break; }
+
 		AddPositionToRemaining(which_time_unit, position, branch);
 		bool succeeded = IncrementPosition(K, position, branch);
 
@@ -1651,6 +1697,8 @@ void KadSampler::AddPositionToRemaining(std::int64_t const & which_time_unit, st
 	std::for_each(position.cbegin(), position.cend(), [&](int const position_index)
 	{
 
+		if (CheckCancelled()) { return; }
+
 		// ************************************************************************************************ //
 		// This function will never be called unless there are MORE THAN ONE leaf slot
 		// for the PRIMARY VARIABLE GROUP
@@ -1661,6 +1709,8 @@ void KadSampler::AddPositionToRemaining(std::int64_t const & which_time_unit, st
 		new_remaining.Insert(position_index);
 
 	});
+
+	if (CheckCancelled()) { return; }
 
 	if (branch.hits[which_time_unit].count(new_remaining) == 0)
 	{
@@ -1769,6 +1819,8 @@ void KadSampler::ClearBranchCaches()
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type  & timeSliceData)
 	{
 
+		if (CheckCancelled()) { return; }
+
 		VariableGroupBranchesAndLeavesVector<hits_tag> & variableGroupBranchesAndLeavesVector = *timeSliceData.second.branches_and_leaves;
 
 		// For now, assume only one variable group
@@ -1783,6 +1835,8 @@ void KadSampler::ClearBranchCaches()
 
 		std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
 		{
+
+			if (CheckCancelled()) { return; }
 
 			// Do not delete!  Let the Boost Pool system handle this memory
 
@@ -1813,12 +1867,16 @@ void KadSampler::ResetBranchCaches(int const child_variable_group_number, bool c
 		ClearBranchCaches();
 	}
 
+	if (CheckCancelled()) { return; }
+
 	ProgressBarMeter meter(messager, "Processed %1% of %2% time slices", timeSlices.size());
 	std::int64_t current_loop_iteration = 0;
 
 	current_child_variable_group_being_merged = child_variable_group_number;
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](TimeSlices<hits_tag>::value_type  & timeSliceData)
 	{
+
+		if (CheckCancelled()) { return; }
 
 		timeSliceData.second.ResetBranchCachesSingleTimeSlice(*this, reset_child_dmu_lookup);
 
@@ -1905,6 +1963,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 		std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & time_unit_output_rows)
 		{
 
+			if (CheckCancelled()) { return; }
+
 			// ***************************************************************************************** //
 			// We have one time unit entry within this time slice for the given branch.
 			// We proceed to build the cache
@@ -1921,6 +1981,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 			bool first_time_in_branch = true;
 			for (auto outputRowPtr = time_unit_output_rows.second.cbegin(); outputRowPtr != time_unit_output_rows.second.cend(); ++outputRowPtr)
 			{
+
+				if (CheckCancelled()) { return; }
 
 				// ******************************************************************************************************** //
 				// We have a new output row we're dealing with.
@@ -1948,123 +2010,127 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 					{
 
+						if (CheckCancelled()) { return; }
+
 						// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the branch)
 
 						switch (childToPrimaryMapping.mapping)
 						{
 
-						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-						{
-
-							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-							child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
-
-						}
-						break;
-
-						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-						{
-
-							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-
-							// ************************************************************************** //
-							//
-							// This is currently unsupported
-							//
-							// If it ever becomes supported, we have to do this calculation
-							// EVERY TIME THROUGH THE LOOP
-							// (i.e., for every output row associated with the primary group's branch),
-							// rather than just the first time through the loop
-							//
-							// ************************************************************************** //
-							if (true)
+							case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
 							{
-								boost::format msg("Logic error: It is currently unsupported for a child variable group's branch column to map to a primary variable group leaf column.");
-								throw NewGeneException() << newgene_error_description(msg.str());
+
+								// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+								child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+
 							}
+							break;
 
-							// leaf_number tells us which leaf in the top-level DMU
-							// index tells us which index in that leaf
-
-							if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
-								(outputRow.primary_leaves_cache.size()))
+							case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
 							{
-								// EVERY output row selects the same number of leaves and places them into its primary_leaves_cache.
-								// So EVERY output row's primary_leaves_cache is the same size.
 
-								// If one output row has fewer leaves in its primary_leaves_cache than is sufficient to fill
-								// the necessary leaf slots required to form the branch slots for the child,
-								// then all output rows also don't.
-								branch_in_child__cannot_match_all_leaf_slots_in_primary = true;
-								break;
-							}
+								// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
 
-							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
-								== 0)
-							{
-								// This is the K=1 case - the matching leaf of the *top-level* UOA
-								// has no primary keys.  This is a logic error, as we should never match
-								// a "leaf" in the top-level UOA in this case.
+								// ************************************************************************** //
 								//
-								// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
-								// in particular the following lines:
-								// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
-								// --> // {
-								// --> //     is_current_index_a_top_level_primary_group_branch = true;
-								// --> // }
+								// This is currently unsupported
+								//
+								// If it ever becomes supported, we have to do this calculation
+								// EVERY TIME THROUGH THE LOOP
+								// (i.e., for every output row associated with the primary group's branch),
+								// rather than just the first time through the loop
+								//
+								// ************************************************************************** //
+								if (true)
+								{
+									boost::format msg("Logic error: It is currently unsupported for a child variable group's branch column to map to a primary variable group leaf column.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
 
-								boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
-								throw NewGeneException() << newgene_error_description(msg.str());
+								// leaf_number tells us which leaf in the top-level DMU
+								// index tells us which index in that leaf
+
+								if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
+									(outputRow.primary_leaves_cache.size()))
+								{
+									// EVERY output row selects the same number of leaves and places them into its primary_leaves_cache.
+									// So EVERY output row's primary_leaves_cache is the same size.
+
+									// If one output row has fewer leaves in its primary_leaves_cache than is sufficient to fill
+									// the necessary leaf slots required to form the branch slots for the child,
+									// then all output rows also don't.
+									branch_in_child__cannot_match_all_leaf_slots_in_primary = true;
+									break;
+								}
+
+								if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
+									== 0)
+								{
+									// This is the K=1 case - the matching leaf of the *top-level* UOA
+									// has no primary keys.  This is a logic error, as we should never match
+									// a "leaf" in the top-level UOA in this case.
+									//
+									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
+									// in particular the following lines:
+									// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+									// --> // {
+									// --> //     is_current_index_a_top_level_primary_group_branch = true;
+									// --> // }
+
+									boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+
+								// ************************************************************************************** //
+								// ************************************************************************************** //
+								//
+								// The following index lookup is one of the trickiest in the entire application.
+								//
+								//
+								// Note that "leaves_cache" belongs GLOBALLY to the PRIMARY VARIABLE GROUP branch object.
+								//
+								// And that "outputRow.primary_leaves_cache" is just a fast lookup into the same data,
+								// with the same index into the data structure via iterating, as "outputRow.primary_leaves".
+								//
+								// And that "childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf"
+								// is the index into the above OUTPUT-ROW SPECIFIC leaf cache.
+								//
+								// And that the value stored in the OUTPUT-ROW SPECIFIC leaf cache
+								// is, itself, just an INDEX into the GLOBAL leaf cache "leaved_cache" noted above.
+								//
+								// Once the actual cached leaf in the GLOBAL leaf cache "leaves_cache" is retrieved via
+								// "leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]]",
+								// the primary key columns of this leaf (because a single leaf can have multiple primary key columns)
+								// is stored in the "primary_keys" data member.
+								//
+								// How do we know which INTERNAL column of DMU instance data inside the individual leaf to retrieve?
+								// That is stored in "childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf".
+								//
+								// If you put all of the above pieces together, you find that the following line of code
+								// stores the DMU instance data corresponding to the proper internal column inside the 
+								// PRIMARY VARIABLE GROUP leaf
+								// at the proper index inside the global PRIMARY VARIABLE GROUP leaf cache,
+								// in the "child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components"
+								//
+								// ************************************************************************************** //
+								// ************************************************************************************** //
+								child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(
+									leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+
 							}
+							break;
 
-							// ************************************************************************************** //
-							// ************************************************************************************** //
-							//
-							// The following index lookup is one of the trickiest in the entire application.
-							//
-							//
-							// Note that "leaves_cache" belongs GLOBALLY to the PRIMARY VARIABLE GROUP branch object.
-							//
-							// And that "outputRow.primary_leaves_cache" is just a fast lookup into the same data,
-							// with the same index into the data structure via iterating, as "outputRow.primary_leaves".
-							//
-							// And that "childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf"
-							// is the index into the above OUTPUT-ROW SPECIFIC leaf cache.
-							//
-							// And that the value stored in the OUTPUT-ROW SPECIFIC leaf cache
-							// is, itself, just an INDEX into the GLOBAL leaf cache "leaved_cache" noted above.
-							//
-							// Once the actual cached leaf in the GLOBAL leaf cache "leaves_cache" is retrieved via
-							// "leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]]",
-							// the primary key columns of this leaf (because a single leaf can have multiple primary key columns)
-							// is stored in the "primary_keys" data member.
-							//
-							// How do we know which INTERNAL column of DMU instance data inside the individual leaf to retrieve?
-							// That is stored in "childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf".
-							//
-							// If you put all of the above pieces together, you find that the following line of code
-							// stores the DMU instance data corresponding to the proper internal column inside the 
-							// PRIMARY VARIABLE GROUP leaf
-							// at the proper index inside the global PRIMARY VARIABLE GROUP leaf cache,
-							// in the "child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components"
-							//
-							// ************************************************************************************** //
-							// ************************************************************************************** //
-							child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(
-								leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
-
-						}
-						break;
-
-						default:
-						{}
-						break;
+							default:
+							{}
+							break;
 
 						}
 
 					});
 
 				}
+
+				if (CheckCancelled()) { break; }
 
 				first_time_in_branch = false;
 
@@ -2078,6 +2144,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				std::for_each(allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cbegin(),
 							  allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
+
+					if (CheckCancelled()) { return; }
 
 					// ************************************************************************************************************** //
 					// We have a SINGLE COLUMN - 
@@ -2192,6 +2260,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 
 					}
 
+					if (CheckCancelled()) { return; }
+
 					++child_leaf_index_crossing_multiple_child_leaves;
 					++child_leaf_index_within_a_single_child_leaf;
 
@@ -2240,6 +2310,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 					}
 
 				});
+
+				if (CheckCancelled()) { break; }
 
 				// Cover the case where there are no child-leaf-to-primary mappings,
 				// only child-branch-to-primary mappings
@@ -2291,6 +2363,8 @@ void KadSampler::PrepareRandomSamples(int const K)
 	while (true)
 	{
 
+		if (CheckCancelled()) { break; }
+
 		if (random_number_iterator == random_numbers.cend())
 		{
 			break;
@@ -2310,6 +2384,8 @@ void KadSampler::PrepareRandomSamples(int const K)
 
 			while (random_number > currentMapElementHighEndWeight)
 			{
+
+				if (CheckCancelled()) { break; }
 
 				// ************************************************************ //
 				// Limit DMU functionality is properly handled here
@@ -2333,6 +2409,8 @@ void KadSampler::PrepareRandomSamples(int const K)
 				currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
 
 			}
+
+			if (CheckCancelled()) { break; }
 
 		}
 		else
@@ -2364,6 +2442,8 @@ void KadSampler::PrepareRandomSamples(int const K)
 			});
 
 		}
+
+		if (CheckCancelled()) { break; }
 
 		TimeSlice const & timeSlice = timeSlicePtr->first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;
@@ -2398,6 +2478,8 @@ void KadSampler::PrepareRandomSamples(int const K)
 			return false;
 		});
 
+		if (CheckCancelled()) { break; }
+
 		const Branch & new_branch = *branchesPtr;
 
 		// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
@@ -2420,14 +2502,20 @@ void KadSampler::PrepareFullSamples(int const K)
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
 
+		if (CheckCancelled()) { return; }
+
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
 		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = *variableGroupTimeSliceData.branches_and_leaves;
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{
+			if (CheckCancelled()) { return; }
+
 			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 			{
+				if (CheckCancelled()) { return; }
+
 				GenerateAllOutputRows(K, branch);
 				number_rows_generated += branch.number_branch_combinations;
 				meter.UpdateProgressBarValue(number_rows_generated);
@@ -2455,11 +2543,15 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 	std::int64_t reserve_size = 0;
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
 	{
+		if (CheckCancelled()) { return; }
+
 		if (hit.first != -1)
 		{
 			reserve_size += hit.second.size();
 		}
 	});
+
+	if (CheckCancelled()) { return; }
 
 	// Optimization required: first, reserve memory
 	// ... profiler shows that 99% of time in "consolidating rows" routine
@@ -2471,10 +2563,14 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 	// Now consolidate the output rows from the time-unit subslices into a single sorted vector
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
 	{
+		if (CheckCancelled()) { return; }
+
 		if (hit.first != -1)
 		{
 			for (auto iter = std::begin(hit.second); iter != std::end(hit.second); ++iter)
 			{
+				if (CheckCancelled()) { break; }
+
 				// Profiler shows that about half the time in the "consolidating rows" phase
 				// is spent creating new memory here.
 
@@ -2498,11 +2594,15 @@ void KadSampler::ConsolidateRowsWithinBranch(Branch const & branch, std::int64_t
 				meter.UpdateProgressBarValue(current_rows);
 			}
 
+			if (CheckCancelled()) { return; }
+
 			// Nope.  Causes MASSIVE hang for many minutes to handle memory model using memory pool - intended for rapid creates, but not rapid deletes
 			//hit.second.clear();
 
 		}
 	});
+
+	if (CheckCancelled()) { return; }
 
 	std::sort(branch.hits_consolidated.begin(), branch.hits_consolidated.end());
 	branch.hits_consolidated.erase(std::unique(branch.hits_consolidated.begin(), branch.hits_consolidated.end()), branch.hits_consolidated.end());
@@ -2530,6 +2630,8 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(KadSampler & a
 
 	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
 	{
+
+		if (allWeightings.CheckCancelled()) { return; }
 
 		branch.ResetLeafCache();
 
@@ -3063,6 +3165,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 		return;
 	}
 
+	if (CheckCancelled()) { return; }
+
 	if (originalTimeSlice.hasTimeGranularity() && !currentTimeSlice.hasTimeGranularity())
 	{
 		boost::format msg("Attempting to prune time units when the new time slice has no time granularity, while the original does!");
@@ -3078,6 +3182,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 		ResetBranchCachesSingleTimeSlice(allWeightings, true);
 		return;
 	}
+
+	if (CheckCancelled()) { return; }
 
 	// We *leave the data available* no matter how small the time slice is,
 	// and let the output routine ensure that the time widths properly weight the slices.
@@ -3159,8 +3265,12 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 	{
 
+		if (CheckCancelled()) { return; }
+
 		std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & current_branch)
 		{
+
+			if (CheckCancelled()) { return; }
 
 			// ************************************************************** //
 			// Single branch
@@ -3176,6 +3286,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 			// granulated output, full sampling
 			currentTimeSlice.loop_through_time_units(allWeightings.time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 			{
+				if (CheckCancelled()) { return; }
+
 				bool overlaps = false;
 				if (time_to_use_for_start < end && time_to_use_for_end > start)
 				{
@@ -3189,17 +3301,25 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 				++hit_number;
 			}));
 
+			if (CheckCancelled()) { return; }
+
 			hits.clear();
 			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<remaining_tag>::value_type const & new_hit)
 			{
+				if (CheckCancelled()) { return; }
+
 				hits[new_hit.first].insert(new_hit.second.cbegin(), new_hit.second.cend());
 			});
+
+			if (CheckCancelled()) { return; }
 
 			current_branch.ValidateOutputRowLeafIndexes();
 
 		});
 
 	});
+
+	if (CheckCancelled()) { return; }
 
 	ResetBranchCachesSingleTimeSlice(allWeightings, true);
 

@@ -2914,7 +2914,7 @@ class KadSampler
 
 	public:
 
-		KadSampler(Messager & messager_);
+		KadSampler(Messager & messager_, bool & cancelled_);
 		~KadSampler();
 
 	public:
@@ -3234,6 +3234,19 @@ class KadSampler
 		bool debuggingflag;
 
 		std::int64_t rowsWritten;
+
+	private:
+
+		bool & cancelled;
+
+	public:
+
+		inline bool CheckCancelled()
+		{
+			// No lock - not necessary for a boolean checked multiple times by back end and that will not cause an error if it is messed up in extraordinarily rare circumstances
+			return cancelled; // opportunity for further checking here
+		}
+
 };
 
 template <typename TAG, int SIZE>
