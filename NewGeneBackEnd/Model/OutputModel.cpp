@@ -289,7 +289,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	bool delete_tables_ = delete_tables;
 	BOOST_SCOPE_EXIT(&input_model, &delete_tables_)
 	{
-		// This is also done explicity at the end,
+
+		// This is also done explicitLy at the end,
 		// but it's better to include in both places,
 		// the first (at end) so that user can benefit from status text,
 		// and the second (here) in case of exit due to failure
@@ -299,6 +300,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 
 		input_model->VacuumDatabase();
+
 	} BOOST_SCOPE_EXIT_END
 
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, input_model);
@@ -519,6 +521,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
+		if (failed || CheckCancelled()) { return; }
+
 		primary_group_column_sets.push_back(selected_raw_data_table_schema);
 
 		N_grand_total = ObtainCount(selected_raw_data_table_schema.second);
@@ -638,21 +642,25 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Selecting %1% random K-adic combinations from %2% available granulated combinations...") % boost::lexical_cast<std::string>(samples).c_str() % allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
 			allWeightings.PrepareRandomSamples(K);
+			if (failed || CheckCancelled()) { return; }
 
+			// *** OLD COMMENT LEFT IN PLACE TO ADD CLARITY TO CURRENT CODE, SEE BELOW FOR CURRENT STATUS ***
 			// Do not clear random numbers!  Deallocation requires ~5-10 seconds for 1-2M on a solid CPU, but takes ~10-20MB memory.
 			// For now - prioritize speed over memory.  Leave the memory in place and allow the Boost memory pool to clear at the end.
 			// Note that when Boost Pool is enhanced to support class-level pools, THEN we'll be able to get the best of both worlds
 			// and just clear the pool right here (in an instant).
 			//allWeightings.ClearRandomNumbers(); // This function will not only "clear()" the vector, but "swap()" it with an empty vector to actually force deallocation - a major C++ gotcha!
 			//messager.SetPerformanceLabel((boost::format("Clearing cache of random numbers...")).str().c_str());
+			// *** DONE OLD COMMENT ***
 			//
-			// NewGene has been enhanced to use a Boost pool for the random numbers, so we can now purge the pool in an instant.
+			// Update: NewGene has been enhanced to use a Boost pool for the random numbers, so we can now purge the pool in an instant.
 			RandomVectorPool::purge_memory();
 			RandomSetPool::purge_memory();
 			purge_pool<newgene_cpp_int_random_tag, sizeof(boost::multiprecision::limb_type)>();
 			purge_pool<newgene_cpp_int_random_tag, sizeof(newgene_cpp_int)>();
 			allWeightings.ClearRemaining();
 			messager.SetPerformanceLabel("");
+			if (failed || CheckCancelled()) { return; }
 
 		}
 		else
@@ -684,6 +692,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		// "remaining_tag" memory pool is used both by random sampler, and by full sampler
 		allWeightings.PurgeTags<remaining_tag>();
+		if (failed || CheckCancelled()) { return; }
 
 		if (false)
 		{
@@ -826,6 +835,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Delete the tables we used to store the selected columns of raw data over the selected time range
 			// ********************************************************************************************************************************************************* //
 			input_model->ClearRemnantTemporaryTables();
+			if (failed || CheckCancelled()) { return; }
 		}
 
 		input_model->VacuumDatabase();
@@ -2180,8 +2190,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	}
 
-	// Add SQL to count the number of results from the SELECT... right here
-
 	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
 	if (variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
@@ -2328,6 +2336,11 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 	}
 
 	PopulateVariableGroups();
+
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
 
 	primary_vg_index__in__top_level_vg_vector = 0;
 
@@ -4325,9 +4338,9 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 	while (StepData())
 	{
 
-		if (CheckCancelled())
+		if (failed || CheckCancelled())
 		{
-			return;
+			break;
 		}
 
 		// All data populated into the row corresponds to
@@ -4354,6 +4367,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 			SetFailureErrorMessage(sorting_row_of_data.error_message);
 			return;
 		}
+
+		if (failed || CheckCancelled()) { break; }
 
 		if (variable_group_selected_columns_schema.has_no_datetime_columns_originally)
 		{
@@ -4400,6 +4415,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 			{
 				return;
 			}
+
+			if (failed || CheckCancelled()) { return; }
 
 			SQLExecutor::WHICH_BINDING binding = binding_info.first;
 			std::pair<int, int> const & indices = binding_info.second;
@@ -4450,6 +4467,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 			{
 				return;
 			}
+
+			if (failed || CheckCancelled()) { return; }
 
 			SQLExecutor::WHICH_BINDING binding = binding_info.first;
 			std::pair<int, int> const & indices = binding_info.second;
@@ -4503,6 +4522,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 			{
 				return;
 			}
+
+			if (failed || CheckCancelled()) { return; }
 
 			SQLExecutor::WHICH_BINDING binding = binding_info.first;
 			std::pair<int, int> const & indices = binding_info.second;
@@ -4592,9 +4613,14 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 
 						while (first || call_again)
 						{
+							if (failed || CheckCancelled()) { break; }
+
 							first = false;
 							std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
 									consolidate_rows, random_sampling, mapIterator, call_again);
+
+							if (failed || CheckCancelled()) { break; }
+
 							bool added_recurse = std::get<0>(ret);
 
 							if (added_recurse)
@@ -4605,6 +4631,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 							call_again = std::get<1>(ret);
 							mapIterator = std::get<2>(ret);
 						}
+
+						if (failed || CheckCancelled()) { break; }
 
 						if (added)
 						{
@@ -4643,9 +4671,14 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 
 						while (first || call_again)
 						{
+							if (failed || CheckCancelled()) { break; }
+
 							first = false;
 							std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
 									consolidate_rows, random_sampling, mapIterator, call_again);
+
+							if (failed || CheckCancelled()) { break; }
+
 							bool added_recurse = std::get<0>(ret);
 
 							if (added_recurse)
@@ -4656,6 +4689,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 							call_again = std::get<1>(ret);
 							mapIterator = std::get<2>(ret);
 						}
+
+						if (failed || CheckCancelled()) { break; }
 
 						if (added)
 						{
@@ -4701,9 +4736,14 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 
 						while (first || call_again)
 						{
+							if (failed || CheckCancelled()) { break; }
+
 							first = false;
 							std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode,
 									consolidate_rows, random_sampling, mapIterator, call_again);
+
+							if (failed || CheckCancelled()) { break; }
+
 							bool added_recurse = std::get<0>(ret);
 
 							if (added_recurse)
@@ -4714,6 +4754,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 							call_again = std::get<1>(ret);
 							mapIterator = std::get<2>(ret);
 						}
+
+						if (failed || CheckCancelled()) { break; }
 
 						if (added)
 						{
@@ -5365,6 +5407,8 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForNonPrimaryGroups(KadSamp
 			 ++overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf)
 		{
 
+			if (failed || CheckCancelled()) { break; }
+
 			// **************************************************************************************** //
 			// The following column order bookkeeping is a pain in the &$^,
 			// but it has to be done, and this is a fine place to do it.
@@ -5373,6 +5417,8 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForNonPrimaryGroups(KadSamp
 			// **************************************************************************************** //
 			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&](PrimaryKeySequence::PrimaryKeySequenceEntry const & full_kad_key_info)
 			{
+
+				if (failed || CheckCancelled()) { return; }
 
 				if (overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf !=
 					full_kad_key_info.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg)
@@ -5473,6 +5519,7 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForNonPrimaryGroups(KadSamp
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
 		messager.AppendKadStatusText((boost::format("Build cache to prepare for merge of child variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		allWeightings.ResetBranchCaches(current_child_vg_index, true);
+		if (failed || CheckCancelled()) { return; }
 
 		// **************************************************************************************** //
 		// We here loop through child variable group raw data
@@ -5530,6 +5577,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 		// This MUST come after the child groups have been merged!
 		// For unbiased sampling, the child groups may only cross a subset of time units within a branch
 		ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(allWeightings);
+		if (failed || CheckCancelled()) { return; }
 	}
 
 	// Create pointer to prevent automatic deletion.
@@ -5552,6 +5600,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 		TimeSlice previousTimeSlice;
 		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 		{
+			if (failed || CheckCancelled()) { return; }
+
 			TimeSlice const & the_slice = timeSlice.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
 			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
@@ -5561,8 +5611,12 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 			{
 				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
+					if (failed || CheckCancelled()) { return; }
+
 					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 					{
+						if (failed || CheckCancelled()) { return; }
+
 						if (random_sampling)
 						{
 							if (allWeightings.time_granularity == TIME_GRANULARITY__NONE)
@@ -5589,8 +5643,12 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 			{
 				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
+					if (failed || CheckCancelled()) { return; }
+
 					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 					{
+						if (failed || CheckCancelled()) { return; }
+
 						if (random_sampling)
 						{
 							if (allWeightings.time_granularity == TIME_GRANULARITY__NONE)
@@ -5631,6 +5689,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 		{
 
+			if (failed || CheckCancelled()) { return; }
+
 			TimeSlice const & the_slice = timeSlice.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
 			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
@@ -5652,10 +5712,14 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
 
+					if (failed || CheckCancelled()) { return; }
+
 					// One primary variable group for the current time slice (for now, this is all that is supported).
 					// Iterate through all of its branches (fixed values of raw data for the primary keys that are not part of the K-ad; i.e., have multiplicity 1)
 					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 					{
+
+						if (failed || CheckCancelled()) { return; }
 
 						// Here is a single branch and its leaves, corresponding to the primary variable group and the current time slice.
 
@@ -5682,6 +5746,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 								auto const & incoming_rows = branch.hits[-1];
 								std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
 								{
+									if (failed || CheckCancelled()) { return; }
+
 									EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation<hits_consolidated_tag>(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
 									meter.UpdateProgressBarValue(orig_row_count);
 								});
@@ -5694,6 +5760,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 								auto & incoming_rows = branch.hits_consolidated;
 								std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
 								{
+									if (failed || CheckCancelled()) { return; }
+
 									EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation<hits_consolidated_tag>(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
 									meter.UpdateProgressBarValue(orig_row_count);
 								});
@@ -5708,6 +5776,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 							auto const & incoming_rows = branch.hits[-1];
 							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
 							{
+								if (failed || CheckCancelled()) { return; }
+
 								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation<hits_consolidated_tag>(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
 								meter.UpdateProgressBarValue(orig_row_count);
 							});
@@ -5717,6 +5787,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					});
 
 				});
+
+				if (failed || CheckCancelled()) { return; }
 
 				MergedTimeSliceRow_RHS_wins = false;
 
@@ -5767,6 +5839,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 				// although they all *end* at the start of the new time slice, are saved.
 				std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow<ongoing_consolidation_tag> & merged_row)
 				{
+					if (failed || CheckCancelled()) { return; }
+
 					if (the_slice.endsAtPlusInfinity())
 					{
 						if (merged_row.time_slice.startsAtNegativeInfinity())
@@ -5785,6 +5859,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 						merged_row.time_slice.setEnd(the_slice.getEnd());
 					}
 				});
+
+				if (failed || CheckCancelled()) { return; }
 
 				// Intersection now contains all previous rows that matched with incoming rows,
 				// and they have been properly extended.
@@ -5825,8 +5901,13 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
+				
+					if (failed || CheckCancelled()) { return; }
+
 					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 					{
+
+						if (failed || CheckCancelled()) { return; }
 
 						MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 
@@ -5841,6 +5922,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 								MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 								std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
 								{
+									if (failed || CheckCancelled()) { return; }
+
 									EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
 									meter.UpdateProgressBarValue(orig_row_count);
 								});
@@ -5853,6 +5936,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 								auto const & incoming_rows = branch.hits_consolidated;
 								std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_consolidated_tag> const & incoming_row)
 								{
+									if (failed || CheckCancelled()) { return; }
+
 									EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
 									meter.UpdateProgressBarValue(orig_row_count);
 								});
@@ -5869,6 +5954,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 							MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 							std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow<hits_tag> const & incoming_row)
 							{
+								if (failed || CheckCancelled()) { return; }
+
 								EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, ongoing_merged_rows, the_slice, orig_row_count);
 								meter.UpdateProgressBarValue(orig_row_count);
 							});
@@ -5958,6 +6045,11 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 	std::for_each(final_result.second.column_definitions.begin(),
 				  final_result.second.column_definitions.end(), [this, &output_file, &first, &column_index](NewGeneSchema::NewGeneColumnDefinition & unformatted_column)
 	{
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
 
 		++column_index;
 
@@ -6052,6 +6144,11 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 			});
 
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
+
 			if (display_absolute_time_columns)
 			{
 				if (!first)
@@ -6088,6 +6185,12 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 		// ... this is for the progress bar
 		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices<hits_tag>::value_type const & timeSliceData)
 		{
+
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
+
 			TimeSlice const & timeSlice = timeSliceData.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
 			VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeavesVector = *variableGroupTimeSliceData.branches_and_leaves;
@@ -6103,11 +6206,18 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 			std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](Branch const & branch)
 			{
 
+				if (failed || CheckCancelled())
+				{
+					return;
+				}
+
 				if (!timeSlice.hasTimeGranularity())
 				{
 					// If the time slice has no time range granularity, just spit out the rows once
 					for (auto const & time_unit_hit : branch.hits)
 					{
+						if (failed || CheckCancelled()) { break; }
+
 						// *********************************************************************************** //
 						// There should be only one hit unit at index -1
 						// ... so this loop should only be entered once
@@ -6123,6 +6233,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						// granulated output, random sampling
 						for (auto const & time_unit_hit : branch.hits)
 						{
+							if (failed || CheckCancelled()) { break; }
+
 							auto const & output_rows_for_this_time_unit = time_unit_hit.second;
 							total_number_output_rows += static_cast<std::int64_t>(output_rows_for_this_time_unit.size());
 						}
@@ -6136,12 +6248,16 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						// granulated output, full sampling
 						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
+							if (failed || CheckCancelled()) { return; }
+
 							total_number_output_rows += static_cast<std::int64_t>(number_rows_this_time_slice);
 						}));
 
 					}
 				}
+		
 			});
+		
 		});
 
 		int which_time_slice = 0;
@@ -6295,6 +6411,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						std::int64_t hit_number = 0;
 						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
+							if (failed || CheckCancelled()) { return; }
+
 							//auto const & time_unit_hit = hits[hit_number];
 							auto const & output_rows_for_this_time_unit = hits[hit_number];
 							TimeSlice current_slice(time_to_use_for_start, time_to_use_for_end);
@@ -6318,6 +6436,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						auto const & output_rows_for_this_full_time_slice = branch.hits[-1];
 						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
 						{
+							if (failed || CheckCancelled()) { return; }
+
 							TimeSlice current_slice(time_to_use_for_start, time_to_use_for_end);
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
 							meter.UpdateProgressBarValue(rows_written);
@@ -6415,14 +6535,30 @@ void OutputModel::OutputGenerator::ConsolidateRowsWithinSingleTimeSlicesAcrossTi
 	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 	{
 
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
 		VariableGroupBranchesAndLeavesVector<hits_tag> const & variableGroupBranchesAndLeaves = *variableGroupTimeSliceData.branches_and_leaves;
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{
+
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
+
 			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & the_branch)
 			{
+				if (failed || CheckCancelled())
+				{
+					return;
+				}
+
 				allWeightings.ConsolidateRowsWithinBranch(the_branch, current_rows, meter);
 			});
 
