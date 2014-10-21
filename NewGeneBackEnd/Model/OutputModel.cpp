@@ -425,7 +425,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	//fast_short_to_int_map dummy_memory_instantiator;
 	//dummy_memory_instantiator[0] = 0; // Will trigger allocation of a huge block of global storage for use by all other instances of this class.
 
-	KadSampler * allWeightings_ = new KadSampler(messager); // SEE NOTE!  Do not delete this object!
+	KadSampler * allWeightings_ = new KadSampler(messager, cancelled); // SEE NOTE!  Do not delete this object!
 	KadSampler & allWeightings = *allWeightings_;
 	BOOST_SCOPE_EXIT(&allWeightings, &allWeightings_, &model, &input_model)
 	{

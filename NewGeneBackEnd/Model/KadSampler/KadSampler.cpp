@@ -14,6 +14,8 @@
 #include "../../Utilities/TimeRangeHelper.h"
 #include <fstream>
 
+bool * __cancelled = nullptr;
+
 std::fstream * create_output_row_visitor::output_file = nullptr;
 int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor::CREATE_ROW_MODE__NONE);
 InstanceDataVector<hits_tag> * create_output_row_visitor::data = nullptr;
@@ -26,6 +28,11 @@ fast_string create_output_row_visitor::converted_value;
 int Weighting::how_many_weightings = 0;
 
 bool VariableGroupTimeSliceData::when_destructing_do_not_delete = false;
+
+bool CheckCancelled()
+{
+	return *__cancelled;
+}
 
 KadSampler::KadSampler(Messager & messager_, bool & cancelled_)
 	: insert_random_sample_stmt{ nullptr }
@@ -40,6 +47,7 @@ KadSampler::KadSampler(Messager & messager_, bool & cancelled_)
 	, rowsWritten{ 0 }
 	, cancelled{ cancelled_ }
 {
+	__cancelled = &cancelled;
 }
 
 KadSampler::~KadSampler()
