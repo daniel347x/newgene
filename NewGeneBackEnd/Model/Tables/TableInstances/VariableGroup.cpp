@@ -60,6 +60,7 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 		{
 			WidgetInstanceIdentifier uoa_identifier = input_model_->t_uoa_category.getIdentifier(fk_uoa_uuid);
 			WidgetInstanceIdentifier vg_category_identifier(uuid, uoa_identifier, code, longhand, 0, flags, uoa_identifier.time_granularity, MakeNotes(notes1, notes2, notes3));
+			vg_category_identifier.ignore_parent_in_sort = true;
 			identifiers.push_back(vg_category_identifier);
 		}
 	}

@@ -94,6 +94,7 @@ public:
 	WidgetInstanceIdentifier()
 		: sequence_number_or_count(0)
 		, time_granularity(TIME_GRANULARITY__NONE)
+		, ignore_parent_in_sort(false)
 	{
 
 	}
@@ -106,6 +107,7 @@ public:
         , flags(flags_ ? flags_ : "")
 		, time_granularity(time_granularity_)
 		, notes(notes_)
+		, ignore_parent_in_sort(false)
 	{
 	}
 
@@ -117,6 +119,7 @@ public:
         , sequence_number_or_count(sequence_number_or_count_)
         , flags(flags_ ? flags_ : "")
 		, notes(notes_)
+		, ignore_parent_in_sort(false)
 	{
 	}
 
@@ -127,6 +130,7 @@ public:
         , flags(flags_ ? flags_ : "")
 		, time_granularity(time_granularity_)
 		, notes(notes_)
+		, ignore_parent_in_sort(false)
 	{
 
 	}
@@ -141,6 +145,7 @@ public:
         , flags(rhs.flags)
 		, time_granularity(rhs.time_granularity)
 		, notes(rhs.notes)
+		, ignore_parent_in_sort(rhs.ignore_parent_in_sort)
 	{
 
 	}
@@ -160,6 +165,7 @@ public:
 		flags = rhs.flags;
 		time_granularity = rhs.time_granularity;
 		notes = rhs.notes;
+		ignore_parent_in_sort = rhs.ignore_parent_in_sort;
 		return *this;
 	}
 
@@ -175,73 +181,86 @@ public:
 	bool operator<(WidgetInstanceIdentifier const & rhs) const
 	{
 
-		if (identifier_parent && rhs.identifier_parent)
+		if (!ignore_parent_in_sort && !rhs.ignore_parent_in_sort)
 		{
-			bool test_sequence_number = false;
-			if (identifier_parent->code && rhs.identifier_parent->code && identifier_parent->uuid && rhs.identifier_parent->uuid)
+			if (identifier_parent && rhs.identifier_parent)
 			{
-				if (*identifier_parent->code == *rhs.identifier_parent->code && *identifier_parent->uuid == *rhs.identifier_parent->uuid)
+				bool test_sequence_number = false;
+				if (identifier_parent->code && rhs.identifier_parent->code && identifier_parent->uuid && rhs.identifier_parent->uuid)
 				{
-					test_sequence_number = true;
-				}
-			}
-			else if (identifier_parent->code && rhs.identifier_parent->code)
-			{
-				if (*identifier_parent->code == *rhs.identifier_parent->code)
-				{
-					test_sequence_number = true;
-				}
-			}
-			else if (identifier_parent->uuid && rhs.identifier_parent->uuid)
-			{
-				if (*identifier_parent->uuid == *rhs.identifier_parent->uuid)
-				{
-					test_sequence_number = true;
-				}
-			}
-
-			if (test_sequence_number)
-			{
-				if (sequence_number_or_count != rhs.sequence_number_or_count)
-				{
-					if (sequence_number_or_count < rhs.sequence_number_or_count)
+					if (*identifier_parent->code == *rhs.identifier_parent->code && *identifier_parent->uuid == *rhs.identifier_parent->uuid)
 					{
-						return true;
+						test_sequence_number = true;
+					}
+				}
+				else if (identifier_parent->code && rhs.identifier_parent->code)
+				{
+					if (*identifier_parent->code == *rhs.identifier_parent->code)
+					{
+						test_sequence_number = true;
+					}
+				}
+				else if (identifier_parent->uuid && rhs.identifier_parent->uuid)
+				{
+					if (*identifier_parent->uuid == *rhs.identifier_parent->uuid)
+					{
+						test_sequence_number = true;
+					}
+				}
+
+				if (test_sequence_number)
+				{
+					if (sequence_number_or_count != rhs.sequence_number_or_count)
+					{
+						if (sequence_number_or_count < rhs.sequence_number_or_count)
+						{
+							return true;
+						}
+						else
+						{
+							return false;
+						}
 					}
 					else
 					{
-						return false;
+						// Parents are identical; revert to self test
+						test_sequence_number = false;
 					}
 				}
 				else
 				{
-					// Parents are identical; revert to self test
-					test_sequence_number = false;
-				}
-			}
-			else
-			{
-				if (*identifier_parent < *rhs.identifier_parent)
-				{
-					return true;
-				}
-				else if (*rhs.identifier_parent < *identifier_parent)
-				{
-					return false;
-				}
-				else
-				{
-					// Parents are identical; revert to self test
-					test_sequence_number = false;
+					if (*identifier_parent < *rhs.identifier_parent)
+					{
+						return true;
+					}
+					else if (*rhs.identifier_parent < *identifier_parent)
+					{
+						return false;
+					}
+					else
+					{
+						// Parents are identical; revert to self test
+						test_sequence_number = false;
+					}
 				}
 			}
 		}
 
+		bool lhs_has_longhand = false;
+		bool rhs_has_longhand = false;
 		bool lhs_has_code = false;
 		bool rhs_has_code = false;
 		bool lhs_has_uuid = false;
 		bool rhs_has_uuid = false;
 
+		if (longhand && !longhand->empty())
+		{
+			lhs_has_longhand = true;
+		}
+		if (rhs.longhand && !rhs.longhand->empty())
+		{
+			rhs_has_longhand = true;
+		}
 		if (code && !code->empty())
 		{
 			lhs_has_code = true;
@@ -260,9 +279,9 @@ public:
 		}
 
 
-		if (lhs_has_code && rhs_has_code)
+		if (lhs_has_longhand && rhs_has_longhand)
 		{
-			if (*code < *rhs.code)
+			if (*longhand < *rhs.longhand)
 			{
 				return true;
 			}
@@ -271,20 +290,19 @@ public:
 				return false;
 			}
 		}
-		else if (lhs_has_code && !rhs_has_code)
+		else if (lhs_has_longhand && !rhs_has_longhand)
 		{
 			return true;
 		}
-		else if (!lhs_has_code && rhs_has_code)
+		else if (!lhs_has_longhand && rhs_has_longhand)
 		{
 			return false;
 		}
 		else
 		{
-			// !lhs_has_code && !rhs_has_code
-			if (lhs_has_uuid && rhs_has_uuid)
+			if (lhs_has_code && rhs_has_code)
 			{
-				if (*uuid < *rhs.uuid)
+				if (*code < *rhs.code)
 				{
 					return true;
 				}
@@ -293,18 +311,41 @@ public:
 					return false;
 				}
 			}
-			else if (lhs_has_uuid && !rhs_has_uuid)
+			else if (lhs_has_code && !rhs_has_code)
 			{
 				return true;
 			}
-			else if (!lhs_has_uuid && rhs_has_uuid)
+			else if (!lhs_has_code && rhs_has_code)
 			{
 				return false;
 			}
 			else
 			{
-				// !lhs_has_uuid && !rhs_has_uuid
-				return false;
+				// !lhs_has_code && !rhs_has_code
+				if (lhs_has_uuid && rhs_has_uuid)
+				{
+					if (*uuid < *rhs.uuid)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				else if (lhs_has_uuid && !rhs_has_uuid)
+				{
+					return true;
+				}
+				else if (!lhs_has_uuid && rhs_has_uuid)
+				{
+					return false;
+				}
+				else
+				{
+					// !lhs_has_uuid && !rhs_has_uuid
+					return false;
+				}
 			}
 		}
 
@@ -393,6 +434,10 @@ public:
 	std::string flags;
 	TIME_GRANULARITY time_granularity;
 	Notes notes;
+
+	public:
+
+	bool ignore_parent_in_sort;
 
 };
 

@@ -30,7 +30,7 @@ void InputModel::LoadTables()
 		t_uoa_category.Sort();
 
 		t_vgp_identifiers.Load(db, this);
-		//t_vgp_identifiers.Sort(); // No! ORDER BY clause is used to sort
+		t_vgp_identifiers.Sort(); // ORDER BY clause is also used to sort, so the ORDER BY sort is wiped out here, but the two sorts should yield the same result - someday, this could be tested to confirm
 
 		t_vgp_setmembers.Load(db, this);
 		t_vgp_setmembers.Sort(); // ORDER BY clause is also used to sort, so the ORDER BY sort is wiped out here, but the two sorts should yield the same result - someday, this could be tested to confirm
