@@ -138,7 +138,14 @@ void NewGeneVariableGroup::ReceiveVariableItemChanged(QStandardItem * currentIte
 
 void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_message)
 {
-	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
+
+    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{
 		switch (change.change_type)
 		{
@@ -260,6 +267,7 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 				break;
 		}
 	});
+
 }
 
 bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifier, bool>> const & vg_members_and_bools)

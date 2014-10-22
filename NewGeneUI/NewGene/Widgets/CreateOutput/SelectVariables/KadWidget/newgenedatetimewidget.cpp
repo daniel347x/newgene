@@ -176,7 +176,14 @@ void NewGeneDateTimeWidget::ReceiveVariableItemChanged(QDateTime const & newValu
 
 void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_message)
 {
-	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
+
+    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{
 		switch (change.change_type)
 		{
@@ -262,4 +269,5 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 				break;
 		}
 	});
+
 }

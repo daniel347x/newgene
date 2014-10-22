@@ -135,6 +135,13 @@ void NewGeneVariableSummaryGroup::ReceiveVariableItemChanged(QStandardItem * /* 
 
 void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change_message)
 {
+
+    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
   std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
   {
 	  switch (change.change_type)

@@ -437,13 +437,13 @@ void limit_dmus_region::ResetBottomRightPane(WidgetInstanceIdentifiers const & d
 void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 {
 
-	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
-	if (project == nullptr)
-	{
-		return;
-	}
+    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
 
-	UIMessager messager(project);
+    UIMessager messager(project);
 
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{

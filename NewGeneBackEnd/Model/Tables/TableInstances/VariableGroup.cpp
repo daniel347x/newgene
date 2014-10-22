@@ -34,7 +34,8 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 	identifiers.clear();
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM VG_CATEGORY");
+	std::string sql("SELECT * FROM VG_CATEGORY ORDER BY ");
+	sql += VG_CATEGORY_STRING_LONGHAND;
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 
 	if (stmt == NULL)
@@ -594,7 +595,8 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 	identifiers_map.clear();
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM VG_SET_MEMBER");
+	std::string sql("SELECT * FROM VG_SET_MEMBER ORDER BY ");
+	sql += VG_SET_MEMBER_SEQUENCE_NUMBER;
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 
 	if (stmt == NULL)
