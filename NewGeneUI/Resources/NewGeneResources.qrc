@@ -2,4 +2,7 @@
     <qresource prefix="/resources">
         <file>kitty.jpg</file>
     </qresource>
+    <qresource prefix="/">
+        <file>earth.bits.png</file>
+    </qresource>
 </RCC>

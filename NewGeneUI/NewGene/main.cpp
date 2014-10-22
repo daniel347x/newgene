@@ -1,8 +1,10 @@
 #include "Widgets/newgenemainwindow.h"
 #include <QApplication>
 #include <QMessageBox>
+#include <QSplashScreen>
 #include <QTimer>
-#include "../../NewGeneBackEnd/test.h"
+#include <memory>
+
 #include "Infrastructure/Model/uimodelmanager.h"
 #include "Infrastructure/Settings/uisettingsmanager.h"
 #include "Infrastructure/Documents/uidocumentmanager.h"
@@ -21,11 +23,16 @@ int main( int argc, char * argv[] )
 {
 
 #	ifdef QT_DEBUG
+        // For debugging startup issues
 		//boost::this_thread::sleep(boost::posix_time::seconds(10));
 #	endif
 
 	NewGeneApplication a( argc, argv );
-	NewGeneMainWindow w;
+
+    std::unique_ptr<QSplashScreen> splash {new QSplashScreen {QPixmap(":/earth.bits.png"), Qt::WindowStaysOnTopHint }};
+    splash->show();
+
+    NewGeneMainWindow w;
 	theMainWindow = &w;
 
 	QTimer::singleShot( 0, &w, SLOT( doInitialize() ) );

@@ -358,3 +358,5 @@ macx: CONFIG += c++11
 
 RESOURCES += \
 	../Resources/NewGeneResources.qrc
+
+OTHER_FILES +=
