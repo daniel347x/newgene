@@ -1,13 +1,13 @@
 #ifndef _FASTMAP_NEWGENE_H
 #define _FASTMAP_NEWGENE_H
 
-#include <utility>
-#include <set>
 #ifndef Q_MOC_RUN
 #	include <boost/pool/pool_alloc.hpp>
 #	include <boost/container/flat_map.hpp>
 #	include <boost/container/flat_set.hpp>
 #endif
+#include <utility>
+#include <set>
 #include "../Messager/Messager.h"
 
 // These didn't work out

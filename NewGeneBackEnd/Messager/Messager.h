@@ -1,18 +1,18 @@
 #ifndef MESSAGER_H
 #define MESSAGER_H
 
-#include <vector>
-#include <set>
-#include <memory>
-#include "../../NewGeneBackEnd/globals.h"
-#include "../UIData/DataWidgets.h"
-#include "../UIAction/ActionChanges.h"
 #ifndef Q_MOC_RUN
 #	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
 #	include <boost/multiprecision/cpp_dec_float.hpp>
 #	include <boost/pool/pool_alloc.hpp>
 #endif 
+#include <vector>
+#include <set>
+#include <memory>
+#include "../../NewGeneBackEnd/globals.h"
+#include "../UIData/DataWidgets.h"
+#include "../UIAction/ActionChanges.h"
 
 struct newgene_cpp_int_tag 
 {};

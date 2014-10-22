@@ -1,6 +1,9 @@
+#ifndef Q_MOC_RUN
+#	include <boost/algorithm/string.hpp>
+#	include <boost/regex.hpp>
+#endif
 #include "displaydmusregion.h"
 #include "ui_displaydmusregion.h"
-
 #include <QStandardItem>
 #include <QInputDialog>
 #include <QDialog>
@@ -15,12 +18,6 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QRadioButton>
-
-#ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#	include <boost/regex.hpp>
-#endif
-
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../../Utilities/qsortfilterproxymodel_numberslast.h"

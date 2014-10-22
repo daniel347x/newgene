@@ -138,8 +138,8 @@
 		C3DAD17D17DB47AD00F1E066 /* UIDataManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0F717DB47AD00F1E066 /* UIDataManager.h */; };
 		C3DAD17E17DB47AD00F1E066 /* NewGeneException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0F917DB47AD00F1E066 /* NewGeneException.cpp */; };
 		C3DAD17F17DB47AD00F1E066 /* NewGeneException.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0FA17DB47AD00F1E066 /* NewGeneException.h */; };
-		C3DAD18017DB47AD00F1E066 /* UUID.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0FB17DB47AD00F1E066 /* UUID.cpp */; };
-		C3DAD18117DB47AD00F1E066 /* UUID.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0FC17DB47AD00F1E066 /* UUID.h */; };
+		C3DAD18017DB47AD00F1E066 /* NewGeneUUID.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0FB17DB47AD00F1E066 /* NewGeneUUID.cpp */; };
+		C3DAD18117DB47AD00F1E066 /* NewGeneUUID.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0FC17DB47AD00F1E066 /* NewGeneUUID.h */; };
 		C3DAD18217DB47AD00F1E066 /* WidgetIdentifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0FD17DB47AD00F1E066 /* WidgetIdentifier.cpp */; };
 		C3DAD18317DB47AD00F1E066 /* WidgetIdentifier.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0FE17DB47AD00F1E066 /* WidgetIdentifier.h */; };
 /* End PBXBuildFile section */
@@ -283,8 +283,8 @@
 		C3DAD0F717DB47AD00F1E066 /* UIDataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIDataManager.h; sourceTree = "<group>"; };
 		C3DAD0F917DB47AD00F1E066 /* NewGeneException.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NewGeneException.cpp; sourceTree = "<group>"; };
 		C3DAD0FA17DB47AD00F1E066 /* NewGeneException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewGeneException.h; sourceTree = "<group>"; };
-		C3DAD0FB17DB47AD00F1E066 /* UUID.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UUID.cpp; sourceTree = "<group>"; };
-		C3DAD0FC17DB47AD00F1E066 /* UUID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UUID.h; sourceTree = "<group>"; };
+		C3DAD0FB17DB47AD00F1E066 /* NewGeneUUID.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NewGeneUUID.cpp; sourceTree = "<group>"; };
+		C3DAD0FC17DB47AD00F1E066 /* NewGeneUUID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewGeneUUID.h; sourceTree = "<group>"; };
 		C3DAD0FD17DB47AD00F1E066 /* WidgetIdentifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WidgetIdentifier.cpp; sourceTree = "<group>"; };
 		C3DAD0FE17DB47AD00F1E066 /* WidgetIdentifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WidgetIdentifier.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -630,8 +630,8 @@
 			children = (
 				C3DAD0F917DB47AD00F1E066 /* NewGeneException.cpp */,
 				C3DAD0FA17DB47AD00F1E066 /* NewGeneException.h */,
-				C3DAD0FB17DB47AD00F1E066 /* UUID.cpp */,
-				C3DAD0FC17DB47AD00F1E066 /* UUID.h */,
+				C3DAD0FB17DB47AD00F1E066 /* NewGeneUUID.cpp */,
+				C3DAD0FC17DB47AD00F1E066 /* NewGeneUUID.h */,
 				C3DAD0FD17DB47AD00F1E066 /* WidgetIdentifier.cpp */,
 				C3DAD0FE17DB47AD00F1E066 /* WidgetIdentifier.h */,
 			);
@@ -709,7 +709,7 @@
 				C3DAD17B17DB47AD00F1E066 /* DataWidgets.h in Headers */,
 				C3DAD17D17DB47AD00F1E066 /* UIDataManager.h in Headers */,
 				C3DAD17F17DB47AD00F1E066 /* NewGeneException.h in Headers */,
-				C3DAD18117DB47AD00F1E066 /* UUID.h in Headers */,
+				C3DAD18117DB47AD00F1E066 /* NewGeneUUID.h in Headers */,
 				C3DAD18317DB47AD00F1E066 /* WidgetIdentifier.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -838,7 +838,7 @@
 				C3DAD17A17DB47AD00F1E066 /* DataWidgets.cpp in Sources */,
 				C3DAD17C17DB47AD00F1E066 /* UIDataManager.cpp in Sources */,
 				C3DAD17E17DB47AD00F1E066 /* NewGeneException.cpp in Sources */,
-				C3DAD18017DB47AD00F1E066 /* UUID.cpp in Sources */,
+				C3DAD18017DB47AD00F1E066 /* NewGeneUUID.cpp in Sources */,
 				C3DAD18217DB47AD00F1E066 /* WidgetIdentifier.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

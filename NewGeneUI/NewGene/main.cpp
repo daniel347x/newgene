@@ -1,8 +1,15 @@
+#ifdef QT_DEBUG
+#	ifndef Q_MOC_RUN
+#		include <boost/date_time/posix_time/posix_time.hpp>
+#		include <boost/thread/thread.hpp>
+#	endif
+#endif
 #include "Widgets/newgenemainwindow.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <QSplashScreen>
 #include <QTimer>
+#include <QQuickWidget>
 #include <memory>
 
 #include "Infrastructure/Model/uimodelmanager.h"
@@ -11,13 +18,6 @@
 #include "Infrastructure/Status/uistatusmanager.h"
 #include "Infrastructure/Logging/uiloggingmanager.h"
 #include "newgeneapplication.h"
-
-#ifdef QT_DEBUG
-#	ifndef Q_MOC_RUN
-#		include <boost/date_time/posix_time/posix_time.hpp>
-#		include <boost/thread/thread.hpp>
-#	endif
-#endif
 
 int main( int argc, char * argv[] )
 {
@@ -29,8 +29,13 @@ int main( int argc, char * argv[] )
 
 	NewGeneApplication a( argc, argv );
 
-    std::unique_ptr<QSplashScreen> splash {new QSplashScreen {QPixmap(":/earth.bits.png"), Qt::WindowStaysOnTopHint }};
-    splash->show();
+    QQuickWidget *view = new QQuickWidget;
+    //view->setSource(QUrl::);
+    //view->show();
+
+    //QPixmap splashImage {":/earth.bits.png"};
+    //std::unique_ptr<QSplashScreen> splash {new QSplashScreen {splashImage, Qt::WindowStaysOnTopHint }};
+    //splash->show();
 
     NewGeneMainWindow w;
 	theMainWindow = &w;

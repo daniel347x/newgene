@@ -31,7 +31,7 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 	{
 
 		// ****************************************************************************************//
-		// Use codes as foreign keys, not UUID's, so that this output model can be shared with others
+		// Use codes as foreign keys, not NewGeneUUID's, so that this output model can be shared with others
 		// ****************************************************************************************//
 		char const * code_dmu_category = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__KAD_COUNT__DMU_CATEGORY_STRING_CODE));
 		int const kad_count = sqlite3_column_int(stmt, INDEX__KAD_COUNT__COUNT);

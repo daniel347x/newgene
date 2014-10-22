@@ -1,3 +1,7 @@
+#ifndef Q_MOC_RUN
+#	include <boost/thread/thread.hpp>
+#	include <boost/filesystem.hpp>
+#endif
 #include "newgenemainwindow.h"
 #include "ui_newgenemainwindow.h"
 #include <QMessageBox>
@@ -17,10 +21,6 @@
 #include "uiinputproject.h"
 #include "uioutputproject.h"
 #include "uiallglobalsettings_list.h"
-#ifndef Q_MOC_RUN
-#	include <boost/thread/thread.hpp>
-#	include <boost/filesystem.hpp>
-#endif
 #include <QFileDialog>
 #include <QCloseEvent>
 

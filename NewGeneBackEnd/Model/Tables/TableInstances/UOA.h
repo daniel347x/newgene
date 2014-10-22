@@ -41,12 +41,12 @@ class Table_UOA_Identifier : public Table<TABLE__UOA_IDENTIFIER, TABLE_INSTANCE_
 		void Load(sqlite3 * db, InputModel * input_model_);
 
 		// For a given UOA, retrieve its DMU categories
-		WidgetInstanceIdentifiers RetrieveDMUCategories(sqlite3 const * db, InputModel * input_model_, UUID const & uuid);
+		WidgetInstanceIdentifiers RetrieveDMUCategories(sqlite3 const * db, InputModel * input_model_, NewGeneUUID const & uuid);
 
 		// For a given UOA, retrieve its DMU categories bucketed by DMU category
 		// (i.e., if DMU's are Country-Country-MID, return result as
 		// Country=2, MID=1
-		DMU_Counts RetrieveDMUCounts(sqlite3 const * db, InputModel * input_model_, UUID const & uuid);
+		DMU_Counts RetrieveDMUCounts(sqlite3 const * db, InputModel * input_model_, NewGeneUUID const & uuid);
 
 		bool Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, bool const also_confirm_using_cache = true);
 		bool ExistsByCode(sqlite3 * db, InputModel & input_model_, std::string const & uoa_code, bool const also_confirm_using_cache = true);

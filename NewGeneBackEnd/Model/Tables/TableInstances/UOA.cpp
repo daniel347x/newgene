@@ -1,11 +1,10 @@
-#include "UOA.h"
-#include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
-
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #endif
+#include "UOA.h"
+#include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 #include "../../InputModel.h"
-#include "../../../Utilities/UUID.h"
+#include "../../../Utilities/NewGeneUUID.h"
 
 #include <unordered_set>
 
@@ -63,7 +62,7 @@ void Table_UOA_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 
 }
 
-WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 const * db, InputModel * input_model_, UUID const & uuid)
+WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 const * db, InputModel * input_model_, NewGeneUUID const & uuid)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -90,7 +89,7 @@ WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 co
 
 }
 
-Table_UOA_Identifier::DMU_Counts Table_UOA_Identifier::RetrieveDMUCounts(sqlite3 const * db, InputModel * input_model_, UUID const & uuid)
+Table_UOA_Identifier::DMU_Counts Table_UOA_Identifier::RetrieveDMUCounts(sqlite3 const * db, InputModel * input_model_, NewGeneUUID const & uuid)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -548,9 +547,9 @@ WidgetInstanceIdentifiers Table_UOA_Member::RetrieveUOAsGivenDMU(sqlite3 * db, I
 	// No hash function available; can't use unordered_set
 	//std::unordered_set<WidgetInstanceIdentifier> uoa_set;
 	WidgetInstanceIdentifiers uoas;
-	std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&](std::pair<UUID const &, WidgetInstanceIdentifiers> const & mapping_from_uoa_to_dmus)
+	std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&](std::pair<NewGeneUUID const &, WidgetInstanceIdentifiers> const & mapping_from_uoa_to_dmus)
 	{
-		UUID const uuid(mapping_from_uoa_to_dmus.first);
+		NewGeneUUID const uuid(mapping_from_uoa_to_dmus.first);
 		WidgetInstanceIdentifiers const & dmus(mapping_from_uoa_to_dmus.second);
 		std::for_each(dmus.cbegin(), dmus.cend(), [&](WidgetInstanceIdentifier const & dmu_candidate)
 		{

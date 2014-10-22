@@ -1,13 +1,13 @@
 #ifndef SETTINGSMANAGER_H
 #define SETTINGSMANAGER_H
 
-#include "../globals.h"
-#include "../Manager.h"
 #ifndef Q_MOC_RUN
 #   include <boost/filesystem.hpp>
 #   include <boost/property_tree/ptree.hpp>
 #   include <boost/property_tree/xml_parser.hpp>
 #endif
+#include "../globals.h"
+#include "../Manager.h"
 #include "Setting.h"
 #include "GlobalSettings.h"
 #include "ProjectSettings.h"

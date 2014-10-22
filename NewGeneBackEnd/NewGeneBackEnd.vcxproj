@@ -46,7 +46,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_WIN32_WINNT=_WIN32_WINNT_WIN7;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <DisableSpecificWarnings>4250;4996;4503</DisableSpecificWarnings>
@@ -65,7 +65,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_WIN32_WINNT=_WIN32_WINNT_WIN7;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
@@ -154,7 +154,7 @@
     <ClInclude Include="Utilities\NewGeneMemoryPool.h" />
     <ClInclude Include="Utilities\Semaphore.h" />
     <ClInclude Include="Utilities\TimeRangeHelper.h" />
-    <ClInclude Include="Utilities\UUID.h" />
+    <ClInclude Include="Utilities\NewGeneUUID.h" />
     <ClInclude Include="Utilities\Validation.h" />
     <ClInclude Include="Utilities\WidgetIdentifier.h" />
   </ItemGroup>
@@ -238,7 +238,7 @@
     <ClCompile Include="Utilities\NewGeneException.cpp" />
     <ClCompile Include="Utilities\NewGeneMemoryPool.cpp" />
     <ClCompile Include="Utilities\TimeRangeHelper.cpp" />
-    <ClCompile Include="Utilities\UUID.cpp" />
+    <ClCompile Include="Utilities\NewGeneUUID.cpp" />
     <ClCompile Include="Utilities\Validation.cpp" />
     <ClCompile Include="Utilities\WidgetIdentifier.cpp" />
   </ItemGroup>

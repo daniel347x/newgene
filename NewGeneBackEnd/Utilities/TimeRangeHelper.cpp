@@ -1,8 +1,8 @@
-#include "TimeRangeHelper.h"
-#include "./NewGeneException.h"
 #ifndef Q_MOC_RUN
 #	include <boost/format.hpp>
 #endif
+#include "TimeRangeHelper.h"
+#include "./NewGeneException.h"
 
 // Returns the closest Unix timestamp that is equal to or higher/lower than test_timestamp
 // (depending on ALIGN_MODE),

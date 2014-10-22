@@ -1,9 +1,3 @@
-#include "OutputModel.h"
-#include "../Utilities/UUID.h"
-
-#include "../Settings/OutputProjectSettings_list.h"
-#include <cstdint>
-
 #ifndef Q_MOC_RUN
 #	include <boost/lexical_cast.hpp>
 #	include <deque>
@@ -12,7 +6,10 @@
 #	include <boost/scope_exit.hpp>
 #	include <boost/date_time/local_time/local_time.hpp>
 #endif
-
+#include "OutputModel.h"
+#include "../Utilities/NewGeneUUID.h"
+#include "../Settings/OutputProjectSettings_list.h"
+#include <cstdint>
 #include <fstream>
 #include <algorithm>
 
@@ -3123,7 +3120,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 		if (!the_dmu_category.uuid || !the_dmu_category.code)
 		{
-			boost::format msg("DMU code (or UUID) is unknown while validating units of analysis.");
+			boost::format msg("DMU code (or NewGeneUUID) is unknown while validating units of analysis.");
 			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from lambda
@@ -3538,7 +3535,7 @@ void OutputModel::OutputGenerator::PopulateUOAs()
 
 		if (!uoa.uuid)
 		{
-			boost::format msg("Unit of analysis %1% does not have a UUID.  (Error while populating metadata for units of analysis.)");
+			boost::format msg("Unit of analysis %1% does not have a NewGeneUUID.  (Error while populating metadata for units of analysis.)");
 			msg % *uoa.code;
 			SetFailureErrorMessage(msg.str());
 			failed = true;

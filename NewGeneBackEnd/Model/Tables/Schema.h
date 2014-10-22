@@ -1,17 +1,15 @@
 #ifndef SCHEMA_H
 #define SCHEMA_H
 
+#ifndef Q_MOC_RUN
+#	include <boost/dynamic_bitset.hpp>
+#endif
 #include <utility>
 #include <string>
 #include <vector>
 #include <memory>
-
 #include "FieldTypes.h"
 #include "../../Utilities/WidgetIdentifier.h"
-
-#ifndef Q_MOC_RUN
-#	include <boost/dynamic_bitset.hpp>
-#endif
 
 class SchemaEntry
 {

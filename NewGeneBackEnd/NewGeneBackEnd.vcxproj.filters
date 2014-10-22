@@ -285,7 +285,7 @@
     <ClInclude Include="Model\Tables\TableTypes.h">
       <Filter>Header Files\Model\Tables</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\UUID.h">
+    <ClInclude Include="Utilities\NewGeneUUID.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
     <ClInclude Include="UIAction\ActionWidgets.h">
@@ -506,7 +506,7 @@
     <ClCompile Include="Model\Tables\TableTypes.cpp">
       <Filter>Source Files\Model\Tables</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\UUID.cpp">
+    <ClCompile Include="Utilities\NewGeneUUID.cpp">
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
     <ClCompile Include="UIData\DataWidgets.cpp">

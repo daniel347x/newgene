@@ -1,12 +1,12 @@
 #include "../UIActionManager.h"
 
+#ifndef Q_MOC_RUN
+#	include <boost/scope_exit.hpp>
+#endif
 #include "../../Project/InputProject.h"
 #include "../../Project/OutputProject.h"
 #include "../../UIData/DataChanges.h"
 #include "../../UIAction/ActionChanges.h"
-#ifndef Q_MOC_RUN
-#	include <boost/scope_exit.hpp>
-#endif
 #include "../../Utilities/TimeRangeHelper.h"
 #include "../../Project/ProjectManager.h"
 

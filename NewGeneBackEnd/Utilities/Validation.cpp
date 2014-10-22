@@ -1,5 +1,3 @@
-#include "Validation.h"
-
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #	include <boost/regex.hpp>
@@ -7,7 +5,7 @@
 #	include <boost/lexical_cast.hpp>
 #	include "boost/date_time/gregorian/gregorian.hpp"
 #endif
-
+#include "Validation.h"
 #include <cstdint>
 
 // TODO: test for numeric when necessary
@@ -95,7 +93,7 @@ bool Validation::ValidateDmuMemberCode(std::string & proposed_dmu_member_code, s
 	if (valid)
 	{
 		// For now (i.e., MID), empty string is allowed for DMU member code
-		// (Example: some MID's have only a number (UUID), but no code or description, in the input file & data)
+		// (Example: some MID's have only a number (NewGeneUUID), but no code or description, in the input file & data)
 		if (false)
 		{
 			if (proposed_dmu_member_code.empty())

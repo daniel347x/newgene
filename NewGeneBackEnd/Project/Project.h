@@ -1,15 +1,15 @@
 #ifndef PROJECT_H
 #define PROJECT_H
 
+#ifndef Q_MOC_RUN
+//#	include <boost/thread/recursive_timed_mutex.hpp>
+#endif
 #include <memory>
 #include "../Settings/ProjectSettings.h"
 #include "../Settings/ModelSettings.h"
 #include "../Threads/ThreadPool.h"
 #include "../Threads/WorkerThread.h"
 #include <mutex>
-#ifndef Q_MOC_RUN
-//#	include <boost/thread/recursive_timed_mutex.hpp>
-#endif
 
 template<typename PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS, typename MODEL_SETTINGS_ENUM, typename MODEL_SETTING_CLASS, typename MODEL_CLASS>
 class Project

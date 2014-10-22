@@ -3,7 +3,7 @@
 #include "newgenemainwindow.h"
 #include "newgenewidget.h"
 #include "uistatusmanager.h"
-#include "../../../NewGeneBackEnd/Utilities/UUID.h"
+#include "../../../NewGeneBackEnd/Utilities/NewGeneUUID.h"
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"

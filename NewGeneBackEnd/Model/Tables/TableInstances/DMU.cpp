@@ -1,11 +1,10 @@
 #include "DMU.h"
-#include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
-
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #endif
+#include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 #include "../../InputModel.h"
-#include "../../../Utilities/UUID.h"
+#include "../../../Utilities/NewGeneUUID.h"
 
 std::string const Table_DMU_Identifier::DMU_CATEGORY_UUID = "DMU_CATEGORY_UUID";
 std::string const Table_DMU_Identifier::DMU_CATEGORY_STRING_CODE = "DMU_CATEGORY_STRING_CODE";

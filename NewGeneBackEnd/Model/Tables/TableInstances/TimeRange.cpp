@@ -1,10 +1,10 @@
+#ifndef Q_MOC_RUN
+#	include <boost/lexical_cast.hpp>
+#endif
 #include "TimeRange.h"
 #include "../../InputModel.h"
 #include "../../OutputModel.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
-#ifndef Q_MOC_RUN
-#	include <boost/lexical_cast.hpp>
-#endif
 
 
 std::string const Table_TIME_RANGE::TIME_RANGE__TIME_RANGE_START = "TIMERANGE_START";

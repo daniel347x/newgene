@@ -119,8 +119,8 @@ class NewGeneWidget
 
 		QWidget * self;
 		WIDGET_NATURE widget_nature;
-		UUID uuid;
-		UUID uuid_parent;
+		NewGeneUUID uuid;
+		NewGeneUUID uuid_parent;
 		UIInputProject * inp;
 		UIOutputProject * outp;
 		DATA_WIDGETS widget_type;
@@ -153,7 +153,7 @@ class WidgetCreationInfo
 							   QWidget * const self_,
 							   NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN,
 							   DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE,
-							   UUID const & uuid_parent_ = "",
+							   NewGeneUUID const & uuid_parent_ = "",
 							   bool const top_level_ = false,
 							   WidgetInstanceIdentifier data_instance_ = WidgetInstanceIdentifier()
 						   )
@@ -201,7 +201,7 @@ class WidgetCreationInfo
 		QWidget * self;
 		NewGeneWidget::WIDGET_NATURE widget_nature;
 		DATA_WIDGETS widget_type;
-		UUID uuid_parent;
+		NewGeneUUID uuid_parent;
 		bool top_level; // Is this widget class tied into a UI Form, or is it created dynamically in code via "new" from some other widget?
 		WidgetInstanceIdentifier data_instance;
 

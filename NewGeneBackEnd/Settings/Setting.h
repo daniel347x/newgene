@@ -1,11 +1,11 @@
 #ifndef SETTING_H
 #define SETTING_H
 
-#include <cstdint>
 #ifndef Q_MOC_RUN
 #	include <boost/lexical_cast.hpp>
 #	include <boost/filesystem.hpp>
 #endif
+#include <cstdint>
 #include "../Messager/Messager.h"
 #include "SettingsRepository.h"
 

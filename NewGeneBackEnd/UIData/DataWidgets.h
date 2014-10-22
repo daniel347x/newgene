@@ -4,8 +4,6 @@
 #include "../Utilities/WidgetIdentifier.h"
 #include <cstdint>
 #include <set>
-#ifndef Q_MOC_RUN
-#endif
 
 enum DATA_WIDGETS
 {

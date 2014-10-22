@@ -1,9 +1,12 @@
 #ifndef TABLE_H
 #define TABLE_H
 
+#ifndef Q_MOC_RUN
+#	include <boost/algorithm/string.hpp>
+#	include <boost/lexical_cast.hpp>
+#endif
 #include <tuple>
 #include <vector>
-
 #include "TableTypes.h"
 #include "../../globals.h"
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
@@ -13,11 +16,6 @@
 #include "Import/Import.h"
 #include "Fields.h"
 #include "Schema.h"
-
-#ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#	include <boost/lexical_cast.hpp>
-#endif
 
 class InputModel;
 class OutputModel;
@@ -176,7 +174,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR> : public Tabl
 			return found;
 		}
 
-		WidgetInstanceIdentifier getIdentifier(UUID const & uuid_)
+		WidgetInstanceIdentifier getIdentifier(NewGeneUUID const & uuid_)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			WidgetInstanceIdentifier the_identifier;
@@ -222,7 +220,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 
 		}
 
-		WidgetInstanceIdentifiers getIdentifiers(UUID const & uuid)
+		WidgetInstanceIdentifiers getIdentifiers(NewGeneUUID const & uuid)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
@@ -234,11 +232,11 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 			return identifiers_map[uuid];
 		}
 
-		bool getIdentifierFromStringCodeAndParentUUID(std::string const code, UUID parent_uuid, WidgetInstanceIdentifier & the_identifier)
+		bool getIdentifierFromStringCodeAndParentUUID(std::string const code, NewGeneUUID parent_uuid, WidgetInstanceIdentifier & the_identifier)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			bool found = false;
-			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&code, &parent_uuid, &found, &the_identifier](std::pair<UUID, WidgetInstanceIdentifiers> const & identifiers_)
+			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&code, &parent_uuid, &found, &the_identifier](std::pair<NewGeneUUID, WidgetInstanceIdentifiers> const & identifiers_)
 			{
 				if (found)
 				{
@@ -266,12 +264,12 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 			return found;
 		}
 
-		WidgetInstanceIdentifier getIdentifier(UUID const & uuid_, UUID parent_uuid, bool const use_code_for_parent = false)
+		WidgetInstanceIdentifier getIdentifier(NewGeneUUID const & uuid_, NewGeneUUID parent_uuid, bool const use_code_for_parent = false)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			WidgetInstanceIdentifier the_identifier;
 			bool found = false;
-			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&uuid_, &parent_uuid, &found, &the_identifier, &use_code_for_parent](std::pair<UUID, WidgetInstanceIdentifiers> const & identifiers_)
+			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&uuid_, &parent_uuid, &found, &the_identifier, &use_code_for_parent](std::pair<NewGeneUUID, WidgetInstanceIdentifiers> const & identifiers_)
 			{
 				if (found)
 				{
@@ -316,7 +314,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 		void Sort()
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-			std::for_each(identifiers_map.begin(), identifiers_map.end(), [](std::pair<UUID const, WidgetInstanceIdentifiers> & map_entry)
+			std::for_each(identifiers_map.begin(), identifiers_map.end(), [](std::pair<NewGeneUUID const, WidgetInstanceIdentifiers> & map_entry)
 			{
 				WidgetInstanceIdentifiers & the_identifiers = map_entry.second;
 				std::sort(the_identifiers.begin(), the_identifiers.end());
@@ -325,7 +323,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 
 	protected:
 
-		std::map<UUID, WidgetInstanceIdentifiers> identifiers_map;
+		std::map<NewGeneUUID, WidgetInstanceIdentifiers> identifiers_map;
 
 };
 
@@ -386,7 +384,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT> : pu
 			return found;
 		}
 
-		WidgetInstanceIdentifier_Int_Pair getIdentifier(UUID const & uuid_)
+		WidgetInstanceIdentifier_Int_Pair getIdentifier(NewGeneUUID const & uuid_)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			WidgetInstanceIdentifier_Int_Pair the_identifier;
@@ -483,7 +481,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT64> : 
 			return found;
 		}
 
-		WidgetInstanceIdentifier_Int64_Pair getIdentifier(UUID const & uuid_)
+		WidgetInstanceIdentifier_Int64_Pair getIdentifier(NewGeneUUID const & uuid_)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			WidgetInstanceIdentifier_Int64_Pair the_identifier;

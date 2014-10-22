@@ -1,10 +1,8 @@
-#include "dialoghelper.h"
-
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
 #	include <boost/format.hpp>
 #endif
-
+#include "dialoghelper.h"
 #include <QPushButton>
 #include <QFileDialog>
 #include <QLabel>

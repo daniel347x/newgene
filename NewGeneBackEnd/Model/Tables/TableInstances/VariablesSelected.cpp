@@ -30,7 +30,7 @@ void Table_VARIABLES_SELECTED::Load(sqlite3 * db, OutputModel * output_model_, I
 	{
 
 		// ****************************************************************************************//
-		// Use codes as foreign keys, not UUID's, so that this output model can be shared with others
+		// Use codes as foreign keys, not NewGeneUUID's, so that this output model can be shared with others
 		// ****************************************************************************************//
 		char const * code_variable = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_STRING_CODE));
 		char const * code_variable_group = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_STRING_CODE));
@@ -104,7 +104,7 @@ bool Table_VARIABLES_SELECTED::Update(sqlite3 * db, OutputModel & output_model_,
 							// VG_CATEGORY
 							// *************** //
 
-							std::map<UUID, WidgetInstanceIdentifiers>::const_iterator found_set = this->identifiers_map.find(*change.parent_identifier.uuid);
+							std::map<NewGeneUUID, WidgetInstanceIdentifiers>::const_iterator found_set = this->identifiers_map.find(*change.parent_identifier.uuid);
 							if (found_set == this->identifiers_map.cend())
 							{
 								// no selections in this variable group category
@@ -333,7 +333,7 @@ Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSele
 	UOA_To_Variables_Map the_map;
 	bool failed = false;
 	// Iterate through variable group => variables selected map
-	std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [this, &input_model_, &failed, &the_map](std::pair<UUID, WidgetInstanceIdentifiers> const & variable_group__variables__pair)
+	std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [this, &input_model_, &failed, &the_map](std::pair<NewGeneUUID, WidgetInstanceIdentifiers> const & variable_group__variables__pair)
 	{
 
 		if (failed)

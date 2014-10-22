@@ -1,13 +1,6 @@
 #ifndef RANDOMSAMPLING_NEWGENE_H
 #define RANDOMSAMPLING_NEWGENE_H
 
-#include <cstdint>
-#include <vector>
-#include <set>
-#include <map>
-#include <tuple>
-#include <memory>
-#include <stdio.h>
 #ifndef Q_MOC_RUN
 #	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
@@ -16,6 +9,13 @@
 #	include <boost/pool/pool_alloc.hpp>
 #	include "boost/date_time/posix_time/posix_time.hpp"
 #endif
+#include <cstdint>
+#include <vector>
+#include <set>
+#include <map>
+#include <tuple>
+#include <memory>
+#include <stdio.h>
 #include "../../Utilities/NewGeneException.h"
 #include "../../Utilities/TimeRangeHelper.h"
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"

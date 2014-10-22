@@ -1,14 +1,14 @@
 #ifndef UIMODEL_H
 #define UIMODEL_H
 
+#ifndef Q_MOC_RUN
+#	include <boost/atomic.hpp>
+#endif
 #include <QObject>
 #include "../../../NewGeneBackEnd/Model/Model.h"
 #include "uimessager.h"
 #include "../../../NewGeneBackEnd/globals.h"
 #include "eventloopthreadmanager.h"
-#ifndef Q_MOC_RUN
-#	include <boost/atomic.hpp>
-#endif
 
 
 template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>

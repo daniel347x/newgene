@@ -1,23 +1,19 @@
 #ifndef WIDGETIDENTIFIER_H
 #define WIDGETIDENTIFIER_H
 
+#ifndef Q_MOC_RUN
+#	include <boost/algorithm/string.hpp>
+#endif
 #include <memory>
 #include <vector>
 #include <string>
 #include <cstdint>
-
 //#include "../../../globals.h"
-
 #include "../Model/TimeGranularity.h"
-
-#ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#endif
-
 //#include "../../NewGeneBackEnd/globals.h"
 
-typedef std::string UUID;
-typedef std::vector<UUID> UUIDVector;
+typedef std::string NewGeneUUID;
+typedef std::vector<NewGeneUUID> UUIDVector;
 
 int const UUID_LENGTH = 36;
 
@@ -99,8 +95,8 @@ public:
 
 	}
 
-	WidgetInstanceIdentifier(UUID const uuid_, std::string const code_, std::string const description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
-		: uuid(std::make_shared<UUID>(uuid_))
+	WidgetInstanceIdentifier(NewGeneUUID const uuid_, std::string const code_, std::string const description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
+		: uuid(std::make_shared<NewGeneUUID>(uuid_))
 		, code(std::make_shared<std::string>(code_))
 		, longhand(std::make_shared<std::string>(description_))
         , sequence_number_or_count(sequence_number_or_count_)
@@ -111,8 +107,8 @@ public:
 	{
 	}
 
-    WidgetInstanceIdentifier(UUID const uuid_, WidgetInstanceIdentifier const & identifier_parent_, std::string const code_, std::string const description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
-		: uuid(std::make_shared<UUID>(uuid_))
+    WidgetInstanceIdentifier(NewGeneUUID const uuid_, WidgetInstanceIdentifier const & identifier_parent_, std::string const code_, std::string const description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
+		: uuid(std::make_shared<NewGeneUUID>(uuid_))
 		, identifier_parent(std::make_shared<WidgetInstanceIdentifier>(identifier_parent_))
 		, code(std::make_shared<std::string>(code_))
 		, longhand(std::make_shared<std::string>(description_))
@@ -418,14 +414,14 @@ public:
 		return false;
 	}
 
-	std::shared_ptr<UUID> uuid; // In case of ambiguity, sometimes identifier_parent or foreign_key_identifiers are necessary to disambiguate this identifier
+	std::shared_ptr<NewGeneUUID> uuid; // In case of ambiguity, sometimes identifier_parent or foreign_key_identifiers are necessary to disambiguate this identifier
 
 	std::shared_ptr<WidgetInstanceIdentifier> identifier_parent; // Parent in the data model (i.e., foreign key in the case of a simple parent-child data relationship), not parent widget in the user interface
 
 	// Regarding comments for this data member: This class is named "WidgetInstanceIdentifier", not just "InstanceIdentifier".
 	// The "Instance" in the class name corresponds to a row in the backend model tables.
 	// But the "Widget" in the class name corresponds to a widget in the user interface, which usually corresponds to a single instance (row) of a backend model table, but might correspond to a number of different rows from one or more tables.
-	std::shared_ptr<std::vector<WidgetInstanceIdentifier>> foreign_key_identifiers; // For more complex foreign key relationships required by this identifier than simple parent-child data relationships, this vector of identifiers can be used.  Note: these identifiers can be used for any application-specific purpose, either directly modeling a row in a backend table, modeling multiple rows in one identifier, representing one or more user-interface widget UUID's, or any other purpose.
+	std::shared_ptr<std::vector<WidgetInstanceIdentifier>> foreign_key_identifiers; // For more complex foreign key relationships required by this identifier than simple parent-child data relationships, this vector of identifiers can be used.  Note: these identifiers can be used for any application-specific purpose, either directly modeling a row in a backend table, modeling multiple rows in one identifier, representing one or more user-interface widget NewGeneUUID's, or any other purpose.
 
 	// For simple identifiers, these are frequently used.  Simple identifiers cover the bulk of uses of this class.
 	std::shared_ptr<std::string> code;

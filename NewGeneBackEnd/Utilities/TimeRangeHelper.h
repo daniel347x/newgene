@@ -1,13 +1,12 @@
 #ifndef TIMERANGEHELPER_H
 #define TIMERANGEHELPER_H
 
-#include <string>
-#include <cstdint>
-
 #ifndef Q_MOC_RUN
 #	include <boost/date_time/local_time/local_time.hpp>
 #	include "boost/date_time/posix_time/posix_time.hpp"
 #endif
+#include <string>
+#include <cstdint>
 #include "../Model/TimeGranularity.h"
 
 namespace TimeRange

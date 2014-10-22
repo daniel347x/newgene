@@ -1,13 +1,13 @@
 #ifndef _MEMORYPOOL_NEWGENE_H
 #define _MEMORYPOOL_NEWGENE_H
 
-#include <map>
-#include <cstdint>
 #ifndef Q_MOC_RUN
 #	include <boost/container/flat_map.hpp>
 #	include <boost/container/flat_set.hpp>
 #	include <boost/format.hpp>
 #endif
+#include <map>
+#include <cstdint>
 #include <stdlib.h>
 #include <time.h>
 #include "NewGeneException.h"

@@ -1,10 +1,8 @@
-#include "newgenedatetimewidget.h"
-
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #	include <boost/date_time/local_time/local_time.hpp>
 #endif
-
+#include "newgenedatetimewidget.h"
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"

@@ -1,17 +1,15 @@
 #ifndef IMPORT_H
 #define IMPORT_H
 
-#include "../Fields.h"
-#include "../Schema.h"
-#include <vector>
-#include <memory>
-
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
 #	include <boost/date_time/local_time/local_time.hpp>
 #	include <boost/date_time/gregorian/gregorian.hpp>
 #endif
-
+#include "../Fields.h"
+#include "../Schema.h"
+#include <vector>
+#include <memory>
 #include "../../../Utilities/WidgetIdentifier.h"
 #include "../../../Messager/Messager.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"

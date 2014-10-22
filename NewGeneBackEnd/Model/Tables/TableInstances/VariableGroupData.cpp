@@ -1,11 +1,10 @@
-#include "VariableGroupData.h"
-#include "../TableManager.h"
-#include "../../InputModel.h"
-
 #ifndef Q_MOC_RUN
 #	include <boost/lexical_cast.hpp>
 #endif
-#include "../../../Utilities/UUID.h"
+#include "VariableGroupData.h"
+#include "../TableManager.h"
+#include "../../InputModel.h"
+#include "../../../Utilities/NewGeneUUID.h"
 
 #include <set>
 

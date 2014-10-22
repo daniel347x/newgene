@@ -1,10 +1,9 @@
 #ifndef VARIABLEGROUP_H
 #define VARIABLEGROUP_H
-
-#include "../Table.h"
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #endif
+#include "../Table.h"
 
 class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR>
 {
@@ -43,7 +42,7 @@ class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY, TABLE_INSTANCE_IDENTI
 		void Load(sqlite3 * db, InputModel * input_model_);
 
 		// For a given UOA, retrieve its VGs
-		WidgetInstanceIdentifiers RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, UUID const & uuid);
+		WidgetInstanceIdentifiers RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, NewGeneUUID const & uuid);
 
 		bool Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & vg, bool const also_confirm_using_cache = true);
 		bool ExistsByUuid(sqlite3 * db, InputModel & input_model_, std::string const & vg_uuid, bool const also_confirm_using_cache = true);

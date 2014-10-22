@@ -155,8 +155,8 @@ class NewGeneSchema
 
 				}
 
-				std::string column_name_in_temporary_table; // The name of the column in the temporary view (currently does NOT always include UUID, but it can)
-				std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
+				std::string column_name_in_temporary_table; // The name of the column in the temporary view (currently does NOT always include NewGeneUUID, but it can)
+				std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without NewGeneUUID)
 				std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
 				WidgetInstanceIdentifier current_variable_group; // The variable group associated with this column
 				WidgetInstanceIdentifier
@@ -725,7 +725,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// one variable group (with at least one variable selected by the user for output)
 				// ... and lists the internal *column names* used by this SQL query,
 				// one vector for the primary keys, and one for the non-primary (i.e., secondary) keys.
-				// Note that a UUID is appended to every variable name to avoid duplicates among variable groups.
+				// Note that a NewGeneUUID is appended to every variable name to avoid duplicates among variable groups.
 				// Also note that the order is preserved (stored) here, in case the user names
 				// columns in a different order with the same name in different variable groups.
 				VariableGroup__PrimaryKey_SecondaryKey_Names__Vector variable_group__key_names__vectors;

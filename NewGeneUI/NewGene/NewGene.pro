@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets quickwidgets
 
 TARGET = NewGene
 TEMPLATE = app
@@ -16,6 +14,8 @@ win32: QMAKE_CXXFLAGS_RELEASE += -Zi
 win32: QMAKE_LFLAGS_RELEASE   += /INCREMENTAL:NO /DEBUG
 win32: QMAKE_CXXFLAGS += /F 32000000 # doesn't work
 win32: QMAKE_LFLAGS   += /STACK:32000000
+
+win32: DEFINES += _WIN32_WINNT=_WIN32_WINNT_WIN7
 
 macx: QMAKE_LFLAGS    += -stack_size 2000000 # in hex
 

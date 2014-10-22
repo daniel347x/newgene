@@ -1,10 +1,9 @@
-#include "VariableGroup.h"
-#include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
-
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #endif
-#include "../../../Utilities/UUID.h"
+#include "VariableGroup.h"
+#include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
+#include "../../../Utilities/NewGeneUUID.h"
 #include "../../InputModel.h"
 
 std::string const Table_VG_CATEGORY::VG_CATEGORY_UUID = "VG_CATEGORY_UUID";
@@ -207,7 +206,7 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 
 }
 
-WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, UUID const & uuid)
+WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, NewGeneUUID const & uuid)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);

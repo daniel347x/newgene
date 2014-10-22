@@ -1,12 +1,12 @@
 #include "../UIActionManager.h"
 
+#ifndef Q_MOC_RUN
+#	include <boost/scope_exit.hpp>
+#endif
 #include "../../Project/InputProject.h"
 #include "../../Project/OutputProject.h"
 #include "../../UIData/DataChanges.h"
 #include "../../UIAction/ActionChanges.h"
-#ifndef Q_MOC_RUN
-#	include <boost/scope_exit.hpp>
-#endif
 
 /************************************************************************/
 // ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
@@ -72,7 +72,7 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				// ************************************* //
 				WidgetActionItem const & actionItem = *instanceActionItem.second;
 				WidgetActionItem__Checkbox const & actionItemCheckbox = static_cast<WidgetActionItem__Checkbox const &>(actionItem);
-				UUID itemUUID = *identifier.uuid;
+				NewGeneUUID itemUUID = *identifier.uuid;
 				bool checked = false;
 				if (actionItemCheckbox.isChecked())
 				{

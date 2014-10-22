@@ -1,12 +1,12 @@
 #ifndef UIPROJECT_H
 #define UIPROJECT_H
 
-//#include "globals.h"
-#include <QObject>
-#include <memory>
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
 #endif
+//#include "globals.h"
+#include <QObject>
+#include <memory>
 #include "../../../NewGeneBackEnd/Project/Project.h"
 #include "../Model/Base/uimodel.h"
 #include "eventloopthreadmanager.h"
@@ -32,8 +32,8 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			public:
 				DATA_CHANGE_TYPE type;
 				bool match_uuid;
-				UUID uuid_to_match;
-				DataChangeInterest(DATA_CHANGE_TYPE type_, bool match_uuid_, UUID const uuid_to_match_ = "")
+				NewGeneUUID uuid_to_match;
+				DataChangeInterest(DATA_CHANGE_TYPE type_, bool match_uuid_, NewGeneUUID const uuid_to_match_ = "")
 					: type(type_)
 					, match_uuid(match_uuid_)
 					, uuid_to_match(uuid_to_match_)
@@ -52,8 +52,8 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				}
 		};
 
-		typedef std::map<UUID, NewGeneWidget *> UUIDWidgetMap; // uuid_parent, uuid_child
-		typedef std::map<std::pair<UUID, UUID>, NewGeneWidget *> ParentWidgetUUIDAndChildDataUUID_to_WidgetPointer_Map; // uuid_parent, uuid_child
+		typedef std::map<NewGeneUUID, NewGeneWidget *> UUIDWidgetMap; // uuid_parent, uuid_child
+		typedef std::map<std::pair<NewGeneUUID, NewGeneUUID>, NewGeneWidget *> ParentWidgetUUIDAndChildDataUUID_to_WidgetPointer_Map; // uuid_parent, uuid_child
 		typedef std::multimap<NewGeneWidget * const, DataChangeInterest const> WidgetDataChangeInterestMap;
 
 		static int const number_worker_threads = 2; // For now, single thread only in pool
@@ -127,13 +127,13 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		virtual void UpdateConnections() {}
 		virtual void DoRefreshAllWidgets() {}
 
-		void AddWidgetUUIDToUUIDMap(NewGeneWidget * widget, UUID const & uuid)
+		void AddWidgetUUIDToUUIDMap(NewGeneWidget * widget, NewGeneUUID const & uuid)
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_map_mutex);
 			widget_uuid_widget_map[uuid] = widget;
 		}
 
-		void RemoveWidgetFromUUIDMap(UUID const & uuid)
+		void RemoveWidgetFromUUIDMap(NewGeneUUID const & uuid)
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_map_mutex);
 			auto position = widget_uuid_widget_map.find(uuid);
@@ -143,7 +143,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			}
 		}
 
-		NewGeneWidget * FindWidget(UUID const & uuid)
+		NewGeneWidget * FindWidget(NewGeneUUID const & uuid)
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_map_mutex);
 			auto position = widget_uuid_widget_map.find(uuid);
@@ -154,13 +154,13 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			return nullptr;
 		}
 
-		void AddWidgetDataItemUUIDToUUIDMap(NewGeneWidget * widget, UUID const & parent_widget_uuid, UUID const & child_data_uuid)
+		void AddWidgetDataItemUUIDToUUIDMap(NewGeneWidget * widget, NewGeneUUID const & parent_widget_uuid, NewGeneUUID const & child_data_uuid)
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map__mutex);
 			widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map[std::make_pair(parent_widget_uuid, child_data_uuid)] = widget;
 		}
 
-		void RemoveWidgetDataItemFromUUIDMap(UUID const & parent_widget_uuid, UUID const & child_data_uuid)
+		void RemoveWidgetDataItemFromUUIDMap(NewGeneUUID const & parent_widget_uuid, NewGeneUUID const & child_data_uuid)
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map__mutex);
 			auto position = widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map.find(std::make_pair(parent_widget_uuid, child_data_uuid));
@@ -170,7 +170,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			}
 		}
 
-		NewGeneWidget * FindWidgetFromDataItem(UUID const & parent_widget_uuid, UUID const & child_data_uuid)
+		NewGeneWidget * FindWidgetFromDataItem(NewGeneUUID const & parent_widget_uuid, NewGeneUUID const & child_data_uuid)
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map__mutex);
 			auto position = widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map.find(std::make_pair(parent_widget_uuid, child_data_uuid));
@@ -181,7 +181,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			return nullptr;
 		}
 
-		void RegisterInterestInChange(NewGeneWidget * widget, DATA_CHANGE_TYPE const type, bool const match_uuid, UUID const & uuid_to_match)
+		void RegisterInterestInChange(NewGeneWidget * widget, DATA_CHANGE_TYPE const type, bool const match_uuid, NewGeneUUID const & uuid_to_match)
 		{
 			std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
 			data_change_interest_map.insert(std::make_pair(widget, DataChangeInterest(type, match_uuid, uuid_to_match)));
@@ -264,7 +264,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 						{
 							if (interest.match_uuid)
 							{
-								// send only if a UUID matches
+								// send only if a NewGeneUUID matches
 								bool matches = false;
 								if (change.parent_identifier.uuid && *change.parent_identifier.uuid == interest.uuid_to_match)
 								{
@@ -282,7 +282,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 								}
 								if (matches)
 								{
-									// Only send if a UUID matches
+									// Only send if a NewGeneUUID matches
 									subset_of_changes_message.changes.push_back(change);
 								}
 							}

@@ -1,12 +1,12 @@
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
 
-#include <memory>
-#include <vector>
 #ifndef Q_MOC_RUN
 #	include <boost/asio/io_service.hpp>
 #	include <boost/thread.hpp>
 #endif
+#include <memory>
+#include <vector>
 
 #include "../Messager/Messager.h"
 

@@ -25,7 +25,7 @@ void Table_GENERAL_OPTIONS::Load(sqlite3 * db, OutputModel * output_model_, Inpu
 	{
 
 		// ****************************************************************************************//
-		// Use codes as foreign keys, not UUID's, so that this output model can be shared with others
+		// Use codes as foreign keys, not NewGeneUUID's, so that this output model can be shared with others
 		// ****************************************************************************************//
 		do_random_sampling = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__DO_RANDOM_SAMPLING) != 0);
 		random_sampling_count_per_stage = sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE);
@@ -363,7 +363,7 @@ std::tuple<bool, std::int64_t, bool, bool> Table_GENERAL_OPTIONS::getKadSamplerI
 	{
 
 		// ****************************************************************************************//
-		// Use codes as foreign keys, not UUID's, so that this output model can be shared with others
+		// Use codes as foreign keys, not NewGeneUUID's, so that this output model can be shared with others
 		// ****************************************************************************************//
 		do_random_sampling = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__DO_RANDOM_SAMPLING) != 0);
 		random_sampling_count_per_stage = sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE);

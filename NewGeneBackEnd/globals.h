@@ -1,13 +1,13 @@
 #ifndef GLOBALS_BACKEND_H
 #define GLOBALS_BACKEND_H
 
+#ifndef Q_MOC_RUN
+#	include <boost/filesystem.hpp>
+#endif
 #include "Utilities/NewGeneException.h"
 #include <memory>
 #include <vector>
 #include <map>
-#ifndef Q_MOC_RUN
-#	include <boost/filesystem.hpp>
-#endif
 #include "Messager/Messager.h"
 
 class ProjectManager;

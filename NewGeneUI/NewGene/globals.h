@@ -1,6 +1,11 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#ifndef Q_MOC_RUN
+#	include <boost/asio/io_service.hpp>
+#	include <boost/filesystem.hpp>
+#endif
+
 #include <string>
 #include <vector>
 
@@ -65,9 +70,6 @@ typedef std::vector<std::string> STD_VECTOR_STRING;
 #include <memory>
 #include <vector>
 #include <map>
-#ifndef Q_MOC_RUN
-#	include <boost/filesystem.hpp>
-#endif
 #include "Infrastructure/Messager/uimessager.h"
 
 typedef std::vector<WidgetInstanceIdentifier> STD_VECTOR_WIDGETINSTANCEIDENTIFIER;

@@ -1,15 +1,15 @@
 #ifndef UISETTINGSMANAGER_H
 #define UISETTINGSMANAGER_H
 
-#include "globals.h"
-#include "Infrastructure/uimanager.h"
-#include "../../../NewGeneBackEnd/Settings/SettingsManager.h"
-#include <QString>
 #ifndef Q_MOC_RUN
 #   include <boost/filesystem.hpp>
 #   include <boost/property_tree/ptree.hpp>
 #   include <boost/property_tree/xml_parser.hpp>
 #endif
+#include "globals.h"
+#include "Infrastructure/uimanager.h"
+#include "../../../NewGeneBackEnd/Settings/SettingsManager.h"
+#include <QString>
 #include "Base/uisetting.h"
 #include "uiallsettings.h"
 #include "uiallglobalsettings.h"

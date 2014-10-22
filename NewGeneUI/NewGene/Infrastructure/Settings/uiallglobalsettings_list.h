@@ -1,7 +1,6 @@
 #ifndef UIALLGLOBALSETTINGS_LIST_H
 #define UIALLGLOBALSETTINGS_LIST_H
 
-#include "uisettingsmanager.h"
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #	include <boost/regex.hpp>
@@ -9,6 +8,7 @@
 #	include <boost/filesystem.hpp>
 #	include <boost/filesystem/operations.hpp>
 #endif
+#include "uisettingsmanager.h"
 #include <fstream>
 
 

@@ -1,16 +1,14 @@
 #ifndef FIELDS_H
 #define FIELDS_H
 
-#include "FieldTypes.h"
-#include <tuple>
-#include <memory>
-
 #ifndef Q_MOC_RUN
 #	include <boost/format.hpp>
 #	include <boost/spirit/home/support/string_traits.hpp>
 #	include <boost/lexical_cast.hpp>
 #endif
-
+#include "FieldTypes.h"
+#include <tuple>
+#include <memory>
 #include "../../Utilities/NewGeneException.h"
 #include "../../Utilities/Validation.h"
 
