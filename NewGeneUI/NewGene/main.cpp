@@ -10,6 +10,7 @@
 #include <QSplashScreen>
 #include <QTimer>
 #include <QQuickWidget>
+#include <Qurl>
 #include <memory>
 
 #include "Infrastructure/Model/uimodelmanager.h"
@@ -18,6 +19,20 @@
 #include "Infrastructure/Status/uistatusmanager.h"
 #include "Infrastructure/Logging/uiloggingmanager.h"
 #include "newgeneapplication.h"
+
+class SplashWindow : public QQuickWidget
+{
+    protected:
+        bool eventFilter(QObject *obj, QEvent *event)
+        {
+            if (event->type() == QEvent::MouseButtonRelease)
+            {
+                close();
+                return true;
+            }
+            return QQuickWidget::eventFilter(obj, event);
+        }
+};
 
 int main( int argc, char * argv[] )
 {
@@ -29,9 +44,14 @@ int main( int argc, char * argv[] )
 
 	NewGeneApplication a( argc, argv );
 
-    QQuickWidget *view = new QQuickWidget;
-    //view->setSource(QUrl::);
-    //view->show();
+    std::unique_ptr<SplashWindow> view { new SplashWindow{} };
+    view->setSource(QUrl{":/splash.qml"});
+    Qt::WindowFlags flags = view->windowFlags();
+    flags |= Qt::WindowStaysOnTopHint;
+    flags |= Qt::SplashScreen;
+    view->installEventFilter(view.get());
+    view->setWindowFlags(flags);
+    view->show();
 
     //QPixmap splashImage {":/earth.bits.png"};
     //std::unique_ptr<QSplashScreen> splash {new QSplashScreen {splashImage, Qt::WindowStaysOnTopHint }};
