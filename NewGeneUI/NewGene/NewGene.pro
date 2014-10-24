@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets quickwidgets
+QT       += core gui widgets quickwidgets webkit
 
 TARGET = NewGene
 TEMPLATE = app
@@ -273,7 +273,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/UIAction/vgmanagement.h \
 	Widgets/Utilities/dialoghelper.h \
 	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.h \
-    Infrastructure/UIAction/limitdmus.h
+    Infrastructure/UIAction/limitdmus.h \
+    splashwindow.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

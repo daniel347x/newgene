@@ -8,9 +8,6 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QSplashScreen>
-#include <QTimer>
-#include <QQuickWidget>
-#include <Qurl>
 #include <memory>
 
 #include "Infrastructure/Model/uimodelmanager.h"
@@ -19,20 +16,7 @@
 #include "Infrastructure/Status/uistatusmanager.h"
 #include "Infrastructure/Logging/uiloggingmanager.h"
 #include "newgeneapplication.h"
-
-class SplashWindow : public QQuickWidget
-{
-    protected:
-        bool eventFilter(QObject *obj, QEvent *event)
-        {
-            if (event->type() == QEvent::MouseButtonRelease)
-            {
-                close();
-                return true;
-            }
-            return QQuickWidget::eventFilter(obj, event);
-        }
-};
+#include "splashwindow.h"
 
 int main( int argc, char * argv[] )
 {
@@ -44,8 +28,13 @@ int main( int argc, char * argv[] )
 
 	NewGeneApplication a( argc, argv );
 
+    NewGeneMainWindow w;
+    theMainWindow = &w;
+
     std::unique_ptr<SplashWindow> view { new SplashWindow{} };
-    view->setSource(QUrl{":/splash.qml"});
+    QQmlEngine * engine = view->engine();
+    engine->rootContext()->setContextProperty("view", view.get());
+    view->setSource(QUrl{"qrc:///splash.qml"});
     Qt::WindowFlags flags = view->windowFlags();
     flags |= Qt::WindowStaysOnTopHint;
     flags |= Qt::SplashScreen;
@@ -57,12 +46,9 @@ int main( int argc, char * argv[] )
     //std::unique_ptr<QSplashScreen> splash {new QSplashScreen {splashImage, Qt::WindowStaysOnTopHint }};
     //splash->show();
 
-    NewGeneMainWindow w;
-	theMainWindow = &w;
-
 	QTimer::singleShot( 0, &w, SLOT( doInitialize() ) );
 
-	w.show();
+    //w.show();
 	return a.exec();
 
 }
