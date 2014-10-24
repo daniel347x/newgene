@@ -16,8 +16,19 @@ class SplashWindow : public QQuickWidget
     public:
         Q_INVOKABLE void Close()
         {
-            QTimer::singleShot( 1000, this, SLOT( close() ) );
-            QTimer::singleShot( 2000, theMainWindow, SLOT( show() ) );
+            QTimer::singleShot( 0, this, SLOT( close() ) );
+            QTimer::singleShot( 500, theMainWindow, SLOT( show() ) );
+            QTimer::singleShot( 1000, theMainWindow, SLOT( doInitialize() ) );
+        }
+
+        Q_INVOKABLE void SetCursorNormal()
+        {
+            setCursor(Qt::ArrowCursor);
+        }
+
+        Q_INVOKABLE void SetCursorLink()
+        {
+            setCursor(Qt::PointingHandCursor);
         }
 
     protected:

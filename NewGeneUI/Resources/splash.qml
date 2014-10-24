@@ -122,6 +122,14 @@ Rectangle {
         text: qsTr("<html><style type='text/css'></style><a href='http://google.com'>Release notes</a></html>")
         font.pixelSize: 12
         onLinkActivated: Qt.openUrlExternally(link)
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: { Qt.openUrlExternally("http://google.com"); view.Close(); }
+            onEntered: { view.SetCursorLink(); }
+            onExited: { view.SetCursorNormal(); }
+        }
     }
 
     WebView
@@ -144,6 +152,16 @@ Rectangle {
                 // delegate request.url here
             }
         }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: { Qt.openUrlExternally(webview.url); view.Close(); }
+            onEntered: { view.SetCursorLink(); }
+            onExited: { view.SetCursorNormal(); }
+        }
+
     }
 
 }
