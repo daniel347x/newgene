@@ -12,7 +12,29 @@ Rectangle {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: view.Close()
+        onClicked: view.close_window()
+
+        Text {
+            id: text9
+            x: 414
+            y: 395
+            color: "#a51111"
+            text: qsTr("<html><strong>Click</strong> to continue...</html>")
+            textFormat: Text.RichText
+            font.pixelSize: 30
+        }
+
+        Text {
+            id: text10
+            x: 8
+            y: 329
+            color: "#040ead"
+            text: qsTr("<html>Paul Poast's introductory video about NewGene<br />on YouTube</html>")
+            horizontalAlignment: Text.AlignHCenter
+            textFormat: Text.RichText
+            wrapMode: Text.WordWrap
+            font.pixelSize: 14
+        }
     }
 
     Image {
@@ -117,18 +139,18 @@ Rectangle {
 
     Text {
         id: text8
-        x: 721
+        x: 699
         y: 570
-        text: qsTr("<html><style type='text/css'></style><a href='http://google.com'>Release notes</a></html>")
+        text: qsTr("<html><style type='text/css'></style><a href='http://www.paulpoast.com/#/statistics-software/4579747856'>NewGene Website</a></html>")
         font.pixelSize: 12
         onLinkActivated: Qt.openUrlExternally(link)
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: { Qt.openUrlExternally("http://google.com"); view.Close(); }
-            onEntered: { view.SetCursorLink(); }
-            onExited: { view.SetCursorNormal(); }
+            onClicked: { Qt.openUrlExternally("http://google.com"); view.close_window(); }
+            onEntered: { view.setCursorLink(); }
+            onExited: { view.setCursorNormal(); }
         }
     }
 
@@ -136,7 +158,7 @@ Rectangle {
     {
         id: webview
         x: 27
-        y: 343
+        y: 369
         width: 247
         height: 203
 
@@ -157,9 +179,9 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: { Qt.openUrlExternally(webview.url); view.Close(); }
-            onEntered: { view.SetCursorLink(); }
-            onExited: { view.SetCursorNormal(); }
+            onClicked: { Qt.openUrlExternally(webview.url); view.close_window(); }
+            onEntered: { view.setCursorLink(); }
+            onExited: { view.setCursorNormal(); }
         }
 
     }
