@@ -43,13 +43,6 @@ int main( int argc, char * argv[] )
     view->show();
     view->activateWindow();
 
-    //QPixmap splashImage {":/earth.bits.png"};
-    //std::unique_ptr<QSplashScreen> splash {new QSplashScreen {splashImage, Qt::WindowStaysOnTopHint }};
-    //splash->show();
-
-    //QTimer::singleShot( 0, &w, SLOT( doInitialize() ) );
-
-    //w.show();
 	return a.exec();
 
 }

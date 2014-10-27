@@ -357,6 +357,8 @@ else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBa
 
 macx: CONFIG += c++11
 
+#Config += console
+
 RESOURCES += \
 	../Resources/NewGeneResources.qrc
 

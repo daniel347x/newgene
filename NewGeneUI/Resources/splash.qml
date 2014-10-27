@@ -44,7 +44,7 @@ Rectangle {
         width: 300
         height: 300
         fillMode: Image.PreserveAspectFit
-        source: "earth.tunnel.jpg"
+        source: "/earth.tunnel.jpg"
     }
 
     Text {
@@ -148,7 +148,7 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: { Qt.openUrlExternally("http://google.com"); view.close_window(); }
+            onClicked: { Qt.openUrlExternally("http://www.paulpoast.com/#/statistics-software/4579747856"); view.close_window(); }
             onEntered: { view.setCursorLink(); }
             onExited: { view.setCursorNormal(); }
         }
