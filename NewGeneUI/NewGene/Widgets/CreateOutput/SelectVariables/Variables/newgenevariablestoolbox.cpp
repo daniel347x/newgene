@@ -111,7 +111,7 @@ void NewGeneVariablesToolbox::Empty()
 void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_message)
 {
 
-	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 	if (project == nullptr)
 	{
 		return;
