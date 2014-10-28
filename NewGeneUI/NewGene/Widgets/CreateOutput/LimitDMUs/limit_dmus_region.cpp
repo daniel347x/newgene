@@ -79,6 +79,7 @@ void limit_dmus_region::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 void limit_dmus_region::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
+
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (project)

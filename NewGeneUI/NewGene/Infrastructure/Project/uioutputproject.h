@@ -28,7 +28,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 						UIMessagerOutputProject & messager_,
 						UIInputProject * inp);
 
-		void UpdateConnections();
+        void UpdateConnections();
 		void DoRefreshAllWidgets();
 		void PassChangeMessageToWidget(NewGeneWidget * widget, DataChangeMessage const & change_message);
 

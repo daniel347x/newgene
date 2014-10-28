@@ -27,6 +27,10 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 {
 	public:
 
+        bool is_input_project;
+        bool IsInputProject() const { return is_input_project; };
+        bool IsOutputProject() const { return ! IsInputProject(); };
+
 		class DataChangeInterest
 		{
 			public:
@@ -70,6 +74,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			, _backend_project( new BACKEND_PROJECT_CLASS(_project_settings->getBackendSettingsSharedPtr(), _model_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()) )
 		{
 			Q_UNUSED(parent);
+            is_input_project = false;
 		}
 
 		~UIProject()
@@ -183,6 +188,12 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		void RegisterInterestInChange(NewGeneWidget * widget, DATA_CHANGE_TYPE const type, bool const match_uuid, NewGeneUUID const & uuid_to_match)
 		{
+			if (widget == nullptr) return;
+
+			// make certain the widget knows about us
+            if (IsInputProject()) { widget->inp = dynamic_cast<UIInputProject*const>(this); }
+            if (IsOutputProject()) { widget->outp = dynamic_cast<UIOutputProject*const>(this); }
+
 			std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
 			data_change_interest_map.insert(std::make_pair(widget, DataChangeInterest(type, match_uuid, uuid_to_match)));
 		}

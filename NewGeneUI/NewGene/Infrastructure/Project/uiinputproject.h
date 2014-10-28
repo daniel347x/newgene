@@ -26,6 +26,7 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 			, messager(messager_)
 		{
 			messager.set(this);
+            is_input_project = true;
 		}
 
 		void UpdateConnections();

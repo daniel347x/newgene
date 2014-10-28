@@ -24,6 +24,7 @@ KadWidgetsScrollArea::KadWidgetsScrollArea( QWidget * parent ) :
 void KadWidgetsScrollArea::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
+
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 
@@ -48,6 +49,7 @@ void KadWidgetsScrollArea::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECT
 void KadWidgetsScrollArea::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
+
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (project)

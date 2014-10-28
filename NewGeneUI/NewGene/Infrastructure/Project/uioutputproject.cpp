@@ -27,7 +27,8 @@ UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const 
     , _inp(inp)
 	{
 		messager.set(this);
-	}
+        is_input_project = false;
+    }
 
 void UIOutputProject::SignalMessageBox(STD_STRING msg)
 {
