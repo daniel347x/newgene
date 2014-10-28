@@ -9,6 +9,9 @@ Rectangle {
     width: 800
     height: 600
     color: "#ffffff"
+    radius: 6
+    border.width: 6
+    border.color: "#040ead"
 
     MouseArea {
         anchors.fill: parent
@@ -26,10 +29,10 @@ Rectangle {
 
         Text {
             id: text10
-            x: 8
-            y: 329
+            x: 25
+            y: 342
             color: "#040ead"
-            text: qsTr("<html>Paul Poast's introductory video about NewGene<br />on YouTube</html>")
+            text: qsTr("<html>Watch Paul Poast's  introductory welcome  video<br />about NewGene on YouTube!</html>")
             horizontalAlignment: Text.AlignHCenter
             textFormat: Text.RichText
             wrapMode: Text.WordWrap
@@ -39,8 +42,8 @@ Rectangle {
 
     Image {
         id: image1
-        x: 0
-        y: 0
+        x: 17
+        y: 8
         width: 300
         height: 300
         fillMode: Image.PreserveAspectFit
@@ -131,7 +134,7 @@ Rectangle {
 
     Text {
         id: text7
-        x: 655
+        x: 648
         y: 550
         text: qsTr("Version 1.0 - Nov 15, 2014")
         font.pixelSize: 12
@@ -139,7 +142,7 @@ Rectangle {
 
     Text {
         id: text8
-        x: 699
+        x: 692
         y: 570
         text: qsTr("<html><style type='text/css'></style><a href='http://www.paulpoast.com/#/statistics-software/4579747856'>NewGene Website</a></html>")
         font.pixelSize: 12
@@ -157,8 +160,8 @@ Rectangle {
     WebView
     {
         id: webview
-        x: 27
-        y: 369
+        x: 44
+        y: 381
         width: 247
         height: 203
 
