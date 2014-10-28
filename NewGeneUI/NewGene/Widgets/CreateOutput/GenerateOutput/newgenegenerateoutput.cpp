@@ -150,8 +150,16 @@ void NewGeneGenerateOutput::on_pushButtonChooseLocation_clicked()
 
 	UIMessager messager(project);
 
-	QString the_file = QFileDialog::getSaveFileName(this, "Choose output file");
-	if (the_file.size())
+    std::unique_ptr<Setting> path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
+
+    QString current_file {};
+    if (path_to_kad_output) current_file = path_to_kad_output->ToString().c_str();
+
+
+    QString selectedFilter {"Comma-separated values (*.csv)"};
+	QString the_file = QFileDialog::getSaveFileName(this, "Choose output file", current_file, QString { selectedFilter }, &selectedFilter, QFileDialog::DontUseNativeDialog | QFileDialog::DontConfirmOverwrite);
+
+    if (the_file.size())
 	{
         if (! the_file.endsWith(".csv", Qt::CaseInsensitive))
         {
