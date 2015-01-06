@@ -53,73 +53,20 @@
    <item>
     <widget class="NewGeneTabWidgetManageInput" name="tabWidgetInput">
      <property name="styleSheet">
-      <string notr="true">
-QWidget {
-border-bottom: 9px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #9394ea,
-                                 stop: 0.1 #4d4eff,
-                                 stop: 0.15 #5354dd,
-                                 stop: 1.0 #ff9372
-                                 );
-}
-
-QTabBar::tab:selected {
-border-left: 0px solid #1c1515;
-padding-left: 10px;
-border-right: 0px solid #1c1515;
-padding-right: 10px;
-border-bottom: 0px;
-border-top: 0px;
-margin-bottom: 2px;
-border-bottom-left-radius: 0px;
-border-bottom-right-radius: 0px;
-padding-top: 1px;
-padding-bottom: 2px;
-background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #f9dac7,
-                                 /*stop: 0.3 #ffbaa5,*/
-                                 stop: 1.0 #ff9372
-                                 /*stop: 1 #ff450c*/
-                                 );
- }
-
-QTabBar::tab:!selected {
-border-left: 1px solid #1c1515;
-padding-left: 10px;
-border-right: 1px solid #1c1515;
-padding-right: 10px;
-border-bottom: 1px solid #7e7fff;
-border-top: 0px solid #a0a0a0;
-margin-bottom: 9px;
-border-bottom-left-radius: 0px;
-border-bottom-right-radius: 0px;
-padding-top: 2px;
-padding-bottom: 2px;
-background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #cbcbff,
-                                 stop: 0.3 #cbcbff,
-                                 stop: 0.6 #b1b1ff,
-                                 stop: 1.0 #9394ea);
-}</string>
+      <string notr="true"/>
      </property>
      <property name="tabPosition">
       <enum>QTabWidget::South</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>
      </property>
      <widget class="QWidget" name="tabManageDMUs">
       <property name="styleSheet">
-       <string notr="true">QWidget {
-/* border-bottom: 3px solid #f9dac7; */
-border-bottom: 5px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #ededed,
-                                 stop: 1.0 #f9dac7
-                                 );
-}</string>
+       <string notr="true"/>
       </property>
       <attribute name="title">
        <string> Manage DMU's </string>
@@ -147,20 +94,13 @@ border-bottom: 5px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
 border-bottom: 0px;;
 }</string>
          </property>
-         <zorder>quickWidget</zorder>
         </widget>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabManageUOAs">
       <property name="styleSheet">
-       <string notr="true">QWidget {
-/* border-bottom: 3px solid #f9dac7; */
-border-bottom: 5px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #ededed,
-                                 stop: 1.0 #f9dac7
-                                 );
-}</string>
+       <string notr="true"/>
       </property>
       <attribute name="title">
        <string> Manage Units of Analysis </string>
@@ -194,13 +134,7 @@ border-bottom: 0px;;
      </widget>
      <widget class="QWidget" name="tabManageVGs">
       <property name="styleSheet">
-       <string notr="true">QWidget {
-/* border-bottom: 3px solid #f9dac7; */
-border-bottom: 5px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #ededed,
-                                 stop: 1.0 #f9dac7
-                                 );
-}</string>
+       <string notr="true"/>
       </property>
       <attribute name="title">
        <string> Manage Variable Groups </string>
