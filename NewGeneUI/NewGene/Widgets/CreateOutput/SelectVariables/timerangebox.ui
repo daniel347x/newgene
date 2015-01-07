@@ -276,7 +276,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="doKadSampler">
+           <widget class="QCheckBox" name="doRandomSampling">
             <property name="text">
              <string>Perform random sampling</string>
             </property>
@@ -319,7 +319,7 @@
            </spacer>
           </item>
          </layout>
-         <zorder>doKadSampler</zorder>
+         <zorder>doRandomSampling</zorder>
          <zorder>randomSamplingHowManyRows</zorder>
          <zorder>verticalSpacer</zorder>
          <zorder>verticalSpacer_2</zorder>

@@ -31,7 +31,7 @@ public:
 	}
 
 	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
-	bool UpdateDoKadSampler(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
+	bool UpdateDoRandomSampling(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
 	bool UpdateKadSamplerCountPerStage(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
 	bool UpdateConsolidateRows(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
 	bool UpdateDisplayAbsoluteTimeColumns(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
@@ -39,7 +39,7 @@ public:
 
 private:
 
-	void ModifyDoKadSampler(sqlite3 * db);
+	void ModifyDoRandomSampling(sqlite3 * db);
 	void ModifyKadSamplerCountPerStage(sqlite3 * db);
 	void ModifyConsolidateRows(sqlite3 * db);
 	void ModifyDisplayAbsoluteTimeColumns(sqlite3 * db);

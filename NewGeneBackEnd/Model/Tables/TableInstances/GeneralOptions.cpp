@@ -41,7 +41,7 @@ void Table_GENERAL_OPTIONS::Load(sqlite3 * db, OutputModel * output_model_, Inpu
 
 }
 
-bool Table_GENERAL_OPTIONS::UpdateDoKadSampler(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
+bool Table_GENERAL_OPTIONS::UpdateDoRandomSampling(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -68,7 +68,7 @@ bool Table_GENERAL_OPTIONS::UpdateDoKadSampler(sqlite3 * db, OutputModel & outpu
 						if (packet)
 						{
 							do_random_sampling = packet->getValue();
-							ModifyDoKadSampler(db);
+							ModifyDoRandomSampling(db);
 						}
 						else
 						{
@@ -249,7 +249,7 @@ bool Table_GENERAL_OPTIONS::UpdateDisplayAbsoluteTimeColumns(sqlite3 * db, Outpu
 
 }
 
-void Table_GENERAL_OPTIONS::ModifyDoKadSampler(sqlite3 * db)
+void Table_GENERAL_OPTIONS::ModifyDoRandomSampling(sqlite3 * db)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
