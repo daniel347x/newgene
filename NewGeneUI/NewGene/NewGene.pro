@@ -48,7 +48,7 @@ SOURCES += main.cpp\
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.cpp \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.cpp \
 	Widgets/CreateOutput/SelectVariables/kadcolumnselectionbox.cpp \
-	Widgets/CreateOutput/SelectVariables/timerangebox.cpp \
+	Widgets/CreateOutput/SelectVariables/optionsbox.cpp \
 	Widgets/newgenewidget.cpp \
 	Infrastructure/Settings/uisettingsmanager.cpp \
 	Infrastructure/Model/uimodelmanager.cpp \
@@ -167,7 +167,7 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.h \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.h \
 	Widgets/CreateOutput/SelectVariables/kadcolumnselectionbox.h \
-	Widgets/CreateOutput/SelectVariables/timerangebox.h \
+	Widgets/CreateOutput/SelectVariables/optionsbox.h \
 	Widgets/newgenewidget.h \
 	Infrastructure/Settings/uisettingsmanager.h \
 	Infrastructure/Model/uimodelmanager.h \
@@ -288,7 +288,7 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.ui \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.ui \
 	Widgets/CreateOutput/SelectVariables/kadcolumnselectionbox.ui \
-	Widgets/CreateOutput/SelectVariables/timerangebox.ui \
+	Widgets/CreateOutput/SelectVariables/optionsbox.ui \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.ui \
 	Widgets/ManageInput/newgenemanageinput.ui \
 	Widgets/ManageInput/DMUs/newgenemanagedmus.ui \

@@ -37,7 +37,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="TimeRangeBox" name="optionsBox">
+    <widget class="OptionsBox" name="optionsBox">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -222,9 +222,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TimeRangeBox</class>
+   <class>OptionsBox</class>
    <extends>QFrame</extends>
-   <header>timerangebox.h</header>
+   <header>optionsbox.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -30,12 +30,12 @@ class DoRandomSamplingChange : public DoOutputAction<ACTION_DO_RANDOM_SAMPLING_C
 
 };
 
-class KadSamplerCountPerStageChange : public DoOutputAction<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>
+class RandomSamplingCountChange : public DoOutputAction<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>
 {
 
 	public:
 
-		KadSamplerCountPerStageChange(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE & action_request_, OutputProjectWorkQueue * queue_)
+		RandomSamplingCountChange(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE & action_request_, OutputProjectWorkQueue * queue_)
 			: DoOutputAction<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>(static_cast<WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>>(action_request_), queue_)
 		{
 
@@ -44,7 +44,7 @@ class KadSamplerCountPerStageChange : public DoOutputAction<ACTION_RANDOM_SAMPLI
 		void operator()()
 		{
 			UIMessagerSingleShot messager(queue->get()->messager);
-			uiactionManagerUI().getBackendManager().DoRandomSamplingCountPerStageChange(messager.get(), action_request, queue->get()->backend());
+			uiactionManagerUI().getBackendManager().DoRandomSamplingCountChange(messager.get(), action_request, queue->get()->backend());
 		}
 
 };

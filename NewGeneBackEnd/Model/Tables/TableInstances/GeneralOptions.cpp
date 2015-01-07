@@ -93,7 +93,7 @@ bool Table_GENERAL_OPTIONS::UpdateDoRandomSampling(sqlite3 * db, OutputModel & o
 
 }
 
-bool Table_GENERAL_OPTIONS::UpdateKadSamplerCountPerStage(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
+bool Table_GENERAL_OPTIONS::UpdateRandomSamplingCount(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -120,7 +120,7 @@ bool Table_GENERAL_OPTIONS::UpdateKadSamplerCountPerStage(sqlite3 * db, OutputMo
 						if (packet)
 						{
 							random_sampling_count_per_stage = packet->getValue();
-							ModifyKadSamplerCountPerStage(db);
+							ModifyRandomSamplingCount(db);
 						}
 						else
 						{
@@ -273,7 +273,7 @@ void Table_GENERAL_OPTIONS::ModifyDoRandomSampling(sqlite3 * db)
 
 }
 
-void Table_GENERAL_OPTIONS::ModifyKadSamplerCountPerStage(sqlite3 * db)
+void Table_GENERAL_OPTIONS::ModifyRandomSamplingCount(sqlite3 * db)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);

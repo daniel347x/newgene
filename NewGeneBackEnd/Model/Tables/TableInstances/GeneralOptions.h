@@ -32,7 +32,7 @@ public:
 
 	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
 	bool UpdateDoRandomSampling(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
-	bool UpdateKadSamplerCountPerStage(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
+	bool UpdateRandomSamplingCount(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
 	bool UpdateConsolidateRows(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
 	bool UpdateDisplayAbsoluteTimeColumns(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
 	std::tuple<bool, std::int64_t, bool, bool> getKadSamplerInfo(sqlite3 * db);
@@ -40,7 +40,7 @@ public:
 private:
 
 	void ModifyDoRandomSampling(sqlite3 * db);
-	void ModifyKadSamplerCountPerStage(sqlite3 * db);
+	void ModifyRandomSamplingCount(sqlite3 * db);
 	void ModifyConsolidateRows(sqlite3 * db);
 	void ModifyDisplayAbsoluteTimeColumns(sqlite3 * db);
 
