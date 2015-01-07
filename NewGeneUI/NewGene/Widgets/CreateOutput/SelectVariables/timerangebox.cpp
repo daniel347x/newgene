@@ -203,11 +203,6 @@ void TimeRangeBox::on_randomSamplingHowManyRows_textChanged(const QString &)
 
 }
 
-void TimeRangeBox::on_dateTimeEdit_start_editingFinished()
-{
-
-}
-
 void TimeRangeBox::on_mergeIdenticalRows_stateChanged(int arg1)
 {
 

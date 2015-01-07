@@ -45,7 +45,6 @@ class TimeRangeBox : public QFrame, public NewGeneWidget // do not reorder base 
 	private slots:
 		void on_doRandomSampling_stateChanged(int arg1);
 		void on_randomSamplingHowManyRows_textChanged(const QString &arg1);
-		void on_dateTimeEdit_start_editingFinished();
 		void on_mergeIdenticalRows_stateChanged(int arg1);
         void on_displayAbsoluteTimeColumns_stateChanged(int arg1);
 };
