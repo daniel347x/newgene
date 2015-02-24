@@ -1,5 +1,5 @@
-#include "timerangebox.h"
-#include "ui_timerangebox.h"
+#include "optionsbox.h"
+#include "ui_optionsbox.h"
 
 #include <QCheckBox>
 #include <QLineEdit>
@@ -8,10 +8,10 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-TimeRangeBox::TimeRangeBox( QWidget * parent ) :
+OptionsBox::OptionsBox( QWidget * parent ) :
 	QFrame( parent ),
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, TIMERANGE_REGION_WIDGET, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::TimeRangeBox )
+	ui( new Ui::OptionsBox )
 {
 
 	ui->setupUi( this );
@@ -32,12 +32,12 @@ TimeRangeBox::TimeRangeBox( QWidget * parent ) :
 
 }
 
-TimeRangeBox::~TimeRangeBox()
+OptionsBox::~OptionsBox()
 {
 	delete ui;
 }
 
-void TimeRangeBox::changeEvent( QEvent * e )
+void OptionsBox::changeEvent( QEvent * e )
 {
 	QFrame::changeEvent( e );
 
@@ -52,7 +52,7 @@ void TimeRangeBox::changeEvent( QEvent * e )
 	}
 }
 
-void TimeRangeBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+void OptionsBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
@@ -62,8 +62,8 @@ void TimeRangeBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 		this->show();
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET)));
-		connect(this, SIGNAL(UpdateDoKadSampler(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)));
-		connect(this, SIGNAL(UpdateKadSamplerCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)));
+		connect(this, SIGNAL(UpdateDoRandomSampling(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)));
+		connect(this, SIGNAL(UpdateRandomSamplingCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)));
 		connect(this, SIGNAL(UpdateConsolidateRows(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)));
 		connect(this, SIGNAL(UpdateDisplayAbsoluteTimeColumns(WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE)));
 	}
@@ -75,12 +75,12 @@ void TimeRangeBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 
 }
 
-void TimeRangeBox::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+void OptionsBox::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 }
 
-void TimeRangeBox::RefreshAllWidgets()
+void OptionsBox::RefreshAllWidgets()
 {
 	if (outp == nullptr)
 	{
@@ -91,7 +91,7 @@ void TimeRangeBox::RefreshAllWidgets()
 	emit RefreshWidget(request);
 }
 
-void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET widget_data)
+void OptionsBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET widget_data)
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
@@ -108,7 +108,7 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 	bool display_absolute_time_columns = widget_data.display_absolute_time_columns;
 
 	{
-		QCheckBox * checkBox = this->findChild<QCheckBox*>("doKadSampler");
+		QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
 		if (checkBox)
 		{
 			bool is_checked = checkBox->isChecked();
@@ -162,7 +162,7 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 
 }
 
-void TimeRangeBox::on_doKadSampler_stateChanged(int)
+void OptionsBox::on_doRandomSampling_stateChanged(int)
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
@@ -171,19 +171,19 @@ void TimeRangeBox::on_doKadSampler_stateChanged(int)
 		return;
 	}
 
-	QCheckBox * checkBox = this->findChild<QCheckBox*>("doKadSampler");
+	QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
 	if (checkBox)
 	{
 		bool is_checked = checkBox->isChecked();
 		InstanceActionItems actionItems;
 		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
 		WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
-		emit UpdateDoKadSampler(action_request);
+		emit UpdateDoRandomSampling(action_request);
 	}
 
 }
 
-void TimeRangeBox::on_randomSamplingHowManyRows_textChanged(const QString &)
+void OptionsBox::on_randomSamplingHowManyRows_textChanged(const QString &)
 {
 
 	QLineEdit * lineEdit = this->findChild<QLineEdit*>("randomSamplingHowManyRows");
@@ -198,17 +198,12 @@ void TimeRangeBox::on_randomSamplingHowManyRows_textChanged(const QString &)
 		InstanceActionItems actionItems;
 		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Int64(the_number)))));
 		WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
-		emit UpdateKadSamplerCount(action_request);
+		emit UpdateRandomSamplingCount(action_request);
 	}
 
 }
 
-void TimeRangeBox::on_dateTimeEdit_start_editingFinished()
-{
-
-}
-
-void TimeRangeBox::on_mergeIdenticalRows_stateChanged(int arg1)
+void OptionsBox::on_mergeIdenticalRows_stateChanged(int arg1)
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
@@ -229,7 +224,7 @@ void TimeRangeBox::on_mergeIdenticalRows_stateChanged(int arg1)
 
 }
 
-void TimeRangeBox::on_displayAbsoluteTimeColumns_stateChanged(int arg1)
+void OptionsBox::on_displayAbsoluteTimeColumns_stateChanged(int arg1)
 {
 
     UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
