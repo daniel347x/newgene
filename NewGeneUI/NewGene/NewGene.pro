@@ -9,6 +9,8 @@ QT       += core gui widgets quickwidgets webkit
 TARGET = NewGene
 TEMPLATE = app
 
+win32:CONFIG(debug, debug|release): DESTDIR = C:/Program Files (x86)/NewGene/
+
 win32: QMAKE_CXXFLAGS_RELEASE += -Zi
 win32: QMAKE_LFLAGS_RELEASE   += /INCREMENTAL:NO /DEBUG
 
