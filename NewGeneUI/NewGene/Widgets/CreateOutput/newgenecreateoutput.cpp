@@ -4,7 +4,7 @@
 #include "newgenetabwidget.h"
 #include "uioutputproject.h"
 
-QString NewGeneCreateOutput::titleBarBaseText { "Create Output Dataset" };
+QString NewGeneCreateOutput::titleBarBaseText { "Output Dataset" };
 
 NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
 	QWidget( parent ),

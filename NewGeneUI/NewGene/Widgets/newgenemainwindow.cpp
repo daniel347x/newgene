@@ -158,13 +158,13 @@ void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		// Let the pane itself handle this.
-		//ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset - ";
+		//ui->CreateOutputPane->LabelCreateOutput->text = "Output Dataset - ";
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		// Let the pane itself handle this.
-		//ui->CreateOutputPane->LabelCreateOutput->text = "Create Output Dataset";
+		//ui->CreateOutputPane->LabelCreateOutput->text = "Output Dataset";
 	}
 
 }
