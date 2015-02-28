@@ -33,33 +33,18 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="LabelManageInput">
-     <property name="styleSheet">
-      <string notr="true">QLabel
-{
-	background-color : #ffffff;
-	color: #727272;
-	font-size: 20px;
-}</string>
-     </property>
-     <property name="text">
-      <string>Input Dataset</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="NewGeneTabWidgetManageInput" name="tabWidgetInput">
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
      <property name="tabPosition">
-      <enum>QTabWidget::South</enum>
+      <enum>QTabWidget::North</enum>
+     </property>
+     <property name="tabShape">
+      <enum>QTabWidget::Triangular</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
+     </property>
+     <property name="elideMode">
+      <enum>Qt::ElideNone</enum>
      </property>
      <property name="documentMode">
       <bool>true</bool>
@@ -70,6 +55,9 @@
       </property>
       <attribute name="title">
        <string> Manage DMU's </string>
+      </attribute>
+      <attribute name="toolTip">
+       <string>Manage Decision Making Units (DMU's).  A DMU represents a column of data.</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
@@ -105,6 +93,9 @@ border-bottom: 0px;;
       <attribute name="title">
        <string> Manage Units of Analysis </string>
       </attribute>
+      <attribute name="toolTip">
+       <string>Manage Units of Analysis.  Each UOA consists of a set of DMU's, and a time range granularity</string>
+      </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
         <number>0</number>
@@ -138,6 +129,9 @@ border-bottom: 0px;;
       </property>
       <attribute name="title">
        <string> Manage Variable Groups </string>
+      </attribute>
+      <attribute name="toolTip">
+       <string>A variable group is a set of tabular data associated with a single unit of analysis.  It must contain the columns identified by the unit of analysis, but it can also have other columns.</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">

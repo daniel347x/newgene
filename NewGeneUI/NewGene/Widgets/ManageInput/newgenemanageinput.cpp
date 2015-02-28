@@ -23,15 +23,15 @@ NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 
 	PrepareInputWidget();
 
-	ui->LabelManageInput->setTextFormat(Qt::TextFormat::RichText);
-	ui->LabelManageInput->setAlignment(Qt::AlignVCenter);
+	//ui->LabelManageInput->setTextFormat(Qt::TextFormat::RichText);
+	//ui->LabelManageInput->setAlignment(Qt::AlignVCenter);
 
-	QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+	//QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
 
-	newLabel += titleBarBaseText;
+	//newLabel += titleBarBaseText;
 
-	newLabel += "</span></div>";
-	ui->LabelManageInput->setText(newLabel);
+	//newLabel += "</span></div>";
+	//ui->LabelManageInput->setText(newLabel);
 
 }
 
@@ -65,13 +65,13 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 		SetInputDatasetText();
 	}
 
-	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
-	{
-		QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
-		newLabel += titleBarBaseText;
-		newLabel += "</span></div>";
-		ui->LabelManageInput->setText(newLabel);
-	}
+	//if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
+	//{
+	//	QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+	//	newLabel += titleBarBaseText;
+	//	newLabel += "</span></div>";
+	//	ui->LabelManageInput->setText(newLabel);
+	//}
 
 }
 
@@ -81,15 +81,15 @@ void NewGeneManageInput::SetInputDatasetText()
 	if (inp)
 	{
 
-		QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
-		newLabel += titleBarBaseText;
-		newLabel += "</span><span style=\"font-size: 12px; font-weight: normal;\">";
+		//QString newLabel { "<div align=\"center\"><span style=\"font-size: 18px; font-weight: normal;\">" };
+		//newLabel += titleBarBaseText;
+		//newLabel += "</span><span style=\"font-size: 12px; font-weight: normal;\">";
 
-		newLabel += "  - "; // spacer
-		newLabel += inp->backend().projectSettings().GetSettingsPath().string().c_str();
+		//newLabel += "  - "; // spacer
+		//newLabel += inp->backend().projectSettings().GetSettingsPath().string().c_str();
 
-		newLabel += "</span></div>";
-		ui->LabelManageInput->setText(newLabel);
+		//newLabel += "</span></div>";
+		//ui->LabelManageInput->setText(newLabel);
 
 	}
 

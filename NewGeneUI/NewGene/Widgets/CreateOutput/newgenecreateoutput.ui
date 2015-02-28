@@ -33,33 +33,15 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="LabelCreateOutput">
-     <property name="styleSheet">
-      <string notr="true">QLabel
-{
-	background-color : #ffffff;
-	color: #727272;
-	font-size: 20px;
-}</string>
-     </property>
-     <property name="text">
-      <string>Output Dataset</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="NewGeneTabWidget" name="tabWidgetOutput">
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
      <property name="tabPosition">
-      <enum>QTabWidget::South</enum>
+      <enum>QTabWidget::North</enum>
+     </property>
+     <property name="tabShape">
+      <enum>QTabWidget::Triangular</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>
