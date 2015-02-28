@@ -177,13 +177,13 @@ void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
 	{
 		// Let the pane itself handle this.
-		//ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset - ";
+		//ui->ManageInputPane->LabelManageInput->text = "Input Dataset - ";
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
 		// Let the pane itself handle this.
-		//ui->ManageInputPane->LabelManageInput->text = "Manage Input Dataset";
+		//ui->ManageInputPane->LabelManageInput->text = "Input Dataset";
 	}
 
 }

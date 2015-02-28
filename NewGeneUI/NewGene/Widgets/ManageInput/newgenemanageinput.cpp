@@ -4,7 +4,7 @@
 #include "newgenetabwidgetmanageinput.h"
 #include "uiinputproject.h"
 
-QString NewGeneManageInput::titleBarBaseText { "Manage Input Dataset" };
+QString NewGeneManageInput::titleBarBaseText { "Input Dataset" };
 
 NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
 	QWidget( parent ),
