@@ -250,6 +250,10 @@ void KadSpinBox::ShowHideFromActiveDMUs(DataChange const & change)
         try
         {
             KadWidgetsScrollArea * scrollArea { dynamic_cast<KadWidgetsScrollArea*>(parent_) };
+			if (scrollArea == nullptr)
+			{
+				return;
+			}
             scrollArea->EmptyTextCheck();
         }
         catch (std::bad_cast &)

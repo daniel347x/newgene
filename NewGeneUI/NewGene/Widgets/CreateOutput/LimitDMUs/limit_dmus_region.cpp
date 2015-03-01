@@ -567,6 +567,10 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									try
 									{
 										dmusModelBottomLeft = dynamic_cast<QStandardItemModel*>(sourceModelLeft);
+										if (dmusModelBottomLeft == nullptr)
+										{
+											return;
+										}
 									}
 									catch (std::bad_cast &)
 									{
@@ -594,6 +598,10 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									try
 									{
 										dmusModelBottomRight = dynamic_cast<QStandardItemModel*>(sourceModelRight);
+										if (dmusModelBottomRight == nullptr)
+										{
+											return;
+										}
 									}
 									catch (std::bad_cast &)
 									{
@@ -833,6 +841,10 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 	try
 	{
 		dmusModel = dynamic_cast<QStandardItemModel*>(sourceModel);
+		if (dmusModel == nullptr)
+		{
+			return;
+		}
 	}
 	catch (std::bad_cast &)
 	{
@@ -918,6 +930,10 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_left_clicked()
 	try
 	{
 		dmusModel = dynamic_cast<QStandardItemModel*>(sourceModel);
+		if (dmusModel == nullptr)
+		{
+			return;
+		}
 	}
 	catch (std::bad_cast &)
 	{
@@ -1018,6 +1034,10 @@ void limit_dmus_region::on_toolButtonSelectAllBottomLeft_clicked()
 	try
 	{
 		dmusModelBottomLeft = dynamic_cast<QStandardItemModel*>(sourceModelLeft);
+		if (dmusModelBottomLeft == nullptr)
+		{
+			return;
+		}
 	}
 	catch (std::bad_cast &)
 	{
@@ -1077,6 +1097,10 @@ void limit_dmus_region::on_toolButtonSelectAllBottomRight_clicked()
 	try
 	{
 		dmusModelBottomRight = dynamic_cast<QStandardItemModel*>(sourceModelRight);
+		if (dmusModelBottomRight == nullptr)
+		{
+			return;
+		}
 	}
 	catch (std::bad_cast &)
 	{

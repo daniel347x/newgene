@@ -8,6 +8,7 @@
 #include <QSize>
 #include <QPalette>
 #include <QPainter>
+#include <QSpacerItem>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -18,8 +19,10 @@ KadWidgetsScrollArea::KadWidgetsScrollArea( QWidget * parent ) :
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, KAD_SPIN_CONTROLS_AREA, true) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
 
-	QLayout * layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
-	this->setLayout(layout);
+    QBoxLayout * layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    layout->addStretch();
+    layout->addStretch();
+    setLayout(layout);
 
 	PrepareOutputWidget();
 
@@ -117,6 +120,20 @@ void KadWidgetsScrollArea::Empty()
 		delete child->widget();
 		delete child;
 	}
+
+    try
+    {
+        QBoxLayout * boxLayout = dynamic_cast<QBoxLayout*>(layout());
+		if (boxLayout)
+		{
+	        boxLayout->addStretch();
+	        boxLayout->addStretch();
+		}
+    }
+    catch (std::bad_cast &)
+    {
+    }
+
     EmptyTextCheck();
 }
 
@@ -167,7 +184,7 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 										try
 										{
 											KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox*>(testWidget);
-											if (testSpinBox->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, uoa_to_remove))
+											if (testSpinBox && testSpinBox->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, uoa_to_remove))
 											{
 												widgetToRemove = testSpinBox;
 												layoutItemToRemove = testLayoutItem;
@@ -225,12 +242,31 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & identifier, WidgetInstanceIdentifiers const & active_dmus)
 {
 
-	WidgetInstanceIdentifier new_identifier(identifier);
+    // Remove the stretch at the end
+    QLayoutItem * stretcher {};
+    if (layout()->count() && (stretcher = layout()->takeAt(layout()->count()-1)) != 0)
+    {
+        try
+        {
+           QSpacerItem * spacer { dynamic_cast<QSpacerItem*>(stretcher) };
+           if (spacer)
+           {
+               delete stretcher->widget();
+               delete stretcher;
+           }
+        }
+        catch (std::bad_cast &)
+        {
+
+        }
+    }
+
+    WidgetInstanceIdentifier new_identifier(identifier);
 	QSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
-	newSpinBox->setFixedHeight(50);
-	newSpinBox->setFixedWidth(400);
+    newSpinBox->setFixedHeight(30);
+    newSpinBox->setFixedWidth(200);
 	QFont currFont = newSpinBox->font();
-	currFont.setPixelSize(20);
+    currFont.setPixelSize(12);
 	newSpinBox->setFont(currFont);
 	std::string stylesheet(" QSpinBox { color: #960488; font-weight: bold; } ");
 	newSpinBox->setStyleSheet(stylesheet.c_str());
@@ -254,7 +290,19 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 	{
 		newSpinBox->setVisible(true);
 	}
-	layout()->addWidget(newSpinBox);
+    layout()->addWidget(newSpinBox);
+
+    try
+    {
+        QBoxLayout * boxLayout = dynamic_cast<QBoxLayout*>(layout());
+		if (boxLayout)
+		{
+	        boxLayout->addStretch();
+		}
+    }
+    catch (std::bad_cast &)
+    {
+    }
 
     EmptyTextCheck();
 
@@ -273,7 +321,7 @@ void KadWidgetsScrollArea::EmptyTextCheck()
         try
         {
             KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox*>(testWidget);
-            if (testSpinBox->isVisible())
+            if (testSpinBox && testSpinBox->isVisible())
             {
                 any_spincontrols_visible = true;
                 break;
@@ -281,7 +329,7 @@ void KadWidgetsScrollArea::EmptyTextCheck()
         }
         catch (std::bad_cast &)
         {
-            // guess not
+            // this will catch throws for the "stretch" layout items, but who cares - it's infrequent
         }
 
     }

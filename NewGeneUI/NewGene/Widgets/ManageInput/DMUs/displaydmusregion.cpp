@@ -756,11 +756,22 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 	}
 
 	QStandardItemModel * model = nullptr;
+	bool bad = false;
 	try
 	{
 		model = dynamic_cast<QStandardItemModel *>(dmuMembersModel->sourceModel());
 	}
 	catch (std::bad_cast &)
+	{
+		bad = true;
+	}
+
+	if (model == nullptr)
+	{
+		bad = true;
+	}
+
+	if (bad)
 	{
 		boost::format msg("Unable to obtain model for DMU member list.");
 		QMessageBox msgBox;
@@ -831,6 +842,12 @@ void DisplayDMUsRegion::on_pushButton_deselect_all_dmu_members_clicked()
 		return;
 	}
 
+	if (sourceStandardModel == nullptr)
+	{
+		// guess not
+		return;
+	}
+
 	int nrows = sourceStandardModel->rowCount();
 	for (int row=0; row<nrows; ++row) {
 		QStandardItem * item = sourceStandardModel->item(row, 0);
@@ -869,6 +886,12 @@ void DisplayDMUsRegion::on_pushButton_select_all_dmu_members_clicked()
 		sourceStandardModel = dynamic_cast<QStandardItemModel*>(sourceModel);
 	}
 	catch (std::bad_cast &)
+	{
+		// guess not
+		return;
+	}
+
+	if (sourceStandardModel == nullptr)
 	{
 		// guess not
 		return;
@@ -1091,6 +1114,12 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 										return;
 									}
 
+									if (memberStandardSourceModel == nullptr)
+									{
+										// guess not
+										return;
+									}
+								
 									QStandardItem * item = new QStandardItem();
 									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(new_dmu_member);
 
@@ -1138,6 +1167,12 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 										return;
 									}
 
+									if (memberStandardSourceModel == nullptr)
+									{
+										// guess not
+										return;
+									}
+								
 									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
 									QList<QStandardItem *> items = memberStandardSourceModel->findItems(text.c_str());
 									if (items.count() == 1)

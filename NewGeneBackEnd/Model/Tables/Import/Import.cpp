@@ -1074,11 +1074,23 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
 	{
 
+		bool bad = false;
+
 		try
 		{
 			inputModel = dynamic_cast<InputModel *>(model);
 		}
 		catch (std::bad_cast &)
+		{
+			bad = true;
+		}
+
+		if (inputModel == nullptr)
+		{
+			bad = true;
+		}
+
+		if (bad)
 		{
 			boost::format msg("Bad input mode in DoImport.");
 			errorMsg = msg.str();
@@ -1105,11 +1117,23 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
 	{
 
+		bool bad = false;
+
 		try
 		{
 			outputModel = dynamic_cast<OutputModel *>(model);
 		}
 		catch (std::bad_cast &)
+		{
+			bad = true;
+		}
+
+		if (outputModel == nullptr)
+		{
+			bad = true;
+		}
+
+		if (bad)
 		{
 			boost::format msg("Bad output mode in DoImport.");
 			errorMsg = msg.str();
@@ -1155,6 +1179,12 @@ Importer::~Importer()
 			return;
 		}
 
+		if (inputModel == nullptr)
+		{
+			// no throws in ctor
+			return;
+		}
+
 		if (!table->ImportEnd(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
 		{
 			// no throws in ctor
@@ -1173,6 +1203,13 @@ Importer::~Importer()
 			// no throws in ctor
 			return;
 		}
+
+		if (outputModel == nullptr)
+		{
+			// no throws in ctor
+			return;
+		}
+
 		if (!table->ImportEnd(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
 		{
 			// no throws in ctor

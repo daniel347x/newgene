@@ -37,7 +37,7 @@
      <property name="styleSheet">
       <string notr="true">QLabel
 {
-	background-color : #EDF2ED;
+	background-color : #F6F2ED;
 	font-weight: bold;
 	font-size: 16px;
 }</string>

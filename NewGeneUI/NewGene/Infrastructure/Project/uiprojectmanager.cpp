@@ -302,6 +302,10 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 			try
 			{
 				mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+				if (mainWindow == nullptr)
+				{
+					return;
+				}
 			}
 			catch (std::bad_cast &)
 			{
@@ -913,6 +917,10 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		try
 		{
 			mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+			if (mainWindow == nullptr)
+			{
+				return;
+			}
 			mainWindow->SetInputDatasetText();
 		}
 		catch (std::bad_cast &)
@@ -1017,6 +1025,10 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 		try
 		{
 			mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+			if (mainWindow == nullptr)
+			{
+				return;
+			}
 			mainWindow->SetOutputDatasetText();
 		}
 		catch (std::bad_cast &)

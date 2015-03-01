@@ -4256,6 +4256,11 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 		bad = true;
 	}
 
+	if (setting_path_to_kad_output == nullptr)
+	{
+		bad = true;
+	}
+
 	if (!bad)
 	{
 		bool output_file_exists = boost::filesystem::exists(setting_path_to_kad_output->ToString());

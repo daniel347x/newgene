@@ -16,11 +16,22 @@ bool QSortFilterProxyModel_NumbersLast::lessThan(const QModelIndex &left, const 
 {
 
 	QStandardItemModel * model = nullptr;
+	bool bad = false;
 	try
 	{
 		model = dynamic_cast<QStandardItemModel *>(sourceModel());
 	}
 	catch (std::bad_cast &)
+	{
+		bad = true;
+	}
+
+	if (model == nullptr)
+	{
+		bad = true;
+	}
+
+	if (bad)
 	{
 		boost::format msg("Unable to obtain model for DMU member list.");
 		throw NewGeneException() << newgene_error_description(msg.str());

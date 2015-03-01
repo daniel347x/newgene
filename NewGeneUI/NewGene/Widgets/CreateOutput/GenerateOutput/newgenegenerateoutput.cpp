@@ -84,6 +84,11 @@ void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUT
 		bad = true;
 	}
 
+	if (setting_path_to_kad_output == nullptr)
+	{
+		bad = true;
+	}
+
 	if (!bad)
 	{
 		if (setting_path_to_kad_output)

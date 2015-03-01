@@ -70,6 +70,10 @@ BackendGlobalSetting * GlobalSettings::CloneSetting(Messager & messager, Backend
 		case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
 			{
 				GlobalSetting_Test * setting = dynamic_cast<GlobalSetting_Test*>(current_setting);
+				if (setting == nullptr)
+				{
+					return nullptr;
+				}
 				return new GlobalSetting_Test(messager, setting->getString());
 			}
 			break;

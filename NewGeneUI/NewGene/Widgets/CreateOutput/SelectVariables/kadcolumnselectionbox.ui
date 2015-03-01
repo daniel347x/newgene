@@ -19,7 +19,7 @@
   <property name="frameShadow">
    <enum>QFrame::Raised</enum>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -59,7 +59,7 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">#scrollAreaWidgetContents {background-color: #F5F9F5;}</string>
+       <string notr="true">#scrollAreaWidgetContents {background-color: #F8FAF5;}</string>
       </property>
       <widget class="QLabel" name="emptyKadsLabel">
        <property name="geometry">
@@ -70,16 +70,16 @@
          <height>13</height>
         </rect>
        </property>
-       <property name="styleSheet">
-        <string notr="true">#emptyKadsLabel {font-weight: bold; color: #454545;}</string>
-       </property>
-       <property name="text">
-        <string>Select some variables to see K-ad options here</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
+         <property name="styleSheet">
+          <string notr="true">#emptyKadsLabel {font-weight: bold; color: #454545;}</string>
+         </property>
+         <property name="text">
+          <string>Select some variables to see K-ad options here</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
      </widget>
     </widget>
    </item>

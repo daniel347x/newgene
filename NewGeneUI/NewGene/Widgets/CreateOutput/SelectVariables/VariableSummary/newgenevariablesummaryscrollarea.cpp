@@ -183,7 +183,7 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 										try
 										{
 											NewGeneVariableSummaryGroup * testVG = dynamic_cast<NewGeneVariableSummaryGroup*>(testWidget);
-											if (testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg_to_remove))
+											if (testVG && testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg_to_remove))
 											{
 												widgetToRemove = testVG;
 												layoutItemToRemove = testLayoutItem;
