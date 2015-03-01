@@ -6,6 +6,7 @@
 
 class QStandardItem;
 class QListView;
+class NewGeneVariablesToolbox;
 
 namespace Ui
 {
@@ -17,7 +18,7 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		Q_OBJECT
 
 	public:
-		explicit NewGeneVariableGroup( QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr );
+        explicit NewGeneVariableGroup(NewGeneVariablesToolbox * toolbox_, QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr );
 		~NewGeneVariableGroup();
 
 		void HandleChanges(DataChangeMessage const &);
@@ -45,6 +46,7 @@ private slots:
         void on_toolButtonDeselectAll_clicked();
 
 private:
+        NewGeneVariablesToolbox * toolbox;
 		Ui::NewGeneVariableGroup * ui;
 };
 

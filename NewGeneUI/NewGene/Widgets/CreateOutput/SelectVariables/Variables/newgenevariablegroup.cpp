@@ -6,14 +6,15 @@
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
+#include "./newgenevariablestoolbox.h"
 
-NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
+NewGeneVariableGroup::NewGeneVariableGroup( NewGeneVariablesToolbox * toolbox_, QWidget * parent_, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
 
-	QWidget( parent ),
+    QWidget( parent_ ),
 
 	NewGeneWidget( WidgetCreationInfo(
 										this, // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-										parent,
+                                        parent_,
 										WIDGET_NATURE_OUTPUT_WIDGET,
 										VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE,
 										false,
@@ -21,9 +22,13 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIden
 									 )
 				 ),
 
+    toolbox(toolbox_),
+
 	ui( new Ui::NewGeneVariableGroup )
 
 {
+
+	this->setObjectName(data_instance_.code->c_str());
 
 	ui->setupUi( this );
 
@@ -94,7 +99,7 @@ void NewGeneVariableGroup::RefreshAllWidgets()
 void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE widget_data)
 {
 
-	if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
+	if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid))
 	{
 		boost::format msg("Invalid widget refresh in NewGeneVariableGroup widget.");
 		QMessageBox msgBox;
@@ -146,7 +151,7 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
         return;
     }
 
-    std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{
 		switch (change.change_type)
 		{
@@ -201,7 +206,8 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 									return; // from lambda
 								}
 
-								std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&model, &change, this](WidgetInstanceIdentifier const & child_identifier)
+                                bool saveChecked = false;
+                                std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&model, &change, &saveChecked, this](WidgetInstanceIdentifier const & child_identifier)
 								{
 									int number_variables = model->rowCount();
 									for (int n=0; n<number_variables; ++n)
@@ -224,6 +230,7 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 													if (!checked)
 													{
 														currentItem->setCheckState(Qt::Checked);
+                                                        checked = true;
 													}
 												}
 												else if (change.change_intention == DATA_CHANGE_INTENTION__REMOVE)
@@ -231,14 +238,25 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 													if (checked)
 													{
 														currentItem->setCheckState(Qt::Unchecked);
-													}
+                                                        checked = false;
+                                                    }
 												}
 
 											}
 
+                                            if (checked)
+                                            {
+                                                saveChecked = true;
+                                            }
+
 										}
 									}
 								});
+
+                                if (toolbox)
+                                {
+                                    toolbox->SetBarColor(saveChecked, this->objectName().toStdString());
+                                }
 
 							}
 							break;
@@ -293,7 +311,8 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
 	QStandardItemModel * model = new QStandardItemModel(ui->listView);
 
 	int index = 0;
-	std::for_each(vg_members_and_bools.cbegin(), vg_members_and_bools.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, bool> const & vg_member_and_bool)
+    bool saveChecked {false};
+    std::for_each(vg_members_and_bools.cbegin(), vg_members_and_bools.cend(), [this, &index, &model, &saveChecked](std::pair<WidgetInstanceIdentifier, bool> const & vg_member_and_bool)
 	{
 		WidgetInstanceIdentifier const & identifier = vg_member_and_bool.first;
 		bool checked = vg_member_and_bool.second;
@@ -319,6 +338,7 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
 			if (checked)
 			{
 				item->setCheckState(Qt::Checked);
+                saveChecked = true;
 			}
 			QVariant v;
 			v.setValue(identifier);
@@ -334,6 +354,11 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
 
 	ui->listView->setModel(model);
 	if (oldSelectionModel) delete oldSelectionModel;
+
+    if (toolbox)
+    {
+        toolbox->SetBarColor(saveChecked, this->objectName().toStdString());
+    }
 
 	return true;
 

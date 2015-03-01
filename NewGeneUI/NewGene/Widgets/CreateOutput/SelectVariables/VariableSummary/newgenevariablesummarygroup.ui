@@ -18,7 +18,11 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QListView" name="listView"/>
+    <widget class="QListView" name="listView">
+     <property name="styleSheet">
+      <string notr="true">* {color: #101078;}</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

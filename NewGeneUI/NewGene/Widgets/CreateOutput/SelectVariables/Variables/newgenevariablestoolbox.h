@@ -15,6 +15,7 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 		explicit NewGeneVariablesToolbox( QWidget * parent = 0 );
 
 		void HandleChanges(DataChangeMessage const &);
+        void SetBarColor(bool active, std::string const & name);
 
 	signals:
 

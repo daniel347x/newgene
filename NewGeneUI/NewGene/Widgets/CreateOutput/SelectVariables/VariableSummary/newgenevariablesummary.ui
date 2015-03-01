@@ -37,9 +37,9 @@
      <property name="styleSheet">
       <string notr="true">QLabel
 {
-	background-color : #F6F3EE;
+	background-color : #F6F3F0;
 	font-weight: bold;
-	font-size: 16px;
+	font-size: 14px;  padding-top: 2px; padding-bottom: 2px;
 }</string>
      </property>
      <property name="text">
@@ -64,7 +64,7 @@
         <x>0</x>
         <y>0</y>
         <width>541</width>
-        <height>406</height>
+        <height>404</height>
        </rect>
       </property>
      </widget>
