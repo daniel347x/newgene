@@ -33,6 +33,7 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 		void AddKadSpinWidget(WidgetInstanceIdentifier const & identifier, WidgetInstanceIdentifiers const & active_dmus);
 		void Empty();
         void resizeEvent(QResizeEvent *);
+        void paintEvent(QPaintEvent *);
 
 };
 

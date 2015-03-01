@@ -6,6 +6,8 @@
 #include <QGraphicsColorizeEffect>
 #include <QLabel>
 #include <QSize>
+#include <QPalette>
+#include <QPainter>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -301,7 +303,7 @@ void KadWidgetsScrollArea::EmptyTextCheck()
 
 void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
 {
-    QLabel * emptySpinsLabel { findChild<QLabel*>("emptyKadsLabel") };
+	QLabel * emptySpinsLabel { findChild<QLabel*>("emptyKadsLabel") };
     if (emptySpinsLabel)
     {
         QSize mySize { size() };
@@ -309,3 +311,11 @@ void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
         emptySpinsLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 2 - labelSize.height() / 2);
     }
 }
+
+void KadWidgetsScrollArea::paintEvent(QPaintEvent *)
+ {
+     QStyleOption opt;
+     opt.init(this);
+     QPainter p(this);
+     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+ }
