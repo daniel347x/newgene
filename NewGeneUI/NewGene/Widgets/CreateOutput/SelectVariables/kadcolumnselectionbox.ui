@@ -59,7 +59,7 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">#scrollAreaWidgetContents {background-color: #EFF3EE;}</string>
+       <string notr="true">#scrollAreaWidgetContents {background-color: #EEFFEE;}</string>
       </property>
       <widget class="QLabel" name="emptyKadsLabel">
        <property name="geometry">
