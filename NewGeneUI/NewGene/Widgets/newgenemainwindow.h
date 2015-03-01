@@ -38,6 +38,7 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 
 		void SetInputDatasetText();
 		void SetOutputDatasetText();
+        void SetTitle();
 
 	public slots:
 		void doInitialize();
@@ -62,8 +63,10 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void on_actionNew_Output_Dataset_triggered();
 		void on_actionSave_Input_Dataset_As_triggered();
 		void on_actionSave_Output_Dataset_As_triggered();
+        void on_actionDisplay_input_dataset_path_triggered();
+        void on_actionDisplay_output_dataset_path_triggered();
 
-	private:
+private:
 		Ui::NewGeneMainWindow * ui;
 
 		friend class NewGeneWidget;

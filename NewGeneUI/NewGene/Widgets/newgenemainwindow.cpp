@@ -4,7 +4,11 @@
 #endif
 #include "newgenemainwindow.h"
 #include "ui_newgenemainwindow.h"
+#include <QLabel>
 #include <QMessageBox>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QDialogButtonBox>
 #include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "uistatusmanager.h"
 #include "uidocumentmanager.h"
@@ -436,4 +440,60 @@ void NewGeneMainWindow::SetInputDatasetText()
 void NewGeneMainWindow::SetOutputDatasetText()
 {
 	ui->CreateOutputPane->SetOutputDatasetText();
+}
+
+void NewGeneMainWindow::on_actionDisplay_input_dataset_path_triggered()
+{
+    std::string input = inp->backend().projectSettings().GetSettingsPath().string();
+    if (!input.empty())
+    {
+        // From http://stackoverflow.com/a/17512615/368896
+        QDialog dialog(this);
+        dialog.setWindowFlags(windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
+        QFormLayout form(&dialog);
+        form.addRow(new QLabel("Input dataset path:"));
+        QLineEdit *lineEdit = new QLineEdit(&dialog);
+        lineEdit->setText(input.c_str());
+        lineEdit->setReadOnly(true);
+        lineEdit->setMinimumWidth(600);
+        form.addRow(lineEdit);
+        QDialogButtonBox buttonBox(QDialogButtonBox::Ok, Qt::Horizontal, &dialog);
+        form.addRow(&buttonBox);
+        QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
+        {
+            dialog.close();
+        });
+        dialog.exec();
+    }
+}
+
+void NewGeneMainWindow::on_actionDisplay_output_dataset_path_triggered()
+{
+    std::string output = outp->backend().projectSettings().GetSettingsPath().string();
+    if (!output.empty())
+    {
+        // From http://stackoverflow.com/a/17512615/368896
+        QDialog dialog(this);
+        dialog.setWindowFlags(windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
+        QFormLayout form(&dialog);
+        form.addRow(new QLabel("Output dataset path:"));
+        QLineEdit *lineEdit = new QLineEdit(&dialog);
+        lineEdit->setText(output.c_str());
+        lineEdit->setReadOnly(true);
+        lineEdit->setMinimumWidth(600);
+        form.addRow(lineEdit);
+        QDialogButtonBox buttonBox(QDialogButtonBox::Ok, Qt::Horizontal, &dialog);
+        form.addRow(&buttonBox);
+        QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
+        {
+            dialog.close();
+        });
+        dialog.exec();
+    }
+}
+
+void NewGeneMainWindow::SetTitle()
+{
+    std::string output = outp->backend().projectSettings().GetSettingsPath().string();
+    std::string input = inp->backend().projectSettings().GetSettingsPath().string();
 }

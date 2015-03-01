@@ -173,6 +173,7 @@
     <addaction name="actionOpen_Input_Dataset"/>
     <addaction name="actionSave_Input_Dataset_As"/>
     <addaction name="actionClose_Current_Input_Dataset"/>
+    <addaction name="actionDisplay_input_dataset_path"/>
    </widget>
    <widget class="QMenu" name="menuOutput">
     <property name="title">
@@ -182,6 +183,7 @@
     <addaction name="actionOpen_Output_Dataset"/>
     <addaction name="actionSave_Output_Dataset_As"/>
     <addaction name="actionClose_Current_Output_Dataset"/>
+    <addaction name="actionDisplay_output_dataset_path"/>
    </widget>
    <addaction name="menuInput"/>
    <addaction name="menuOutput"/>
@@ -225,6 +227,16 @@
   <action name="actionSave_Output_Dataset_As">
    <property name="text">
     <string>Save Output Dataset As...</string>
+   </property>
+  </action>
+  <action name="actionDisplay_input_dataset_path">
+   <property name="text">
+    <string>Display input dataset path</string>
+   </property>
+  </action>
+  <action name="actionDisplay_output_dataset_path">
+   <property name="text">
+    <string>Display output dataset path</string>
    </property>
   </action>
  </widget>
