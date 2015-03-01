@@ -141,7 +141,7 @@ SOURCES += main.cpp\
 	Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.cpp \
 	Infrastructure/UIAction/kadcountchange.cpp \
 	Infrastructure/UIAction/generateoutput.cpp \
-	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.cpp \
+	Widgets/CreateOutput/GenerateOutput/newgenedatetimewidget.cpp \
 	Infrastructure/UIAction/timerangechange.cpp \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.cpp \
 	Infrastructure/UIAction/generaloptions.cpp \
@@ -260,7 +260,7 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.h \
 	Infrastructure/UIAction/kadcountchange.h \
 	Infrastructure/UIAction/generateoutput.h \
-	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.h \
+	Widgets/CreateOutput/GenerateOutput/newgenedatetimewidget.h \
 	Infrastructure/UIAction/timerangechange.h \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.h \
 	Infrastructure/UIAction/generaloptions.h \
