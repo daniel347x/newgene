@@ -263,16 +263,16 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 
     WidgetInstanceIdentifier new_identifier(identifier);
 	QSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
-    newSpinBox->setFixedHeight(30);
+    newSpinBox->setFixedHeight(20);
     newSpinBox->setFixedWidth(200);
 	QFont currFont = newSpinBox->font();
-    currFont.setPixelSize(12);
+    currFont.setPixelSize(11);
 	newSpinBox->setFont(currFont);
-	std::string stylesheet(" QSpinBox { color: #960488; font-weight: bold; } ");
+    std::string stylesheet(" QSpinBox { color: #333333; font-weight: bold; } ");
 	newSpinBox->setStyleSheet(stylesheet.c_str());
 	std::string prefixText(" #");
 	prefixText += *identifier.longhand;
-	prefixText += " columns:  ";
+    prefixText += " cols:  ";
 	newSpinBox->setPrefix(prefixText.c_str());
 	bool not_me = true;
 	std::for_each(active_dmus.cbegin(), active_dmus.cend(), [&](WidgetInstanceIdentifier const & the_dmu)
