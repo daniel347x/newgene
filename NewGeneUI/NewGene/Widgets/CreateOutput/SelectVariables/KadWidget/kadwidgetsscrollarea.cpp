@@ -4,6 +4,8 @@
 #include <QLayout>
 #include <QFont>
 #include <QGraphicsColorizeEffect>
+#include <QLabel>
+#include <QSize>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -113,6 +115,7 @@ void KadWidgetsScrollArea::Empty()
 		delete child->widget();
 		delete child;
 	}
+    EmptyTextCheck();
 }
 
 void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_message)
@@ -184,6 +187,8 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 										delete layoutItemToRemove;
 										widgetToRemove = nullptr;
 										layoutItemToRemove = nullptr;
+
+                                        EmptyTextCheck();
 									}
 
 								}
@@ -249,4 +254,58 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 	}
 	layout()->addWidget(newSpinBox);
 
+    EmptyTextCheck();
+
+}
+
+void KadWidgetsScrollArea::EmptyTextCheck()
+{
+
+    int current_number = layout()->count();
+    bool any_spincontrols_visible = false;
+    int i = 0;
+    for (i=0; i<current_number; ++i)
+    {
+        QLayoutItem * testLayoutItem = layout()->itemAt(i);
+        QWidget * testWidget(testLayoutItem->widget());
+        try
+        {
+            KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox*>(testWidget);
+            if (testSpinBox->isVisible())
+            {
+                any_spincontrols_visible = true;
+                break;
+            }
+        }
+        catch (std::bad_cast &)
+        {
+            // guess not
+        }
+
+    }
+
+    QLabel * emptySpinsLabel { findChild<QLabel*>("emptyKadsLabel") };
+    if (emptySpinsLabel)
+    {
+        if (!any_spincontrols_visible)
+        {
+            emptySpinsLabel->setVisible(true);
+        }
+        else
+        {
+            emptySpinsLabel->setVisible(false);
+        }
+    }
+
+}
+
+void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
+{
+    QLabel * emptySpinsLabel { findChild<QLabel*>("emptyKadsLabel") };
+    if (emptySpinsLabel)
+    {
+        QSize mySize { size() };
+        QSize labelSize { emptySpinsLabel->size() };
+        emptySpinsLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 2 - labelSize.height() / 2);
+    }
 }

@@ -20,7 +20,16 @@
    <enum>QFrame::Raised</enum>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -49,6 +58,28 @@
         <height>69</height>
        </rect>
       </property>
+      <property name="styleSheet">
+       <string notr="true">#scrollAreaWidgetContents {background-color: #EFF3EE;}</string>
+      </property>
+      <widget class="QLabel" name="emptyKadsLabel">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>30</y>
+         <width>425</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#emptyKadsLabel {font-weight: bold; color: #454545;}</string>
+       </property>
+       <property name="text">
+        <string>Select some variables to see K-ad options here</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>

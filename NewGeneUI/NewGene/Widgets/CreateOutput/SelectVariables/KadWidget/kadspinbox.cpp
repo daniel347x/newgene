@@ -3,6 +3,7 @@
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
+#include "kadwidgetsscrollarea.h"
 
 KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
 
@@ -242,4 +243,18 @@ void KadSpinBox::ShowHideFromActiveDMUs(DataChange const & change)
 	{
 		this->setVisible(true);
 	}
+
+    QWidget * parent_ = this->parentWidget();
+    if (parent_)
+    {
+        try
+        {
+            KadWidgetsScrollArea * scrollArea { dynamic_cast<KadWidgetsScrollArea*>(parent_) };
+            scrollArea->EmptyTextCheck();
+        }
+        catch (std::bad_cast &)
+        {
+
+        }
+    }
 }

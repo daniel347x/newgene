@@ -51,7 +51,7 @@
        <string notr="true"/>
       </property>
       <attribute name="title">
-       <string> Select variables and timerange</string>
+       <string> Select variables </string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
