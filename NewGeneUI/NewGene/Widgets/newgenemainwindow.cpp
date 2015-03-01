@@ -157,17 +157,19 @@ void NewGeneMainWindow::doInitialize()
 void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
-	NewGeneWidget::UpdateOutputConnections(connection_type, project);
+    NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
-	{
-		// Let the pane itself handle this.
-		//ui->CreateOutputPane->LabelCreateOutput->text = "Output Dataset - ";
-	}
+    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+    {
+        SetTitle();
+        // Let the pane itself handle this.
+        //ui->CreateOutputPane->LabelCreateOutput->text = "Output Dataset - ";
+    }
 
-	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
-	{
-		// Let the pane itself handle this.
+    if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+    {
+        SetTitle();
+        // Let the pane itself handle this.
 		//ui->CreateOutputPane->LabelCreateOutput->text = "Output Dataset";
 	}
 
@@ -180,13 +182,15 @@ void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
 	{
+        SetTitle();
 		// Let the pane itself handle this.
 		//ui->ManageInputPane->LabelManageInput->text = "Input Dataset - ";
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
-		// Let the pane itself handle this.
+        SetTitle();
+        // Let the pane itself handle this.
 		//ui->ManageInputPane->LabelManageInput->text = "Input Dataset";
 	}
 
@@ -494,6 +498,39 @@ void NewGeneMainWindow::on_actionDisplay_output_dataset_path_triggered()
 
 void NewGeneMainWindow::SetTitle()
 {
-    std::string output = outp->backend().projectSettings().GetSettingsPath().string();
-    std::string input = inp->backend().projectSettings().GetSettingsPath().string();
+
+    boost::filesystem::path output_path;
+    boost::filesystem::path input_path;
+
+    if (outp)
+    {
+        output_path = outp->backend().projectSettings().GetSettingsPath();
+    }
+
+    if (inp)
+    {
+        input_path = inp->backend().projectSettings().GetSettingsPath();
+    }
+
+    std::string output {output_path.string()};
+    std::string input {input_path.string()};
+
+    std::string title {"NewGene"};
+
+    if (!input.empty())
+    {
+        title += " [Input: ";
+        title += input_path.filename().string();
+        title += "]";
+    }
+
+    if (!output.empty())
+    {
+        title += " [Output: ";
+        title += output_path.filename().string();
+        title += "]";
+    }
+
+    this->setWindowTitle(title.c_str());
+
 }
