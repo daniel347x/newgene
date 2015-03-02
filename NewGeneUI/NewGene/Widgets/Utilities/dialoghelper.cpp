@@ -19,6 +19,7 @@
 #include "../../../../NewGeneBackEnd/Model/Tables/TableInstances/DMU.h"
 #include "../../../../NewGeneBackEnd/Model/Tables/TableInstances/UOA.h"
 #include "../../../../NewGeneBackEnd/Model/Tables/TableInstances/VariableGroup.h"
+#include "htmldelegate.h"
 
 #include <set>
 
@@ -1042,6 +1043,7 @@ void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWid
 	QLabel * title = new QLabel(labelTitle, &dialog);
 
 	listpane = new QListView(&VgConstructionPanes);
+	listpane->setAlternatingRowColors(true);
 
 	formConstructionPane.addWidget(listpane);
 
@@ -1068,7 +1070,7 @@ void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWid
 				}
 
 				QStandardItem * item = new QStandardItem();
-				std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa, *uoa.foreign_key_identifiers);
+				std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa, *uoa.foreign_key_identifiers, true);
 				item->setText(text.c_str());
 				item->setEditable(false);
 				item->setCheckable(false);
@@ -1085,6 +1087,7 @@ void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWid
 		model->sort(0);
 
 		listpane->setModel(model);
+    	listpane->setItemDelegate(new HtmlDelegate{});
 
 	}
 
@@ -1098,6 +1101,7 @@ void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormL
 
 	// The parent of the list view is a widget, not a layout
 	listpane = new QListView(&VgConstructionPanes);
+	listpane->setAlternatingRowColors(true);
 
 	// But the list view gets added to the layout, not to its parent widget
 	formConstructionPane.addWidget(listpane);
@@ -1126,7 +1130,7 @@ void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormL
 		{
 
 			QStandardItem * item = new QStandardItem();
-			std::string text = Table_VG_CATEGORY::GetVgDisplayText(vg);
+			std::string text = Table_VG_CATEGORY::GetVgDisplayText(vg, true);
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
@@ -1142,6 +1146,7 @@ void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormL
 		model->sort(0);
 
 		listpane->setModel(model);
+		listpane->setItemDelegate(new HtmlDelegate{});
 
 		listpane->clearSelection();
 

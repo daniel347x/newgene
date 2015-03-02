@@ -53,7 +53,7 @@ class Table_UOA_Identifier : public Table<TABLE__UOA_IDENTIFIER, TABLE_INSTANCE_
 		bool DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, DataChangeMessage & change_message);
 		bool CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & uoa_code, std::string const & uoa_description, WidgetInstanceIdentifiers const & dmu_categories, TIME_GRANULARITY const & time_granularity);
 
-		static std::string GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories);
+		static std::string GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories, bool const = false);
 
 };
 

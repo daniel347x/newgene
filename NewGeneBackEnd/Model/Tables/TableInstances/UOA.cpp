@@ -392,7 +392,7 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 
 }
 
-std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories)
+std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories, bool const formatted)
 {
 
 	if (!uoa_category.uuid || uoa_category.uuid->empty())
@@ -406,6 +406,11 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 
 	std::string displayText;
 
+	if (formatted)
+	{
+		displayText += "<br>";
+	}
+
 	if (uoa_category.code && !uoa_category.code->empty())
 	{
 		has_code = true;
@@ -416,29 +421,26 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		has_description = true;
 	}
 
+	if (formatted)
+	{
+		displayText += "<b>";
+	}
+
 	if (has_code || has_description)
 	{
 		if (!has_code)
 		{
 			displayText += *uoa_category.longhand;
-			//displayText += " (";
-			//displayText += *uoa_category.uuid;
-			//displayText += ")";
 		}
 		else if (!has_description)
 		{
 			displayText += *uoa_category.code;
-			//displayText += " (";
-			//displayText += *uoa_category.uuid;
-			//displayText += ")";
 		}
 		else
 		{
 			displayText += *uoa_category.longhand;
 			displayText += " (";
 			displayText += *uoa_category.code;
-			//displayText += " - ";
-			//displayText += *uoa_category.uuid;
 			displayText += ")";
 		}
 	}
@@ -447,10 +449,19 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		displayText += *uoa_category.uuid;
 	}
 
+	if (formatted)
+	{
+		displayText += "</b>";
+	}
 
 	// Now the DMU categories, if requested
 	if (!dmu_categories.empty())
 	{
+		if (formatted)
+		{
+			displayText += "<br>";
+		}
+	
 		displayText += " (DMU/s: ";
 		bool first = true;
 		std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
@@ -470,6 +481,10 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		displayText += ")";
 	}
 
+	if (formatted)
+	{
+		displayText += "<br>";
+	}
 	switch (uoa_category.time_granularity)
 	{
 		case TIME_GRANULARITY__NONE:
@@ -484,6 +499,11 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		case TIME_GRANULARITY__DAY:
 			displayText += " (Day granularity)";
 			break;
+	}
+
+	if (formatted)
+	{
+		displayText += "<br>";
 	}
 
 	return displayText;

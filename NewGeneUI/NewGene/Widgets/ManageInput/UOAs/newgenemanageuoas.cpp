@@ -12,6 +12,7 @@
 #include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
 #include "../../../../NewGeneBackEnd/Model/InputModel.h"
 #include "../../../../NewGeneBackEnd/Model/TimeGranularity.h"
+#include "../../Utilities/htmldelegate.h"
 
 NewGeneManageUOAs::NewGeneManageUOAs( QWidget * parent ) :
 	QWidget( parent ),
@@ -141,7 +142,7 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 		{
 
 			QStandardItem * item = new QStandardItem();
-			std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
+			std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories, true);
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
@@ -158,7 +159,8 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 	model->sort(0);
 
 	ui->listViewManageUOAs->setModel(model);
-	if (oldSelectionModel) delete oldSelectionModel;
+    ui->listViewManageUOAs->setItemDelegate(new HtmlDelegate{});
+    if (oldSelectionModel) delete oldSelectionModel;
 
 }
 
@@ -535,7 +537,7 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifier const & uoa_category = change.parent_identifier;
 								WidgetInstanceIdentifiers const & dmu_categories = change.child_identifiers;
 
-								std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
+								std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories, true);
 
 								QStandardItem * item = new QStandardItem();
 								item->setText(text.c_str());
