@@ -25,7 +25,7 @@ limit_dmus_region::limit_dmus_region(QWidget *parent) :
 
 	PrepareOutputWidget();
 
-	ui->limit_dmus_bottom_half_widget->hide(); // initially, no DMU category is checked
+    //ui->limit_dmus_bottom_half_widget->hide(); // initially, no DMU category is checked
 
 }
 
@@ -342,11 +342,11 @@ void limit_dmus_region::ReceiveDMUSelectionChanged(const QItemSelection & select
 		ui->checkBox_limit_dmus->setChecked(is_limited);
 		if (is_limited)
 		{
-			ui->limit_dmus_bottom_half_widget->show();
+            //ui->limit_dmus_bottom_half_widget->show();
 		}
 		else
 		{
-			ui->limit_dmus_bottom_half_widget->hide();
+            //ui->limit_dmus_bottom_half_widget->hide();
 		}
 
 		ResetDmuMembersPanes(dmu_category, is_limited, dmu_set_members__all, dmu_set_members_not_limited, dmu_set_members__limited);
@@ -987,12 +987,12 @@ void limit_dmus_region::on_checkBox_limit_dmus_toggled(bool checked)
 	if (checked)
 	{
 		checkbox_state = "y";
-		ui->limit_dmus_bottom_half_widget->show();
+        //ui->limit_dmus_bottom_half_widget->show();
 	}
 	else
 	{
 		checkbox_state = "n";
-		ui->limit_dmus_bottom_half_widget->hide();
+        //ui->limit_dmus_bottom_half_widget->hide();
 	}
 
 	std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
