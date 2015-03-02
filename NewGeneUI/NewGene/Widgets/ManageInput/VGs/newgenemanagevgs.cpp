@@ -15,6 +15,7 @@
 #include "../../../../NewGeneBackEnd/Model/InputModel.h"
 #include "../../../../NewGeneBackEnd/Model/TimeGranularity.h"
 #include "../../../../NewGeneBackEnd/Model/Tables/Import/Import.h"
+#include "../../Utilities/htmldelegate.h"
 
 #include <set>
 
@@ -152,7 +153,7 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 		{
 
 			QStandardItem * item = new QStandardItem();
-			std::string text = Table_VG_CATEGORY::GetVgDisplayText(vg);
+			std::string text = Table_VG_CATEGORY::GetVgDisplayText(vg, true);
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
@@ -169,6 +170,7 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 	model->sort(0);
 
 	ui->listViewManageVGs->setModel(model);
+    ui->listViewManageVGs->setItemDelegate(new HtmlDelegate{});
 	if (oldSelectionModel) delete oldSelectionModel;
 
 }
@@ -268,7 +270,7 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifier const & vg = change.parent_identifier;
 								WidgetInstanceIdentifier const & uoa = *vg.identifier_parent;
 
-								std::string text = Table_VG_CATEGORY::GetVgDisplayText(vg);
+								std::string text = Table_VG_CATEGORY::GetVgDisplayText(vg, true);
 
 								QStandardItem * item = new QStandardItem();
 								item->setText(text.c_str());
@@ -783,8 +785,10 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
 
 	boost::format msg_import_header("Variable Group data refresh details: %1%");
-	msg_import_header % Table_VG_CATEGORY::GetVgDisplayText(vg);
-	form.addRow(new QLabel(msg_import_header.str().c_str()));
+	msg_import_header % Table_VG_CATEGORY::GetVgDisplayText(vg, true);
+	QLabel * rowLabel { new QLabel(msg_import_header.str().c_str()) };
+	rowLabel->setTextFormat(Qt::RichText);
+	form.addRow(rowLabel);
 
 	QList<QLineEdit *> fieldsFileChooser;
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited data file", "Choose comma-delimited data file location", "", "" };

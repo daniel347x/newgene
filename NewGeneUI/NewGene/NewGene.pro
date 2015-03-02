@@ -154,7 +154,8 @@ SOURCES += main.cpp\
 	Widgets/Utilities/qsortfilterproxymodel_numberslast.cpp \
 	Widgets/Utilities/dialoghelper.cpp \
 	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.cpp \
-    Infrastructure/UIAction/limitdmus.cpp
+    Infrastructure/UIAction/limitdmus.cpp \
+    Widgets/Utilities/htmldelegate.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -278,7 +279,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/Utilities/dialoghelper.h \
 	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.h \
     Infrastructure/UIAction/limitdmus.h \
-    splashwindow.h
+    splashwindow.h \
+    Widgets/Utilities/htmldelegate.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

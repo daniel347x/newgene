@@ -511,7 +511,7 @@ bool Table_VG_CATEGORY::ExistsByCode(sqlite3 * db, InputModel & input_model_, st
 
 }
 
-std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const & vg)
+std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const & vg, bool const formatted)
 {
 
 	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty() || !vg.identifier_parent)
@@ -528,6 +528,12 @@ std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const &
 	}
 
 	std::string displayText;
+
+	if (formatted)
+	{
+		displayText += "<br>";
+		displayText += "<b>";
+	}
 
 	if (has_description)
 	{
@@ -548,9 +554,19 @@ std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const &
 		dmu_categories = *(*vg.identifier_parent).foreign_key_identifiers;
 	}
 
-	displayText += " (Corresponds to UOA: ";
+	if (formatted)
+	{
+		displayText += "</b><br>";
+	}
+
+	displayText += " [Corresponds to UOA: ";
 	displayText += Table_UOA_Identifier::GetUoaCategoryDisplayText(*vg.identifier_parent, dmu_categories);
-	displayText += ")";
+	displayText += "]";
+
+	if (formatted)
+	{
+		displayText += "<br>";
+	}
 
 	return displayText;
 
