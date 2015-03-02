@@ -269,8 +269,9 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 
 	// From http://stackoverflow.com/a/17512615/368896
 	QDialog dialog(this);
+	dialog.setWindowTitle("Create New DMU");
+	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
-	form.addRow(new QLabel("Create New DMU"));
 	QList<QLineEdit *> fields;
 	QLineEdit *lineEditName = new QLineEdit(&dialog);
 	QString labelName = QString("Enter Decision Making Unit (DMU) category name:");
@@ -473,13 +474,15 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	}
 
 	QDialog dialog(this);
+	dialog.setWindowTitle("DMU refresh");
+	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
 	QWidget FileChooserWidget;
 	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
 
 	QList<QLineEdit *> fields;
 
-	form.addRow(new QLabel("DMU member refresh details"));
+	//form.addRow(new QLabel("DMU member refresh details"));
 
 	QString labelColumnNameUuid = QString("Enter 'code' column label:");
 	QLineEdit *lineEditColumnNameUuid = new QLineEdit(&dialog);
@@ -500,10 +503,6 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited file", "Choose DMU comma-delimited data file location", "", "" };
 	DialogHelper::AddFileChooserBlock(dialog, form, formFileSelection, FileChooserWidget, fieldsFileChooser, fileChooserStrings);
 
-	//QList<QLineEdit *> fieldsTimeRange;
-	//QList<QRadioButton *> radioButtonsTimeRange;
-	//DialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange);
-
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
 	form.addRow(&buttonBox);
@@ -514,8 +513,6 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	std::vector<std::string> dataFileChooser;
 	std::vector<std::string> dataTimeRange;
-
-	//TimeRange::TimeRangeImportMode timeRangeMode = TimeRange::TIME_RANGE_IMPORT_MODE__NONE;
 
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
@@ -629,6 +626,8 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 
 	// From http://stackoverflow.com/a/17512615/368896
 	QDialog dialog(this);
+	dialog.setWindowTitle("Add DMU member");
+	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
 	boost::format title("Add DMU member to %1%");
 	title % *dmu_category.code;

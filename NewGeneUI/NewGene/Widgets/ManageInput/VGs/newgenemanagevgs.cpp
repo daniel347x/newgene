@@ -467,8 +467,9 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 
 	// From http://stackoverflow.com/a/17512615/368896
 	QDialog dialog(this);
+	dialog.setWindowTitle("Create new variable group");
+	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
-	form.addRow(new QLabel("Create new variable group"));
 	QList<QLineEdit *> fields;
 	QLineEdit *lineEditCode = new QLineEdit(&dialog);
 	QString labelCode = QString("Enter a brief identifying code for the new variable group:");
@@ -773,6 +774,8 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	// Pair: dialog (a widget) and its layout
 	QDialog dialog(this);
+	dialog.setWindowTitle("Variable group refresh");
+	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
 
 
@@ -784,7 +787,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	QWidget FileChooserWidget;
 	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
 
-	boost::format msg_import_header("Variable Group data refresh details: %1%");
+	boost::format msg_import_header("Variable group: %1%");
 	msg_import_header % Table_VG_CATEGORY::GetVgDisplayText(vg, true);
 	QLabel * rowLabel { new QLabel(msg_import_header.str().c_str()) };
 	rowLabel->setTextFormat(Qt::RichText);

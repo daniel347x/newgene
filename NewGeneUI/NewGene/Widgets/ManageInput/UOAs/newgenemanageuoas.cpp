@@ -267,8 +267,9 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 
 	// From http://stackoverflow.com/a/17512615/368896
 	QDialog dialog(this);
+	dialog.setWindowTitle("Create New UOA");
+	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
-	form.addRow(new QLabel("Create New UOA"));
 	QList<QLineEdit *> fields;
 	QLineEdit *lineEditCode = new QLineEdit(&dialog);
 	QString labelCode = QString("Enter a brief identifying code for the new Unit of Analysis:");

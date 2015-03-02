@@ -29,18 +29,23 @@ void DialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBo
 	FileChooserWidget.setLayout(&formFileSelection);
 
 	QString labelFilePathName = QString( fileChooserStrings[0].c_str() );
+    labelFilePathName += ":";
 
 	QLineEdit *lineEditFilePathName = new QLineEdit(&FileChooserWidget);
-	QPushButton *buttonFilePathName = new QPushButton("...", &FileChooserWidget);
+    QPushButton *buttonFilePathName = new QPushButton("Browse...", &FileChooserWidget);
+    buttonFilePathName->setMaximumWidth(100);
 
-	lineEditFilePathName->setMinimumWidth(300);
+	lineEditFilePathName->setMinimumWidth(400);
 
-	formFileSelection.addWidget(lineEditFilePathName);
-	formFileSelection.addWidget(buttonFilePathName);
-
-	fieldsFileChooser << lineEditFilePathName;
-
-	form.addRow(labelFilePathName, &FileChooserWidget);
+    QWidget * spacer1 = new QWidget {};
+    spacer1->setMinimumHeight(20);
+    form.addRow(spacer1);
+	form.addRow(labelFilePathName, lineEditFilePathName);
+    form.addRow("", buttonFilePathName);
+    form.itemAt(form.rowCount()-1, QFormLayout::FieldRole)->setAlignment(Qt::AlignRight);
+    QWidget * spacer2 = new QWidget {};
+    spacer2->setMinimumHeight(20);
+    form.addRow(spacer2);
 
 	QObject::connect(buttonFilePathName, &QPushButton::clicked, [=, &dialog, &fileChooserStrings]()
 	{

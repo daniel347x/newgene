@@ -38,6 +38,7 @@ int main( int argc, char * argv[] )
     Qt::WindowFlags flags = view->windowFlags();
     flags |= Qt::WindowStaysOnTopHint;
     flags |= Qt::SplashScreen;
+    flags &= ~Qt::WindowContextHelpButtonHint;
     view->installEventFilter(view.get());
     view->setWindowFlags(flags);
     view->show();

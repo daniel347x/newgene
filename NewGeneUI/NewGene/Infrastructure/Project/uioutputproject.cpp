@@ -52,8 +52,9 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 {
 
 	QDialog dialog;
+	dialog.setWindowTitle(msg_title.c_str());
+	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
-	form.addRow(new QLabel(msg_title.c_str()));
 
 	QWidget VgConstructionWidget;
 	QVBoxLayout formOverall;

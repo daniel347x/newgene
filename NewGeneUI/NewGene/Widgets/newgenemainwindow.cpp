@@ -463,7 +463,7 @@ void NewGeneMainWindow::on_actionDisplay_input_dataset_path_triggered()
     {
         // From http://stackoverflow.com/a/17512615/368896
         QDialog dialog(this);
-        dialog.setWindowFlags(windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
+        dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
         QFormLayout form(&dialog);
         form.addRow(new QLabel("Input dataset path:"));
         QLineEdit *lineEdit = new QLineEdit(&dialog);
@@ -488,7 +488,7 @@ void NewGeneMainWindow::on_actionDisplay_output_dataset_path_triggered()
     {
         // From http://stackoverflow.com/a/17512615/368896
         QDialog dialog(this);
-        dialog.setWindowFlags(windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
+        dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
         QFormLayout form(&dialog);
         form.addRow(new QLabel("Output dataset path:"));
         QLineEdit *lineEdit = new QLineEdit(&dialog);
