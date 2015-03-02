@@ -24,6 +24,11 @@ class NewGeneVariablesToolboxWrapper : public QWidget, public NewGeneWidget // d
 	private:
 		QGridLayout * gridLayout;
 		NewGeneVariablesToolbox * newgeneToolBox;
+
+    public:
+
+        friend class NewGeneMainWindow;
+
 };
 
 #endif // NEWGENEVARIABLESTOOLBOXWRAPPER_H

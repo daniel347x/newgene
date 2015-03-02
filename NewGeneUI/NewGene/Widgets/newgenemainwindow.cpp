@@ -27,6 +27,18 @@
 #include "uiallglobalsettings_list.h"
 #include <QFileDialog>
 #include <QCloseEvent>
+#include "newgenecreateoutput.h"
+#include "ui_newgenecreateoutput.h"
+#include "newgeneselectvariables.h"
+#include "ui_newgeneselectvariables.h"
+#include "newgenevariables.h"
+#include "ui_newgenevariables.h"
+#include "newgenevariablegroupsscrollarea.h"
+#include "ui_newgenevariablegroupsscrollarea.h"
+#include "newgenevariablesummary.h"
+#include "ui_newgenevariablesummary.h"
+#include "newgenevariablesummaryscrollarea.h"
+#include "ui_newgenevariablesummaryscrollarea.h"
 
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	QMainWindow( parent ),
@@ -150,6 +162,8 @@ void NewGeneMainWindow::doInitialize()
 	PrepareInputWidget();
 	PrepareOutputWidget();
 
+    PrepareGlobalConnections();
+
 	projectManagerUI().LoadOpenProjects(this, this);
 
 }
@@ -162,15 +176,11 @@ void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
     if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
     {
         SetTitle();
-        // Let the pane itself handle this.
-        //ui->CreateOutputPane->LabelCreateOutput->text = "Output Dataset - ";
     }
 
     if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
     {
         SetTitle();
-        // Let the pane itself handle this.
-		//ui->CreateOutputPane->LabelCreateOutput->text = "Output Dataset";
 	}
 
 }
@@ -533,4 +543,11 @@ void NewGeneMainWindow::SetTitle()
 
     this->setWindowTitle(title.c_str());
 
+}
+
+void NewGeneMainWindow::PrepareGlobalConnections()
+{
+    QWidget * source = ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSelections->ui->scrollAreaWidgetContents->ui->toolbox->newgeneToolBox;
+    QWidget * target = ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSummary->ui->scrollAreaWidgetContents;
+    connect(source, SIGNAL(DoTabChange(WidgetInstanceIdentifier)), target, SLOT(DoTabChange(WidgetInstanceIdentifier)));
 }

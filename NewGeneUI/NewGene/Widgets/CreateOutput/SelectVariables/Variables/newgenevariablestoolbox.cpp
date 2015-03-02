@@ -1,4 +1,5 @@
 #include "newgenevariablestoolbox.h"
+#include "../../../newgenemainwindow.h"
 #include "../../../../Infrastructure/Project/uiprojectmanager.h"
 
 #include <QLayout>
@@ -11,7 +12,8 @@ NewGeneVariablesToolbox::NewGeneVariablesToolbox( QWidget * parent ) :
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_TOOLBOX, true) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
     layout()->setSpacing( 4 );
-    //this->setStyleSheet("QToolBox::Tab:selected {border-bottom: 0px;}");
+    setStyleSheet("QToolBox::Tab:selected {font-weight: bold;}");
+
     PrepareOutputWidget();
 }
 
@@ -28,7 +30,10 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONN
 
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
-	}
+
+        // Handle clicks on different variable group tabs
+        connect(this, SIGNAL(currentChanged(int)), this, SLOT(tabChange(int)));
+    }
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
@@ -80,6 +85,10 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
             addItem( tmpGrp, identifier.longhand->c_str() );
 		}
 	});
+
+    // Either this widget populates before the summary widget, or the other way around.
+    // Both scenarios are properly handled because the summary widget caches the value.
+    tabChange(0);
 
 }
 
@@ -249,6 +258,18 @@ void NewGeneVariablesToolbox::SetBarColor(bool active, std::string const & name)
                 }
                 i++;
             }
+        }
+    }
+}
+
+void NewGeneVariablesToolbox::tabChange(int index)
+{
+    if (index != -1)
+    {
+        NewGeneVariableGroup * vg { dynamic_cast<NewGeneVariableGroup*>(widget(index)) };
+        if (vg)
+        {
+            emit DoTabChange(vg->data_instance);
         }
     }
 }

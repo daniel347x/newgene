@@ -35,6 +35,10 @@ class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not re
 
 		Ui::NewGeneVariableSummary * ui;
 
+    public:
+
+        friend class NewGeneMainWindow;
+
 };
 
 #endif // NEWGENEVARIABLESUMMARY_H

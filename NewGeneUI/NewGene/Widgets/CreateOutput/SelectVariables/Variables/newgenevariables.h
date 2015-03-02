@@ -22,6 +22,11 @@ class NewGeneVariables : public QWidget, public NewGeneWidget // do not reorder 
 
 	private:
 		Ui::NewGeneVariables * ui;
+
+    public:
+
+        friend class NewGeneMainWindow;
+
 };
 
 #endif // NEWGENEVARIABLES_H

@@ -391,7 +391,6 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObje
 
 	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(), output_project->projectSettings().getUISettings().GetSettingsPath().string()));
 
-	//getActiveUIInputProject()->DoRefreshAllWidgets();
 	getActiveUIOutputProject()->DoRefreshAllWidgets();
 
 }

@@ -53,6 +53,7 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 	protected:
 		void changeEvent( QEvent * e );
 		void closeEvent(QCloseEvent *event);
+        void PrepareGlobalConnections();
 
 	private slots:
 		void on_actionOpen_Input_Dataset_triggered();

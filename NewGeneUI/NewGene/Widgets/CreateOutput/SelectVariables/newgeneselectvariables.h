@@ -33,6 +33,10 @@ class NewGeneSelectVariables : public QWidget, public NewGeneWidget // do not re
 
 	public slots:
 
+    public:
+
+        friend class NewGeneMainWindow;
+
 };
 
 #endif // NEWGENESELECTVARIABLES_H

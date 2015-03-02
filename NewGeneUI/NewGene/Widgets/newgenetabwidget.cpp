@@ -14,6 +14,6 @@ void NewGeneTabWidget::NewGeneUIInitialize()
 
 	if ( pTB )
 	{
-		pTB->setDrawBase( false );
+        //pTB->setDrawBase( false );
 	}
 }

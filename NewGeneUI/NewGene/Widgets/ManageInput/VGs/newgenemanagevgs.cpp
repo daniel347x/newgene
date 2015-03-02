@@ -469,7 +469,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	form.addRow(new QLabel("Create new variable group"));
 	QList<QLineEdit *> fields;
 	QLineEdit *lineEditCode = new QLineEdit(&dialog);
-	QString labelCode = QString("Enter a brief identifying code for the new variable group (all caps):");
+	QString labelCode = QString("Enter a brief identifying code for the new variable group:");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
 

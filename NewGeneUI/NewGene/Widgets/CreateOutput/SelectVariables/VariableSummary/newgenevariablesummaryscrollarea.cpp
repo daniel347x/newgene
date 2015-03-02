@@ -101,6 +101,10 @@ void NewGeneVariableSummaryScrollArea::WidgetDataRefreshReceive(WidgetDataItem_V
 			NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this, new_identifier, outp );
 			tmpGrp->setTitle(identifier.longhand->c_str());
 			layout()->addWidget(tmpGrp);
+            if (new_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+            {
+                DoTabChange(new_identifier);
+            }
 		}
 	});
 
@@ -120,6 +124,8 @@ void NewGeneVariableSummaryScrollArea::WidgetDataRefreshReceive(WidgetDataItem_V
 
 void NewGeneVariableSummaryScrollArea::Empty()
 {
+    //cached_active_vg = WidgetInstanceIdentifier{}; // No - this is sometimes called after the variable selection widget has loaded, but before this widget has begun loading - we need to save the cached value
+    DoTabChange(cached_active_vg);
 	QLayoutItem *child;
 	while ((child = layout()->takeAt(0)) != 0)
 	{
@@ -158,7 +164,14 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 									NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this, new_identifier, outp );
 									tmpGrp->setTitle(new_identifier.longhand->c_str());
 									layout()->addWidget(tmpGrp);
-								}
+
+                                    // Upon first project load, the variable selection widget may have loaded before we did.
+                                    // We cache the proper VG and then set its text to bold here.
+                                    if (new_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+                                    {
+                                        DoTabChange(new_identifier);
+                                    }
+                                }
 
 							}
 							break;
@@ -188,6 +201,10 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 												widgetToRemove = testVG;
 												layoutItemToRemove = testLayoutItem;
 												found = true;
+                                                if (testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+                                                {
+                                                    cached_active_vg = WidgetInstanceIdentifier{};
+                                                }
 												break;
 											}
 										}
@@ -239,4 +256,31 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 		}
 	});
 
+}
+
+void NewGeneVariableSummaryScrollArea::DoTabChange(WidgetInstanceIdentifier data)
+{
+    cached_active_vg = data;
+
+    int current_number = layout()->count();
+    bool found = false;
+    for (int i=0; i<current_number; ++i)
+    {
+        QLayoutItem * layoutItem = layout()->itemAt(i);
+        if (layoutItem)
+        {
+            auto vg = dynamic_cast<NewGeneVariableSummaryGroup*>(layoutItem->widget());
+            if (vg)
+            {
+                if (vg->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, data))
+                {
+                    vg->setStyleSheet("QGroupBox {font-weight: bold; color: #101078;}");
+                }
+                else
+                {
+                    vg->setStyleSheet("QGroupBox {font-weight: normal; color: black;}");
+                }
+            }
+        }
+    }
 }

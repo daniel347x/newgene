@@ -42,6 +42,7 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA); // us, parent
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE); // child
+        void DoTabChange(WidgetInstanceIdentifier);
 
 	protected:
 
@@ -50,6 +51,7 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 	private:
 
 		NewGeneVariableSummaryGroup * groups;
+        WidgetInstanceIdentifier cached_active_vg;
 
 };
 

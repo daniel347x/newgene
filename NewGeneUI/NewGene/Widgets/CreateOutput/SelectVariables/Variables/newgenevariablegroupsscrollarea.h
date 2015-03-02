@@ -33,6 +33,11 @@ class NewGeneVariableGroupsScrollArea : public QWidget, public NewGeneWidget // 
 
 	private:
 		Ui::NewGeneVariableGroupsScrollArea * ui;
+
+    public:
+
+        friend class NewGeneMainWindow;
+
 };
 
 #endif // NEWGENEVARIABLEGROUPSSCROLLAREA_H

@@ -40,6 +40,8 @@ class NewGeneCreateOutput : public QWidget, public NewGeneWidget // do not reord
 
         static QString titleBarBaseText;
 
+        friend class NewGeneMainWindow;
+
 
 };
 

@@ -20,6 +20,7 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 	signals:
 
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX);
+        void DoTabChange(WidgetInstanceIdentifier);
 
 	public slots:
 
@@ -28,6 +29,7 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX); // us, parent
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE); // child
+        void tabChange(int);
 
 		// For Squish only: exception to rule regarding slots; return something here
 		QListView * GetListView(int const index);

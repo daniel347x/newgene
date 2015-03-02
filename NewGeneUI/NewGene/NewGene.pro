@@ -41,7 +41,7 @@ SOURCES += main.cpp\
 	Widgets/CreateOutput/newgenecreateoutput.cpp \
 	Widgets/CreateOutput/SelectVariables/newgeneselectvariables.cpp \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.cpp \
-	Widgets/CreateOutput/newgenetabwidget.cpp \
+	Widgets/newgenetabwidget.cpp \
 	Widgets/CreateOutput/SelectVariables/Variables/newgenevariablegroup.cpp \
 	Widgets/CreateOutput/SelectVariables/Variables/newgenevariables.cpp \
 	Widgets/CreateOutput/SelectVariables/Variables/newgenevariablegroupsscrollarea.cpp \
@@ -160,7 +160,7 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
 	Widgets/CreateOutput/SelectVariables/newgeneselectvariables.h \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.h \
-	Widgets/CreateOutput/newgenetabwidget.h \
+	Widgets/newgenetabwidget.h \
 	Widgets/CreateOutput/SelectVariables/Variables/newgenevariablegroup.h \
 	Widgets/CreateOutput/SelectVariables/Variables/newgenevariables.h \
 	Widgets/CreateOutput/SelectVariables/Variables/newgenevariablegroupsscrollarea.h \

@@ -269,7 +269,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	form.addRow(new QLabel("Create New UOA"));
 	QList<QLineEdit *> fields;
 	QLineEdit *lineEditCode = new QLineEdit(&dialog);
-	QString labelCode = QString("Enter a brief identifying code for the new Unit of Analysis (all caps):");
+	QString labelCode = QString("Enter a brief identifying code for the new Unit of Analysis:");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
 
