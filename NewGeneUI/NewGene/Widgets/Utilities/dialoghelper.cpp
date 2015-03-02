@@ -10,6 +10,7 @@
 #include <QListView>
 #include <QSpacerItem>
 #include <QStandardItemModel>
+#include <QGroupBox>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -98,22 +99,31 @@ bool DialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFileChoos
 void DialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog, QFormLayout & form, QVBoxLayout & formTimeRangeGranularitySelection, QList<QRadioButton *> & radioButtonsTimeRangeGranularity)
 {
 
-	// Time range RADIO BUTTONS
-	form.addRow(new QLabel("Time range granularity options:"));
+	QWidget * spacer1 { new QWidget{} };
+	spacer1->setMinimumHeight(20);
+	form.addRow(spacer1);
+
 	QRadioButton * NButton = new QRadioButton("None", &dialog);
 	QRadioButton * YButton = new QRadioButton("Year", &dialog);
 	QRadioButton * YMButton = new QRadioButton("Year, Month", &dialog);
 	QRadioButton * YMDButton = new QRadioButton("Year, Month, Day", &dialog);
-	//QRadioButton * SButton = new QRadioButton("String", &dialog);
+
 	formTimeRangeGranularitySelection.addWidget(NButton);
 	formTimeRangeGranularitySelection.addWidget(YButton);
 	formTimeRangeGranularitySelection.addWidget(YMButton);
 	formTimeRangeGranularitySelection.addWidget(YMDButton);
-	//formTimeRangeGranularitySelection.addWidget(SButton);
-	form.addRow(&formTimeRangeGranularitySelection);
+
+	QGroupBox * groupBox = new QGroupBox("Time range granularity options");
+	groupBox->setLayout(&formTimeRangeGranularitySelection);
+
+	form.addRow(groupBox);
+
+	QWidget * spacer2 { new QWidget{} };
+	spacer2->setMinimumHeight(20);
+	form.addRow(spacer2);
+
 	NButton->setChecked(true);
 
-	//radioButtonsTimeRangeGranularity << NButton << YButton << YMButton << YMDButton << SButton;
 	radioButtonsTimeRangeGranularity << NButton << YButton << YMButton<< YMDButton;
 
 }
@@ -861,7 +871,7 @@ bool DialogHelper::ValidateTimeRangeBlock
 void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories)
 {
 
-	QString labelTitle = QString("Define the DMU categories for the new Unit of Analysis:");
+	QString labelTitle = QString("Define the DMU categories for the new unit of analysis:");
 	QLabel * title = new QLabel(labelTitle, &dialog);
 
 	lhs = new QListView(&UoaConstructionPanes);
@@ -1048,6 +1058,8 @@ void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWid
 	QLabel * title = new QLabel(labelTitle, &dialog);
 
 	listpane = new QListView(&VgConstructionPanes);
+    listpane->setMinimumWidth(400);
+    listpane->setMinimumHeight(400);
 	listpane->setAlternatingRowColors(true);
 
 	formConstructionPane.addWidget(listpane);

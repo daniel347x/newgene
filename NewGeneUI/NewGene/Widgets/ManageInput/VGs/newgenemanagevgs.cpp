@@ -467,7 +467,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 
 	// From http://stackoverflow.com/a/17512615/368896
 	QDialog dialog(this);
-	dialog.setWindowTitle("Create new variable group");
+	dialog.setWindowTitle("Create variable group");
 	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
 	QList<QLineEdit *> fields;
@@ -477,7 +477,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	fields << lineEditCode;
 
 	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
-	QString labelDescription = QString("Description:");
+	QString labelDescription = QString("Enter a short description for the new variable group:");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
 
@@ -818,12 +818,11 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	});
 
-
-	// Add space - stupid Qt won't provide "addSpacing()" function for form layouts
-	form.addRow(new QLabel(" "));
-
-
-
+    {
+        QWidget * spacer { new QWidget{} };
+        spacer->setMinimumHeight(20);
+        form.addRow(spacer);
+    }
 
 	// ********************************************************************************************************************** //
 	// Time range block
@@ -894,9 +893,11 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 													  );
 	}
 
-
-	// Add space - stupid Qt won't provide "addSpacing()" function for form layouts
-	form.addRow(new QLabel(" "));
+    {
+        QWidget * spacer { new QWidget{} };
+        spacer->setMinimumHeight(20);
+        form.addRow(spacer);
+    }
 
 	// Add rows that allow the user to state whether the input file has rows containing the column descriptions, or describing the column data types
 	QList<QCheckBox *> fieldsCheckboxes;
@@ -913,6 +914,11 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	form.addRow(checkboxIncludeDataTypes);
 	fieldsCheckboxes << checkboxIncludeDataTypes;
 
+    {
+        QWidget * spacer { new QWidget{} };
+        spacer->setMinimumHeight(20);
+        form.addRow(spacer);
+    }
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);

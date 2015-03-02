@@ -269,7 +269,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 
 	// From http://stackoverflow.com/a/17512615/368896
 	QDialog dialog(this);
-	dialog.setWindowTitle("Create New DMU");
+	dialog.setWindowTitle("Create DMU");
 	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
 	QList<QLineEdit *> fields;
