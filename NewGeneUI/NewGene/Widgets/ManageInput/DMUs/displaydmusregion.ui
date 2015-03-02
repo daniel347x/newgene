@@ -49,7 +49,7 @@
           <item>
            <widget class="QPushButton" name="pushButton_add_dmu">
             <property name="text">
-             <string>Create New DMU</string>
+             <string>            Create New DMU                 </string>
             </property>
            </widget>
           </item>
@@ -143,16 +143,16 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
-              <widget class="QPushButton" name="pushButton_deselect_all_dmu_members">
+              <widget class="QPushButton" name="pushButton_select_all_dmu_members">
                <property name="text">
-                <string>Deselect all</string>
+                <string>Select all</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_select_all_dmu_members">
+              <widget class="QPushButton" name="pushButton_deselect_all_dmu_members">
                <property name="text">
-                <string>Select all</string>
+                <string>Deselect all</string>
                </property>
               </widget>
              </item>

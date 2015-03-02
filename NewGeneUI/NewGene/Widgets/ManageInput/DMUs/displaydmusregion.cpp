@@ -36,7 +36,9 @@ DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
 	ui->label_importProgress->hide();
 	ui->progressBar_importDMU->hide();
 	ui->pushButton_cancel->hide();
-	PrepareInputWidget(true);
+    ui->splitter_dmus_dmu_members->setStretchFactor(0, 1);
+    ui->splitter_dmus_dmu_members->setStretchFactor(1, 3);
+    PrepareInputWidget(true);
 
 	refresh_dmu_called_after_create = false;
 

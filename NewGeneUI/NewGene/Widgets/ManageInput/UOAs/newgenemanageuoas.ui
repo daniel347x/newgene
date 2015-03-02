@@ -26,13 +26,13 @@
       <item>
        <widget class="QLabel" name="label_manage_uoas">
         <property name="text">
-         <string>&lt;b&gt;Manage Units of Analysis (UOA)&lt;/b&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600; color:#101078;&quot;&gt;Units of Analysis (UOA's):&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="textFormat">
          <enum>Qt::RichText</enum>
         </property>
         <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -45,6 +45,9 @@
          </sizepolicy>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
          <item>
           <widget class="QListView" name="listViewManageUOAs">
            <property name="sizePolicy">
