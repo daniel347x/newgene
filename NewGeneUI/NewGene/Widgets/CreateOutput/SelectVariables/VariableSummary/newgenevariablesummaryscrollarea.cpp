@@ -53,6 +53,7 @@ void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(NewGeneWidget::UP
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
+        cached_active_vg = WidgetInstanceIdentifier{};
 		Empty();
 	}
 }
