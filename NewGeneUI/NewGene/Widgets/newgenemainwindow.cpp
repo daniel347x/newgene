@@ -193,15 +193,12 @@ void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
 	{
         SetTitle();
-		// Let the pane itself handle this.
-		//ui->ManageInputPane->LabelManageInput->text = "Input Dataset - ";
+
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
         SetTitle();
-        // Let the pane itself handle this.
-		//ui->ManageInputPane->LabelManageInput->text = "Input Dataset";
 	}
 
 }
@@ -551,3 +548,5 @@ void NewGeneMainWindow::PrepareGlobalConnections()
     QWidget * target = ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSummary->ui->scrollAreaWidgetContents;
     connect(source, SIGNAL(DoTabChange(WidgetInstanceIdentifier)), target, SLOT(DoTabChange(WidgetInstanceIdentifier)));
 }
+
+void NewGeneMainWindow::EnableAction(NEWGENE_ACTIONS const theAction, bool const enable = true);

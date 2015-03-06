@@ -16,6 +16,12 @@ namespace Ui
 	class NewGeneMainWindow;
 }
 
+enum NEWGENE_ACTIONS
+{
+    NEWGENE_ACTION__CLOSE_INPUT_DATASET
+    , NEWGENE_ACTION__CLOSE_OUTPUT_DATASET
+};
+
 class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
 		Q_OBJECT
@@ -39,6 +45,7 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void SetInputDatasetText();
 		void SetOutputDatasetText();
         void SetTitle();
+        void EnableAction(NEWGENE_ACTIONS const theAction, bool const enable = true);
 
 	public slots:
 		void doInitialize();
