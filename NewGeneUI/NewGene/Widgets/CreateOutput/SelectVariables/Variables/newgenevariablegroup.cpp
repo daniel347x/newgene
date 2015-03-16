@@ -258,7 +258,9 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
                                     toolbox->SetBarColor(saveChecked, this->objectName().toStdString());
                                 }
 
-							}
+                                SetEnabledStateSelectAllButtons(model);
+
+                            }
 							break;
 
 						case DATA_CHANGE_INTENTION__UPDATE:
@@ -360,7 +362,9 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
         toolbox->SetBarColor(saveChecked, this->objectName().toStdString());
     }
 
-	return true;
+    SetEnabledStateSelectAllButtons(model);
+
+    return true;
 
 }
 
@@ -415,4 +419,23 @@ void NewGeneVariableGroup::on_toolButtonDeselectAll_clicked()
     }
     ui->listView->setUpdatesEnabled(true);
 
+}
+
+void NewGeneVariableGroup::SetEnabledStateSelectAllButtons(QStandardItemModel * model)
+{
+    // Enable/disable "Select All"/"Deselect All" buttons
+    if (!model) return;
+    int number_variables = model->rowCount();
+    bool anyChecked {false};
+    bool anyUnchecked {false};
+    for (int n=0; n<number_variables; ++n)
+    {
+        QStandardItem * currentItem = model->item(n);
+        if (currentItem)
+        {
+            currentItem->checkState() == Qt::Checked ? anyChecked = true : anyUnchecked = true;
+        }
+    }
+    ui->toolButtonDeselectAll->setEnabled(anyChecked);
+    ui->toolButtonSelectAll->setEnabled(anyUnchecked);
 }
