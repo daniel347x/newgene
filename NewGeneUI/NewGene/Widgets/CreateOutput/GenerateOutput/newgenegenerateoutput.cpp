@@ -1,10 +1,7 @@
 #include "newgenegenerateoutput.h"
 #include "ui_newgenegenerateoutput.h"
 
-#include "globals.h"
 #include "../../../../NewGeneBackEnd/Settings/OutputProjectSettings_list.h"
-#include <QFileDialog>
-#include <QPlainTextEdit>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -17,8 +14,9 @@ NewGeneGenerateOutput::NewGeneGenerateOutput(QWidget *parent) :
 {
 
 	ui->setupUi(this);
-
 	PrepareOutputWidget();
+    connect(this, SIGNAL(SelectAndSetKadOutputPath()), ui->optionsBox, SLOT(SelectAndSetKadOutputPath()));
+    connect(this, SIGNAL(EditingFinishedKadOutputPath()), ui->optionsBox, SLOT(EditingFinishedKadOutputPath()));
 
 }
 
@@ -63,43 +61,7 @@ void NewGeneGenerateOutput::on_pushButtonGenerateOutput_clicked()
 void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB)
 {
 
-	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-	if (project == nullptr)
-	{
-		return;
-	}
-
-	UIMessager messager(project);
-
-	std::unique_ptr<Setting> path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
-
-	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
-	bool bad = false;
-	try
-	{
-		setting_path_to_kad_output = dynamic_cast<OutputProjectPathToKadOutputFile*>(path_to_kad_output.get());
-	}
-	catch (std::bad_cast &)
-	{
-		bad = true;
-	}
-
-	if (setting_path_to_kad_output == nullptr)
-	{
-		bad = true;
-	}
-
-	if (!bad)
-	{
-		if (setting_path_to_kad_output)
-		{
-			QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
-			if (editControl)
-			{
-				editControl->setText(QString(setting_path_to_kad_output->ToString().c_str()));
-			}
-		}
-	}
+	// Everything is delegated to the child OutputBox's implementation of this function
 
 }
 
@@ -147,60 +109,14 @@ void NewGeneGenerateOutput::ReceiveSignalSetPerformanceLabel(int /* progress_bar
 void NewGeneGenerateOutput::on_pushButtonChooseLocation_clicked()
 {
 
-	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-	if (project == nullptr)
-	{
-		return;
-	}
-
-	UIMessager messager(project);
-
-    std::unique_ptr<Setting> path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
-
-    QString current_file {};
-    if (path_to_kad_output) current_file = path_to_kad_output->ToString().c_str();
-
-
-    QString selectedFilter {"Comma-separated values (*.csv)"};
-	QString the_file = QFileDialog::getSaveFileName(this, "Choose output file", current_file, QString { selectedFilter }, &selectedFilter, QFileDialog::DontUseNativeDialog | QFileDialog::DontConfirmOverwrite);
-
-    if (the_file.size())
-	{
-        if (! the_file.endsWith(".csv", Qt::CaseInsensitive))
-        {
-            the_file += ".csv";
-        }
-		projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_file.toStdString()));
-		QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
-		if (editControl)
-		{
-			editControl->setText(the_file);
-		}
-	}
+    emit SelectAndSetKadOutputPath();
 
 }
 
 void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_editingFinished()
 {
 
-	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-	if (project == nullptr)
-	{
-		return;
-	}
-
-	UIMessager messager(project);
-
-	QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
-	if (editControl)
-	{
-		QString the_path = editControl->text();
-        if (! the_path.endsWith(".csv", Qt::CaseInsensitive))
-        {
-            the_path += ".csv";
-        }
-        projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_path.toStdString()));
-	}
+    emit EditingFinishedKadOutputPath();
 
 }
 

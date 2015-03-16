@@ -28,6 +28,8 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 
 		void GenerateOutputSignal(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT);
 		void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB);
+        void SelectAndSetKadOutputPath();
+        void EditingFinishedKadOutputPath();
 
 	public slots:
 

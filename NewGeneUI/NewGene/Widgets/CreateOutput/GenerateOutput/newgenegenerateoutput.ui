@@ -47,40 +47,6 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutOutputFileLocation">
-     <item>
-      <widget class="QLabel" name="labelOutputFile">
-       <property name="text">
-        <string>Output file:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="lineEditFilePathToKadOutput">
-       <property name="minimumSize">
-        <size>
-         <width>500</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButtonChooseLocation">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Choose location...</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
     <spacer name="verticalSpacerBottom">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -121,15 +87,50 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>250</width>
-         <height>30</height>
+         <width>149</width>
+         <height>34</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>200</width>
-         <height>16777215</height>
+         <width>149</width>
+         <height>34</height>
         </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+    border: 2px solid #8f8f91;
+    border-radius: 6px;
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #dadbde, stop: 1 #95f995);
+    min-width: 145px;
+    min-height: 30px;
+    width: 145px;
+    height: 30px;
+    max-width: 145px;
+    max-height: 30px;
+    font-weight: bold;
+}
+
+QPushButton:pressed {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #dadbde, stop: 1 #56f756);
+    border-color: #ad3434;
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #dadbde, stop: 1 #56f756);
+}
+
+QPushButton:flat {
+	border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+	border-color: navy; /* make the default button prominent */
+}
+</string>
        </property>
        <property name="text">
         <string>Generate Output</string>

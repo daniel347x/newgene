@@ -2,7 +2,7 @@
 #define OPTIONSBOX_H
 
 #include <QFrame>
-#include "../../newgenewidget.h"
+#include "../../../newgenewidget.h"
 
 namespace Ui
 {
@@ -41,12 +41,19 @@ class OptionsBox : public QFrame, public NewGeneWidget // do not reorder base cl
 		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET);
+        void SelectAndSetKadOutputPath();
+        void EditingFinishedKadOutputPath();
 
 	private slots:
 		void on_doRandomSampling_stateChanged(int arg1);
 		void on_randomSamplingHowManyRows_textChanged(const QString &arg1);
 		void on_mergeIdenticalRows_stateChanged(int arg1);
         void on_displayAbsoluteTimeColumns_stateChanged(int arg1);
+
+    protected:
+
+        void setFilenameInSelectionEditBox();
+
 };
 
 #endif // OPTIONSBOX_H

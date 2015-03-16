@@ -3,7 +3,11 @@
 
 #include <QCheckBox>
 #include <QLineEdit>
+#include <QFileDialog>
+#include <QPlainTextEdit>
 
+#include "globals.h"
+#include "../../../../NewGeneBackEnd/Settings/OutputProjectSettings_list.h"
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
@@ -160,6 +164,10 @@ void OptionsBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET
 		}
 	}
 
+    {
+        setFilenameInSelectionEditBox();
+    }
+
 }
 
 void OptionsBox::on_doRandomSampling_stateChanged(int)
@@ -241,6 +249,81 @@ void OptionsBox::on_displayAbsoluteTimeColumns_stateChanged(int arg1)
         actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
         WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
         emit UpdateDisplayAbsoluteTimeColumns(action_request);
+    }
+
+}
+
+void OptionsBox::SelectAndSetKadOutputPath()
+{
+
+    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    UIMessager messager(project);
+
+    std::unique_ptr<Setting> path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
+
+    QString current_file {};
+    if (path_to_kad_output) current_file = path_to_kad_output->ToString().c_str();
+
+    QString selectedFilter {"Comma-separated values (*.csv)"};
+    QString the_file = QFileDialog::getSaveFileName(this, "Choose output file", current_file, QString { selectedFilter }, &selectedFilter, QFileDialog::DontUseNativeDialog | QFileDialog::DontConfirmOverwrite);
+
+    if (the_file.size())
+    {
+        if (! the_file.endsWith(".csv", Qt::CaseInsensitive))
+        {
+            the_file += ".csv";
+        }
+        projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_file.toStdString()));
+        setFilenameInSelectionEditBox();
+    }
+
+}
+
+void OptionsBox::setFilenameInSelectionEditBox()
+{
+    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    UIMessager messager(project);
+
+    std::unique_ptr<Setting> path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
+    QString current_file {};
+    if (path_to_kad_output) current_file = path_to_kad_output->ToString().c_str();
+    QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
+    if (editControl)
+    {
+        editControl->setText(current_file);
+    }
+}
+
+void OptionsBox::EditingFinishedKadOutputPath()
+{
+
+    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    UIMessager messager(project);
+
+    QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
+    if (editControl)
+    {
+        QString the_path = editControl->text();
+        if (! the_path.endsWith(".csv", Qt::CaseInsensitive))
+        {
+            the_path += ".csv";
+        }
+        projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_path.toStdString()));
     }
 
 }
