@@ -549,4 +549,4 @@ void NewGeneMainWindow::PrepareGlobalConnections()
     connect(source, SIGNAL(DoTabChange(WidgetInstanceIdentifier)), target, SLOT(DoTabChange(WidgetInstanceIdentifier)));
 }
 
-void NewGeneMainWindow::EnableAction(NEWGENE_ACTIONS const theAction, bool const enable = true);
+//void NewGeneMainWindow::EnableAction(NEWGENE_ACTIONS const theAction, bool const enable = true);
