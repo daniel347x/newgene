@@ -792,10 +792,6 @@ bool limit_dmus_region::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 	QItemSelectionModel * dmu_selectionModel = ui->listView_limit_dmus_top_pane->selectionModel();
 	if (dmu_selectionModel == nullptr)
 	{
-		boost::format msg("Invalid selection in Limit DMU's DMU category pane.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
 		return false;
 	}
 
