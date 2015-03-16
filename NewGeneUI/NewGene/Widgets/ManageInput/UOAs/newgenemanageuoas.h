@@ -47,7 +47,8 @@ class NewGeneManageUOAs : public QWidget, public NewGeneWidget // do not reorder
 		void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDGET);
 
 	private slots:
-		void on_pushButton_deleteUOA_clicked();
+        void ReceiveUOASelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+        void on_pushButton_deleteUOA_clicked();
 		void on_pushButton_createUOA_clicked();
 
 	protected:

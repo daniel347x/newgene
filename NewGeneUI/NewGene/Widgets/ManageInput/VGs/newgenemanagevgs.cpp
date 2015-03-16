@@ -30,7 +30,11 @@ NewGeneManageVGs::NewGeneManageVGs( QWidget * parent ) :
 	ui->pushButton_cancel->hide();
 	PrepareInputWidget(true);
 
-	refresh_vg_called_after_create = false;
+    ui->pushButton_add_vg->setEnabled(false);
+    ui->pushButton_remove_vg->setEnabled(false);
+    ui->pushButton_refresh_vg->setEnabled(false);
+
+    refresh_vg_called_after_create = false;
 }
 
 NewGeneManageVGs::~NewGeneManageVGs()
@@ -71,7 +75,11 @@ void NewGeneManageVGs::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_
 		{
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE, false, "");
 		}
-	}
+
+        ui->pushButton_add_vg->setEnabled(true);
+        ui->pushButton_remove_vg->setEnabled(false);
+        ui->pushButton_refresh_vg->setEnabled(false);
+    }
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (inp)
@@ -173,6 +181,12 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
     ui->listViewManageVGs->setItemDelegate(new HtmlDelegate{});
 	if (oldSelectionModel) delete oldSelectionModel;
 
+    connect( ui->listViewManageVGs->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveVGSelectionChanged(const QItemSelection &, const QItemSelection &)));
+
+    ui->pushButton_add_vg->setEnabled(true);
+    ui->pushButton_remove_vg->setEnabled(false);
+    ui->pushButton_refresh_vg->setEnabled(false);
+
 }
 
 void NewGeneManageVGs::Empty()
@@ -210,6 +224,10 @@ void NewGeneManageVGs::Empty()
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
+
+    ui->pushButton_add_vg->setEnabled(false);
+    ui->pushButton_remove_vg->setEnabled(false);
+    ui->pushButton_refresh_vg->setEnabled(false);
 
 }
 
@@ -1288,4 +1306,39 @@ void NewGeneManageVGs::on_pushButton_cancel_clicked()
 			}
 		}
 	}
+}
+
+void NewGeneManageVGs::ReceiveVGSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+{
+
+    UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    UIMessager messager(project);
+
+    if (!ui->listViewManageVGs)
+    {
+        boost::format msg("Invalid list view in Manage VG's tab.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    if(!selected.indexes().isEmpty())
+    {
+        ui->pushButton_add_vg->setEnabled(true);
+        ui->pushButton_remove_vg->setEnabled(true);
+        ui->pushButton_refresh_vg->setEnabled(true);
+    }
+    else
+    {
+        ui->pushButton_add_vg->setEnabled(true);
+        ui->pushButton_remove_vg->setEnabled(false);
+        ui->pushButton_refresh_vg->setEnabled(false);
+    }
+
 }

@@ -21,6 +21,8 @@ NewGeneManageUOAs::NewGeneManageUOAs( QWidget * parent ) :
 {
 	ui->setupUi( this );
 	PrepareInputWidget(true);
+    ui->pushButton_createUOA->setEnabled(false);
+    ui->pushButton_deleteUOA->setEnabled(false);
 }
 
 NewGeneManageUOAs::~NewGeneManageUOAs()
@@ -60,7 +62,10 @@ void NewGeneManageUOAs::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		{
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__UOA_CHANGE, false, "");
 		}
-	}
+
+        ui->pushButton_createUOA->setEnabled(true);
+        ui->pushButton_deleteUOA->setEnabled(false);
+    }
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (inp)
@@ -162,6 +167,11 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
     ui->listViewManageUOAs->setItemDelegate(new HtmlDelegate{});
     if (oldSelectionModel) delete oldSelectionModel;
 
+    connect( ui->listViewManageUOAs->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveUOASelectionChanged(const QItemSelection &, const QItemSelection &)));
+
+    ui->pushButton_createUOA->setEnabled(true);
+    ui->pushButton_deleteUOA->setEnabled(false);
+
 }
 
 void NewGeneManageUOAs::Empty()
@@ -199,6 +209,9 @@ void NewGeneManageUOAs::Empty()
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
+
+    ui->pushButton_createUOA->setEnabled(false);
+    ui->pushButton_deleteUOA->setEnabled(false);
 
 }
 
@@ -699,5 +712,38 @@ bool NewGeneManageUOAs::GetSelectedUoaCategory(WidgetInstanceIdentifier & uoa_ca
 	uoa_dmu_categories = uoa_and_dmu_categories.second;
 
 	return true;
+
+}
+
+void NewGeneManageUOAs::ReceiveUOASelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+{
+
+    UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    UIMessager messager(project);
+
+    if (!ui->listViewManageUOAs)
+    {
+        boost::format msg("Invalid list view in Manage UOA's tab.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    if(!selected.indexes().isEmpty())
+    {
+        ui->pushButton_createUOA->setEnabled(true);
+        ui->pushButton_deleteUOA->setEnabled(true);
+    }
+    else
+    {
+        ui->pushButton_createUOA->setEnabled(true);
+        ui->pushButton_deleteUOA->setEnabled(false);
+    }
 
 }
