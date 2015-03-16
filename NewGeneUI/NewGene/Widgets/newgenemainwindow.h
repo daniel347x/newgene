@@ -42,8 +42,6 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 
 	public:
 
-		void SetInputDatasetText();
-		void SetOutputDatasetText();
         void SetTitle();
         void EnableAction(NEWGENE_ACTIONS const theAction, bool const enable = true);
 

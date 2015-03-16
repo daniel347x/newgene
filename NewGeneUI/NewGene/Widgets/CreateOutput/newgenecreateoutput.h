@@ -25,8 +25,6 @@ class NewGeneCreateOutput : public QWidget, public NewGeneWidget // do not reord
 
 	public:
 
-        void SetOutputDatasetText();
-
 	signals:
 
 	public slots:
@@ -43,6 +41,8 @@ class NewGeneCreateOutput : public QWidget, public NewGeneWidget // do not reord
         friend class NewGeneMainWindow;
 
 
+private slots:
+        void on_tabWidgetOutput_currentChanged(int index);
 };
 
 #endif // NEWGENECREATEOUTPUT_H

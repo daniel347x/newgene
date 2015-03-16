@@ -25,8 +25,6 @@ class NewGeneManageInput : public QWidget, public NewGeneWidget // do not reorde
 
 	public:
 
-        void SetInputDatasetText();
-
 	signals:
 
 	public slots:

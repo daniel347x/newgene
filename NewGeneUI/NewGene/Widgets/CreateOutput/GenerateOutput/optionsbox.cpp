@@ -120,7 +120,8 @@ void OptionsBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET
 			{
 				checkBox->setChecked(do_random_sampling);
 			}
-		}
+            ui->randomSamplingHowManyRows->setEnabled(is_checked);
+        }
 	}
 
 	{
@@ -187,6 +188,8 @@ void OptionsBox::on_doRandomSampling_stateChanged(int)
 		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
 		WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 		emit UpdateDoRandomSampling(action_request);
+
+        ui->randomSamplingHowManyRows->setEnabled(is_checked);
 	}
 
 }

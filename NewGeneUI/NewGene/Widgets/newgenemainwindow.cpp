@@ -454,16 +454,6 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 
 }
 
-void NewGeneMainWindow::SetInputDatasetText()
-{
-	ui->ManageInputPane->SetInputDatasetText();
-}
-
-void NewGeneMainWindow::SetOutputDatasetText()
-{
-	ui->CreateOutputPane->SetOutputDatasetText();
-}
-
 void NewGeneMainWindow::on_actionDisplay_input_dataset_path_triggered()
 {
     std::string input = inp->backend().projectSettings().GetSettingsPath().string();

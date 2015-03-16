@@ -920,7 +920,6 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 			{
 				return;
 			}
-			mainWindow->SetInputDatasetText();
 		}
 		catch (std::bad_cast &)
 		{
@@ -1028,7 +1027,6 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 			{
 				return;
 			}
-			mainWindow->SetOutputDatasetText();
 		}
 		catch (std::bad_cast &)
 		{
