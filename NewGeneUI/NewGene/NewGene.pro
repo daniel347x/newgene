@@ -155,7 +155,8 @@ SOURCES += main.cpp\
 	Widgets/Utilities/dialoghelper.cpp \
 	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.cpp \
     Infrastructure/UIAction/limitdmus.cpp \
-    Widgets/Utilities/htmldelegate.cpp
+    Widgets/Utilities/htmldelegate.cpp \
+    splashwindow.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \

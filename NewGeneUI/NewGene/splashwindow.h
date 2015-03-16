@@ -7,6 +7,7 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <Qurl>
+#include <QApplication>
 #include "Widgets/newgenemainwindow.h"
 
 class SplashWindow : public QQuickWidget
@@ -16,6 +17,7 @@ class SplashWindow : public QQuickWidget
     public:
         Q_INVOKABLE void close_window()
         {
+            closed_via_click = true;
             QTimer::singleShot( 0, this, SLOT( close() ) );
             QTimer::singleShot( 500, theMainWindow, SLOT( show() ) );
             QTimer::singleShot( 1000, theMainWindow, SLOT( doInitialize() ) );
@@ -41,7 +43,20 @@ class SplashWindow : public QQuickWidget
                 //QTimer::singleShot( 2000, theMainWindow, SLOT( show() ) );
             }
             return ret;
+
         }
+
+        void closeEvent(QCloseEvent * event)
+        {
+            if (!closed_via_click)
+            {
+                QApplication::quit();
+            }
+            event->accept();
+        }
+
+        bool closed_via_click;
+
 };
 
 #endif // SPLASHWINDOW_H
