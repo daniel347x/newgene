@@ -50,9 +50,6 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 
 		int number_timerange_widgets_created;
 
-		NewGeneGenerateOutput * output_pane;
-        NewGeneTabWidget * tab_widget;
-
 		UIInputProject * getUIInputProject()
 		{
 			return _inp;

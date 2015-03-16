@@ -174,16 +174,16 @@ void UIMessagerOutputProject::set(UIOutputProject * outp_)
 						connect(this, SIGNAL(SignalEndProgressBar(int)), mainWindow, SLOT(ReceiveSignalStopProgressBar(int)));
 						connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
 						connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
-						get()->output_pane = mainWindow->findChild<NewGeneGenerateOutput *>("widgetOutputPane");
-						if (get()->output_pane)
+						NewGeneGenerateOutput * outputPane = mainWindow->findChild<NewGeneGenerateOutput *>("widgetOutputPane");
+						if (outputPane)
 						{
-                            connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const)), get()->output_pane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
-                            connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const)), get()->output_pane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
+                            connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const)), outputPane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
+                            connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const)), outputPane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
 						}
-						get()->tab_widget = mainWindow->findChild<NewGeneTabWidget *>("tabWidgetOutput");
-                        if (get()->tab_widget)
+						NewGeneTabWidget * tabWidget = mainWindow->findChild<NewGeneTabWidget *>("tabWidgetOutput");
+                        if (tabWidget)
                         {
-                            connect(this, SIGNAL(SignalSetRunStatus(int, RUN_STATUS_ENUM const)), get()->tab_widget, SLOT(ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const)));
+                            connect(this, SIGNAL(SignalSetRunStatus(int, RUN_STATUS_ENUM const)), tabWidget, SLOT(ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const)));
                         }
                     }
 				}
