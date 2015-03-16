@@ -123,6 +123,12 @@ QPushButton:disabled {
     stop: 0 #dadbde, stop: 1 #343434);
 }
 
+QPushButton:disabled[class=&quot;active&quot;] {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #dadbde, stop: 1 #def7de);
+    border-color: #ff003b;
+}
+
 QPushButton:hover:!pressed {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
     stop: 0 #dadbde, stop: 1 #56f756);

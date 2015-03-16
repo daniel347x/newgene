@@ -34,6 +34,9 @@ void NewGeneTabWidget::ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const runS
             }
             break;
         default:
+            {
+                setTabText(2, QString(" Prepare run"));
+            }
             break;
     }
 

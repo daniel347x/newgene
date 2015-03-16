@@ -41,10 +41,16 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 		void ReceiveSignalAppendKadStatusText(int, STD_STRING const);
 		void ReceiveSignalSetPerformanceLabel(int, STD_STRING const);
         void on_pushButtonChooseLocation_clicked();
+        void ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const);
 
 	private slots:
 		void on_lineEditFilePathToKadOutput_editingFinished();
 		void on_pushButton_cancel_clicked();
+
+    protected:
+
+        void setGenerateOutputPushbuttonClass(std::string const &);
+
 };
 
 #endif // NEWGENEGENERATEOUTPUT_H

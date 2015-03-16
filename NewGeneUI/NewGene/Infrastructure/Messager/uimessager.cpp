@@ -179,7 +179,8 @@ void UIMessagerOutputProject::set(UIOutputProject * outp_)
 						{
                             connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const)), outputPane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
                             connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const)), outputPane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
-						}
+                            connect(this, SIGNAL(SignalSetRunStatus(int, RUN_STATUS_ENUM const)), outputPane, SLOT(ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const)));
+                        }
 						NewGeneTabWidget * tabWidget = mainWindow->findChild<NewGeneTabWidget *>("tabWidgetOutput");
                         if (tabWidget)
                         {
