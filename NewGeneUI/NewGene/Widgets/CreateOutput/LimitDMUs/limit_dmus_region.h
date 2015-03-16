@@ -39,19 +39,14 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 	private slots:
 
 		void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-
-		void on_pushButton_limit_dmus_move_right_clicked();
-
+        void ReceiveBottomLeftSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+        void ReceiveBottomRightSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+        void on_pushButton_limit_dmus_move_right_clicked();
 		void on_pushButton_limit_dmus_move_left_clicked();
-
 		void on_checkBox_limit_dmus_toggled(bool checked);
-
         void on_toolButtonSelectAllBottomLeft_clicked();
-
         void on_toolButtonDeselectAllBottomLeft_clicked();
-
         void on_toolButtonSelectAllBottomRight_clicked();
-
         void on_toolButtonDeselectAllBottomRight_clicked();
 
 protected:
@@ -59,6 +54,7 @@ protected:
 		void changeEvent( QEvent * e );
 		void Empty();
 		void PrepareItem(QStandardItem * item, std::string const & text, WidgetInstanceIdentifier const & identifier, bool const is_limited);
+        void SetEnabledStateMoveButtons();
 
 	private:
 
