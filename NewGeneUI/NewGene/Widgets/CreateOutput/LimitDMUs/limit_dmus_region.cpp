@@ -27,6 +27,7 @@ limit_dmus_region::limit_dmus_region(QWidget *parent) :
 
     // Wait for a project to load
     ui->checkBox_limit_dmus->setEnabled(false);
+    ui->checkBox_limit_dmus->setChecked(false);
     ui->toolButtonSelectAllBottomRight->setEnabled(false);
     ui->pushButton_limit_dmus_move_left->setEnabled(false);
     ui->toolButtonDeselectAllBottomRight->setEnabled(false);
@@ -242,6 +243,7 @@ void limit_dmus_region::Empty()
 	}
 
     ui->checkBox_limit_dmus->setEnabled(false);
+    ui->checkBox_limit_dmus->setChecked(false);
 
 }
 
@@ -376,6 +378,7 @@ void limit_dmus_region::ReceiveDMUSelectionChanged(const QItemSelection & select
     else
     {
         ui->checkBox_limit_dmus->setEnabled(false);
+        ui->checkBox_limit_dmus->setChecked(false);
     }
 
     SetEnabledStateMoveButtons();
