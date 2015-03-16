@@ -84,7 +84,8 @@ void DisplayDMUsRegion::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		{
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE, false, "");
-		}
+            ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED);
+        }
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
@@ -226,6 +227,8 @@ void DisplayDMUsRegion::Empty()
 		oldSelectionModel = nullptr;
 	}
 
+    ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_PROJECT_OPEN);
+
 }
 
 void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
@@ -258,9 +261,13 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 		WidgetInstanceIdentifier & dmu_category = dmu_and_members.first;
 		WidgetInstanceIdentifiers & dmu_members = dmu_and_members.second;
 
-		ResetDmuMembersPane(dmu_category, dmu_members);
+        ResetDmuMembersPane(dmu_category, dmu_members);
 
 	}
+    else
+    {
+        ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED);
+    }
 
 }
 
@@ -1323,6 +1330,7 @@ void DisplayDMUsRegion::ResetDmuMembersPane(WidgetInstanceIdentifier const & dmu
 {
 
 	EmptyDmuMembersPane();
+    ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::DMU_IS_SELECTED);
 
 	QItemSelectionModel * oldSelectionModel = ui->listView_dmu_members->selectionModel();
 	QStandardItemModel * model = new QStandardItemModel();
@@ -1355,6 +1363,8 @@ void DisplayDMUsRegion::ResetDmuMembersPane(WidgetInstanceIdentifier const & dmu
 	proxyModel->sort(0);
 	ui->listView_dmu_members->setModel(proxyModel);
 	if (oldSelectionModel) delete oldSelectionModel;
+
+    connect( model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveBottomPaneSelectionCheckChanged(QStandardItem*)));
 
 }
 
@@ -1476,6 +1486,8 @@ void DisplayDMUsRegion::EmptyDmuMembersPane()
 
 	}
 
+    ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED);
+
 }
 
 void DisplayDMUsRegion::on_pushButton_cancel_clicked()
@@ -1493,4 +1505,120 @@ void DisplayDMUsRegion::on_pushButton_cancel_clicked()
 			}
 		}
 	}
+}
+
+void DisplayDMUsRegion::ReceiveBottomPaneSelectionCheckChanged(QStandardItem *)
+{
+
+    UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+    if (project == nullptr)
+    {
+        return;
+    }
+
+    UIMessager messager(project);
+
+    if (!ui->listView_dmus || !ui->listView_dmu_members)
+    {
+        boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    QSortFilterProxyModel_NumbersLast * dmuMembersModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
+    if (dmuMembersModel == nullptr)
+    {
+        boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    QStandardItemModel * model = nullptr;
+    bool bad = false;
+    try
+    {
+        model = dynamic_cast<QStandardItemModel *>(dmuMembersModel->sourceModel());
+    }
+    catch (std::bad_cast &)
+    {
+        bad = true;
+    }
+
+    if (model == nullptr)
+    {
+        bad = true;
+    }
+
+    if (bad)
+    {
+        boost::format msg("Unable to obtain model for DMU member list.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    int numberChecked {};
+    for (int i = 0; i < dmuMembersModel->rowCount(); ++i)
+    {
+
+        QModelIndex testIndex = dmuMembersModel->index(i, 0);
+        QStandardItem * testItem = model->item(testIndex.row());
+        if (testItem->checkState() == Qt::Checked)
+        {
+            ++numberChecked;
+        }
+
+    }
+
+    ui->pushButton_delete_selected_dmu_members->setEnabled(numberChecked > 0);
+    ui->pushButton_deselect_all_dmu_members->setEnabled(numberChecked > 0);
+    ui->pushButton_select_all_dmu_members->setEnabled(numberChecked != dmuMembersModel->rowCount());
+
+}
+
+void DisplayDMUsRegion::ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE const state)
+{
+    switch (state)
+    {
+        case LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED:
+            {
+                ui->pushButton_add_dmu->setEnabled(true);
+                ui->pushButton_delete_dmu->setEnabled(false);
+                ui->pushButton_refresh_dmu_members_from_file->setEnabled(false);
+                ui->pushButton_add_dmu_member_by_hand->setEnabled(false);
+                ui->pushButton_delete_selected_dmu_members->setEnabled(false);
+                ui->pushButton_select_all_dmu_members->setEnabled(false);
+                ui->pushButton_deselect_all_dmu_members->setEnabled(false);
+            }
+            break;
+        case LOWER_PANE_BUTTON_ENABLED_STATE::DMU_IS_SELECTED:
+            {
+                ui->pushButton_add_dmu->setEnabled(true);
+                ui->pushButton_delete_dmu->setEnabled(true);
+                ui->pushButton_refresh_dmu_members_from_file->setEnabled(true);
+                ui->pushButton_add_dmu_member_by_hand->setEnabled(true);
+                ui->pushButton_delete_selected_dmu_members->setEnabled(false);
+                ui->pushButton_select_all_dmu_members->setEnabled(true);
+                ui->pushButton_deselect_all_dmu_members->setEnabled(false);
+            }
+            break;
+        case LOWER_PANE_BUTTON_ENABLED_STATE::NO_PROJECT_OPEN:
+            {
+                ui->pushButton_add_dmu->setEnabled(false);
+                ui->pushButton_delete_dmu->setEnabled(false);
+                ui->pushButton_refresh_dmu_members_from_file->setEnabled(false);
+                ui->pushButton_add_dmu_member_by_hand->setEnabled(false);
+                ui->pushButton_delete_selected_dmu_members->setEnabled(false);
+                ui->pushButton_select_all_dmu_members->setEnabled(false);
+                ui->pushButton_deselect_all_dmu_members->setEnabled(false);
+            }
+            break;
+        default:
+            break;
+    }
 }

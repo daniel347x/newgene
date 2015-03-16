@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QItemSelection>
+#include <QStandardItem>
+
 #include "../../newgenewidget.h"
 
 namespace Ui
@@ -51,6 +53,7 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 
 	private slots:
 		void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+        void ReceiveBottomPaneSelectionCheckChanged(QStandardItem *);
 
 		// Buttons
 		void on_pushButton_add_dmu_clicked();
@@ -65,6 +68,14 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 
 	protected:
 		void Empty();
+
+        enum LOWER_PANE_BUTTON_ENABLED_STATE
+        {
+            NO_DMU_SELECTED
+            , DMU_IS_SELECTED
+            , NO_PROJECT_OPEN
+        };
+        void ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE const state);
 
 	private:
 		bool GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_category, WidgetInstanceIdentifiers & dmu_members);
