@@ -176,12 +176,18 @@ void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
     if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
     {
         SetTitle();
+        ui->actionClose_Current_Output_Dataset->setEnabled(true);
+        ui->actionDisplay_output_dataset_path->setEnabled(true);
+        ui->actionSave_Output_Dataset_As->setEnabled(true);
     }
 
     if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
     {
         SetTitle();
-	}
+        ui->actionClose_Current_Output_Dataset->setEnabled(false);
+        ui->actionDisplay_output_dataset_path->setEnabled(false);
+        ui->actionSave_Output_Dataset_As->setEnabled(false);
+    }
 
 }
 
@@ -193,13 +199,18 @@ void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
 	{
         SetTitle();
-
-	}
+        ui->actionClose_Current_Input_Dataset->setEnabled(true);
+        ui->actionDisplay_input_dataset_path->setEnabled(true);
+        ui->actionSave_Input_Dataset_As->setEnabled(true);
+    }
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
         SetTitle();
-	}
+        ui->actionClose_Current_Input_Dataset->setEnabled(false);
+        ui->actionDisplay_input_dataset_path->setEnabled(false);
+        ui->actionSave_Input_Dataset_As->setEnabled(false);
+    }
 
 }
 
