@@ -484,17 +484,17 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	//form.addRow(new QLabel("DMU member refresh details"));
 
-	QString labelColumnNameUuid = QString("Enter 'code' column label:");
+	QString labelColumnNameUuid = QString("Enter 'code' column heading (data uniquely identifies each DMU member):");
 	QLineEdit *lineEditColumnNameUuid = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameUuid, lineEditColumnNameUuid);
 	fields << lineEditColumnNameUuid;
 
-	QString labelColumnNameCode = QString("Enter 'abbreviation' column label (optional):");
+	QString labelColumnNameCode = QString("Enter 'abbreviation' column heading (if present):");
 	QLineEdit *lineEditColumnNameCode = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameCode, lineEditColumnNameCode);
 	fields << lineEditColumnNameCode;
 
-	QString labelColumnNameDescription = QString("Enter 'description' column label (optional):");
+	QString labelColumnNameDescription = QString("Enter 'description' column heading (if present):");
 	QLineEdit *lineEditColumnNameDescription = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameDescription, lineEditColumnNameDescription);
 	fields << lineEditColumnNameDescription;
