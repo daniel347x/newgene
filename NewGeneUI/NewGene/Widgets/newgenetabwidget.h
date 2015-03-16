@@ -14,6 +14,8 @@ class NewGeneTabWidget : public QTabWidget, public NewGeneWidget // do not reord
 
 	public slots:
 
+        void ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const);
+
 	public:
 		void NewGeneUIInitialize();
 

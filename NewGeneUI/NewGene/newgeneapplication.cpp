@@ -22,7 +22,11 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetInstanceIdentifier_Bool_Pair>("WidgetInstanceIdentifier_Bool_Pair");
 
 
-	// Widget refresh request data
+    // Enums
+    qRegisterMetaType<RUN_STATUS_ENUM>("RUN_STATUS_ENUM");
+
+
+    // Widget refresh request data
 
 	// Output widgets
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>("WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA");
@@ -92,6 +96,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QEVENT_CLICK_VG_REFRESH                = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_CLICK_VG_REFRESH_HINT));
 	QEVENT_PROMPT_FOR_DMU_REFRESH          = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_PROMPT_FOR_DMU_REFRESH_HINT));
 	QEVENT_CLICK_DMU_REFRESH               = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_CLICK_DMU_REFRESH_HINT));
+
 
 }
 

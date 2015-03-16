@@ -17,3 +17,24 @@ void NewGeneTabWidget::NewGeneUIInitialize()
         //pTB->setDrawBase( false );
 	}
 }
+
+void NewGeneTabWidget::ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const runStatus)
+{
+
+    switch (runStatus)
+    {
+        case RUN_STATUS__RUNNING:
+            {
+                setTabText(2, QString(" Running..."));
+            }
+            break;
+        case RUN_STATUS__NOT_RUNNING:
+            {
+                setTabText(2, QString(" Prepare run"));
+            }
+            break;
+        default:
+            break;
+    }
+
+}

@@ -138,7 +138,7 @@ void UIMessagerInputProject::set(UIInputProject * inp_)
 						connect(this, SIGNAL(SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)));
 						connect(this, SIGNAL(SignalEndProgressBar(int)), mainWindow, SLOT(ReceiveSignalStopProgressBar(int)));
 						connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
-						connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+						connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
 					}
 				}
 				catch (std::bad_cast &)
@@ -173,15 +173,19 @@ void UIMessagerOutputProject::set(UIOutputProject * outp_)
 						connect(this, SIGNAL(SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)));
 						connect(this, SIGNAL(SignalEndProgressBar(int)), mainWindow, SLOT(ReceiveSignalStopProgressBar(int)));
 						connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
-						connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+						connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
 						get()->output_pane = mainWindow->findChild<NewGeneGenerateOutput *>("widgetOutputPane");
 						if (get()->output_pane)
 						{
-							connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
-							connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
+                            connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const)), get()->output_pane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
+                            connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const)), get()->output_pane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
 						}
 						get()->tab_widget = mainWindow->findChild<NewGeneTabWidget *>("tabWidgetOutput");
-					}
+                        if (get()->tab_widget)
+                        {
+                            connect(this, SIGNAL(SignalSetRunStatus(int, RUN_STATUS_ENUM const)), get()->tab_widget, SLOT(ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const)));
+                        }
+                    }
 				}
 				catch (std::bad_cast &)
 				{
@@ -263,24 +267,7 @@ int UIMessagerOutputProject::ShowOptionMessageBox(std::string msg_title, std::st
 
 void UIMessagerOutputProject::SetRunStatus(RUN_STATUS_ENUM const & runStatus)
 {
-	if (get()->tab_widget != nullptr)
-	{
-		switch (runStatus)
-		{
-			case RUN_STATUS__RUNNING:
-				{
-					get()->tab_widget->setTabText(2, QString(" Running..."));
-				}
-				break;
-			case RUN_STATUS__NOT_RUNNING:
-				{
-					get()->tab_widget->setTabText(2, QString(" Prepare run"));
-				}
-				break;
-			default:
-				break;
-		}
-	}
+    emit SignalSetRunStatus(current_messager_id, runStatus);
 }
 
 void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)

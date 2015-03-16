@@ -103,9 +103,10 @@ class UIMessager : public QObject, public Messager
 		void SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const);
 		void SignalEndProgressBar(int);
 		void SignalUpdateProgressBarValue(int, STD_INT64 const);
-		void SignalUpdateStatusBarText(int, STD_STRING const &);
-		void SignalAppendKadStatusText(int, STD_STRING const &);
-		void SignalSetPerformanceLabel(int, STD_STRING const &);
+		void SignalUpdateStatusBarText(int, STD_STRING const);
+		void SignalAppendKadStatusText(int, STD_STRING const);
+		void SignalSetPerformanceLabel(int, STD_STRING const);
+        void SignalSetRunStatus(int, RUN_STATUS_ENUM const);
 
 	public slots:
 

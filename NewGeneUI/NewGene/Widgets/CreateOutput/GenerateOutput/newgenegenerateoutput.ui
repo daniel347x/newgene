@@ -114,13 +114,19 @@
 
 QPushButton:pressed {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-    stop: 0 #dadbde, stop: 1 #56f756);
-    border-color: #ad3434;
+    stop: 0 #dadbde, stop: 1 #349b34);
+    border-color: #2600ff;
 }
 
-QPushButton:hover {
+QPushButton:disabled {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #dadbde, stop: 1 #343434);
+}
+
+QPushButton:hover:!pressed {
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
     stop: 0 #dadbde, stop: 1 #56f756);
+    border-color: #ad3434;
 }
 
 QPushButton:flat {

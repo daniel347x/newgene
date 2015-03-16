@@ -18,6 +18,11 @@ NewGeneGenerateOutput::NewGeneGenerateOutput(QWidget *parent) :
     connect(this, SIGNAL(SelectAndSetKadOutputPath()), ui->optionsBox, SLOT(SelectAndSetKadOutputPath()));
     connect(this, SIGNAL(EditingFinishedKadOutputPath()), ui->optionsBox, SLOT(EditingFinishedKadOutputPath()));
 
+    ui->pushButton_cancel->setEnabled(false);
+    ui->pushButtonGenerateOutput->setEnabled(false);
+
+    this->setFocus();
+
 }
 
 NewGeneGenerateOutput::~NewGeneGenerateOutput()
@@ -35,11 +40,14 @@ void NewGeneGenerateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNEC
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB)));
 		connect(this, SIGNAL(GenerateOutputSignal(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)));
-	}
+        ui->pushButtonGenerateOutput->setEnabled(true);
+    }
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
-	}
+        ui->pushButton_cancel->setEnabled(false);
+        ui->pushButtonGenerateOutput->setEnabled(false);
+    }
 
 }
 
