@@ -26,18 +26,7 @@ class SplashWindow : public QQuickWidget
         {
             closed_via_click = true;
             QTimer::singleShot( 10, this, SLOT( close() ) );
-            QTimer::singleShot( 100, parent(), SLOT( doEnable() ) );
-            QTimer::singleShot( 10, this, SLOT( deleteMe() ) );
-
-            if (opened_as_about_box)
-            {
-                //QTimer::singleShot( 1000, theMainWindow, SLOT( doEnable() ) );
-            }
-            else
-            {
-                //QTimer::singleShot( 500, theMainWindow, SLOT( show() ) );
-                //QTimer::singleShot( 1000, theMainWindow, SLOT( doInitialize() ) );
-            }
+            QTimer::singleShot( 1000, this, SLOT( closeAndRefreshSequence() ) );
         }
 
         Q_INVOKABLE void setCursorNormal()
@@ -54,20 +43,15 @@ class SplashWindow : public QQuickWidget
         bool eventFilter(QObject *obj, QEvent *event)
         {
             bool ret = QQuickWidget::eventFilter(obj, event);
-            if (event->type() == QEvent::MouseButtonRelease)
-            {
-                //QTimer::singleShot( 1000, this, SLOT( close() ) );
-                //QTimer::singleShot( 2000, theMainWindow, SLOT( show() ) );
-            }
             return ret;
 
         }
 
         void closeEvent(QCloseEvent * event)
         {
-            if (!closed_via_click && !opened_as_about_box)
+            if (!closed_via_click)
             {
-                //QApplication::quit();
+                closeAndRefreshSequence();
             }
             event->accept();
         }
@@ -78,6 +62,17 @@ class SplashWindow : public QQuickWidget
         bool opened_as_about_box;
 
     private slots:
+
+        void closeAndRefreshSequence()
+        {
+            // Deal with visual artifacts - I'm not sure why the window needs to be repainted,
+            // but repainting to remove artifacts after the splash screen has been removed
+            // only works after the splash screen has been deleted, and there is a safety delay
+            // prior to deleting it.
+            QTimer::singleShot( 0, this, SLOT( deleteMe() ) );
+            QTimer::singleShot( 100, parent(), SLOT( doEnable() ) );
+            QTimer::singleShot( 1000, parent(), SLOT( update() ) );
+        }
 
         void receiveStatusChanged(QQuickWidget::Status status)
         {
