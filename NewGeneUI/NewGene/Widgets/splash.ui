@@ -19,40 +19,83 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QWebView" name="webView">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>711</width>
-     <height>651</height>
-    </rect>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="spacing">
+    <number>0</number>
    </property>
-   <property name="url">
-    <url>
-     <string>http://newgenesoftware.ezweb123.com/#/splash/4587529526</string>
-    </url>
+   <property name="leftMargin">
+    <number>0</number>
    </property>
-   <property name="zoomFactor">
-    <double>0.699999988079071</double>
+   <property name="topMargin">
+    <number>0</number>
    </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>650</y>
-     <width>721</width>
-     <height>141</height>
-    </rect>
+   <property name="rightMargin">
+    <number>0</number>
    </property>
-   <property name="styleSheet">
-    <string notr="true">QPushButton {font-size: 20px; color: #681342; font-weight: bold;}</string>
+   <property name="bottomMargin">
+    <number>0</number>
    </property>
-   <property name="text">
-    <string>Continue to NewGene --&gt;</string>
-   </property>
-  </widget>
+   <item>
+    <widget class="QFrame" name="frame">
+     <property name="styleSheet">
+      <string notr="true">QFrame#frame {border: 6px solid #040ead; background-color: #CDCDCD}</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QWebView" name="webView">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>6</y>
+        <width>699</width>
+        <height>651</height>
+       </rect>
+      </property>
+      <property name="url">
+       <url>
+        <string>http://newgenesoftware.ezweb123.com/#/splash/4587529526</string>
+       </url>
+      </property>
+      <property name="zoomFactor">
+       <double>0.699999988079071</double>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>660</y>
+        <width>699</width>
+        <height>120</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {font-size: 20px; color: #681342; font-weight: bold;}</string>
+      </property>
+      <property name="text">
+       <string>Continue to NewGene --&gt;</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>227</x>
+        <y>197</y>
+        <width>256</width>
+        <height>256</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <customwidgets>
   <customwidget>

@@ -27,6 +27,7 @@ class Splash : public QWidget
 		void deleteMe();
 		void on_pushButton_clicked();
 		void receiveLinkClicked(const QUrl &);
+		void receiveLoadFinished(bool);
 
 	private:
 		bool eventFilter(QObject * obj, QEvent * event);

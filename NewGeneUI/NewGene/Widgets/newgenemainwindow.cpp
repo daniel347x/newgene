@@ -617,6 +617,7 @@ void NewGeneMainWindow::doEnable()
 	ui->centralWidget->setEnabled(true);
 	ui->menuBar->setEnabled(true);
 	ui->statusBar->setEnabled(true);
+	activateWindow();
 }
 
 void NewGeneMainWindow::on_actionAbout_NewGene_triggered()

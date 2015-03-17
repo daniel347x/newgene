@@ -2,6 +2,7 @@
 #include "ui_splash.h"
 #include <QCloseEvent>
 #include <QDesktopServices>
+#include <QMovie>
 
 Splash::Splash(QWidget * parent, NewGeneMainWindow * mainWindow_, bool const opened_as_about_box_) :
 	QWidget{parent},
@@ -13,7 +14,12 @@ Splash::Splash(QWidget * parent, NewGeneMainWindow * mainWindow_, bool const ope
 	ui->setupUi(this);
 	QTimer::singleShot(10, mainWindow, SLOT(doDisable()));
 	ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+	ui->webView->setVisible(false);
+	QMovie * movie = new QMovie(":/spinner.gif");
+	ui->label->setMovie(movie);
+	movie->start();
 	connect(ui->webView, SIGNAL(linkClicked(const QUrl &)), this, SLOT(receiveLinkClicked(const QUrl &)));
+	connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(receiveLoadFinished(bool)));
 }
 
 Splash::~Splash()
@@ -25,6 +31,12 @@ void Splash::receiveLinkClicked(const QUrl & url)
 {
 	QDesktopServices::openUrl(url);
 	closeMyself();
+}
+
+void Splash::receiveLoadFinished(bool)
+{
+	ui->label->setVisible(false);
+	ui->webView->setVisible(true);
 }
 
 bool Splash::eventFilter(QObject * obj, QEvent * event)
