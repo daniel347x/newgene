@@ -154,7 +154,7 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 		{
 
 			QStandardItem * item = new QStandardItem();
-			std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories, true);
+			std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories, false, true);
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
@@ -579,7 +579,7 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifier const & uoa_category = change.parent_identifier;
 								WidgetInstanceIdentifiers const & dmu_categories = change.child_identifiers;
 
-								std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories, true);
+								std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories, false, true);
 
 								QStandardItem * item = new QStandardItem();
 								item->setText(text.c_str());

@@ -179,6 +179,9 @@ template<>
 class WidgetDataItem<VARIABLE_GROUPS_TOOLBOX> : public WidgetDataItem_base
 {
 	public:
+		
+		typedef std::vector<std::pair<WidgetInstanceIdentifier, std::string>> Identifiers_with_labels;
+		
 		WidgetDataItem<VARIABLE_GROUPS_TOOLBOX>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN,
 												WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
 			: WidgetDataItem_base(request_reason_, identifier_)
@@ -193,7 +196,7 @@ class WidgetDataItem<VARIABLE_GROUPS_TOOLBOX> : public WidgetDataItem_base
 			, identifiers(rhs.identifiers)
 		{
 		}
-		WidgetInstanceIdentifiers identifiers;
+		Identifiers_with_labels identifiers;
 };
 typedef WidgetDataItem<VARIABLE_GROUPS_TOOLBOX> WidgetDataItem_VARIABLE_GROUPS_TOOLBOX;
 

@@ -560,7 +560,7 @@ std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const &
 	}
 
 	displayText += " [Corresponds to UOA: ";
-	displayText += Table_UOA_Identifier::GetUoaCategoryDisplayText(*vg.identifier_parent, dmu_categories);
+	displayText += Table_UOA_Identifier::GetUoaCategoryDisplayText(*vg.identifier_parent, dmu_categories, false, false);
 	displayText += "]";
 
 	if (formatted)

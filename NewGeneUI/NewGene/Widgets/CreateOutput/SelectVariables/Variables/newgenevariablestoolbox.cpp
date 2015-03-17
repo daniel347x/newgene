@@ -79,13 +79,19 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 
 	Empty();
 
-	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](WidgetInstanceIdentifier const & identifier)
+	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & identifier_)
 	{
+		WidgetInstanceIdentifier const & identifier {identifier_.first};
+		std::string const & uoa_text {identifier_.second};
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
 			WidgetInstanceIdentifier new_identifier(identifier);
 			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup(this, this, new_identifier, outp);
-			addItem(tmpGrp, identifier.longhand->c_str());
+			std::string displayText {identifier.longhand->c_str()};
+			displayText += " (";
+			displayText += uoa_text;
+			displayText += ")";
+			addItem(tmpGrp, displayText.c_str());
 		}
 	});
 

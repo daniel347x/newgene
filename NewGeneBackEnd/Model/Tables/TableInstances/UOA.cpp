@@ -430,7 +430,7 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 
 }
 
-std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories, bool const formatted)
+std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories, bool const simple, bool const formatted)
 {
 
 	if (!uoa_category.uuid || uoa_category.uuid->empty())
@@ -477,9 +477,12 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		else
 		{
 			displayText += *uoa_category.longhand;
-			displayText += " (";
-			displayText += *uoa_category.code;
-			displayText += ")";
+			if (!simple)
+			{
+				displayText += " (";
+				displayText += *uoa_category.code;
+				displayText += ")";
+			}
 		}
 	}
 	else
@@ -526,28 +529,33 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		displayText += "<br>";
 	}
 
-	switch (uoa_category.time_granularity)
+	if (!simple)
 	{
-		case TIME_GRANULARITY__NONE:
-			displayText += " (No time granularity)";
-			break;
 
-		case TIME_GRANULARITY__YEAR:
-			displayText += " (Year granularity)";
-			break;
+		switch (uoa_category.time_granularity)
+		{
+			case TIME_GRANULARITY__NONE:
+				displayText += " (No time granularity)";
+				break;
 
-		case TIME_GRANULARITY__MONTH:
-			displayText += " (Month granularity)";
-			break;
+			case TIME_GRANULARITY__YEAR:
+				displayText += " (Year granularity)";
+				break;
 
-		case TIME_GRANULARITY__DAY:
-			displayText += " (Day granularity)";
-			break;
-	}
+			case TIME_GRANULARITY__MONTH:
+				displayText += " (Month granularity)";
+				break;
 
-	if (formatted)
-	{
-		displayText += "<br>";
+			case TIME_GRANULARITY__DAY:
+				displayText += " (Day granularity)";
+				break;
+		}
+
+		if (formatted)
+		{
+			displayText += "<br>";
+		}
+
 	}
 
 	return displayText;

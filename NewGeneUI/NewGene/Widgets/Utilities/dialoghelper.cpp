@@ -1140,7 +1140,7 @@ void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWid
 				}
 
 				QStandardItem * item = new QStandardItem();
-				std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa, *uoa.foreign_key_identifiers, true);
+				std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa, *uoa.foreign_key_identifiers, false, true);
 				item->setText(text.c_str());
 				item->setEditable(false);
 				item->setCheckable(false);

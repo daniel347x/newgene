@@ -219,7 +219,7 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 					// ************************************* //
 					// Retrieve data sent by user interface
 					// ************************************* //
-					std::string uoa_to_delete_display_text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
+					std::string uoa_to_delete_display_text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories, false, false);
 
 					bool uoa_already_exists = input_model.t_uoa_category.Exists(input_model.getDb(), input_model, uoa_category);
 

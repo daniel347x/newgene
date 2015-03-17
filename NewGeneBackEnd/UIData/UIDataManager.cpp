@@ -2,6 +2,7 @@
 
 #include "../Project/InputProject.h"
 #include "../Project/OutputProject.h"
+#include "../Model/Tables/TableInstances/UOA.h"
 
 #include <algorithm>
 #include <iterator>
@@ -26,7 +27,11 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 
 	InputModel & input_model = project.model().getInputModel();
 	WidgetDataItem_VARIABLE_GROUPS_TOOLBOX variable_groups(widget_request);
-	variable_groups.identifiers = input_model.t_vgp_identifiers.getIdentifiers();
+	WidgetInstanceIdentifiers identifiers { input_model.t_vgp_identifiers.getIdentifiers() };
+	for (auto const & identifier : identifiers)
+	{
+		variable_groups.identifiers.push_back(std::make_pair(identifier, Table_UOA_Identifier::GetUoaCategoryDisplayText(*identifier.identifier_parent, WidgetInstanceIdentifiers {}, true, false)));
+	}
 	messager.EmitOutputWidgetDataRefresh(variable_groups);
 }
 
