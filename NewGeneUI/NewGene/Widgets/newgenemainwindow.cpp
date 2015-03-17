@@ -39,6 +39,8 @@
 #include "ui_newgenevariablesummary.h"
 #include "newgenevariablesummaryscrollarea.h"
 #include "ui_newgenevariablesummaryscrollarea.h"
+#include <QtWebEngine/qtwebengineglobal.h>
+#include <QWebView>
 #include "splashwindow.h"
 
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
@@ -588,16 +590,21 @@ void NewGeneMainWindow::displaySplashAbout()
 
 void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
 {
-    SplashWindow * view { new SplashWindow{this, opened_as_about_box} };
-    QQmlEngine * engine = view->engine();
-    engine->rootContext()->setContextProperty("view", view);
-    view->setSource(QUrl{"qrc:///splash.qml"});
-    Qt::WindowFlags flags = view->windowFlags();
-    flags |= Qt::WindowStaysOnTopHint;
-    flags |= Qt::SplashScreen;
-    flags &= ~Qt::WindowContextHelpButtonHint;
-    view->installEventFilter(view);
-    view->setWindowFlags(flags);
+    //QtWebEngine::initialize();
+    //SplashWindow * view { new SplashWindow{this, opened_as_about_box} };
+    //QWebEngineView * view { new QWebView{this} };
+    QWebView * view { new QWebView{this} };
+    //QQmlEngine * engine = view->engine();
+    //engine->rootContext()->setContextProperty("view", view);
+    //view->setSource(QUrl{"qrc:///splash.qml"});
+    view->load(QUrl{"http://www.weather.com"});
+    //view->setHtml("<html><body>foo</body></html>");
+    //Qt::WindowFlags flags = view->windowFlags();
+    //flags |= Qt::WindowStaysOnTopHint;
+    //flags |= Qt::SplashScreen;
+    //flags &= ~Qt::WindowContextHelpButtonHint;
+    //view->installEventFilter(view);
+    //view->setWindowFlags(flags);
     view->show();
-    view->activateWindow();
+    //view->activateWindow();
 }

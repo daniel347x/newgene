@@ -866,7 +866,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 		void InitializeTasks()
 		{
 
-			static char * task_names[]
+                        static char const * task_names[]
 			{
 				"delete_dmu"
 				, "delete_uoa"
@@ -884,7 +884,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 			for (size_t task_number = 0; task_number < number_tasks; ++task_number)
 			{
-				char * task_name = task_names[task_number];
+				char const * task_name = task_names[task_number];
 				TASK_ORDER task_order = task_orders[task_number];
 				task_class_infos.emplace(std::piecewise_construct, std::forward_as_tuple(std::string(task_name)), std::forward_as_tuple(std::string(task_name), task_order,
 										 new semaphore));

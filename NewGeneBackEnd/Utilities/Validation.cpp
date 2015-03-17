@@ -72,7 +72,7 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, b
 
 	if (!valid)
 	{
-		boost::format msg("The DMU member code is invalid%1%");
+		boost::format msg("The uniquely identifying DMU member code is invalid%1%");
 		msg % invalid_string;
 		errorMsg = msg.str();
 	}
@@ -380,7 +380,7 @@ bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & 
 				}
 				else
 				{
-					boost::format msg("The DMU code is invalid.  Only letters and underscores are allowed.");
+					boost::format msg("The DMU category name is invalid.  Only letters and underscores are allowed.");
 					errorMsg = msg.str();
 					valid = false;
 				}
@@ -388,14 +388,14 @@ bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & 
 			}
 			else
 			{
-				boost::format msg("The DMU code is invalid.  Only letters and underscores are allowed.");
+				boost::format msg("The DMU category name is invalid.  Only letters and underscores are allowed.");
 				errorMsg = msg.str();
 				valid = false;
 			}
 		}
 		else
 		{
-			boost::format msg("The DMU code is invalid.  Only letters and underscores are allowed.");
+			boost::format msg("The DMU category name is invalid.  Only letters and underscores are allowed.");
 			errorMsg = msg.str();
 			valid = false;
 		}
@@ -460,7 +460,7 @@ bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & 
 				}
 				else
 				{
-					boost::format msg("The UOA code is invalid.  Only letters and underscores are allowed.");
+					boost::format msg("The UOA identifying code is invalid.  Only letters and underscores are allowed.");
 					errorMsg = msg.str();
 					valid = false;
 				}
@@ -468,14 +468,14 @@ bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & 
 			}
 			else
 			{
-				boost::format msg("The UOA code is invalid.  Only letters and underscores are allowed.");
+				boost::format msg("The UOA identifying code is invalid.  Only letters and underscores are allowed.");
 				errorMsg = msg.str();
 				valid = false;
 			}
 		}
 		else
 		{
-			boost::format msg("The UOA code is invalid.  Only letters and underscores are allowed.");
+			boost::format msg("The UOA identifying code is invalid.  Only letters and underscores are allowed.");
 			errorMsg = msg.str();
 			valid = false;
 		}
@@ -558,7 +558,7 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 				}
 				else
 				{
-					boost::format msg("The VG code is invalid.  Only letters, numbers, and underscores are allowed.");
+					boost::format msg("The VG identifying code is invalid.  Only letters, numbers, and underscores are allowed.");
 					errorMsg = msg.str();
 					valid = false;
 				}
@@ -566,14 +566,14 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 			}
 			else
 			{
-				boost::format msg("The VG code is invalid.  Only letters, numbers, and underscores are allowed.");
+				boost::format msg("The VG identifying code is invalid.  Only letters, numbers, and underscores are allowed.");
 				errorMsg = msg.str();
 				valid = false;
 			}
 		}
 		else
 		{
-			boost::format msg("The VG code is invalid.  Only letters, numbers, and underscores are allowed.");
+			boost::format msg("The VG identifying code is invalid.  Only letters, numbers, and underscores are allowed.");
 			errorMsg = msg.str();
 			valid = false;
 		}

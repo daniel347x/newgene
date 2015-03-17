@@ -8,18 +8,20 @@
 #include <QQmlContext>
 #include <Qurl>
 #include <QApplication>
+#include <QWebEngineView>`
+#include <QtWebEngineWidgets>
 #include "Widgets/newgenemainwindow.h"
 
-class SplashWindow : public QQuickWidget
+class SplashWindow : public QWebEngineView
 {
     Q_OBJECT
 
     public:
 
-        SplashWindow(QWidget * parent_, bool const opened_as_about_box_) : QQuickWidget{parent_}, closed_via_click{false}, opened_as_about_box{opened_as_about_box_}
+        SplashWindow(QWidget * parent_, bool const opened_as_about_box_) : QWebEngineView{nullptr}, closed_via_click{false}, opened_as_about_box{opened_as_about_box_}
         {
             QTimer::singleShot( 10, parent(), SLOT( doDisable() ) );
-            connect(this, SIGNAL(statusChanged(QQuickWidget::Status)), this, SLOT(receiveStatusChanged(QQuickWidget::Status)));
+            //connect(this, SIGNAL(statusChanged(QQuickWidget::Status)), this, SLOT(receiveStatusChanged(QQuickWidget::Status)));
         }
 
         Q_INVOKABLE void close_window()
@@ -42,7 +44,7 @@ class SplashWindow : public QQuickWidget
     protected:
         bool eventFilter(QObject *obj, QEvent *event)
         {
-            bool ret = QQuickWidget::eventFilter(obj, event);
+            bool ret = QWebEngineView::eventFilter(obj, event);
             return ret;
 
         }
@@ -74,16 +76,16 @@ class SplashWindow : public QQuickWidget
             QTimer::singleShot( 1000, parent(), SLOT( update() ) );
         }
 
-        void receiveStatusChanged(QQuickWidget::Status status)
-        {
-            if (status == QQuickWidget::Status::Error)
-            {
-            }
-        }
+        //void receiveStatusChanged(QQuickWidget::Status status)
+        //{
+        //    if (status == QQuickWidget::Status::Error)
+        //    {
+        //    }
+        //}
 
         void deleteMe()
         {
-            deleteLater();
+            //deleteLater();
         }
 
 };

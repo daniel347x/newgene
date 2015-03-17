@@ -8,8 +8,9 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QSplashScreen>
+#include <QtWebEngine/qtwebengineglobal.h>
 #include <memory>
-
+#include <QWebView>
 #include "Infrastructure/Model/uimodelmanager.h"
 #include "Infrastructure/Settings/uisettingsmanager.h"
 #include "Infrastructure/Documents/uidocumentmanager.h"
@@ -30,7 +31,14 @@ int main( int argc, char * argv[] )
 
     NewGeneApplication a( argc, argv );
 
+    //QtWebEngine::initialize();
+
     {
+
+        QWebView * view { new QWebView{nullptr} };
+        view->load(QUrl{"http://www.weather.com"});
+        view->show();
+
 
         NewGeneMainWindow w;
         theMainWindow = &w;
