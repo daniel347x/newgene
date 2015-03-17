@@ -130,7 +130,7 @@ void OptionsBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET
 			if (is_checked != do_random_sampling)
 			{
 				checkBox->setChecked(do_random_sampling);
-                is_checked = do_random_sampling;
+				is_checked = do_random_sampling;
 			}
 
 			ui->randomSamplingHowManyRows->setEnabled(is_checked);
