@@ -9,6 +9,8 @@
 #include <QFormLayout>
 #include <QLineEdit>
 #include <QDialogButtonBox>
+#include <QtWebKit>
+#include <QWebView>
 #include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "uistatusmanager.h"
 #include "uidocumentmanager.h"
@@ -588,10 +590,12 @@ void NewGeneMainWindow::displaySplashAbout()
 
 void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
 {
-    SplashWindow * view { new SplashWindow{this, opened_as_about_box} };
-    QQmlEngine * engine = view->engine();
-    engine->rootContext()->setContextProperty("view", view);
-    view->setSource(QUrl{"qrc:///splash.qml"});
+    QWebView * view {new QWebView{this}};
+    //SplashWindow * view { new SplashWindow{this, opened_as_about_box} };
+    //QQmlEngine * engine = view->engine();
+    //engine->rootContext()->setContextProperty("view", view);
+    //view->setSource(QUrl{"qrc:///splash.qml"});
+    view->load(QUrl{"http://www.weather.com"});
     Qt::WindowFlags flags = view->windowFlags();
     flags |= Qt::WindowStaysOnTopHint;
     flags |= Qt::SplashScreen;

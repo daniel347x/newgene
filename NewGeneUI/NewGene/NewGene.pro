@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets quickwidgets webkit
+QT       += core gui widgets quickwidgets webkit webkitwidgets qml quick
 
 TARGET = NewGene
 TEMPLATE = app

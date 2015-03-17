@@ -3,6 +3,7 @@ import QtWebKit 3.0
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.0
 import QtMultimedia 5.0
+import QtWebView 1.0
 
 Rectangle {
     id: rectangle1
@@ -165,7 +166,7 @@ Rectangle {
         width: 247
         height: 203
 
-        url: "http://www.youtube.com/embed/gZxvSs36JoI"
+        url: "http://www.weather.com"
 
         onNavigationRequested: {
             // detect URL scheme prefix, most likely an external link
