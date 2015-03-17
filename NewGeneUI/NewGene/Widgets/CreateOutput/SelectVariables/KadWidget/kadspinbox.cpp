@@ -5,39 +5,39 @@
 #include "../Project/uioutputproject.h"
 #include "kadwidgetsscrollarea.h"
 
-KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
+KadSpinBox::KadSpinBox(QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project) :
 
-	QSpinBox( parent ),
+	QSpinBox(parent),
 
-	NewGeneWidget( WidgetCreationInfo(
-										this, // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-										parent,
-										WIDGET_NATURE_OUTPUT_WIDGET,
-										KAD_SPIN_CONTROL_WIDGET,
-										false,
-										data_instance_
-									 )
-				   )
+	NewGeneWidget(WidgetCreationInfo(
+					  this, // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+					  parent,
+					  WIDGET_NATURE_OUTPUT_WIDGET,
+					  KAD_SPIN_CONTROL_WIDGET,
+					  false,
+					  data_instance_
+				  )
+				 )
 
 {
 
-   PrepareOutputWidget();
+	PrepareOutputWidget();
 
-   connect(this, SIGNAL(valueChanged(int)), this, SLOT(ReceiveVariableItemChanged(int)));
+	connect(this, SIGNAL(valueChanged(int)), this, SLOT(ReceiveVariableItemChanged(int)));
 
-   if (data_instance.uuid && project)
-   {
+	if (data_instance.uuid && project)
+	{
 
-	   UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+		UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 
-	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
-	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, false, *data_instance.uuid);
-	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE, false, *data_instance.uuid);
+		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
+		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, false, *data_instance.uuid);
+		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE, false, *data_instance.uuid);
 
-	   WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(0, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
-	   emit RefreshWidget(request);
+		WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(0, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
+		emit RefreshWidget(request);
 
-   }
+	}
 
 }
 
@@ -67,18 +67,19 @@ void KadSpinBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE 
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET)));
-		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE)));
+		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE)), outp->getConnector(),
+				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE)));
 	}
 }
 
 void KadSpinBox::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET widget_data)
 {
 
-	if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
+	if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid))
 	{
 		boost::format msg("Invalid widget refresh in KadSpinBox widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -94,7 +95,7 @@ void KadSpinBox::ReceiveVariableItemChanged(int newValue)
 {
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(data_instance, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Spinbox(newValue)))));
+	actionItems.push_back(std::make_pair(data_instance, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__Spinbox(newValue)))));
 	WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 	emit SignalReceiveVariableItemChanged(action_request);
 
@@ -103,13 +104,14 @@ void KadSpinBox::ReceiveVariableItemChanged(int newValue)
 void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 {
 
-    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 
-    std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{
 		switch (change.change_type)
 		{
@@ -123,6 +125,7 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								// Should never receive this.
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
 								// This is the OUTPUT model changing.
@@ -137,12 +140,14 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&change, this](WidgetInstanceIdentifier const & child_identifier)
 								{
 									int value_ = value();
+
 									if (data_instance.uuid && child_identifier.uuid && *data_instance.uuid == *child_identifier.uuid)
 									{
 
 										if (change.change_intention == DATA_CHANGE_INTENTION__UPDATE)
 										{
 											DataChangePacket_int * packet = static_cast<DataChangePacket_int *>(change.getPacket());
+
 											if (packet)
 											{
 												if (value_ != packet->getValue())
@@ -164,11 +169,13 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								});
 
 							}
+
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 								// Ditto above.
 							}
 							break;
+
 						default:
 							{
 							}
@@ -187,11 +194,13 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								ShowHideFromActiveDMUs(change);
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__UPDATE:
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 							}
 							break;
+
 						default:
 							{
 							}
@@ -199,6 +208,7 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 					}
 				}
 				break;
+
 			case DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE:
 				{
 					switch (change.change_intention)
@@ -208,6 +218,7 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								ShowHideFromActiveDMUs(change);
 							}
 							break;
+
 						default:
 							{
 
@@ -216,6 +227,7 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 					}
 				}
 				break;
+
 			default:
 				{
 				}
@@ -235,6 +247,7 @@ void KadSpinBox::ShowHideFromActiveDMUs(DataChange const & change)
 			not_me = false;
 		}
 	});
+
 	if (not_me)
 	{
 		this->setVisible(false);
@@ -244,21 +257,24 @@ void KadSpinBox::ShowHideFromActiveDMUs(DataChange const & change)
 		this->setVisible(true);
 	}
 
-    QWidget * parent_ = this->parentWidget();
-    if (parent_)
-    {
-        try
-        {
-            KadWidgetsScrollArea * scrollArea { dynamic_cast<KadWidgetsScrollArea*>(parent_) };
+	QWidget * parent_ = this->parentWidget();
+
+	if (parent_)
+	{
+		try
+		{
+			KadWidgetsScrollArea * scrollArea { dynamic_cast<KadWidgetsScrollArea *>(parent_) };
+
 			if (scrollArea == nullptr)
 			{
 				return;
 			}
-            scrollArea->EmptyTextCheck();
-        }
-        catch (std::bad_cast &)
-        {
 
-        }
-    }
+			scrollArea->EmptyTextCheck();
+		}
+		catch (std::bad_cast &)
+		{
+
+		}
+	}
 }

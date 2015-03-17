@@ -9,26 +9,26 @@ template<typename MODEL_SETTINGS_ENUM, typename MODEL_SETTING_CLASS>
 class ModelSettings : public Settings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>
 {
 
-public:
+	public:
 
-	ModelSettings(Messager & messager, boost::filesystem::path const model_settings_path)
-		: Settings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>(messager, model_settings_path)
-	{
+		ModelSettings(Messager & messager, boost::filesystem::path const model_settings_path)
+			: Settings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>(messager, model_settings_path)
+		{
 
-	}
+		}
 
-	void WriteSettingsToFile(Messager & messager)
-	{
-		boost::property_tree::ptree pt;
-		SettingsRepository<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>::WriteSettingsToPtree(messager, pt);
-		SettingsRepository<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>::WritePtreeToFile(messager, pt);
-	}
+		void WriteSettingsToFile(Messager & messager)
+		{
+			boost::property_tree::ptree pt;
+			SettingsRepository<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>::WriteSettingsToPtree(messager, pt);
+			SettingsRepository<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>::WritePtreeToFile(messager, pt);
+		}
 
-	virtual ~ModelSettings() {}
+		virtual ~ModelSettings() {}
 
 
-protected:
-	
+	protected:
+
 };
 
 #endif

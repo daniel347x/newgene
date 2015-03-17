@@ -18,13 +18,13 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 	public:
 
-        UIAllSettings(UIMessager & messager, int const number_worker_threads)
+		UIAllSettings(UIMessager & messager, int const number_worker_threads)
 			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(messager, number_worker_threads)
 		{
 
 		}
 
-        virtual void WriteSettingsToFile(Messager &) {}
+		virtual void WriteSettingsToFile(Messager &) {}
 
 		virtual void UpdateConnections() {}
 
@@ -64,16 +64,16 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				template<typename T>
 				void UpdateSetting(Messager & messager, SETTINGS_ENUM const which_setting, T const & setting_value)
 				{
-                    SettingInfo setting_info = this->SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
-                    this->_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(this->NewSetting(messager, setting_info, setting_value.ToString()));
+					SettingInfo setting_info = this->SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+					this->_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(this->NewSetting(messager, setting_info, setting_value.ToString()));
 					WriteSettingsToFile(messager);
 				}
 
 				void WriteSettingsToFile(Messager & messager)
 				{
 					boost::property_tree::ptree pt;
-                    this->WriteSettingsToPtree(messager, pt);
-                    this->WritePtreeToFile(messager, pt);
+					this->WriteSettingsToPtree(messager, pt);
+					this->WritePtreeToFile(messager, pt);
 				}
 
 			protected:
@@ -101,7 +101,7 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 					protected:
 
-                        _RelatedImpl_base(UIMessager &, boost::filesystem::path const)
+						_RelatedImpl_base(UIMessager &, boost::filesystem::path const)
 						{
 
 						}
@@ -148,9 +148,10 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 						{
 							if (!_settings_repository)
 							{
-								boost::format msg( "Settings repository instance not yet constructed." );
-								throw NewGeneException() << newgene_error_description( msg.str() );
+								boost::format msg("Settings repository instance not yet constructed.");
+								throw NewGeneException() << newgene_error_description(msg.str());
 							}
+
 							return *(_settings_repository.get());
 						}
 
@@ -192,9 +193,10 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 						{
 							if (!settingsManager()._global_settings)
 							{
-								boost::format msg( "GlobalSettings instance not yet constructed." );
-								throw NewGeneException() << newgene_error_description( msg.str() );
+								boost::format msg("GlobalSettings instance not yet constructed.");
+								throw NewGeneException() << newgene_error_description(msg.str());
 							}
+
 							return *(settingsManager()._global_settings.get());
 						}
 
@@ -219,9 +221,10 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 						{
 							if (!_settings_repository)
 							{
-								boost::format msg( "Settings repository instance not yet constructed." );
-								throw NewGeneException() << newgene_error_description( msg.str() );
+								boost::format msg("Settings repository instance not yet constructed.");
+								throw NewGeneException() << newgene_error_description(msg.str());
 							}
+
 							return *_settings_repository;
 						}
 
@@ -282,9 +285,10 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				{
 					if (!__ui_impl)
 					{
-						boost::format msg( "Internal UI settings implementation not yet constructed." );
-						throw NewGeneException() << newgene_error_description( msg.str() );
+						boost::format msg("Internal UI settings implementation not yet constructed.");
+						throw NewGeneException() << newgene_error_description(msg.str());
 					}
+
 					return *(__ui_impl.get());
 				}
 
@@ -292,9 +296,10 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				{
 					if (!__backend_impl)
 					{
-						boost::format msg( "Internal backend settings implementation not yet constructed." );
-						throw NewGeneException() << newgene_error_description( msg.str() );
+						boost::format msg("Internal backend settings implementation not yet constructed.");
+						throw NewGeneException() << newgene_error_description(msg.str());
 					}
+
 					return *(__backend_impl.get());
 				}
 
@@ -312,14 +317,14 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &
 		getUISettings_base(_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS> & impl)
 		{
-            return static_cast<UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &>(impl.getInternalUIImplementation().getSettingsRepository());
+			return static_cast<UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &>(impl.getInternalUIImplementation().getSettingsRepository());
 		}
 
 		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS, typename SETTINGS_ENUM, typename SETTING_CLASS>
 		Settings<SETTINGS_ENUM, SETTING_CLASS> &
 		getBackendSettings_base(_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS> & impl)
 		{
-            return static_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(impl.getInternalBackendImplementation().getSettingsRepository());
+			return static_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(impl.getInternalBackendImplementation().getSettingsRepository());
 		}
 
 		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS>
@@ -328,13 +333,14 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		{
 			try
 			{
-                return dynamic_cast<typename _impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendProjectRelatedImpl_base &>(impl.getInternalBackendImplementation()).getSettingsRepositorySharedPtr();
+				return dynamic_cast<typename _impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendProjectRelatedImpl_base &>
+					   (impl.getInternalBackendImplementation()).getSettingsRepositorySharedPtr();
 			}
 			catch (std::bad_cast & bc)
 			{
-				boost::format msg( "Cannot convert from _BackendRelatedImpl_base to _BackendProjectRelatedImpl_base in getBackendSettingsSharedPtr_base: %1%" );
+				boost::format msg("Cannot convert from _BackendRelatedImpl_base to _BackendProjectRelatedImpl_base in getBackendSettingsSharedPtr_base: %1%");
 				msg % bc.what();
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 		}
 

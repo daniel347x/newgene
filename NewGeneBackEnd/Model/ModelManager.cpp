@@ -22,7 +22,8 @@ bool ModelManager::ImportRawData(Messager & messager, Model_basemost * model_, T
 			case TABLE__VG_SET_MEMBER:
 			case TABLE__VG_INPUT_DATA:
 				{
-					input_model = dynamic_cast<InputModel*>(model_);
+					input_model = dynamic_cast<InputModel *>(model_);
+
 					if (!input_model)
 					{
 						// Todo: log warning
@@ -30,10 +31,12 @@ bool ModelManager::ImportRawData(Messager & messager, Model_basemost * model_, T
 					}
 				}
 				break;
+
 			case TABLE__VG_SET_MEMBER_SELECTED:
 			case TABLE__KAD_COUNT:
 				{
-					output_model = dynamic_cast<OutputModel*>(model_);
+					output_model = dynamic_cast<OutputModel *>(model_);
+
 					if (!output_model)
 					{
 						// Todo: log warning
@@ -41,8 +44,9 @@ bool ModelManager::ImportRawData(Messager & messager, Model_basemost * model_, T
 					}
 				}
 				break;
-            default:
-                return false;
+
+			default:
+				return false;
 		}
 
 	}
@@ -58,48 +62,59 @@ bool ModelManager::ImportRawData(Messager & messager, Model_basemost * model_, T
 			{
 			}
 			break;
+
 		case TABLE__DMU_INSTANCE:
 			{
 			}
 			break;
+
 		case TABLE__CMU_IDENTIFIER:
 			{
 			}
 			break;
+
 		case TABLE__CMU_INSTANCE:
 			{
 			}
 			break;
+
 		case TABLE__UOA_IDENTIFIER:
 			{
 			}
 			break;
+
 		case TABLE__UOA_MEMBER:
 			{
 			}
 			break;
+
 		case TABLE__VG_CATEGORY:
 			{
 			}
 			break;
+
 		case TABLE__VG_SET_MEMBER:
 			{
 			}
 			break;
+
 		case TABLE__VG_INPUT_DATA:
 			{
 			}
 			break;
+
 		case TABLE__VG_SET_MEMBER_SELECTED:
 			{
 			}
 			break;
+
 		case TABLE__KAD_COUNT:
 			{
 			}
 			break;
-        default:
-            break;
+
+		default:
+			break;
 	}
 
 	return true;

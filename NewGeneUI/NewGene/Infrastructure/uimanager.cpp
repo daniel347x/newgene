@@ -52,6 +52,7 @@ namespace MANAGER_DESCRIPTION_NAMESPACE
 		{
 			return "UITriggerManager";
 		}
+
 		return std::string();
 	}
 

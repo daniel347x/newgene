@@ -28,7 +28,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 						UIMessagerOutputProject & messager_,
 						UIInputProject * inp);
 
-        void UpdateConnections();
+		void UpdateConnections();
 		void DoRefreshAllWidgets();
 		void PassChangeMessageToWidget(NewGeneWidget * widget, DataChangeMessage const & change_message);
 
@@ -40,7 +40,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		void SignalMessageBox(STD_STRING);
 		bool QuestionMessageBox(STD_STRING, STD_STRING); // title, question text
 		int OptionMessageBox(STD_STRING msg_title, STD_STRING msg_question, STD_VECTOR_WIDGETINSTANCEIDENTIFIER option_list);
-	
+
 	public:
 
 		QObject * mainWindowObject;
@@ -65,7 +65,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		WorkQueueManager<UI_OUTPUT_PROJECT> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			OutputProjectWorkQueue * work_queue = new OutputProjectWorkQueue();
-			work_queue->SetUIObject(reinterpret_cast<UIOutputProject*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIOutputProject *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

@@ -27,6 +27,7 @@ class EventLoopThreadManager
 		void InitializeEventLoop(void * me, int stackSize = 0)
 		{
 			work_queue_manager.reset(InstantiateWorkQueue(me));
+
 			if (worker_pool_ui_2.isActive())
 			{
 				work_queue_manager_2.reset(InstantiateWorkQueue(me, true));
@@ -40,6 +41,7 @@ class EventLoopThreadManager
 			work_queue_manager_thread.start();
 
 			work_queue_manager->moveToThread(&work_queue_manager_thread);
+
 			if (worker_pool_ui_2.isActive())
 			{
 				work_queue_manager_2->moveToThread(&work_queue_manager_thread);

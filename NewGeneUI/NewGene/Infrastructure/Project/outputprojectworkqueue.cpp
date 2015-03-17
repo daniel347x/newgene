@@ -22,7 +22,7 @@ OutputProjectWorkQueue::OutputProjectWorkQueue(QObject * parent)
 
 UIOutputProject * OutputProjectWorkQueue::get()
 {
-	return reinterpret_cast<UIOutputProject*>(outp);
+	return reinterpret_cast<UIOutputProject *>(outp);
 }
 
 void OutputProjectWorkQueue::TestSlot()
@@ -46,6 +46,7 @@ void OutputProjectWorkQueue::EmitMessage(std::string msg)
 void OutputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 {
 	WidgetChangeMessages widget_change_messages = get()->HandleChanges(changes);
+
 	if (!widget_change_messages.empty())
 	{
 		emit DataChangeMessageSignal(widget_change_messages);

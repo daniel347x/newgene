@@ -17,7 +17,8 @@ class VariableGroupSetMemberSelectionChange : public DoOutputAction<ACTION_VARIA
 	public:
 
 		VariableGroupSetMemberSelectionChange(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED & action_request_, OutputProjectWorkQueue * queue_)
-			: DoOutputAction<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(static_cast<WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>>(action_request_), queue_)
+			: DoOutputAction<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(static_cast<WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>>(action_request_),
+					queue_)
 		{
 
 		}

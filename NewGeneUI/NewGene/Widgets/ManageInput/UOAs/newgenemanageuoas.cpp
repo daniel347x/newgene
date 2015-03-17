@@ -14,15 +14,16 @@
 #include "../../../../NewGeneBackEnd/Model/TimeGranularity.h"
 #include "../../Utilities/htmldelegate.h"
 
-NewGeneManageUOAs::NewGeneManageUOAs( QWidget * parent ) :
-	QWidget( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_INPUT_WIDGET, MANAGE_UOAS_WIDGET, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneManageUOAs )
+NewGeneManageUOAs::NewGeneManageUOAs(QWidget * parent) :
+	QWidget(parent),
+	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_INPUT_WIDGET, MANAGE_UOAS_WIDGET,
+									 true)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	ui(new Ui::NewGeneManageUOAs)
 {
-	ui->setupUi( this );
+	ui->setupUi(this);
 	PrepareInputWidget(true);
-    ui->pushButton_createUOA->setEnabled(false);
-    ui->pushButton_deleteUOA->setEnabled(false);
+	ui->pushButton_createUOA->setEnabled(false);
+	ui->pushButton_deleteUOA->setEnabled(false);
 }
 
 NewGeneManageUOAs::~NewGeneManageUOAs()
@@ -31,14 +32,14 @@ NewGeneManageUOAs::~NewGeneManageUOAs()
 }
 
 
-void NewGeneManageUOAs::changeEvent( QEvent * e )
+void NewGeneManageUOAs::changeEvent(QEvent * e)
 {
-	QWidget::changeEvent( e );
+	QWidget::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:
@@ -63,15 +64,16 @@ void NewGeneManageUOAs::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__UOA_CHANGE, false, "");
 		}
 
-        ui->pushButton_createUOA->setEnabled(true);
-        ui->pushButton_deleteUOA->setEnabled(false);
-    }
+		ui->pushButton_createUOA->setEnabled(true);
+		ui->pushButton_deleteUOA->setEnabled(false);
+	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (inp)
 		{
 			inp->UnregisterInterestInChanges(this);
 		}
+
 		Empty();
 	}
 
@@ -105,6 +107,7 @@ void NewGeneManageUOAs::RefreshAllWidgets()
 		Empty();
 		return;
 	}
+
 	WidgetDataItemRequest_MANAGE_UOAS_WIDGET request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
@@ -113,6 +116,7 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -124,12 +128,13 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 	{
 		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel *>(ui->listViewManageUOAs->model());
+
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -139,10 +144,12 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 	QStandardItemModel * model = new QStandardItemModel(ui->listViewManageUOAs);
 
 	int index = 0;
-	std::for_each(widget_data.uoas_and_dmu_categories.cbegin(), widget_data.uoas_and_dmu_categories.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & uoa_and_dmu_categories)
+	std::for_each(widget_data.uoas_and_dmu_categories.cbegin(), widget_data.uoas_and_dmu_categories.cend(), [this, &index,
+				  &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & uoa_and_dmu_categories)
 	{
 		WidgetInstanceIdentifier const & uoa_category = uoa_and_dmu_categories.first;
 		WidgetInstanceIdentifiers const & dmu_categories = uoa_and_dmu_categories.second;
+
 		if (uoa_category.uuid && !uoa_category.uuid->empty())
 		{
 
@@ -154,7 +161,7 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 			QVariant v;
 			v.setValue(uoa_and_dmu_categories);
 			item->setData(v);
-			model->setItem( index, item );
+			model->setItem(index, item);
 
 			++index;
 
@@ -164,13 +171,15 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 	model->sort(0);
 
 	ui->listViewManageUOAs->setModel(model);
-    ui->listViewManageUOAs->setItemDelegate(new HtmlDelegate{});
-    if (oldSelectionModel) delete oldSelectionModel;
+	ui->listViewManageUOAs->setItemDelegate(new HtmlDelegate{});
 
-    connect( ui->listViewManageUOAs->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveUOASelectionChanged(const QItemSelection &, const QItemSelection &)));
+	if (oldSelectionModel) { delete oldSelectionModel; }
 
-    ui->pushButton_createUOA->setEnabled(true);
-    ui->pushButton_deleteUOA->setEnabled(false);
+	connect(ui->listViewManageUOAs->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveUOASelectionChanged(const QItemSelection &,
+			const QItemSelection &)));
+
+	ui->pushButton_createUOA->setEnabled(true);
+	ui->pushButton_deleteUOA->setEnabled(false);
 
 }
 
@@ -181,7 +190,7 @@ void NewGeneManageUOAs::Empty()
 	{
 		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -190,13 +199,15 @@ void NewGeneManageUOAs::Empty()
 	QItemSelectionModel * oldSelectionModel = nullptr;
 
 	oldSelectionModel = ui->listViewManageUOAs->selectionModel();
+
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
 
-	oldModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
+	oldModel = static_cast<QStandardItemModel *>(ui->listViewManageUOAs->model());
+
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -204,14 +215,15 @@ void NewGeneManageUOAs::Empty()
 	}
 
 	oldSelectionModel = ui->listViewManageUOAs->selectionModel();
+
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
 
-    ui->pushButton_createUOA->setEnabled(false);
-    ui->pushButton_deleteUOA->setEnabled(false);
+	ui->pushButton_createUOA->setEnabled(false);
+	ui->pushButton_deleteUOA->setEnabled(false);
 
 }
 
@@ -219,6 +231,7 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -230,7 +243,7 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 	{
 		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -238,6 +251,7 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 	WidgetInstanceIdentifier uoa_category;
 	WidgetInstanceIdentifiers uoa_dmu_categories;
 	bool is_selected = GetSelectedUoaCategory(uoa_category, uoa_dmu_categories);
+
 	if (!is_selected)
 	{
 		return;
@@ -249,13 +263,15 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 	boost::format msgTitle("Delete UOA \"%1%\"?");
 	msgTitle % *uoa_category.code;
 	reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 	if (reply == QMessageBox::No)
 	{
 		return;
 	}
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(uoa_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers(uoa_dmu_categories)))));
+	actionItems.push_back(std::make_pair(uoa_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__WidgetInstanceIdentifiers(
+			uoa_dmu_categories)))));
 	WidgetActionItemRequest_ACTION_DELETE_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
 	emit DeleteUOA(action_request);
 
@@ -265,11 +281,12 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		boost::format msg("Bad input project.  Unable to create \"New UOA\" dialog.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -284,12 +301,12 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
 	QList<QLineEdit *> fields;
-	QLineEdit *lineEditCode = new QLineEdit(&dialog);
+	QLineEdit * lineEditCode = new QLineEdit(&dialog);
 	QString labelCode = QString("Enter a brief identifying code for the new unit of analysis:");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
 
-	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
+	QLineEdit * lineEditDescription = new QLineEdit(&dialog);
 	QString labelDescription = QString("Enter a short description for the new unit of analysis:");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
@@ -311,7 +328,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	{
 		boost::format msg("Unable to create \"New UOA\" dialog.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -337,15 +354,17 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 
 		QLineEdit * proposed_uoa_code_field = fields[0];
 		QLineEdit * uoa_description_field = fields[1];
+
 		if (proposed_uoa_code_field && uoa_description_field)
 		{
 			proposed_uoa_code = proposed_uoa_code_field->text().toStdString();
 			uoa_description = uoa_description_field->text().toStdString();
+
 			if (proposed_uoa_code.empty())
 			{
 				boost::format msg("The UOA must have an identifying code (typically, a short, all-caps string).");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
@@ -354,7 +373,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 		{
 			boost::format msg("Unable to determine new UOA code or description.");
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 			return false;
 		}
@@ -379,7 +398,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 			boost::format msg("%1%");
 			msg % errorMsg;
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 			return false;
 		}
@@ -388,24 +407,27 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 		{
 
 			// retrieve the time range granularity
-			if(radioButtonsTimeRangeGranularity.isEmpty())
+			if (radioButtonsTimeRangeGranularity.isEmpty())
 			{
 				boost::format msg("No time range granularity selected.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
 
 			int index_time_granularity = 0;
-			for(int rbidx = 0; rbidx < radioButtonsTimeRangeGranularity.size(); ++rbidx)
+
+			for (int rbidx = 0; rbidx < radioButtonsTimeRangeGranularity.size(); ++rbidx)
 			{
 				if (radioButtonsTimeRangeGranularity.at(rbidx)->isChecked())
 				{
 					break;
 				}
+
 				++index_time_granularity;
 			}
+
 			switch (index_time_granularity)
 			{
 
@@ -437,7 +459,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 					{
 						boost::format msg("Invalid time range granularity selected.");
 						QMessageBox msgBox;
-						msgBox.setText( msg.str().c_str() );
+						msgBox.setText(msg.str().c_str());
 						msgBox.exec();
 						return false;
 					}
@@ -446,18 +468,20 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 			}
 
 			// retrieve the chosen DMU categories
-			QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
+			QStandardItemModel * rhsModel = static_cast<QStandardItemModel *>(rhs->model());
+
 			if (rhsModel == nullptr)
 			{
 				boost::format msg("Invalid rhs list view items in Construct UOA popup.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
 
 			int dmurows = rhsModel->rowCount();
-			QList<QStandardItem*> list;
+			QList<QStandardItem *> list;
+
 			for (int dmurow = 0; dmurow < dmurows; ++dmurow)
 			{
 				QVariant dmu_category_variant = rhsModel->item(dmurow)->data();
@@ -469,7 +493,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 			{
 				boost::format msg("At least one DMU category must be included in the definition of the unit of analysis.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
@@ -487,7 +511,9 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	std::string new_uoa_code(proposed_uoa_code);
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int(dmu_categories_to_use, new_uoa_code, uoa_description, time_granularity)))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(),
+										 std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int(dmu_categories_to_use, new_uoa_code,
+												 uoa_description, time_granularity)))));
 	WidgetActionItemRequest_ACTION_ADD_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit AddUOA(action_request);
@@ -498,6 +524,7 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -509,17 +536,18 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 	{
 		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * itemModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
+	QStandardItemModel * itemModel = static_cast<QStandardItemModel *>(ui->listViewManageUOAs->model());
+
 	if (itemModel == nullptr)
 	{
 		boost::format msg("Invalid list view items in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -543,7 +571,7 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 								{
 									boost::format msg("Invalid new UOA ID.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
@@ -562,9 +590,10 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 								QVariant v;
 								v.setValue(uoa_and_dmu_categories);
 								item->setData(v);
-								itemModel->appendRow( item );
+								itemModel->appendRow(item);
 
 								QItemSelectionModel * selectionModel = ui->listViewManageUOAs->selectionModel();
+
 								if (selectionModel != nullptr)
 								{
 									QModelIndex itemIndex = itemModel->indexFromItem(item);
@@ -581,7 +610,7 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 								{
 									boost::format msg("Invalid UOA to remove.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
@@ -590,14 +619,17 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifiers const & dmu_categories = change.child_identifiers;
 
 								int numberItems = itemModel->rowCount();
-								for(int currentItem = 0; currentItem < numberItems; ++currentItem)
+
+								for (int currentItem = 0; currentItem < numberItems; ++currentItem)
 								{
 									QStandardItem * uoa_to_remove_item = itemModel->item(currentItem);
+
 									if (uoa_to_remove_item != nullptr)
 									{
 
 										QVariant uoa_and_dmu_categories_variant = uoa_to_remove_item->data();
-										std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const uoa_and_dmu_categories = uoa_and_dmu_categories_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
+										std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const uoa_and_dmu_categories =
+											uoa_and_dmu_categories_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
 										WidgetInstanceIdentifier const & uoa = uoa_and_dmu_categories.first;
 
 										if (uoa.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, uoa_category))
@@ -610,6 +642,7 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 											uoa_to_remove_item = nullptr;
 
 											QItemSelectionModel * selectionModel = ui->listViewManageUOAs->selectionModel();
+
 											if (selectionModel != nullptr)
 											{
 												selectionModel->clearSelection();
@@ -662,11 +695,12 @@ bool NewGeneManageUOAs::GetSelectedUoaCategory(WidgetInstanceIdentifier & uoa_ca
 {
 
 	QItemSelectionModel * uoa_selectionModel = ui->listViewManageUOAs->selectionModel();
+
 	if (uoa_selectionModel == nullptr)
 	{
 		boost::format msg("Invalid selection in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -683,7 +717,7 @@ bool NewGeneManageUOAs::GetSelectedUoaCategory(WidgetInstanceIdentifier & uoa_ca
 	{
 		boost::format msg("Simultaneous selections not allowed.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -696,18 +730,20 @@ bool NewGeneManageUOAs::GetSelectedUoaCategory(WidgetInstanceIdentifier & uoa_ca
 		return false;
 	}
 
-	QStandardItemModel * uoaModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
+	QStandardItemModel * uoaModel = static_cast<QStandardItemModel *>(ui->listViewManageUOAs->model());
+
 	if (uoaModel == nullptr)
 	{
 		boost::format msg("Invalid model in NewGeneManageUOAs DMU category widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
 
 	QVariant uoa_and_dmu_categories_variant = uoaModel->item(selectedIndex.row())->data();
-	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> uoa_and_dmu_categories = uoa_and_dmu_categories_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
+	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> uoa_and_dmu_categories =
+		uoa_and_dmu_categories_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
 	uoa_category = uoa_and_dmu_categories.first;
 	uoa_dmu_categories = uoa_and_dmu_categories.second;
 
@@ -718,32 +754,33 @@ bool NewGeneManageUOAs::GetSelectedUoaCategory(WidgetInstanceIdentifier & uoa_ca
 void NewGeneManageUOAs::ReceiveUOASelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
 {
 
-    UIInputProject * project = projectManagerUI().getActiveUIInputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
 
-    UIMessager messager(project);
+	if (project == nullptr)
+	{
+		return;
+	}
 
-    if (!ui->listViewManageUOAs)
-    {
-        boost::format msg("Invalid list view in Manage UOA's tab.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	UIMessager messager(project);
 
-    if(!selected.indexes().isEmpty())
-    {
-        ui->pushButton_createUOA->setEnabled(true);
-        ui->pushButton_deleteUOA->setEnabled(true);
-    }
-    else
-    {
-        ui->pushButton_createUOA->setEnabled(true);
-        ui->pushButton_deleteUOA->setEnabled(false);
-    }
+	if (!ui->listViewManageUOAs)
+	{
+		boost::format msg("Invalid list view in Manage UOA's tab.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
+
+	if (!selected.indexes().isEmpty())
+	{
+		ui->pushButton_createUOA->setEnabled(true);
+		ui->pushButton_deleteUOA->setEnabled(true);
+	}
+	else
+	{
+		ui->pushButton_createUOA->setEnabled(true);
+		ui->pushButton_deleteUOA->setEnabled(false);
+	}
 
 }

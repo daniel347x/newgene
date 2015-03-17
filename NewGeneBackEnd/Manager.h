@@ -11,7 +11,7 @@ namespace MANAGER_DESCRIPTION_NAMESPACE
 
 	enum WHICH_MANAGER
 	{
-		  MANAGER_DOCUMENTS
+		MANAGER_DOCUMENTS
 		, MANAGER_SETTINGS
 		, MANAGER_STATUS
 		, MANAGER_MODEL
@@ -48,11 +48,11 @@ class Manager
 		static Manager<MANAGER_CLASS, MANAGER_ENUM> & getManager()
 		{
 
-			if ( _manager == NULL )
+			if (_manager == NULL)
 			{
-				boost::format msg( "Manager \"%1%\" not instantiated." );
+				boost::format msg("Manager \"%1%\" not instantiated.");
 				msg % MANAGER_DESCRIPTION_NAMESPACE::get_text_name_from_enum(MANAGER_ENUM);
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
 			return *_manager;

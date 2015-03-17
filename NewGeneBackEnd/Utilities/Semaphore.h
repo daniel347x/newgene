@@ -4,7 +4,8 @@
 #include <mutex>
 #include <condition_variable>
 
-class semaphore{
+class semaphore
+{
 
 	private:
 
@@ -39,6 +40,6 @@ class semaphore{
 
 		}
 
-}; 
+};
 
 #endif

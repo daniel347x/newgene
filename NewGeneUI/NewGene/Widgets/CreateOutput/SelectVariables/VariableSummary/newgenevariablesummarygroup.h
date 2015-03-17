@@ -17,7 +17,7 @@ class NewGeneVariableSummaryGroup : public QGroupBox, public NewGeneWidget // do
 
 	public:
 
-		explicit NewGeneVariableSummaryGroup( QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr );
+		explicit NewGeneVariableSummaryGroup(QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr);
 		~NewGeneVariableSummaryGroup();
 
 		// ****************************************//
@@ -44,16 +44,16 @@ class NewGeneVariableSummaryGroup : public QGroupBox, public NewGeneWidget // do
 		// *********************************//
 		// Directly receive the OS-level event
 		// *********************************//
-		void ReceiveVariableItemChanged(QStandardItem*);
+		void ReceiveVariableItemChanged(QStandardItem *);
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 		bool ResetAll(WidgetInstanceIdentifiers const & vg_members);
 
-    private:
+	private:
 
-        void HideShow(); // shows or hides the widget depending on whether there are any variable selected
+		void HideShow(); // shows or hides the widget depending on whether there are any variable selected
 
 	private:
 

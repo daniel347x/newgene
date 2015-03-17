@@ -4,7 +4,7 @@
 #include <QCoreApplication>
 #include <fstream>
 
-UIDocumentManager::UIDocumentManager( QObject * parent, UIMessager & messager )
+UIDocumentManager::UIDocumentManager(QObject * parent, UIMessager & messager)
 	: QObject(parent)
 	, UIManager(messager)
 {

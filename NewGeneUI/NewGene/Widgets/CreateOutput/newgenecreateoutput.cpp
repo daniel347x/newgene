@@ -6,17 +6,18 @@
 
 QString NewGeneCreateOutput::titleBarBaseText { "Output Dataset" };
 
-NewGeneCreateOutput::NewGeneCreateOutput( QWidget * parent ) :
-	QWidget( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneCreateOutput )
+NewGeneCreateOutput::NewGeneCreateOutput(QWidget * parent) :
+	QWidget(parent),
+	NewGeneWidget(WidgetCreationInfo(this,
+									 WIDGET_NATURE_OUTPUT_WIDGET)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	ui(new Ui::NewGeneCreateOutput)
 {
 
-	ui->setupUi( this );
+	ui->setupUi(this);
 
-	NewGeneTabWidget * pTWoutput = findChild<NewGeneTabWidget *>( "tabWidgetOutput" );
+	NewGeneTabWidget * pTWoutput = findChild<NewGeneTabWidget *>("tabWidgetOutput");
 
-	if ( pTWoutput )
+	if (pTWoutput)
 	{
 		pTWoutput->NewGeneUIInitialize();
 	}
@@ -30,14 +31,14 @@ NewGeneCreateOutput::~NewGeneCreateOutput()
 	delete ui;
 }
 
-void NewGeneCreateOutput::changeEvent( QEvent * e )
+void NewGeneCreateOutput::changeEvent(QEvent * e)
 {
-	QWidget::changeEvent( e );
+	QWidget::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:
@@ -48,11 +49,11 @@ void NewGeneCreateOutput::changeEvent( QEvent * e )
 void NewGeneCreateOutput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 
-    NewGeneWidget::UpdateInputConnections(connection_type, project);
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
 
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
-    {
-    }
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
+	{
+	}
 
 }
 
@@ -73,5 +74,5 @@ void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTI
 
 void NewGeneCreateOutput::on_tabWidgetOutput_currentChanged(int index)
 {
-    setFocus();
+	setFocus();
 }

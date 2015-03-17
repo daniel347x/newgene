@@ -1,7 +1,7 @@
 #include "../UIActionManager.h"
 
 #ifndef Q_MOC_RUN
-#	include <boost/scope_exit.hpp>
+	#include <boost/scope_exit.hpp>
 #endif
 #include "../../Project/InputProject.h"
 #include "../../Project/OutputProject.h"
@@ -24,26 +24,28 @@ void UIActionManager::DoDoRandomSamplingChange(Messager & messager, WidgetAction
 		this_->EndFailIfBusy();
 	} BOOST_SCOPE_EXIT_END
 
-		if (!action_request.items)
-		{
-			return;
-		}
+	if (!action_request.items)
+	{
+		return;
+	}
 
-		OutputModel & output_model = project.model();
-		InputModel & input_model = project.model().getInputModel();
+	OutputModel & output_model = project.model();
+	InputModel & input_model = project.model().getInputModel();
 
-		switch (action_request.reason)
-		{
+	switch (action_request.reason)
+	{
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
 			{
 
 			}
 			break;
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
 			{
 
 			}
 			break;
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 			{
 
@@ -87,14 +89,15 @@ void UIActionManager::DoDoRandomSamplingChange(Messager & messager, WidgetAction
 
 			}
 			break;
-		}
+	}
 
 }
 
 /************************************************************************/
 // ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE
 /************************************************************************/
-void UIActionManager::DoRandomSamplingCountChange(Messager & messager, WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE const & action_request, OutputProject & project)
+void UIActionManager::DoRandomSamplingCountChange(Messager & messager, WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE const & action_request,
+		OutputProject & project)
 {
 
 	if (FailIfBusy(messager))
@@ -107,26 +110,28 @@ void UIActionManager::DoRandomSamplingCountChange(Messager & messager, WidgetAct
 		this_->EndFailIfBusy();
 	} BOOST_SCOPE_EXIT_END
 
-		if (!action_request.items)
-		{
-			return;
-		}
+	if (!action_request.items)
+	{
+		return;
+	}
 
-		OutputModel & output_model = project.model();
-		InputModel & input_model = project.model().getInputModel();
+	OutputModel & output_model = project.model();
+	InputModel & input_model = project.model().getInputModel();
 
-		switch (action_request.reason)
-		{
+	switch (action_request.reason)
+	{
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
 			{
 
 			}
 			break;
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
 			{
 
 			}
 			break;
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 			{
 
@@ -170,7 +175,7 @@ void UIActionManager::DoRandomSamplingCountChange(Messager & messager, WidgetAct
 
 			}
 			break;
-		}
+	}
 
 }
 
@@ -190,26 +195,28 @@ void UIActionManager::DoConsolidateRowsChange(Messager & messager, WidgetActionI
 		this_->EndFailIfBusy();
 	} BOOST_SCOPE_EXIT_END
 
-		if (!action_request.items)
-		{
-			return;
-		}
+	if (!action_request.items)
+	{
+		return;
+	}
 
-		OutputModel & output_model = project.model();
-		InputModel & input_model = project.model().getInputModel();
+	OutputModel & output_model = project.model();
+	InputModel & input_model = project.model().getInputModel();
 
-		switch (action_request.reason)
-		{
+	switch (action_request.reason)
+	{
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
 			{
 
 			}
 			break;
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
 			{
 
 			}
 			break;
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 			{
 
@@ -253,14 +260,15 @@ void UIActionManager::DoConsolidateRowsChange(Messager & messager, WidgetActionI
 
 			}
 			break;
-		}
+	}
 
 }
 
 /************************************************************************/
 // ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE
 /************************************************************************/
-void UIActionManager::DoDisplayAbsoluteTimeColumnsChange(Messager & messager, WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE const & action_request, OutputProject & project)
+void UIActionManager::DoDisplayAbsoluteTimeColumnsChange(Messager & messager, WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE const & action_request,
+		OutputProject & project)
 {
 
 	if (FailIfBusy(messager))
@@ -273,26 +281,28 @@ void UIActionManager::DoDisplayAbsoluteTimeColumnsChange(Messager & messager, Wi
 		this_->EndFailIfBusy();
 	} BOOST_SCOPE_EXIT_END
 
-		if (!action_request.items)
-		{
-			return;
-		}
+	if (!action_request.items)
+	{
+		return;
+	}
 
-		OutputModel & output_model = project.model();
-		InputModel & input_model = project.model().getInputModel();
+	OutputModel & output_model = project.model();
+	InputModel & input_model = project.model().getInputModel();
 
-		switch (action_request.reason)
-		{
+	switch (action_request.reason)
+	{
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
 			{
 
 			}
 			break;
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
 			{
 
 			}
 			break;
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 			{
 
@@ -336,6 +346,6 @@ void UIActionManager::DoDisplayAbsoluteTimeColumnsChange(Messager & messager, Wi
 
 			}
 			break;
-		}
+	}
 
 }

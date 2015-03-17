@@ -1,8 +1,8 @@
 #include "FieldTypes.h"
 
 #ifndef Q_MOC_RUN
-#	include <boost/lexical_cast.hpp>
-#	include <boost/format.hpp>
+	#include <boost/lexical_cast.hpp>
+	#include <boost/format.hpp>
 #endif
 #include "../../Utilities/NewGeneException.h"
 
@@ -25,7 +25,7 @@ FieldTypeTraits<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID>::type const FieldTypeTraits<
 FieldTypeTraits<FIELD_TYPE_DATETIME_STRING>::type const FieldTypeTraits<FIELD_TYPE_DATETIME_STRING>::default_;
 FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING>::type const FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING>::default_;
 
-bool IsFieldTypeInt32(FIELD_TYPE const & field_type) 
+bool IsFieldTypeInt32(FIELD_TYPE const & field_type)
 {
 
 	bool returnVal = false;
@@ -171,16 +171,16 @@ bool IsFieldTypeTimeRange(FIELD_TYPE const & field_type)
 		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING:
 		case FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME:
 		case FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME:
-		{
-			returnVal = true;
-		}
-		break;
+			{
+				returnVal = true;
+			}
+			break;
 
 		default:
-		{
-			returnVal = false;
-		}
-		break;
+			{
+				returnVal = false;
+			}
+			break;
 
 	}
 
@@ -198,20 +198,17 @@ void BindSqlField(sqlite3_stmt * stmt, int & bind_index, std::pair<FIELD_TYPE, s
 		sqlite3_bind_int(stmt, bind_index++, boost::lexical_cast<std::int32_t>(field.second.c_str()));
 		handled = true;
 	}
-	else
-	if (IsFieldTypeInt64(field.first))
+	else if (IsFieldTypeInt64(field.first))
 	{
 		sqlite3_bind_int64(stmt, bind_index++, boost::lexical_cast<std::int64_t>(field.second.c_str()));
 		handled = true;
 	}
-	else
-	if (IsFieldTypeFloat(field.first))
+	else if (IsFieldTypeFloat(field.first))
 	{
 		sqlite3_bind_double(stmt, bind_index++, boost::lexical_cast<double>(field.second.c_str()));
 		handled = true;
 	}
-	else
-	if (IsFieldTypeString(field.first))
+	else if (IsFieldTypeString(field.first))
 	{
 		sqlite3_bind_text(stmt, bind_index++, field.second.c_str(), static_cast<int>(field.second.size()), SQLITE_STATIC);
 		handled = true;

@@ -4,7 +4,8 @@
 #include "../../../newgenewidget.h"
 #include <QWidget>
 
-namespace Ui {
+namespace Ui
+{
 	class NewGeneGenerateOutput;
 }
 
@@ -15,12 +16,12 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 
 	public:
 
-		explicit NewGeneGenerateOutput(QWidget *parent = 0);
+		explicit NewGeneGenerateOutput(QWidget * parent = 0);
 		~NewGeneGenerateOutput();
 
 	private:
 
-		Ui::NewGeneGenerateOutput *ui;
+		Ui::NewGeneGenerateOutput * ui;
 
 	public:
 
@@ -28,8 +29,8 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 
 		void GenerateOutputSignal(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT);
 		void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB);
-        void SelectAndSetKadOutputPath();
-        void EditingFinishedKadOutputPath();
+		void SelectAndSetKadOutputPath();
+		void EditingFinishedKadOutputPath();
 
 	public slots:
 
@@ -40,16 +41,16 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 		void RefreshAllWidgets();
 		void ReceiveSignalAppendKadStatusText(int, STD_STRING const);
 		void ReceiveSignalSetPerformanceLabel(int, STD_STRING const);
-        void on_pushButtonChooseLocation_clicked();
-        void ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const);
+		void on_pushButtonChooseLocation_clicked();
+		void ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const);
 
 	private slots:
 		void on_lineEditFilePathToKadOutput_editingFinished();
 		void on_pushButton_cancel_clicked();
 
-    protected:
+	protected:
 
-        void setGenerateOutputPushbuttonClass(std::string const &);
+		void setGenerateOutputPushbuttonClass(std::string const &);
 
 };
 

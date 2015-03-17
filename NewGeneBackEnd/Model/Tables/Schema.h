@@ -2,7 +2,7 @@
 #define SCHEMA_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/dynamic_bitset.hpp>
+	#include <boost/dynamic_bitset.hpp>
 #endif
 #include <utility>
 #include <string>
@@ -32,7 +32,7 @@ class SchemaEntry
 			: field_type(field_type_)
 			, field_name(field_name_)
 			, dmu_category_string_code(std::make_shared<std::string>(dmu_category_string_code_))
-            , required(required_)
+			, required(required_)
 			, isTimeRange(false)
 		{
 		}
@@ -42,7 +42,7 @@ class SchemaEntry
 			, field_name(rhs.field_name)
 			, field_description(rhs.field_description)
 			, dmu_category_string_code(rhs.dmu_category_string_code)
-            , required(rhs.required)
+			, required(rhs.required)
 			, isTimeRange(rhs.isTimeRange)
 		{
 		}
@@ -53,6 +53,7 @@ class SchemaEntry
 			{
 				return false;
 			}
+
 			return true;
 		}
 

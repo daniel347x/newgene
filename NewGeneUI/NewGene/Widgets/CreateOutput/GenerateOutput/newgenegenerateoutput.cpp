@@ -7,22 +7,23 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-NewGeneGenerateOutput::NewGeneGenerateOutput(QWidget *parent) :
+NewGeneGenerateOutput::NewGeneGenerateOutput(QWidget * parent) :
 	QWidget(parent),
-	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, GENERATE_OUTPUT_TAB, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, GENERATE_OUTPUT_TAB,
+									 true)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui(new Ui::NewGeneGenerateOutput)
 {
 
 	ui->setupUi(this);
 	PrepareOutputWidget();
-    connect(this, SIGNAL(SelectAndSetKadOutputPath()), ui->optionsBox, SLOT(SelectAndSetKadOutputPath()));
-    connect(this, SIGNAL(EditingFinishedKadOutputPath()), ui->optionsBox, SLOT(EditingFinishedKadOutputPath()));
+	connect(this, SIGNAL(SelectAndSetKadOutputPath()), ui->optionsBox, SLOT(SelectAndSetKadOutputPath()));
+	connect(this, SIGNAL(EditingFinishedKadOutputPath()), ui->optionsBox, SLOT(EditingFinishedKadOutputPath()));
 
-    setGenerateOutputPushbuttonClass("");
-    ui->pushButton_cancel->setEnabled(false);
-    ui->pushButtonGenerateOutput->setEnabled(false);
+	setGenerateOutputPushbuttonClass("");
+	ui->pushButton_cancel->setEnabled(false);
+	ui->pushButtonGenerateOutput->setEnabled(false);
 
-    this->setFocus();
+	this->setFocus();
 
 }
 
@@ -40,15 +41,16 @@ void NewGeneGenerateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNEC
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB)));
-		connect(this, SIGNAL(GenerateOutputSignal(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)));
-        ui->pushButtonGenerateOutput->setEnabled(true);
-    }
+		connect(this, SIGNAL(GenerateOutputSignal(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)), outp->getConnector(),
+				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)));
+		ui->pushButtonGenerateOutput->setEnabled(true);
+	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
-        ui->pushButton_cancel->setEnabled(false);
-        ui->pushButtonGenerateOutput->setEnabled(false);
-    }
+		ui->pushButton_cancel->setEnabled(false);
+		ui->pushButtonGenerateOutput->setEnabled(false);
+	}
 
 }
 
@@ -61,7 +63,7 @@ void NewGeneGenerateOutput::on_pushButtonGenerateOutput_clicked()
 {
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__GenerateOutput()))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__GenerateOutput()))));
 	WidgetActionItemRequest_ACTION_GENERATE_OUTPUT action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
 	emit GenerateOutputSignal(action_request);
 
@@ -81,13 +83,15 @@ void NewGeneGenerateOutput::RefreshAllWidgets()
 		Empty();
 		return;
 	}
+
 	WidgetDataItemRequest_GENERATE_OUTPUT_TAB request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
 
 void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int /* progress_bar_id */, STD_STRING const kad_status_update)
 {
-	QPlainTextEdit * edit_pane = findChild<QPlainTextEdit *>( "plainTextEdit_KadStatus" );
+	QPlainTextEdit * edit_pane = findChild<QPlainTextEdit *>("plainTextEdit_KadStatus");
+
 	if (edit_pane)
 	{
 		if (kad_status_update.length())
@@ -103,7 +107,8 @@ void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int /* progress_bar
 
 void NewGeneGenerateOutput::ReceiveSignalSetPerformanceLabel(int /* progress_bar_id */, STD_STRING const performance_measure_text)
 {
-	QLabel * label_ = findChild<QLabel *>( "labelOngoingPerformance" );
+	QLabel * label_ = findChild<QLabel *>("labelOngoingPerformance");
+
 	if (label_)
 	{
 		QString html_prefix("<span style=\"font-size:12pt; font-weight:600; color:#aa0000;\">");
@@ -118,14 +123,14 @@ void NewGeneGenerateOutput::ReceiveSignalSetPerformanceLabel(int /* progress_bar
 void NewGeneGenerateOutput::on_pushButtonChooseLocation_clicked()
 {
 
-    emit SelectAndSetKadOutputPath();
+	emit SelectAndSetKadOutputPath();
 
 }
 
 void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_editingFinished()
 {
 
-    emit EditingFinishedKadOutputPath();
+	emit EditingFinishedKadOutputPath();
 
 }
 
@@ -133,10 +138,12 @@ void NewGeneGenerateOutput::on_pushButton_cancel_clicked()
 {
 	{
 		std::lock_guard<std::recursive_mutex> guard(OutputModel::OutputGenerator::is_generating_output_mutex);
+
 		if (OutputModel::OutputGenerator::is_generating_output)
 		{
 			QMessageBox::StandardButton reply;
 			reply = QMessageBox::question(nullptr, QString("Cancel?"), QString("Are you sure you wish to cancel?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 			if (reply == QMessageBox::Yes)
 			{
 				// No lock - not necessary for a boolean whose read/write is guaranteed to be in proper sequence
@@ -149,36 +156,38 @@ void NewGeneGenerateOutput::on_pushButton_cancel_clicked()
 void NewGeneGenerateOutput::ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const runStatus)
 {
 
-    switch (runStatus)
-    {
-        case RUN_STATUS__RUNNING:
-            {
-                ui->pushButton_cancel->setEnabled(true);
-                ui->pushButtonGenerateOutput->setEnabled(false);
-                ui->pushButtonGenerateOutput->setText("Generating...");
-                setGenerateOutputPushbuttonClass("active");
-            }
-            break;
-        case RUN_STATUS__NOT_RUNNING:
-            {
-                ui->pushButton_cancel->setEnabled(false);
-                ui->pushButtonGenerateOutput->setEnabled(true);
-                ui->pushButtonGenerateOutput->setText("Generate Output");
-                setGenerateOutputPushbuttonClass("");
-            }
-            break;
-        default:
-            break;
-    }
+	switch (runStatus)
+	{
+		case RUN_STATUS__RUNNING:
+			{
+				ui->pushButton_cancel->setEnabled(true);
+				ui->pushButtonGenerateOutput->setEnabled(false);
+				ui->pushButtonGenerateOutput->setText("Generating...");
+				setGenerateOutputPushbuttonClass("active");
+			}
+			break;
+
+		case RUN_STATUS__NOT_RUNNING:
+			{
+				ui->pushButton_cancel->setEnabled(false);
+				ui->pushButtonGenerateOutput->setEnabled(true);
+				ui->pushButtonGenerateOutput->setText("Generate Output");
+				setGenerateOutputPushbuttonClass("");
+			}
+			break;
+
+		default:
+			break;
+	}
 
 }
 
 void NewGeneGenerateOutput::setGenerateOutputPushbuttonClass(std::string const & theClass)
 {
 
-    ui->pushButtonGenerateOutput->setProperty( "class", theClass.c_str() );
-    ui->pushButtonGenerateOutput->style()->unpolish(ui->pushButtonGenerateOutput);
-    ui->pushButtonGenerateOutput->style()->polish(ui->pushButtonGenerateOutput);
-    ui->pushButtonGenerateOutput->update();
+	ui->pushButtonGenerateOutput->setProperty("class", theClass.c_str());
+	ui->pushButtonGenerateOutput->style()->unpolish(ui->pushButtonGenerateOutput);
+	ui->pushButtonGenerateOutput->style()->polish(ui->pushButtonGenerateOutput);
+	ui->pushButtonGenerateOutput->update();
 
 }

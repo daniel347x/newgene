@@ -16,7 +16,7 @@ class NewGeneVariablesToolboxWrapper : public QWidget, public NewGeneWidget // d
 		Q_OBJECT
 
 	public:
-		explicit NewGeneVariablesToolboxWrapper( QWidget * parent = 0 );
+		explicit NewGeneVariablesToolboxWrapper(QWidget * parent = 0);
 		~NewGeneVariablesToolboxWrapper();
 
 	protected:
@@ -25,9 +25,9 @@ class NewGeneVariablesToolboxWrapper : public QWidget, public NewGeneWidget // d
 		QGridLayout * gridLayout;
 		NewGeneVariablesToolbox * newgeneToolBox;
 
-    public:
+	public:
 
-        friend class NewGeneMainWindow;
+		friend class NewGeneMainWindow;
 
 };
 

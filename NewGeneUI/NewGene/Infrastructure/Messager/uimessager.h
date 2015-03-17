@@ -72,11 +72,11 @@ class UIMessager : public QObject, public Messager
 
 		enum Mode
 		{
-			  NORMAL
+			NORMAL
 			, KAD_GENERATION
 		};
 
-		UIMessager(QObject *parent = 0);
+		UIMessager(QObject * parent = 0);
 		~UIMessager();
 
 		void setMode(Mode const mode_) { mode = mode_; }
@@ -86,7 +86,7 @@ class UIMessager : public QObject, public Messager
 		void InitializeSingleShot();
 		void FinalizeSingleShot();
 
-        void EmitChangeMessage(DataChangeMessage & widgetData);
+		void EmitChangeMessage(DataChangeMessage & widgetData);
 
 		virtual void UpdateStatusBarText(std::string const &, void *);
 		virtual void AppendKadStatusText(std::string const &, void *);
@@ -106,7 +106,7 @@ class UIMessager : public QObject, public Messager
 		void SignalUpdateStatusBarText(int, STD_STRING const);
 		void SignalAppendKadStatusText(int, STD_STRING const);
 		void SignalSetPerformanceLabel(int, STD_STRING const);
-        void SignalSetRunStatus(int, RUN_STATUS_ENUM const);
+		void SignalSetRunStatus(int, RUN_STATUS_ENUM const);
 
 	public slots:
 
@@ -181,9 +181,9 @@ class UIMessagerOutputProject : public UIMessager
 		bool ShowQuestionMessageBox(std::string, std::string); // title, question text
 		int  ShowOptionMessageBox(std::string, std::string, std::vector<WidgetInstanceIdentifier>); // title, question, option list
 
-        void SetRunStatus(RUN_STATUS_ENUM const &);
+		void SetRunStatus(RUN_STATUS_ENUM const &);
 
-        virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
+		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
 		virtual void UpdateProgressBarValue(std::int64_t const);
 		virtual void UpdateStatusBarText(std::string const & status_bar_text, void *);

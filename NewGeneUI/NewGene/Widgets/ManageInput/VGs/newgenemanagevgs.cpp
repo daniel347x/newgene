@@ -19,22 +19,23 @@
 
 #include <set>
 
-NewGeneManageVGs::NewGeneManageVGs( QWidget * parent ) :
-	QWidget( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_INPUT_WIDGET, MANAGE_VGS_WIDGET, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneManageVGs )
+NewGeneManageVGs::NewGeneManageVGs(QWidget * parent) :
+	QWidget(parent),
+	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_INPUT_WIDGET, MANAGE_VGS_WIDGET,
+									 true)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	ui(new Ui::NewGeneManageVGs)
 {
-	ui->setupUi( this );
+	ui->setupUi(this);
 	ui->label_importProgress->hide();
 	ui->progressBar_importVG->hide();
 	ui->pushButton_cancel->hide();
 	PrepareInputWidget(true);
 
-    ui->pushButton_add_vg->setEnabled(false);
-    ui->pushButton_remove_vg->setEnabled(false);
-    ui->pushButton_refresh_vg->setEnabled(false);
+	ui->pushButton_add_vg->setEnabled(false);
+	ui->pushButton_remove_vg->setEnabled(false);
+	ui->pushButton_refresh_vg->setEnabled(false);
 
-    refresh_vg_called_after_create = false;
+	refresh_vg_called_after_create = false;
 }
 
 NewGeneManageVGs::~NewGeneManageVGs()
@@ -42,14 +43,14 @@ NewGeneManageVGs::~NewGeneManageVGs()
 	delete ui;
 }
 
-void NewGeneManageVGs::changeEvent( QEvent * e )
+void NewGeneManageVGs::changeEvent(QEvent * e)
 {
-	QWidget::changeEvent( e );
+	QWidget::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:
@@ -76,16 +77,17 @@ void NewGeneManageVGs::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE, false, "");
 		}
 
-        ui->pushButton_add_vg->setEnabled(true);
-        ui->pushButton_remove_vg->setEnabled(false);
-        ui->pushButton_refresh_vg->setEnabled(false);
-    }
+		ui->pushButton_add_vg->setEnabled(true);
+		ui->pushButton_remove_vg->setEnabled(false);
+		ui->pushButton_refresh_vg->setEnabled(false);
+	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (inp)
 		{
 			inp->UnregisterInterestInChanges(this);
 		}
+
 		Empty();
 	}
 
@@ -119,6 +121,7 @@ void NewGeneManageVGs::RefreshAllWidgets()
 		Empty();
 		return;
 	}
+
 	WidgetDataItemRequest_MANAGE_VGS_WIDGET request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
@@ -127,6 +130,7 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -138,12 +142,13 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 	{
 		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listViewManageVGs->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel *>(ui->listViewManageVGs->model());
+
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -153,10 +158,12 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 	QStandardItemModel * model = new QStandardItemModel(ui->listViewManageVGs);
 
 	int index = 0;
-	std::for_each(widget_data.vgs_and_uoa.cbegin(), widget_data.vgs_and_uoa.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier> const & vg_and_uoa)
+	std::for_each(widget_data.vgs_and_uoa.cbegin(), widget_data.vgs_and_uoa.cend(), [this, &index,
+				  &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier> const & vg_and_uoa)
 	{
 		WidgetInstanceIdentifier const & vg = vg_and_uoa.first;
 		WidgetInstanceIdentifier const & uoa = vg_and_uoa.second;
+
 		if (vg.uuid && !vg.uuid->empty() && vg.code && !vg.code->empty())
 		{
 
@@ -168,7 +175,7 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 			QVariant v;
 			v.setValue(vg_and_uoa);
 			item->setData(v);
-			model->setItem( index, item );
+			model->setItem(index, item);
 
 			++index;
 
@@ -178,14 +185,16 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 	model->sort(0);
 
 	ui->listViewManageVGs->setModel(model);
-    ui->listViewManageVGs->setItemDelegate(new HtmlDelegate{});
-	if (oldSelectionModel) delete oldSelectionModel;
+	ui->listViewManageVGs->setItemDelegate(new HtmlDelegate{});
 
-    connect( ui->listViewManageVGs->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveVGSelectionChanged(const QItemSelection &, const QItemSelection &)));
+	if (oldSelectionModel) { delete oldSelectionModel; }
 
-    ui->pushButton_add_vg->setEnabled(true);
-    ui->pushButton_remove_vg->setEnabled(false);
-    ui->pushButton_refresh_vg->setEnabled(false);
+	connect(ui->listViewManageVGs->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveVGSelectionChanged(const QItemSelection &,
+			const QItemSelection &)));
+
+	ui->pushButton_add_vg->setEnabled(true);
+	ui->pushButton_remove_vg->setEnabled(false);
+	ui->pushButton_refresh_vg->setEnabled(false);
 
 }
 
@@ -196,7 +205,7 @@ void NewGeneManageVGs::Empty()
 	{
 		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -205,13 +214,15 @@ void NewGeneManageVGs::Empty()
 	QItemSelectionModel * oldSelectionModel = nullptr;
 
 	oldSelectionModel = ui->listViewManageVGs->selectionModel();
+
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
 
-	oldModel = static_cast<QStandardItemModel*>(ui->listViewManageVGs->model());
+	oldModel = static_cast<QStandardItemModel *>(ui->listViewManageVGs->model());
+
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -219,15 +230,16 @@ void NewGeneManageVGs::Empty()
 	}
 
 	oldSelectionModel = ui->listViewManageVGs->selectionModel();
+
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
 
-    ui->pushButton_add_vg->setEnabled(false);
-    ui->pushButton_remove_vg->setEnabled(false);
-    ui->pushButton_refresh_vg->setEnabled(false);
+	ui->pushButton_add_vg->setEnabled(false);
+	ui->pushButton_remove_vg->setEnabled(false);
+	ui->pushButton_refresh_vg->setEnabled(false);
 
 }
 
@@ -235,6 +247,7 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -246,17 +259,18 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 	{
 		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * itemModel = static_cast<QStandardItemModel*>(ui->listViewManageVGs->model());
+	QStandardItemModel * itemModel = static_cast<QStandardItemModel *>(ui->listViewManageVGs->model());
+
 	if (itemModel == nullptr)
 	{
 		boost::format msg("Invalid list view items in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -276,11 +290,12 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__ADD:
 							{
 
-								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty() || !change.parent_identifier.code || change.parent_identifier.code->empty() || !change.parent_identifier.identifier_parent)
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty() || !change.parent_identifier.code || change.parent_identifier.code->empty()
+									|| !change.parent_identifier.identifier_parent)
 								{
 									boost::format msg("Invalid new VG ID, code, or associated UOA.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
@@ -299,9 +314,10 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 								QVariant v;
 								v.setValue(vg_and_uoa);
 								item->setData(v);
-								itemModel->appendRow( item );
+								itemModel->appendRow(item);
 
 								QItemSelectionModel * selectionModel = ui->listViewManageVGs->selectionModel();
+
 								if (selectionModel != nullptr)
 								{
 									QModelIndex itemIndex = itemModel->indexFromItem(item);
@@ -317,11 +333,12 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
-								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty() || !change.parent_identifier.code || change.parent_identifier.code->empty() || !change.parent_identifier.identifier_parent)
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty() || !change.parent_identifier.code || change.parent_identifier.code->empty()
+									|| !change.parent_identifier.identifier_parent)
 								{
 									boost::format msg("Invalid VG to remove.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
@@ -330,19 +347,23 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifier const & uoa = *vg.identifier_parent;
 
 								int numberItems = itemModel->rowCount();
-								for(int currentItem = 0; currentItem < numberItems; ++currentItem)
+
+								for (int currentItem = 0; currentItem < numberItems; ++currentItem)
 								{
 									QStandardItem * vg_to_remove_item = itemModel->item(currentItem);
+
 									if (vg_to_remove_item != nullptr)
 									{
 
 										QVariant vg_and_uoa_variant = vg_to_remove_item->data();
 										std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier> const vg_and_uoa = vg_and_uoa_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier>>();
 										WidgetInstanceIdentifier const & vg_test = vg_and_uoa.first;
+
 										if (!vg_test.identifier_parent)
 										{
 											continue;
 										}
+
 										WidgetInstanceIdentifier const & uoa_test = *vg_test.identifier_parent;
 
 										if (vg_test.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg)
@@ -357,6 +378,7 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 											vg_to_remove_item = nullptr;
 
 											QItemSelectionModel * selectionModel = ui->listViewManageVGs->selectionModel();
+
 											if (selectionModel != nullptr)
 											{
 												selectionModel->clearSelection();
@@ -409,11 +431,12 @@ bool NewGeneManageVGs::GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstan
 {
 
 	QItemSelectionModel * vg_selectionModel = ui->listViewManageVGs->selectionModel();
+
 	if (vg_selectionModel == nullptr)
 	{
 		boost::format msg("Invalid selection in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -430,7 +453,7 @@ bool NewGeneManageVGs::GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstan
 	{
 		boost::format msg("Simultaneous selections not allowed in NewGeneManageVGs DMU category widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -443,12 +466,13 @@ bool NewGeneManageVGs::GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstan
 		return false;
 	}
 
-	QStandardItemModel * vgModel = static_cast<QStandardItemModel*>(ui->listViewManageVGs->model());
+	QStandardItemModel * vgModel = static_cast<QStandardItemModel *>(ui->listViewManageVGs->model());
+
 	if (vgModel == nullptr)
 	{
 		boost::format msg("Invalid model in NewGeneManageVGs DMU category widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -456,10 +480,12 @@ bool NewGeneManageVGs::GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstan
 	QVariant vg_and_uoa_variant = vgModel->item(selectedIndex.row())->data();
 	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier> vg_and_uoa = vg_and_uoa_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier>>();
 	vg = vg_and_uoa.first;
+
 	if (!vg.identifier_parent)
 	{
 		return false;
 	}
+
 	uoa = *vg.identifier_parent;
 
 	return true;
@@ -470,11 +496,12 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		boost::format msg("Bad input project.  Unable to create \"New VG\" dialog.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -489,12 +516,12 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
 	QList<QLineEdit *> fields;
-	QLineEdit *lineEditCode = new QLineEdit(&dialog);
+	QLineEdit * lineEditCode = new QLineEdit(&dialog);
 	QString labelCode = QString("Enter a brief identifying code for the new variable group:");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
 
-	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
+	QLineEdit * lineEditDescription = new QLineEdit(&dialog);
 	QString labelDescription = QString("Enter a short description for the new variable group:");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
@@ -511,7 +538,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	{
 		boost::format msg("Unable to create \"New VG\" dialog.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -536,23 +563,26 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 
 		QLineEdit * proposed_vg_code_field = fields[0];
 		QLineEdit * vg_description_field = fields[1];
+
 		if (proposed_vg_code_field && vg_description_field)
 		{
 			proposed_vg_code = proposed_vg_code_field->text().toStdString();
 			vg_description = vg_description_field->text().toStdString();
+
 			if (proposed_vg_code.empty())
 			{
 				boost::format msg("The variable group must have an identifying code (an all-caps, typically short, string).");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
+
 			if (vg_description.empty())
 			{
 				boost::format msg("You must provide a description for the variable group.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
@@ -561,7 +591,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 		{
 			boost::format msg("Unable to determine new VG code or description.");
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 			return false;
 		}
@@ -586,7 +616,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 			boost::format msg("%1%");
 			msg % errorMsg;
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 			return false;
 		}
@@ -595,22 +625,24 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 		{
 
 			// retrieve the UOA to associate with the new variable group
-			QStandardItemModel * listpaneModel = static_cast<QStandardItemModel*>(listpane->model());
+			QStandardItemModel * listpaneModel = static_cast<QStandardItemModel *>(listpane->model());
+
 			if (listpaneModel == nullptr)
 			{
 				boost::format msg("Invalid list view items in Construct VG popup.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
 
 			QItemSelectionModel * listpane_selectionModel = listpane->selectionModel();
+
 			if (listpane_selectionModel == nullptr)
 			{
 				boost::format msg("Invalid selection in New VG popup.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
@@ -620,18 +652,18 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 			if (selectedIndexes.empty())
 			{
 				// No selection
-                boost::format msg("You must select a unit of analysis (UOA) for the variable group.");
-                QMessageBox msgBox;
-                msgBox.setText( msg.str().c_str() );
-                msgBox.exec();
-                return false;
+				boost::format msg("You must select a unit of analysis (UOA) for the variable group.");
+				QMessageBox msgBox;
+				msgBox.setText(msg.str().c_str());
+				msgBox.exec();
+				return false;
 			}
 
 			if (selectedIndexes.size() > 1)
 			{
 				boost::format msg("Simultaneous selections not allowed.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
@@ -642,7 +674,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 			{
 				boost::format msg("A unit of analysis must be associated with the new variable group.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
@@ -663,7 +695,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	std::string new_vg_code(proposed_vg_code);
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(uoa_to_use, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{new_vg_code, vg_description})))));
+	actionItems.push_back(std::make_pair(uoa_to_use, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__StringVector(std::vector<std::string> {new_vg_code, vg_description})))));
 	WidgetActionItemRequest_ACTION_CREATE_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit CreateVG(action_request);
@@ -674,6 +706,7 @@ void NewGeneManageVGs::on_pushButton_remove_vg_clicked()
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -685,7 +718,7 @@ void NewGeneManageVGs::on_pushButton_remove_vg_clicked()
 	{
 		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -693,6 +726,7 @@ void NewGeneManageVGs::on_pushButton_remove_vg_clicked()
 	WidgetInstanceIdentifier vg;
 	WidgetInstanceIdentifier uoa;
 	bool is_selected = GetSelectedVG(vg, uoa);
+
 	if (!is_selected)
 	{
 		return;
@@ -702,7 +736,7 @@ void NewGeneManageVGs::on_pushButton_remove_vg_clicked()
 	{
 		boost::format msg("Invalid variable group being deleted.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -713,13 +747,14 @@ void NewGeneManageVGs::on_pushButton_remove_vg_clicked()
 	boost::format msgTitle("Delete variable group \"%1%\"?");
 	msgTitle % *vg.code;
 	reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 	if (reply == QMessageBox::No)
 	{
 		return;
 	}
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(vg, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem()))));
+	actionItems.push_back(std::make_pair(vg, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem()))));
 	WidgetActionItemRequest_ACTION_DELETE_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
 	emit DeleteVG(action_request);
 
@@ -734,25 +769,29 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		// give warning
 		refresh_vg_called_after_create = false;
 		boost::format msg_title("Refreshing data can be slow");
-		boost::format msg_text("Warning: If there is a large amount of existing data AND a large amount of data being refreshed, it will be MUCH, MUCH faster to delete the existing variable group, and re-import from scratch.  Continue?");
+		boost::format
+		msg_text("Warning: If there is a large amount of existing data AND a large amount of data being refreshed, it will be MUCH, MUCH faster to delete the existing variable group, and re-import from scratch.  Continue?");
 		QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 		if (reply == QMessageBox::No)
 		{
 			return;
 		}
 	}
+
 	bool do_refresh_not_plain_insert = !refresh_vg_called_after_create;
 	refresh_vg_called_after_create = false;
 
 	WidgetInstanceIdentifier vg;
 	WidgetInstanceIdentifier uoa;
 	bool found = GetSelectedVG(vg, uoa);
+
 	if (!found)
 	{
 		boost::format msg("A variable group must be selected.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -761,7 +800,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	{
 		boost::format msg("DMU's cannot be found for the UOA associated with the selected variable group.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -836,11 +875,11 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	});
 
-    {
-        QWidget * spacer { new QWidget{} };
-        spacer->setMinimumHeight(20);
-        form.addRow(spacer);
-    }
+	{
+		QWidget * spacer { new QWidget{} };
+		spacer->setMinimumHeight(20);
+		form.addRow(spacer);
+	}
 
 	// ********************************************************************************************************************** //
 	// Time range block
@@ -879,43 +918,43 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	{
 		DialogHelper::AddTimeRangeSelectorBlock(
 
-													  dialog,
-													  form,
-													  fieldsTimeRange,
-													  radioButtonsTimeRange,
-													  formTimeRangeSelection,
+			dialog,
+			form,
+			fieldsTimeRange,
+			radioButtonsTimeRange,
+			formTimeRangeSelection,
 
-													  YearWidget,
-													  formYearOptions,
+			YearWidget,
+			formYearOptions,
 
-													  YearMonthDayWidget,
-													  formYearMonthDayOptions,
-													  YearMonthDayWidget_ints,
-													  formYearMonthDayOptions_ints,
-													  YearMonthDayWidget_strings,
-													  formYearMonthDayOptions_strings,
-													  formYMDTimeRange_StringVsInt,
-													  radioButtonsYMD_StringVsInt_TimeRange,
+			YearMonthDayWidget,
+			formYearMonthDayOptions,
+			YearMonthDayWidget_ints,
+			formYearMonthDayOptions_ints,
+			YearMonthDayWidget_strings,
+			formYearMonthDayOptions_strings,
+			formYMDTimeRange_StringVsInt,
+			radioButtonsYMD_StringVsInt_TimeRange,
 
-													  YearMonthWidget,
-													  formYearMonthOptions,
-													  YearMonthWidget_ints,
-													  formYearMonthOptions_ints,
-													  YearMonthWidget_strings,
-													  formYearMonthOptions_strings,
-													  formYMTimeRange_StringVsInt,
-													  radioButtonsYM_StringVsInt_TimeRange,
+			YearMonthWidget,
+			formYearMonthOptions,
+			YearMonthWidget_ints,
+			formYearMonthOptions_ints,
+			YearMonthWidget_strings,
+			formYearMonthOptions_strings,
+			formYMTimeRange_StringVsInt,
+			radioButtonsYM_StringVsInt_TimeRange,
 
-													  uoa.time_granularity
+			uoa.time_granularity
 
-													  );
+		);
 	}
 
-    {
-        QWidget * spacer { new QWidget{} };
-        spacer->setMinimumHeight(20);
-        form.addRow(spacer);
-    }
+	{
+		QWidget * spacer { new QWidget{} };
+		spacer->setMinimumHeight(20);
+		form.addRow(spacer);
+	}
 
 	// Add rows that allow the user to state whether the input file has rows containing the column descriptions, or describing the column data types
 	QList<QCheckBox *> fieldsCheckboxes;
@@ -932,11 +971,11 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	form.addRow(checkboxIncludeDataTypes);
 	fieldsCheckboxes << checkboxIncludeDataTypes;
 
-    {
-        QWidget * spacer { new QWidget{} };
-        spacer->setMinimumHeight(20);
-        form.addRow(spacer);
-    }
+	{
+		QWidget * spacer { new QWidget{} };
+		spacer->setMinimumHeight(20);
+		form.addRow(spacer);
+	}
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
@@ -986,9 +1025,11 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				}
 
 				QLineEdit * data_column_dmu = nullptr;
+
 				if (valid)
 				{
 					data_column_dmu = fieldsDMU[index];
+
 					if (!data_column_dmu)
 					{
 						valid = false;
@@ -999,6 +1040,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				}
 
 				std::string data_column_name;
+
 				if (valid)
 				{
 					data_column_name = data_column_dmu->text().toStdString();
@@ -1008,6 +1050,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				{
 
 					valid = Validation::ValidateColumnName(data_column_name, "DMU", true, errorMsg);
+
 					if (!valid)
 					{
 						valid = false;
@@ -1032,6 +1075,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		{
 			// Test that primary key column names are unique
 			std::set<std::string> testkeys(dataDmuColNames.cbegin(), dataDmuColNames.cend());
+
 			if (testkeys.size() != dataDmuColNames.size())
 			{
 				valid = false;
@@ -1052,36 +1096,36 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 			{
 				valid = DialogHelper::ValidateTimeRangeBlock(
 
-																   dialog,
-																   form,
-																   fieldsTimeRange,
-																   radioButtonsTimeRange,
+							dialog,
+							form,
+							fieldsTimeRange,
+							radioButtonsTimeRange,
 
-																   YearWidget,
-																   formYearOptions,
+							YearWidget,
+							formYearOptions,
 
-																   YearMonthDayWidget,
-																   formYearMonthDayOptions,
-																   YearMonthDayWidget_ints,
-																   formYearMonthDayOptions_ints,
-																   YearMonthDayWidget_strings,
-																   formYearMonthDayOptions_strings,
-																   radioButtonsYMD_StringVsInt_TimeRange,
+							YearMonthDayWidget,
+							formYearMonthDayOptions,
+							YearMonthDayWidget_ints,
+							formYearMonthDayOptions_ints,
+							YearMonthDayWidget_strings,
+							formYearMonthDayOptions_strings,
+							radioButtonsYMD_StringVsInt_TimeRange,
 
-																   YearMonthWidget,
-																   formYearMonthOptions,
-																   YearMonthWidget_ints,
-																   formYearMonthOptions_ints,
-																   YearMonthWidget_strings,
-																   formYearMonthOptions_strings,
-																   radioButtonsYM_StringVsInt_TimeRange,
+							YearMonthWidget,
+							formYearMonthOptions,
+							YearMonthWidget_ints,
+							formYearMonthOptions_ints,
+							YearMonthWidget_strings,
+							formYearMonthOptions_strings,
+							radioButtonsYM_StringVsInt_TimeRange,
 
-																   uoa.time_granularity,
-																   dataTimeRange,
-																   warnEmptyEndingTimeCols,
-																   errorMsg
+							uoa.time_granularity,
+							dataTimeRange,
+							warnEmptyEndingTimeCols,
+							errorMsg
 
-																   );
+						);
 			}
 		}
 
@@ -1097,6 +1141,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				QString fin;
 				QString colOrCols;
 				QString isOrAre;
+
 				if (YButton->isChecked())
 				{
 					ymd = "year ";
@@ -1145,6 +1190,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				title += "blank.";
 
 				reply = QMessageBox::question(nullptr, title, msg, QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 				if (reply != QMessageBox::Yes)
 				{
 					valid = false;
@@ -1167,7 +1213,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		{
 			boost::format msg(errorMsg);
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 		}
 
@@ -1195,13 +1241,15 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	});
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__ImportVariableGroup(vg, dataTimeRange, dmusAndColumnNames, data_column_file_pathname, uoa.time_granularity, inputFileContainsColumnDescriptions, inputFileContainsColumnDataTypes, do_refresh_not_plain_insert)))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__ImportVariableGroup(vg,
+										 dataTimeRange, dmusAndColumnNames, data_column_file_pathname, uoa.time_granularity, inputFileContainsColumnDescriptions, inputFileContainsColumnDataTypes,
+										 do_refresh_not_plain_insert)))));
 	WidgetActionItemRequest_ACTION_REFRESH_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
 	emit RefreshVG(action_request);
 
 }
 
-bool NewGeneManageVGs::event ( QEvent * e )
+bool NewGeneManageVGs::event(QEvent * e)
 {
 
 	bool returnVal = false;
@@ -1211,6 +1259,7 @@ bool NewGeneManageVGs::event ( QEvent * e )
 		WidgetInstanceIdentifier vg;
 		WidgetInstanceIdentifier uoa;
 		bool is_selected = GetSelectedVG(vg, uoa);
+
 		if (!is_selected)
 		{
 			return true; // Even though no VG is selected, we have recognized and processed our own custom event
@@ -1221,15 +1270,16 @@ bool NewGeneManageVGs::event ( QEvent * e )
 		msg % *vg.code;
 		boost::format msgTitle("Import data?");
 		reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 		if (reply == QMessageBox::Yes)
 		{
 			QEvent * event = new QEvent(QEVENT_CLICK_VG_REFRESH);
 			QApplication::postEvent(this, event);
 		}
+
 		returnVal = true;
 	}
-	else
-	if (e->type() == QEVENT_CLICK_VG_REFRESH)
+	else if (e->type() == QEVENT_CLICK_VG_REFRESH)
 	{
 		refresh_vg_called_after_create = true;
 		ui->pushButton_refresh_vg->click();
@@ -1295,10 +1345,12 @@ void NewGeneManageVGs::on_pushButton_cancel_clicked()
 {
 	{
 		std::lock_guard<std::recursive_mutex> guard(Importer::is_performing_import_mutex);
+
 		if (Importer::is_performing_import)
 		{
 			QMessageBox::StandardButton reply;
 			reply = QMessageBox::question(nullptr, QString("Cancel?"), QString("Are you sure you wish to cancel?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 			if (reply == QMessageBox::Yes)
 			{
 				// No lock - not necessary for a boolean whose read/write is guaranteed to be in proper sequence
@@ -1311,34 +1363,35 @@ void NewGeneManageVGs::on_pushButton_cancel_clicked()
 void NewGeneManageVGs::ReceiveVGSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
 {
 
-    UIInputProject * project = projectManagerUI().getActiveUIInputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
 
-    UIMessager messager(project);
+	if (project == nullptr)
+	{
+		return;
+	}
 
-    if (!ui->listViewManageVGs)
-    {
-        boost::format msg("Invalid list view in Manage VG's tab.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	UIMessager messager(project);
 
-    if(!selected.indexes().isEmpty())
-    {
-        ui->pushButton_add_vg->setEnabled(true);
-        ui->pushButton_remove_vg->setEnabled(true);
-        ui->pushButton_refresh_vg->setEnabled(true);
-    }
-    else
-    {
-        ui->pushButton_add_vg->setEnabled(true);
-        ui->pushButton_remove_vg->setEnabled(false);
-        ui->pushButton_refresh_vg->setEnabled(false);
-    }
+	if (!ui->listViewManageVGs)
+	{
+		boost::format msg("Invalid list view in Manage VG's tab.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
+
+	if (!selected.indexes().isEmpty())
+	{
+		ui->pushButton_add_vg->setEnabled(true);
+		ui->pushButton_remove_vg->setEnabled(true);
+		ui->pushButton_refresh_vg->setEnabled(true);
+	}
+	else
+	{
+		ui->pushButton_add_vg->setEnabled(true);
+		ui->pushButton_remove_vg->setEnabled(false);
+		ui->pushButton_refresh_vg->setEnabled(false);
+	}
 
 }

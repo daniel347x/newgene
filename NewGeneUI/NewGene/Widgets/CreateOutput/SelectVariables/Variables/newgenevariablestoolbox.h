@@ -12,15 +12,15 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 
 	public:
 
-		explicit NewGeneVariablesToolbox( QWidget * parent = 0 );
+		explicit NewGeneVariablesToolbox(QWidget * parent = 0);
 
 		void HandleChanges(DataChangeMessage const &);
-        void SetBarColor(bool active, std::string const & name);
+		void SetBarColor(bool active, std::string const & name);
 
 	signals:
 
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX);
-        void DoTabChange(WidgetInstanceIdentifier);
+		void DoTabChange(WidgetInstanceIdentifier);
 
 	public slots:
 
@@ -29,7 +29,7 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX); // us, parent
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE); // child
-        void tabChange(int);
+		void tabChange(int);
 
 		// For Squish only: exception to rule regarding slots; return something here
 		QListView * GetListView(int const index);

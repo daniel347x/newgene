@@ -20,13 +20,16 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 	identifiers.clear();
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM KAD_COUNT");	
+	std::string sql("SELECT * FROM KAD_COUNT");
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		return;
 	}
+
 	int step_result = 0;
+
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 
@@ -35,11 +38,13 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 		// ****************************************************************************************//
 		char const * code_dmu_category = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__KAD_COUNT__DMU_CATEGORY_STRING_CODE));
 		int const kad_count = sqlite3_column_int(stmt, INDEX__KAD_COUNT__COUNT);
+
 		//char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__KAD_COUNT__FLAGS));
 		if (code_dmu_category && strlen(code_dmu_category))
 		{
 			WidgetInstanceIdentifier identifier; // DMU
 			bool found_parent = input_model_->t_dmu_category.getIdentifierFromStringCode(code_dmu_category, identifier);
+
 			if (found_parent && identifier.uuid && identifier.uuid->size() > 0)
 			{
 				identifiers.push_back(std::make_pair(identifier, kad_count));
@@ -47,6 +52,7 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 		}
 
 	}
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -60,7 +66,7 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	//Executor theExecutor(db);
-	
+
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [&db, &input_model_, this](DataChange const & change)
 	{
 		switch (change.change_type)
@@ -75,6 +81,7 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 								// Should never receive this.
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
 								// This is the OUTPUT model changing.
@@ -93,6 +100,7 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 										if (change.change_intention == DATA_CHANGE_INTENTION__UPDATE)
 										{
 											DataChangePacket_int * packet = static_cast<DataChangePacket_int *>(change.getPacket());
+
 											if (packet)
 											{
 												bool found = false;
@@ -101,22 +109,27 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 													if (boost::iequals(*child_identifier.uuid, *cache_identifier.first.uuid))
 													{
 														found = true;
+
 														if (packet->getValue() != cache_identifier.second)
 														{
 															cache_identifier.second = packet->getValue();
 														}
+
 														return; // from lambda
 													}
 												});
+
 												if (!found)
 												{
 													// Must add - the DMU has no entry in the output model database's KAd selection table yet
 													WidgetInstanceIdentifier identifier_new;
 													bool found_parent = input_model_.t_dmu_category.getIdentifierFromStringCode(*child_identifier.code, identifier_new);
+
 													if (found_parent && identifier_new.uuid && identifier_new.uuid->size() > 0)
 													{
 														identifiers.push_back(std::make_pair(identifier_new, packet->getValue()));
 													}
+
 													Add(db, *child_identifier.code, packet->getValue());
 												}
 												else
@@ -133,18 +146,21 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 								});
 
 							}
+
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 								// Ditto above.
 							}
 							break;
-                        default:
-                            break;
+
+						default:
+							break;
 					}
 				}
 				break;
-            default:
-                break;
+
+			default:
+				break;
 		}
 	});
 
@@ -173,10 +189,12 @@ void Table_KAD_COUNT::Add(sqlite3 * db, std::string const & dmu_category_code, i
 	sqlAdd += ",'')";
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sqlAdd.c_str(), static_cast<int>(sqlAdd.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		return;
 	}
+
 	sqlite3_step(stmt);
 
 }
@@ -193,11 +211,14 @@ void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code
 	sqlRemove += "'";
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sqlRemove.c_str(), static_cast<int>(sqlRemove.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		return;
 	}
+
 	sqlite3_step(stmt);
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -208,9 +229,11 @@ void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code
 
 	size_t count = identifiers.size();
 	int index_to_remove = -1;
+
 	for (size_t n = 0; n < count; ++n)
 	{
 		std::pair<WidgetInstanceIdentifier, int> const & test_pair = identifiers[n];
+
 		if (test_pair.first.code || boost::iequals(*test_pair.first.code, dmu_category_code))
 		{
 			index_to_remove = n;
@@ -241,11 +264,14 @@ void Table_KAD_COUNT::Modify(sqlite3 * db, std::string const & dmu_category_code
 	sqlAdd += "'";
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sqlAdd.c_str(), static_cast<int>(sqlAdd.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		return;
 	}
+
 	sqlite3_step(stmt);
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);

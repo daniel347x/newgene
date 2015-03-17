@@ -12,18 +12,21 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-OptionsBox::OptionsBox( QWidget * parent ) :
-	QFrame( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, TIMERANGE_REGION_WIDGET, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::OptionsBox )
+OptionsBox::OptionsBox(QWidget * parent) :
+	QFrame(parent),
+	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, TIMERANGE_REGION_WIDGET,
+									 true)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	ui(new Ui::OptionsBox)
 {
 
-	ui->setupUi( this );
+	ui->setupUi(this);
 
-	QLineEdit * lineEdit = this->findChild<QLineEdit*>("randomSamplingHowManyRows");
+	QLineEdit * lineEdit = this->findChild<QLineEdit *>("randomSamplingHowManyRows");
+
 	if (lineEdit)
 	{
-		QIntValidator * val = new QIntValidator(0,2147483647, this);
+		QIntValidator * val = new QIntValidator(0, 2147483647, this);
+
 		if (val)
 		{
 			lineEdit->setValidator(val);
@@ -41,14 +44,14 @@ OptionsBox::~OptionsBox()
 	delete ui;
 }
 
-void OptionsBox::changeEvent( QEvent * e )
+void OptionsBox::changeEvent(QEvent * e)
 {
-	QFrame::changeEvent( e );
+	QFrame::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:
@@ -66,10 +69,14 @@ void OptionsBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE 
 		this->show();
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET)));
-		connect(this, SIGNAL(UpdateDoRandomSampling(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)));
-		connect(this, SIGNAL(UpdateRandomSamplingCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)));
-		connect(this, SIGNAL(UpdateConsolidateRows(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)));
-		connect(this, SIGNAL(UpdateDisplayAbsoluteTimeColumns(WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE)));
+		connect(this, SIGNAL(UpdateDoRandomSampling(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)), outp->getConnector(),
+				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)));
+		connect(this, SIGNAL(UpdateRandomSamplingCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)), outp->getConnector(),
+				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)));
+		connect(this, SIGNAL(UpdateConsolidateRows(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)), outp->getConnector(),
+				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)));
+		connect(this, SIGNAL(UpdateDisplayAbsoluteTimeColumns(WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE)), outp->getConnector(),
+				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE)));
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
@@ -91,6 +98,7 @@ void OptionsBox::RefreshAllWidgets()
 		Empty();
 		return;
 	}
+
 	WidgetDataItemRequest_TIMERANGE_REGION_WIDGET request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
@@ -99,6 +107,7 @@ void OptionsBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -112,28 +121,34 @@ void OptionsBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET
 	bool display_absolute_time_columns = widget_data.display_absolute_time_columns;
 
 	{
-		QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
+		QCheckBox * checkBox = this->findChild<QCheckBox *>("doRandomSampling");
+
 		if (checkBox)
 		{
 			bool is_checked = checkBox->isChecked();
+
 			if (is_checked != do_random_sampling)
 			{
 				checkBox->setChecked(do_random_sampling);
 			}
-            ui->randomSamplingHowManyRows->setEnabled(is_checked);
-        }
+
+			ui->randomSamplingHowManyRows->setEnabled(is_checked);
+		}
 	}
 
 	{
-		QLineEdit * lineEdit = this->findChild<QLineEdit*>("randomSamplingHowManyRows");
+		QLineEdit * lineEdit = this->findChild<QLineEdit *>("randomSamplingHowManyRows");
+
 		if (lineEdit)
 		{
 			QString the_string = lineEdit->text();
 			std::int64_t the_number = 1;
+
 			if (the_string.size() > 0)
 			{
 				the_number = boost::lexical_cast<std::int64_t>(the_string.toStdString());
 			}
+
 			if (the_number != random_sampling_count_per_stage)
 			{
 				lineEdit->setText(QString((boost::lexical_cast<std::string>(random_sampling_count_per_stage).c_str())));
@@ -142,10 +157,12 @@ void OptionsBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET
 	}
 
 	{
-		QCheckBox * checkBox = this->findChild<QCheckBox*>("mergeIdenticalRows");
+		QCheckBox * checkBox = this->findChild<QCheckBox *>("mergeIdenticalRows");
+
 		if (checkBox)
 		{
 			bool is_checked = checkBox->isChecked();
+
 			if (is_checked != consolidate_rows)
 			{
 				checkBox->setChecked(consolidate_rows);
@@ -154,10 +171,12 @@ void OptionsBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET
 	}
 
 	{
-		QCheckBox * checkBox = this->findChild<QCheckBox*>("displayAbsoluteTimeColumns");
+		QCheckBox * checkBox = this->findChild<QCheckBox *>("displayAbsoluteTimeColumns");
+
 		if (checkBox)
 		{
 			bool is_checked = checkBox->isChecked();
+
 			if (is_checked != display_absolute_time_columns)
 			{
 				checkBox->setChecked(display_absolute_time_columns);
@@ -165,9 +184,9 @@ void OptionsBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET
 		}
 	}
 
-    {
-        setFilenameInSelectionEditBox();
-    }
+	{
+		setFilenameInSelectionEditBox();
+	}
 
 }
 
@@ -175,21 +194,23 @@ void OptionsBox::on_doRandomSampling_stateChanged(int)
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+
 	if (project == nullptr)
 	{
 		return;
 	}
 
-	QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
+	QCheckBox * checkBox = this->findChild<QCheckBox *>("doRandomSampling");
+
 	if (checkBox)
 	{
 		bool is_checked = checkBox->isChecked();
 		InstanceActionItems actionItems;
-		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
+		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__Checkbox(is_checked)))));
 		WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 		emit UpdateDoRandomSampling(action_request);
 
-        ui->randomSamplingHowManyRows->setEnabled(is_checked);
+		ui->randomSamplingHowManyRows->setEnabled(is_checked);
 	}
 
 }
@@ -197,17 +218,20 @@ void OptionsBox::on_doRandomSampling_stateChanged(int)
 void OptionsBox::on_randomSamplingHowManyRows_textChanged(const QString &)
 {
 
-	QLineEdit * lineEdit = this->findChild<QLineEdit*>("randomSamplingHowManyRows");
+	QLineEdit * lineEdit = this->findChild<QLineEdit *>("randomSamplingHowManyRows");
+
 	if (lineEdit)
 	{
 		QString the_string = lineEdit->text();
 		std::int64_t the_number = 1;
+
 		if (the_string.size() > 0)
 		{
 			the_number = boost::lexical_cast<std::int64_t>(the_string.toStdString());
 		}
+
 		InstanceActionItems actionItems;
-		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Int64(the_number)))));
+		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__Int64(the_number)))));
 		WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 		emit UpdateRandomSamplingCount(action_request);
 	}
@@ -218,17 +242,19 @@ void OptionsBox::on_mergeIdenticalRows_stateChanged(int arg1)
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+
 	if (project == nullptr)
 	{
 		return;
 	}
 
-	QCheckBox * checkBox = this->findChild<QCheckBox*>("mergeIdenticalRows");
+	QCheckBox * checkBox = this->findChild<QCheckBox *>("mergeIdenticalRows");
+
 	if (checkBox)
 	{
 		bool is_checked = checkBox->isChecked();
 		InstanceActionItems actionItems;
-		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
+		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__Checkbox(is_checked)))));
 		WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 		emit UpdateConsolidateRows(action_request);
 	}
@@ -238,95 +264,113 @@ void OptionsBox::on_mergeIdenticalRows_stateChanged(int arg1)
 void OptionsBox::on_displayAbsoluteTimeColumns_stateChanged(int arg1)
 {
 
-    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 
-    QCheckBox * checkBox = this->findChild<QCheckBox*>("displayAbsoluteTimeColumns");
-    if (checkBox)
-    {
-        bool is_checked = checkBox->isChecked();
-        InstanceActionItems actionItems;
-        actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
-        WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
-        emit UpdateDisplayAbsoluteTimeColumns(action_request);
-    }
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	QCheckBox * checkBox = this->findChild<QCheckBox *>("displayAbsoluteTimeColumns");
+
+	if (checkBox)
+	{
+		bool is_checked = checkBox->isChecked();
+		InstanceActionItems actionItems;
+		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__Checkbox(is_checked)))));
+		WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
+		emit UpdateDisplayAbsoluteTimeColumns(action_request);
+	}
 
 }
 
 void OptionsBox::SelectAndSetKadOutputPath()
 {
 
-    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 
-    UIMessager messager(project);
+	if (project == nullptr)
+	{
+		return;
+	}
 
-    std::unique_ptr<Setting> path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
+	UIMessager messager(project);
 
-    QString current_file {};
-    if (path_to_kad_output) current_file = path_to_kad_output->ToString().c_str();
+	std::unique_ptr<Setting> path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager,
+			OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
 
-    QString selectedFilter {"Comma-separated values (*.csv)"};
-    QString the_file = QFileDialog::getSaveFileName(this, "Choose output file", current_file, QString { selectedFilter }, &selectedFilter, QFileDialog::DontUseNativeDialog | QFileDialog::DontConfirmOverwrite);
+	QString current_file {};
 
-    if (! the_file.isEmpty())
-    {
-        if (! the_file.endsWith(".csv", Qt::CaseInsensitive))
-        {
-            the_file += ".csv";
-        }
-        projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_file.toStdString()));
-        setFilenameInSelectionEditBox();
-    }
+	if (path_to_kad_output) { current_file = path_to_kad_output->ToString().c_str(); }
+
+	QString selectedFilter {"Comma-separated values (*.csv)"};
+	QString the_file = QFileDialog::getSaveFileName(this, "Choose output file", current_file, QString { selectedFilter }, &selectedFilter,
+					   QFileDialog::DontUseNativeDialog | QFileDialog::DontConfirmOverwrite);
+
+	if (! the_file.isEmpty())
+	{
+		if (! the_file.endsWith(".csv", Qt::CaseInsensitive))
+		{
+			the_file += ".csv";
+		}
+
+		projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE,
+				OutputProjectPathToKadOutputFile(messager, the_file.toStdString()));
+		setFilenameInSelectionEditBox();
+	}
 
 }
 
 void OptionsBox::setFilenameInSelectionEditBox()
 {
-    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 
-    UIMessager messager(project);
+	if (project == nullptr)
+	{
+		return;
+	}
 
-    std::unique_ptr<Setting> path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
-    QString current_file {};
-    if (path_to_kad_output) current_file = path_to_kad_output->ToString().c_str();
-    QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
-    if (editControl)
-    {
-        editControl->setText(current_file);
-    }
+	UIMessager messager(project);
+
+	std::unique_ptr<Setting> path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager,
+			OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
+	QString current_file {};
+
+	if (path_to_kad_output) { current_file = path_to_kad_output->ToString().c_str(); }
+
+	QLineEdit * editControl = this->findChild<QLineEdit *>("lineEditFilePathToKadOutput");
+
+	if (editControl)
+	{
+		editControl->setText(current_file);
+	}
 }
 
 void OptionsBox::EditingFinishedKadOutputPath()
 {
 
-    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 
-    UIMessager messager(project);
+	if (project == nullptr)
+	{
+		return;
+	}
 
-    QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
-    if (editControl)
-    {
-        QString the_path = editControl->text();
-        if (! the_path.isEmpty() && ! the_path.endsWith(".csv", Qt::CaseInsensitive))
-        {
-            the_path += ".csv";
-        }
-        projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_path.toStdString()));
-    }
+	UIMessager messager(project);
+
+	QLineEdit * editControl = this->findChild<QLineEdit *>("lineEditFilePathToKadOutput");
+
+	if (editControl)
+	{
+		QString the_path = editControl->text();
+
+		if (! the_path.isEmpty() && ! the_path.endsWith(".csv", Qt::CaseInsensitive))
+		{
+			the_path += ".csv";
+		}
+
+		projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE,
+				OutputProjectPathToKadOutputFile(messager, the_path.toStdString()));
+	}
 
 }

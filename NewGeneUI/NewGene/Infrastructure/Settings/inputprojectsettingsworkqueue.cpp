@@ -9,7 +9,7 @@ InputProjectSettingsWorkQueue::InputProjectSettingsWorkQueue(QObject * parent)
 
 UIInputProjectSettings * InputProjectSettingsWorkQueue::get()
 {
-	return reinterpret_cast<UIInputProjectSettings*>(inp);
+	return reinterpret_cast<UIInputProjectSettings *>(inp);
 }
 
 void InputProjectSettingsWorkQueue::TestSlot()

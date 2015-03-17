@@ -1,12 +1,13 @@
 #include "newgenevariables.h"
 #include "ui_newgenevariables.h"
 
-NewGeneVariables::NewGeneVariables( QWidget * parent ) :
-	QWidget( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneVariables )
+NewGeneVariables::NewGeneVariables(QWidget * parent) :
+	QWidget(parent),
+	NewGeneWidget(WidgetCreationInfo(this,
+									 WIDGET_NATURE_OUTPUT_WIDGET)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	ui(new Ui::NewGeneVariables)
 {
-	ui->setupUi( this );
+	ui->setupUi(this);
 }
 
 NewGeneVariables::~NewGeneVariables()
@@ -14,14 +15,14 @@ NewGeneVariables::~NewGeneVariables()
 	delete ui;
 }
 
-void NewGeneVariables::changeEvent( QEvent * e )
+void NewGeneVariables::changeEvent(QEvent * e)
 {
-	QWidget::changeEvent( e );
+	QWidget::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:

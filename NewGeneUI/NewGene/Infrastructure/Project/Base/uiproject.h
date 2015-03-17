@@ -2,7 +2,7 @@
 #define UIPROJECT_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/filesystem.hpp>
+	#include <boost/filesystem.hpp>
 #endif
 //#include "globals.h"
 #include <QObject>
@@ -27,9 +27,9 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 {
 	public:
 
-        bool is_input_project;
-        bool IsInputProject() const { return is_input_project; };
-        bool IsOutputProject() const { return ! IsInputProject(); };
+		bool is_input_project;
+		bool IsInputProject() const { return is_input_project; };
+		bool IsOutputProject() const { return ! IsInputProject(); };
 
 		class DataChangeInterest
 		{
@@ -71,10 +71,10 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			, _project_settings(ui_settings)
 			, _model_settings(ui_model_settings)
 			, _model(ui_model)
-			, _backend_project( new BACKEND_PROJECT_CLASS(_project_settings->getBackendSettingsSharedPtr(), _model_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()) )
+			, _backend_project(new BACKEND_PROJECT_CLASS(_project_settings->getBackendSettingsSharedPtr(), _model_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()))
 		{
 			Q_UNUSED(parent);
-            is_input_project = false;
+			is_input_project = false;
 		}
 
 		~UIProject()
@@ -142,6 +142,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_map_mutex);
 			auto position = widget_uuid_widget_map.find(uuid);
+
 			if (position != widget_uuid_widget_map.cend())
 			{
 				widget_uuid_widget_map.erase(position);
@@ -152,10 +153,12 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_map_mutex);
 			auto position = widget_uuid_widget_map.find(uuid);
+
 			if (position != widget_uuid_widget_map.cend())
 			{
 				return position->second;
 			}
+
 			return nullptr;
 		}
 
@@ -169,6 +172,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map__mutex);
 			auto position = widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map.find(std::make_pair(parent_widget_uuid, child_data_uuid));
+
 			if (position != widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map.cend())
 			{
 				widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map.erase(position);
@@ -179,20 +183,23 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		{
 			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map__mutex);
 			auto position = widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map.find(std::make_pair(parent_widget_uuid, child_data_uuid));
+
 			if (position != widget_uuid_plus_child_data_item_uuid__to__widget_pointer_map.cend())
 			{
 				return position->second;
 			}
+
 			return nullptr;
 		}
 
 		void RegisterInterestInChange(NewGeneWidget * widget, DATA_CHANGE_TYPE const type, bool const match_uuid, NewGeneUUID const & uuid_to_match)
 		{
-			if (widget == nullptr) return;
+			if (widget == nullptr) { return; }
 
 			// make certain the widget knows about us
-            if (IsInputProject()) { widget->inp = dynamic_cast<UIInputProject*const>(this); }
-            if (IsOutputProject()) { widget->outp = dynamic_cast<UIOutputProject*const>(this); }
+			if (IsInputProject()) { widget->inp = dynamic_cast<UIInputProject * const>(this); }
+
+			if (IsOutputProject()) { widget->outp = dynamic_cast<UIOutputProject * const>(this); }
 
 			std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
 			data_change_interest_map.insert(std::make_pair(widget, DataChangeInterest(type, match_uuid, uuid_to_match)));
@@ -201,6 +208,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		void UnregisterInterestInChanges(NewGeneWidget * widget)
 		{
 			std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
+
 			if (data_change_interest_map.find(widget) != data_change_interest_map.cend())
 			{
 				data_change_interest_map.erase(widget);
@@ -223,12 +231,13 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 					if (!change_message.changes.empty())
 					{
 						std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
-#						ifdef _WIN32
+						#						ifdef _WIN32
 						// Obnoxious Visual Studio bug: http://stackoverflow.com/questions/20847637/clang-os-x-requires-template-keyword-in-a-particular-nested-declaration-whi
 						WidgetDataChangeInterestMap::const_iterator found_iterator = data_change_interest_map.find(widget);
-#						else
+						#						else
 						typename WidgetDataChangeInterestMap::const_iterator found_iterator = data_change_interest_map.find(widget);
-#						endif
+						#						endif
+
 						if (found_iterator != data_change_interest_map.cend())
 						{
 							// The widget is still alive
@@ -257,7 +266,8 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 			{
 				std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
-				std::for_each(data_change_interest_map.cbegin(), data_change_interest_map.cend(), [&changes, &widget_change_message_map](std::pair<NewGeneWidget * const, DataChangeInterest const> const & pair_)
+				std::for_each(data_change_interest_map.cbegin(), data_change_interest_map.cend(), [&changes,
+							  &widget_change_message_map](std::pair<NewGeneWidget * const, DataChangeInterest const> const & pair_)
 				{
 					// This function does the following:
 					// create widget-to-uuid map, populate it above at same time as reverse map,
@@ -277,6 +287,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 							{
 								// send only if a NewGeneUUID matches
 								bool matches = false;
+
 								if (change.parent_identifier.uuid && *change.parent_identifier.uuid == interest.uuid_to_match)
 								{
 									matches = true;
@@ -291,6 +302,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 										}
 									});
 								}
+
 								if (matches)
 								{
 									// Only send if a NewGeneUUID matches

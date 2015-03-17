@@ -18,7 +18,7 @@ namespace MANAGER_DESCRIPTION_NAMESPACE
 
 	enum WHICH_MANAGER_UI
 	{
-		  MANAGER_DOCUMENTS_UI
+		MANAGER_DOCUMENTS_UI
 		, MANAGER_SETTINGS_UI
 		, MANAGER_STATUS_UI
 		, MANAGER_MODEL_UI
@@ -56,33 +56,35 @@ class UIManager
 
 		NewGeneMainWindow & getMainWindow()
 		{
-			if ( theMainWindow == NULL )
+			if (theMainWindow == NULL)
 			{
-				boost::format msg( "Main window does not exist in %1%" );
+				boost::format msg("Main window does not exist in %1%");
 				msg % which_descriptor.toStdString();
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return *theMainWindow;
 		}
 
 		static UIManager<MANAGER_CLASS_UI, MANAGER_CLASS_BACKEND, MANAGER_ENUM_UI, MANAGER_ENUM_BACKEND> & getManager(UIMessager * messager = nullptr)
 		{
 
-			if ( _ui_manager == NULL && messager != nullptr )
+			if (_ui_manager == NULL && messager != nullptr)
 			{
-				_ui_manager.reset( new MANAGER_CLASS_UI(nullptr, *messager) );
-				if ( _ui_manager )
+				_ui_manager.reset(new MANAGER_CLASS_UI(nullptr, *messager));
+
+				if (_ui_manager)
 				{
 					_ui_manager->which = MANAGER_ENUM_UI;
 					_ui_manager->which_descriptor = MANAGER_DESCRIPTION_NAMESPACE::get_text_name_from_enum_ui(MANAGER_ENUM_UI).c_str();
 				}
 			}
 
-			if ( _ui_manager == NULL )
+			if (_ui_manager == NULL)
 			{
-				boost::format msg( "Manager \"%1%\" not instantiated." );
+				boost::format msg("Manager \"%1%\" not instantiated.");
 				msg % MANAGER_DESCRIPTION_NAMESPACE::get_text_name_from_enum_ui(MANAGER_ENUM_UI);
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
 			return *_ui_manager;
@@ -91,10 +93,10 @@ class UIManager
 
 		static MANAGER_CLASS_BACKEND & getBackendManager()
 		{
-			return static_cast<MANAGER_CLASS_BACKEND&>(MANAGER_CLASS_BACKEND::getManager());
+			return static_cast<MANAGER_CLASS_BACKEND &>(MANAGER_CLASS_BACKEND::getManager());
 		}
 
-	UIMessager & messager;
+		UIMessager & messager;
 
 	protected:
 		MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER_UI which;

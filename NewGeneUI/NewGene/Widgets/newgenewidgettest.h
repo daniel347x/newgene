@@ -12,7 +12,7 @@ class NewGeneWidgetTest : public QObject
 		Q_OBJECT
 
 	public:
-		explicit NewGeneWidgetTest( QWidget * self_ = 0, QObject * parent = nullptr )
+		explicit NewGeneWidgetTest(QWidget * self_ = 0, QObject * parent = nullptr)
 			: QObject(parent)
 			, self(self_)
 		{

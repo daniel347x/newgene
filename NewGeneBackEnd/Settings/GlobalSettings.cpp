@@ -11,21 +11,21 @@ SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, in
 	switch (value_)
 	{
 
-	case GLOBAL_SETTINGS_BACKEND_NAMESPACE::TEST_SETTING:
-		{
-			return SettingInfo(SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST,
-				static_cast<int>(GLOBAL_SETTINGS_BACKEND_NAMESPACE::TEST_SETTING),
-				newgene_global_backend_root_node + "GLOBAL_BACKEND_TEST",
-				"default test string!  And it works");
-		}
-		break;
+		case GLOBAL_SETTINGS_BACKEND_NAMESPACE::TEST_SETTING:
+			{
+				return SettingInfo(SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST,
+								   static_cast<int>(GLOBAL_SETTINGS_BACKEND_NAMESPACE::TEST_SETTING),
+								   newgene_global_backend_root_node + "GLOBAL_BACKEND_TEST",
+								   "default test string!  And it works");
+			}
+			break;
 
-	default:
-		{
-			boost::format msg("Settings information is not available for GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND value %1%.  Using empty setting.");
-			msg % value_;
-			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_ENUM_VALUE, msg.str()));
-		}
+		default:
+			{
+				boost::format msg("Settings information is not available for GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND value %1%.  Using empty setting.");
+				msg % value_;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_ENUM_VALUE, msg.str()));
+			}
 
 	}
 
@@ -39,20 +39,21 @@ void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info
 	switch (setting_info.setting_class)
 	{
 
-	case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
-		{
-			std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-			_settings_map[static_cast<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND>(setting_info.enum_index)] = std::unique_ptr<BackendGlobalSetting>(SettingFactory<GlobalSetting_Test>()(messager, string_setting));
-		}
-		break;
+		case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
+			{
+				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
+				_settings_map[static_cast<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND>(setting_info.enum_index)] = std::unique_ptr<BackendGlobalSetting>
+						(SettingFactory<GlobalSetting_Test>()(messager, string_setting));
+			}
+			break;
 
-	default:
-		{
-			boost::format msg("Unknown UI global setting \"%1%\" (\"%2%\") being loaded.");
-			msg % setting_info.text % setting_info.setting_class;
-			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
-		}
-		break;
+		default:
+			{
+				boost::format msg("Unknown UI global setting \"%1%\" (\"%2%\") being loaded.");
+				msg % setting_info.text % setting_info.setting_class;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
+			}
+			break;
 
 	}
 
@@ -67,24 +68,26 @@ BackendGlobalSetting * GlobalSettings::CloneSetting(Messager & messager, Backend
 		switch (setting_info.setting_class)
 		{
 
-		case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
-			{
-				GlobalSetting_Test * setting = dynamic_cast<GlobalSetting_Test*>(current_setting);
-				if (setting == nullptr)
+			case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
 				{
-					return nullptr;
-				}
-				return new GlobalSetting_Test(messager, setting->getString());
-			}
-			break;
+					GlobalSetting_Test * setting = dynamic_cast<GlobalSetting_Test *>(current_setting);
 
-		default:
-			{
-				boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being requested.");
-				msg % setting_info.text % setting_info.setting_class;
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
-			}
-			break;
+					if (setting == nullptr)
+					{
+						return nullptr;
+					}
+
+					return new GlobalSetting_Test(messager, setting->getString());
+				}
+				break;
+
+			default:
+				{
+					boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being requested.");
+					msg % setting_info.text % setting_info.setting_class;
+					messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
+				}
+				break;
 
 		}
 
@@ -106,21 +109,21 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 	switch (setting_info.setting_class)
 	{
 
-	case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
-		{
-			std::string string_setting = setting_info.default_val_string;
-			string_setting = setting_value_string;
-			return new GlobalSetting_Test(messager, string_setting);
-		}
-		break;
+		case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
+			{
+				std::string string_setting = setting_info.default_val_string;
+				string_setting = setting_value_string;
+				return new GlobalSetting_Test(messager, string_setting);
+			}
+			break;
 
-	default:
-		{
-			boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being updated.");
-			msg % setting_info.text % setting_info.setting_class;
-			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
-		}
-		break;
+		default:
+			{
+				boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being updated.");
+				msg % setting_info.text % setting_info.setting_class;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
+			}
+			break;
 
 	}
 
@@ -132,6 +135,7 @@ void GlobalSettings::SetPTreeEntry(Messager & messager, GLOBAL_SETTINGS_BACKEND_
 {
 
 	SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
+
 	if (theSetting == _settings_map.cend())
 	{
 		return;
@@ -142,23 +146,24 @@ void GlobalSettings::SetPTreeEntry(Messager & messager, GLOBAL_SETTINGS_BACKEND_
 	switch (setting_info.setting_class)
 	{
 
-	case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
-		{
-			GlobalSetting_Test const * setting = static_cast<GlobalSetting_Test const *>(_settings_map[which_setting].get());
-			if (setting)
+		case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
 			{
-				pt.put(setting_info.text, setting->getString());
-			}
-		}
-		break;
+				GlobalSetting_Test const * setting = static_cast<GlobalSetting_Test const *>(_settings_map[which_setting].get());
 
-	default:
-		{
-			boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being set.");
-			msg % setting_info.text % setting_info.setting_class;
-			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
-		}
-		break;
+				if (setting)
+				{
+					pt.put(setting_info.text, setting->getString());
+				}
+			}
+			break;
+
+		default:
+			{
+				boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being set.");
+				msg % setting_info.text % setting_info.setting_class;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
+			}
+			break;
 
 	}
 

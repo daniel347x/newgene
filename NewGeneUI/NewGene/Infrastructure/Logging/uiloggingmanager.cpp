@@ -7,7 +7,7 @@
 #include <QCoreApplication>
 #include <fstream>
 
-UILoggingManager::UILoggingManager( QObject * parent, UIMessager & messager )
+UILoggingManager::UILoggingManager(QObject * parent, UIMessager & messager)
 	: QObject(parent)
 	, UIManager(messager)
 {
@@ -18,16 +18,18 @@ UILoggingManager::UILoggingManager( QObject * parent, UIMessager & messager )
 
 	bool found = ObtainLogfilePath();
 
-	if ( !found )
+	if (!found)
 	{
 		QString error_message = "Unable to open NewGene logfile for writing.  No logging will occur.";
+
 		if (current_error.length() > 0)
 		{
 			error_message += " (";
 			error_message += current_error;
 			error_message += ")";
 		}
-		statusManagerUI().PostStatus(error_message, UIStatusManager::IMPORTANCE_STANDARD, true );
+
+		statusManagerUI().PostStatus(error_message, UIStatusManager::IMPORTANCE_STANDARD, true);
 		current_error.clear();
 	}
 

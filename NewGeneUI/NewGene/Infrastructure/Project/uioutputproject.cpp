@@ -11,27 +11,27 @@
 #include <QStandardItemModel>
 
 UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const & project_settings,
-				std::shared_ptr<UIOutputModelSettings> const & model_settings,
-				std::shared_ptr<UIOutputModel> const & model,
-				QObject * mainWindowObject_,
-				QObject * parent,
-				UIMessagerOutputProject & messager_,
-				UIInputProject * inp)
+								 std::shared_ptr<UIOutputModelSettings> const & model_settings,
+								 std::shared_ptr<UIOutputModel> const & model,
+								 QObject * mainWindowObject_,
+								 QObject * parent,
+								 UIMessagerOutputProject & messager_,
+								 UIInputProject * inp)
 	: QObject(parent)
 	, UIProject(project_settings, model_settings, model, parent, messager_)
 	, mainWindowObject(mainWindowObject_)
 	, messager(messager_)
 	, number_timerange_widgets_created(0)
-    , _inp(inp)
-	{
-		messager.set(this);
-        is_input_project = false;
-    }
+	, _inp(inp)
+{
+	messager.set(this);
+	is_input_project = false;
+}
 
 void UIOutputProject::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg.c_str() );
+	msgBox.setText(msg.c_str());
 	msgBox.exec();
 }
 
@@ -39,10 +39,12 @@ bool UIOutputProject::QuestionMessageBox(STD_STRING msg_title, STD_STRING msg_te
 {
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 	if (reply == QMessageBox::Yes)
 	{
 		return true;
 	}
+
 	return false;
 }
 
@@ -65,7 +67,7 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 	{
 		boost::format msg("Unable to create \"Choose top-level variable group\" dialog.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return -1;
 	}
@@ -88,22 +90,24 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 		{
 
 			// retrieve the VG to use as the primary, top-level VG
-			QStandardItemModel * listpaneModel = static_cast<QStandardItemModel*>(listpane->model());
+			QStandardItemModel * listpaneModel = static_cast<QStandardItemModel *>(listpane->model());
+
 			if (listpaneModel == nullptr)
 			{
 				boost::format msg("Invalid list view items in \"Select VG to use as Primary\" popup.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
 
 			QItemSelectionModel * listpane_selectionModel = listpane->selectionModel();
+
 			if (listpane_selectionModel == nullptr)
 			{
 				boost::format msg("Invalid selection in Selct Variable Group popup.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
@@ -120,7 +124,7 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 			{
 				boost::format msg("Simultaneous selections not allowed.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
@@ -131,7 +135,7 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 			{
 				boost::format msg("A variable group must be selected.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
@@ -153,11 +157,12 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 	{
 		return test.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg_to_use);
 	});
+
 	if (found == option_list.cend())
 	{
 		boost::format msg("Selected variable group cannot be found.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return -1;
 	}
@@ -185,10 +190,12 @@ bool UIOutputProject::is_model_equivalent(UIMessager & messager, UIOutputModel *
 	{
 		boost::filesystem::path this_path = this_input_model.getPathToDatabaseFile();
 		boost::filesystem::path that_path = that_input_model.getPathToDatabaseFile();
+
 		try
 		{
 			bool this_exists = boost::filesystem::exists(this_path);
 			bool that_exists = boost::filesystem::exists(that_path);
+
 			if (this_exists != that_exists)
 			{
 				return false;
@@ -220,6 +227,7 @@ bool UIOutputProject::is_model_equivalent(UIMessager & messager, UIOutputModel *
 	{
 		boost::filesystem::path this_path = model().backend().getPathToDatabaseFile();
 		boost::filesystem::path that_path = model_->backend().getPathToDatabaseFile();
+
 		try
 		{
 			if (this_path == boost::filesystem::path() || that_path == boost::filesystem::path())

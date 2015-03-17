@@ -13,11 +13,11 @@ class Form : public QWidget
 		Q_OBJECT
 
 	public:
-		explicit Form( QWidget * parent = 0 );
+		explicit Form(QWidget * parent = 0);
 		~Form();
 
 	protected:
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 		Ui::Form * ui;

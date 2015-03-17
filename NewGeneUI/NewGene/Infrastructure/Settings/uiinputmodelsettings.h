@@ -15,9 +15,9 @@ class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MOD
 		UIInputModelSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
 			: QObject(parent)
 			, UIModelSettings(messager, InputModelSettings::number_worker_threads)
-			{
-				CreateImplementation(messager, path_to_settings);
-			}
+		{
+			CreateImplementation(messager, path_to_settings);
+		}
 
 		void UpdateConnections();
 
@@ -63,9 +63,10 @@ class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MOD
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Model settings implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Model settings implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return *__impl;
 		}
 
@@ -82,9 +83,10 @@ class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MOD
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Internal settings implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Internal settings implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return static_cast<InputModelSettings &>(getBackendSettings_base<InputModelSettings, INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS, InputModelSetting>(*__impl));
 		}
 
@@ -92,9 +94,10 @@ class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MOD
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Internal settings implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Internal settings implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return getBackendSettingsSharedPtr_base<InputModelSettings>(*__impl);
 		}
 
@@ -109,10 +112,10 @@ class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MOD
 
 	protected:
 
-        WorkQueueManager<UI_INPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
+		WorkQueueManager<UI_INPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			InputModelSettingsWorkQueue * work_queue = new InputModelSettingsWorkQueue();
-			work_queue->SetUIObject(reinterpret_cast<UIInputModelSettings*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIInputModelSettings *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

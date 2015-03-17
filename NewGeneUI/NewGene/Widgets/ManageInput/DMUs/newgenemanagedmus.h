@@ -16,12 +16,12 @@ class NewGeneManageDMUs : public QWidget, public NewGeneWidget // do not reorder
 
 	public:
 
-		explicit NewGeneManageDMUs( QWidget * parent = 0 );
+		explicit NewGeneManageDMUs(QWidget * parent = 0);
 		~NewGeneManageDMUs();
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 

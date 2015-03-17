@@ -2,9 +2,9 @@
 #define FIELDS_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/format.hpp>
-#	include <boost/spirit/home/support/string_traits.hpp>
-#	include <boost/lexical_cast.hpp>
+	#include <boost/format.hpp>
+	#include <boost/spirit/home/support/string_traits.hpp>
+	#include <boost/lexical_cast.hpp>
 #endif
 #include "FieldTypes.h"
 #include <tuple>

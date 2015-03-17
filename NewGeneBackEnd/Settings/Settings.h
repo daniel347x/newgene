@@ -2,7 +2,7 @@
 #define SETTINGS_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/filesystem.hpp>
+	#include <boost/filesystem.hpp>
 #endif
 
 #include "SettingsRepository.h"

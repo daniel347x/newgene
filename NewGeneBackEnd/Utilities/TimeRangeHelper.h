@@ -2,8 +2,8 @@
 #define TIMERANGEHELPER_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/date_time/local_time/local_time.hpp>
-#	include "boost/date_time/posix_time/posix_time.hpp"
+	#include <boost/date_time/local_time/local_time.hpp>
+	#include "boost/date_time/posix_time/posix_time.hpp"
 #endif
 #include <string>
 #include <cstdint>
@@ -15,7 +15,7 @@ namespace TimeRange
 	enum TimeRangeImportMode
 	{
 
-		  TIME_RANGE_IMPORT_MODE__NONE = 0
+		TIME_RANGE_IMPORT_MODE__NONE = 0
 		, TIME_RANGE_IMPORT_MODE__YEAR_MONTH_DAY
 		, TIME_RANGE_IMPORT_MODE__YEAR
 
@@ -31,11 +31,13 @@ namespace TimeRange
 	{
 		boost::posix_time::ptime time_epoch(boost::gregorian::date(1970, 1, 1));
 		boost::posix_time::ptime t = time_epoch + boost::posix_time::milliseconds(ms);
+
 		if (only_date)
 		{
 			boost::gregorian::date d = t.date();
 			return boost::gregorian::to_simple_string(d);
 		}
+
 		return boost::posix_time::to_simple_string(t);
 	}
 

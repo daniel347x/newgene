@@ -1,7 +1,7 @@
 #include "table.h"
 
 void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-	int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors)
+									 int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -122,6 +122,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 		boost::format msg("Unable to execute SQL query: %1%");
 		msg % sql_insert.c_str();
 		errors.push_back(msg.str());
+
 		if (stmt)
 		{
 			sqlite3_finalize(stmt);
@@ -145,7 +146,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 }
 
 void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-	int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, long & numlinesupdated, std::vector<std::string> & errors)
+									   int const number_rows_in_block, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, long & numlinesupdated, std::vector<std::string> & errors)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -153,6 +154,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 	Executor executor(db);
 
 	std::string errorMsg;
+
 	for (int row = 0; row < number_rows_in_block; ++row)
 	{
 
@@ -236,24 +238,23 @@ void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field
 	{
 		sql_insert += boost::lexical_cast<std::string>(field_data->GetInt32Ref());
 	}
-	else
-	if (IsFieldTypeInt64(field_type))
+	else if (IsFieldTypeInt64(field_type))
 	{
 		sql_insert += boost::lexical_cast<std::string>(field_data->GetInt64Ref());
 	}
-	else
-	if (IsFieldTypeFloat(field_type))
+	else if (IsFieldTypeFloat(field_type))
 	{
 		sql_insert += boost::lexical_cast<std::string>(field_data->GetDouble());
 	}
-	else
-	if (IsFieldTypeString(field_type))
+	else if (IsFieldTypeString(field_type))
 	{
 		if (!no_quotes)
 		{
 			sql_insert += '\'';
 		}
+
 		sql_insert += Table_basemost::EscapeTicks(field_data->GetString());
+
 		if (!no_quotes)
 		{
 			sql_insert += '\'';
@@ -286,7 +287,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 		int index = 0;
 		bool innerFailed = false;
 		std::for_each(import_definition.output_schema.schema.cbegin(),
-			import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
+					  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
 		{
 
 			if (innerFailed)
@@ -337,7 +338,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 		index = 0;
 		innerFailed = false;
 		std::for_each(import_definition.output_schema.schema.cbegin(),
-			import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
+					  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
 		{
 
 			if (innerFailed)
@@ -409,7 +410,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 	int index = 0;
 	bool innerFailed = false;
 	std::for_each(import_definition.output_schema.schema.cbegin(),
-		import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
+				  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
 	{
 
 		if (innerFailed)
@@ -446,7 +447,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 	index = 0;
 	innerFailed = false;
 	std::for_each(import_definition.output_schema.schema.cbegin(),
-		import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
+				  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
 	{
 
 		if (innerFailed)
@@ -483,12 +484,14 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 	}
 
 	size_t numberValues = values.size();
+
 	for (size_t n = 0; n < numberValues; ++n)
 	{
 		BindSqlField(import_definition.stmt_update, bind_index, values[n]);
 	}
 
 	size_t numberWheres = where_values.size();
+
 	for (size_t n = 0; n < numberWheres; ++n)
 	{
 		BindSqlField(import_definition.stmt_update, bind_index, where_values[n]);
@@ -538,7 +541,7 @@ int Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed
 		bool first = true;
 		int index = 0;
 		std::for_each(import_definition.output_schema.schema.cbegin(),
-			import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
+					  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
 		{
 
 			if (!first)
@@ -566,7 +569,7 @@ int Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed
 		index = 0;
 		bool innerFailed = false;
 		std::for_each(import_definition.output_schema.schema.cbegin(),
-			import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
+					  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
 		{
 
 			if (innerFailed)
@@ -668,6 +671,7 @@ int Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed
 	}
 
 	size_t numberFields = values.size();
+
 	for (size_t n = 0; n < numberFields; ++n)
 	{
 		BindSqlField(import_definition.stmt_insert, bind_index, values[n]);

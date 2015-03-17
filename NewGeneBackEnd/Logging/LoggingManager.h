@@ -5,8 +5,8 @@
 
 class LoggingManager : public Manager<LoggingManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_LOGGING>
 {
-public:
-	LoggingManager(Messager & messager_) : Manager<LoggingManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_LOGGING>(messager_) {}
+	public:
+		LoggingManager(Messager & messager_) : Manager<LoggingManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_LOGGING>(messager_) {}
 };
 
 #endif

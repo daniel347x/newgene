@@ -9,7 +9,7 @@ UIProjectManagerWorkQueue::UIProjectManagerWorkQueue(QObject * parent)
 
 UIProjectManager * UIProjectManagerWorkQueue::get()
 {
-	return reinterpret_cast<UIProjectManager*>(inp);
+	return reinterpret_cast<UIProjectManager *>(inp);
 }
 
 void UIProjectManagerWorkQueue::TestSlot()

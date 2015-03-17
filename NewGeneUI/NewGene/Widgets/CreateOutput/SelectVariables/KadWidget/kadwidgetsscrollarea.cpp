@@ -14,15 +14,16 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-KadWidgetsScrollArea::KadWidgetsScrollArea( QWidget * parent ) :
-	QWidget( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, KAD_SPIN_CONTROLS_AREA, true) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+KadWidgetsScrollArea::KadWidgetsScrollArea(QWidget * parent) :
+	QWidget(parent),
+	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, KAD_SPIN_CONTROLS_AREA,
+									 true))   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
 
-    QBoxLayout * layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
-    layout->addStretch();
-    layout->addStretch();
-    setLayout(layout);
+	QBoxLayout * layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+	layout->addStretch();
+	layout->addStretch();
+	setLayout(layout);
 
 	PrepareOutputWidget();
 
@@ -80,6 +81,7 @@ void KadWidgetsScrollArea::RefreshAllWidgets()
 		Empty();
 		return;
 	}
+
 	WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
@@ -105,6 +107,7 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 	if (widget_data.identifier && widget_data.identifier->uuid)
 	{
 		NewGeneWidget * child = outp->FindWidgetFromDataItem(uuid, *widget_data.identifier->uuid);
+
 		if (child)
 		{
 			child->WidgetDataRefreshReceive(widget_data);
@@ -114,39 +117,42 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 
 void KadWidgetsScrollArea::Empty()
 {
-	QLayoutItem *child;
+	QLayoutItem * child;
+
 	while ((child = layout()->takeAt(0)) != 0)
 	{
 		delete child->widget();
 		delete child;
 	}
 
-    try
-    {
-        QBoxLayout * boxLayout = dynamic_cast<QBoxLayout*>(layout());
+	try
+	{
+		QBoxLayout * boxLayout = dynamic_cast<QBoxLayout *>(layout());
+
 		if (boxLayout)
 		{
-	        boxLayout->addStretch();
-	        boxLayout->addStretch();
+			boxLayout->addStretch();
+			boxLayout->addStretch();
 		}
-    }
-    catch (std::bad_cast &)
-    {
-    }
+	}
+	catch (std::bad_cast &)
+	{
+	}
 
-    EmptyTextCheck();
+	EmptyTextCheck();
 }
 
 void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_message)
 {
 
-    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 
-    UIMessager messager(project);
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
 
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{
@@ -164,6 +170,7 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 								}
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
@@ -177,13 +184,16 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 									QWidget * widgetToRemove = nullptr;
 									QLayoutItem * layoutItemToRemove = nullptr;
 									int i = 0;
-									for (i=0; i<current_number; ++i)
+
+									for (i = 0; i < current_number; ++i)
 									{
 										QLayoutItem * testLayoutItem = layout()->itemAt(i);
 										QWidget * testWidget(testLayoutItem->widget());
+
 										try
 										{
-											KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox*>(testWidget);
+											KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox *>(testWidget);
+
 											if (testSpinBox && testSpinBox->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, uoa_to_remove))
 											{
 												widgetToRemove = testSpinBox;
@@ -207,22 +217,25 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 										widgetToRemove = nullptr;
 										layoutItemToRemove = nullptr;
 
-                                        EmptyTextCheck();
+										EmptyTextCheck();
 									}
 
 								}
 
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
 								// Should never receive this.
 							}
+
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 								// Ditto above.
 							}
 							break;
+
 						default:
 							{
 							}
@@ -230,6 +243,7 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 					}
 				}
 				break;
+
 			default:
 				{
 				}
@@ -242,37 +256,39 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & identifier, WidgetInstanceIdentifiers const & active_dmus)
 {
 
-    // Remove the stretch at the end
-    QLayoutItem * stretcher {};
-    if (layout()->count() && (stretcher = layout()->takeAt(layout()->count()-1)) != 0)
-    {
-        try
-        {
-           QSpacerItem * spacer { dynamic_cast<QSpacerItem*>(stretcher) };
-           if (spacer)
-           {
-               delete stretcher->widget();
-               delete stretcher;
-           }
-        }
-        catch (std::bad_cast &)
-        {
+	// Remove the stretch at the end
+	QLayoutItem * stretcher {};
 
-        }
-    }
+	if (layout()->count() && (stretcher = layout()->takeAt(layout()->count() - 1)) != 0)
+	{
+		try
+		{
+			QSpacerItem * spacer { dynamic_cast<QSpacerItem *>(stretcher) };
 
-    WidgetInstanceIdentifier new_identifier(identifier);
+			if (spacer)
+			{
+				delete stretcher->widget();
+				delete stretcher;
+			}
+		}
+		catch (std::bad_cast &)
+		{
+
+		}
+	}
+
+	WidgetInstanceIdentifier new_identifier(identifier);
 	QSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
-    newSpinBox->setFixedHeight(20);
-    newSpinBox->setFixedWidth(200);
+	newSpinBox->setFixedHeight(20);
+	newSpinBox->setFixedWidth(200);
 	QFont currFont = newSpinBox->font();
-    currFont.setPixelSize(11);
+	currFont.setPixelSize(11);
 	newSpinBox->setFont(currFont);
-    std::string stylesheet(" QSpinBox { color: #333333; font-weight: bold; } ");
+	std::string stylesheet(" QSpinBox { color: #333333; font-weight: bold; } ");
 	newSpinBox->setStyleSheet(stylesheet.c_str());
 	std::string prefixText(" #");
 	prefixText += *identifier.longhand;
-    prefixText += " cols:  ";
+	prefixText += " cols:  ";
 	newSpinBox->setPrefix(prefixText.c_str());
 	bool not_me = true;
 	std::for_each(active_dmus.cbegin(), active_dmus.cend(), [&](WidgetInstanceIdentifier const & the_dmu)
@@ -282,6 +298,7 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 			not_me = false;
 		}
 	});
+
 	if (not_me)
 	{
 		newSpinBox->setVisible(false);
@@ -290,80 +307,87 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 	{
 		newSpinBox->setVisible(true);
 	}
-    layout()->addWidget(newSpinBox);
 
-    try
-    {
-        QBoxLayout * boxLayout = dynamic_cast<QBoxLayout*>(layout());
+	layout()->addWidget(newSpinBox);
+
+	try
+	{
+		QBoxLayout * boxLayout = dynamic_cast<QBoxLayout *>(layout());
+
 		if (boxLayout)
 		{
-	        boxLayout->addStretch();
+			boxLayout->addStretch();
 		}
-    }
-    catch (std::bad_cast &)
-    {
-    }
+	}
+	catch (std::bad_cast &)
+	{
+	}
 
-    EmptyTextCheck();
+	EmptyTextCheck();
 
 }
 
 void KadWidgetsScrollArea::EmptyTextCheck()
 {
 
-    int current_number = layout()->count();
-    bool any_spincontrols_visible = false;
-    int i = 0;
-    for (i=0; i<current_number; ++i)
-    {
-        QLayoutItem * testLayoutItem = layout()->itemAt(i);
-        QWidget * testWidget(testLayoutItem->widget());
-        try
-        {
-            KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox*>(testWidget);
-            if (testSpinBox && testSpinBox->isVisible())
-            {
-                any_spincontrols_visible = true;
-                break;
-            }
-        }
-        catch (std::bad_cast &)
-        {
-            // this will catch throws for the "stretch" layout items, but who cares - it's infrequent
-        }
+	int current_number = layout()->count();
+	bool any_spincontrols_visible = false;
+	int i = 0;
 
-    }
+	for (i = 0; i < current_number; ++i)
+	{
+		QLayoutItem * testLayoutItem = layout()->itemAt(i);
+		QWidget * testWidget(testLayoutItem->widget());
 
-    QLabel * emptySpinsLabel { findChild<QLabel*>("emptyKadsLabel") };
-    if (emptySpinsLabel)
-    {
-        if (!any_spincontrols_visible)
-        {
-            emptySpinsLabel->setVisible(true);
-        }
-        else
-        {
-            emptySpinsLabel->setVisible(false);
-        }
-    }
+		try
+		{
+			KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox *>(testWidget);
+
+			if (testSpinBox && testSpinBox->isVisible())
+			{
+				any_spincontrols_visible = true;
+				break;
+			}
+		}
+		catch (std::bad_cast &)
+		{
+			// this will catch throws for the "stretch" layout items, but who cares - it's infrequent
+		}
+
+	}
+
+	QLabel * emptySpinsLabel { findChild<QLabel *>("emptyKadsLabel") };
+
+	if (emptySpinsLabel)
+	{
+		if (!any_spincontrols_visible)
+		{
+			emptySpinsLabel->setVisible(true);
+		}
+		else
+		{
+			emptySpinsLabel->setVisible(false);
+		}
+	}
 
 }
 
 void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
 {
-	QLabel * emptySpinsLabel { findChild<QLabel*>("emptyKadsLabel") };
-    if (emptySpinsLabel)
-    {
-        QSize mySize { size() };
-        QSize labelSize { emptySpinsLabel->size() };
-        emptySpinsLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 2 - labelSize.height() / 2);
-    }
+	QLabel * emptySpinsLabel { findChild<QLabel *>("emptyKadsLabel") };
+
+	if (emptySpinsLabel)
+	{
+		QSize mySize { size() };
+		QSize labelSize { emptySpinsLabel->size() };
+		emptySpinsLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 2 - labelSize.height() / 2);
+	}
 }
 
 void KadWidgetsScrollArea::paintEvent(QPaintEvent *)
- {
-     QStyleOption opt;
-     opt.init(this);
-     QPainter p(this);
-     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
- }
+{
+	QStyleOption opt;
+	opt.init(this);
+	QPainter p(this);
+	style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}

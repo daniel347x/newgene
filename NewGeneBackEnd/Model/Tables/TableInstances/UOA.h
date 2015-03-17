@@ -22,7 +22,7 @@ class Table_UOA_Identifier : public Table<TABLE__UOA_IDENTIFIER, TABLE_INSTANCE_
 
 		enum COLUMN_INDEX
 		{
-			  INDEX__UOA_CATEGORY_UUID = 0
+			INDEX__UOA_CATEGORY_UUID = 0
 			, INDEX__UOA_CATEGORY_STRING_CODE
 			, INDEX__UOA_CATEGORY_STRING_LONGHAND
 			, INDEX__UOA_CATEGORY_TIME_GRANULARITY
@@ -51,7 +51,8 @@ class Table_UOA_Identifier : public Table<TABLE__UOA_IDENTIFIER, TABLE_INSTANCE_
 		bool Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, bool const also_confirm_using_cache = true);
 		bool ExistsByCode(sqlite3 * db, InputModel & input_model_, std::string const & uoa_code, bool const also_confirm_using_cache = true);
 		bool DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, DataChangeMessage & change_message);
-		bool CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & uoa_code, std::string const & uoa_description, WidgetInstanceIdentifiers const & dmu_categories, TIME_GRANULARITY const & time_granularity);
+		bool CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & uoa_code, std::string const & uoa_description, WidgetInstanceIdentifiers const & dmu_categories,
+						  TIME_GRANULARITY const & time_granularity);
 
 		static std::string GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories, bool const = false);
 
@@ -68,7 +69,7 @@ class Table_UOA_Member : public Table<TABLE__UOA_MEMBER, TABLE_INSTANCE_IDENTIFI
 
 		enum COLUMN_INDEX
 		{
-			  INDEX__UOA_CATEGORY_LOOKUP_FK_UOA_CATEGORY_UUID = 0
+			INDEX__UOA_CATEGORY_LOOKUP_FK_UOA_CATEGORY_UUID = 0
 			, INDEX__UOA_CATEGORY_LOOKUP_SEQUENCE_NUMBER
 			, INDEX__UOA_CATEGORY_LOOKUP_FK_DMU_CATEGORY_UUID
 		};

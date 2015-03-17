@@ -12,7 +12,7 @@ namespace GLOBAL_SETTINGS_UI_NAMESPACE
 
 	enum GLOBAL_SETTINGS_UI
 	{
-		  SETTING_FIRST = 0
+		SETTING_FIRST = 0
 
 		, MRU_INPUT_PROJECTS_LIST
 		, MRU_OUTPUT_PROJECTS_LIST
@@ -50,7 +50,8 @@ class UIAllGlobalSettings : public QObject, public UIAllSettings<UI_GLOBAL_SETTI
 
 			public:
 
-				UIOnlySettings(Messager & messager_, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(static_cast<UIMessager&>(messager_), path_to_settings)
+				UIOnlySettings(Messager & messager_, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(static_cast<UIMessager &>(messager_),
+							path_to_settings)
 				{
 
 				}
@@ -113,9 +114,10 @@ class UIAllGlobalSettings : public QObject, public UIAllSettings<UI_GLOBAL_SETTI
 		{
 			if (!__impl)
 			{
-				boost::format msg( "UI Global settings implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("UI Global settings implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return *__impl;
 		}
 
@@ -140,10 +142,10 @@ class UIAllGlobalSettings : public QObject, public UIAllSettings<UI_GLOBAL_SETTI
 
 	protected:
 
-        WorkQueueManager<UI_GLOBAL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
+		WorkQueueManager<UI_GLOBAL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			GlobalSettingsWorkQueue * work_queue = new GlobalSettingsWorkQueue();
-			work_queue->SetUIObject(reinterpret_cast<UIAllGlobalSettings*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIAllGlobalSettings *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

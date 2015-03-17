@@ -5,13 +5,14 @@
 #include "../../../NewGeneBackEnd/Triggers/TriggerManager.h"
 #include <QWidget>
 
-class UITriggerManager : public QObject, public UIManager<UITriggerManager, TriggerManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS>
+class UITriggerManager : public QObject, public
+	UIManager<UITriggerManager, TriggerManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS>
 {
 		Q_OBJECT
 
 	public:
 
-		explicit UITriggerManager( QObject * parent, UIMessager & messager );
+		explicit UITriggerManager(QObject * parent, UIMessager & messager);
 
 	signals:
 

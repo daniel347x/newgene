@@ -1,7 +1,7 @@
 #include "../UIActionManager.h"
 
 #ifndef Q_MOC_RUN
-#	include <boost/scope_exit.hpp>
+	#include <boost/scope_exit.hpp>
 #endif
 #include "../../Project/InputProject.h"
 #include "../../Project/OutputProject.h"
@@ -68,7 +68,8 @@ void UIActionManager::AddUOA(Messager & messager__, WidgetActionItemRequest_ACTI
 					// Retrieve data sent by user interface
 					// ************************************* //
 					WidgetActionItem const & actionItem = *instanceActionItem.second;
-					WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const & actionItemWsStringStringInt = static_cast<WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const &>(actionItem);
+					WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const & actionItemWsStringStringInt =
+						static_cast<WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const &>(actionItem);
 					WidgetInstanceIdentifiers const & dmu_categories = actionItemWsStringStringInt.getValue();
 					std::string const & new_uoa_code = actionItemWsStringStringInt.getValueString();
 					std::string const & uoa_description = actionItemWsStringStringInt.getValueString2();
@@ -163,6 +164,7 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 					ProjectManager & project_manager = projectManager();
 					std::string errorMsg;
 					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_uoa"), errorMsg);
+
 					if (!proceed)
 					{
 						boost::format msg("Error deleting UOA: %1%");
@@ -170,9 +172,11 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
+
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
 						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_uoa"), errorMsg);
+
 						if (!success)
 						{
 							boost::format msg("Error deleting UOA: %1%. Please restart NewGene.");
@@ -275,12 +279,14 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 
 				DataChangeMessage change_response(&project);
 
-				std::for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				std::for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager,
+							  &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
 					ProjectManager & project_manager = projectManager();
 					std::string errorMsg;
 					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_uoa"), errorMsg);
+
 					if (!proceed)
 					{
 						boost::format msg("Error deleting UOA: %1%");
@@ -288,9 +294,11 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
+
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
 						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_uoa"), errorMsg);
+
 						if (!success)
 						{
 							boost::format msg("Error deleting UOA: %1%. Please restart NewGene.");
@@ -312,6 +320,7 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 					Executor executor(input_model.getDb());
 
 					WidgetInstanceIdentifier uoa_category = instanceActionItem.first;
+
 					if (!uoa_category.uuid || uoa_category.uuid->empty())
 					{
 						// Error should already be handled in input model function

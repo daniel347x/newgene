@@ -1,6 +1,6 @@
 #ifndef Q_MOC_RUN
-#	include <boost/filesystem.hpp>
-#	include <boost/format.hpp>
+	#include <boost/filesystem.hpp>
+	#include <boost/format.hpp>
 #endif
 #include "dialoghelper.h"
 #include <QPushButton>
@@ -24,34 +24,36 @@
 
 #include <set>
 
-void DialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBoxLayout & formFileSelection, QWidget & FileChooserWidget, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
+void DialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBoxLayout & formFileSelection, QWidget & FileChooserWidget, QList<QLineEdit *> & fieldsFileChooser,
+									   std::vector<std::string> const & fileChooserStrings)
 {
 
 	FileChooserWidget.setLayout(&formFileSelection);
 
-	QString labelFilePathName = QString( fileChooserStrings[0].c_str() );
-    labelFilePathName += ":";
+	QString labelFilePathName = QString(fileChooserStrings[0].c_str());
+	labelFilePathName += ":";
 
-	QLineEdit *lineEditFilePathName = new QLineEdit(&FileChooserWidget);
-    QPushButton *buttonFilePathName = new QPushButton("Browse...", &FileChooserWidget);
-    buttonFilePathName->setMaximumWidth(100);
+	QLineEdit * lineEditFilePathName = new QLineEdit(&FileChooserWidget);
+	QPushButton * buttonFilePathName = new QPushButton("Browse...", &FileChooserWidget);
+	buttonFilePathName->setMaximumWidth(100);
 	fieldsFileChooser.append(lineEditFilePathName);
 
 	lineEditFilePathName->setMinimumWidth(400);
 
-    QWidget * spacer1 = new QWidget {};
-    spacer1->setMinimumHeight(20);
-    form.addRow(spacer1);
+	QWidget * spacer1 = new QWidget {};
+	spacer1->setMinimumHeight(20);
+	form.addRow(spacer1);
 	form.addRow(labelFilePathName, lineEditFilePathName);
-    form.addRow("", buttonFilePathName);
-    form.itemAt(form.rowCount()-1, QFormLayout::FieldRole)->setAlignment(Qt::AlignRight);
-    QWidget * spacer2 = new QWidget {};
-    spacer2->setMinimumHeight(20);
-    form.addRow(spacer2);
+	form.addRow("", buttonFilePathName);
+	form.itemAt(form.rowCount() - 1, QFormLayout::FieldRole)->setAlignment(Qt::AlignRight);
+	QWidget * spacer2 = new QWidget {};
+	spacer2->setMinimumHeight(20);
+	form.addRow(spacer2);
 
-	QObject::connect(buttonFilePathName, &QPushButton::clicked, [=, &dialog, &fileChooserStrings]()
+	QObject::connect(buttonFilePathName, &QPushButton::clicked, [ =, &dialog, &fileChooserStrings]()
 	{
 		QString the_file = QFileDialog::getOpenFileName(&dialog, fileChooserStrings[1].c_str(), fileChooserStrings[2].c_str(), fileChooserStrings[2].c_str());
+
 		if (!the_file.isEmpty())
 		{
 			lineEditFilePathName->setText(the_file);
@@ -71,6 +73,7 @@ bool DialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFileChoos
 	if (data_column_file_pathname_field)
 	{
 		std::string filePathName(data_column_file_pathname_field->text().toStdString());
+
 		if (!boost::filesystem::exists(filePathName))
 		{
 			valid = false;
@@ -97,7 +100,8 @@ bool DialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFileChoos
 
 }
 
-void DialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog, QFormLayout & form, QVBoxLayout & formTimeRangeGranularitySelection, QList<QRadioButton *> & radioButtonsTimeRangeGranularity)
+void DialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog, QFormLayout & form, QVBoxLayout & formTimeRangeGranularitySelection,
+		QList<QRadioButton *> & radioButtonsTimeRangeGranularity)
 {
 
 	QWidget * spacer1 { new QWidget{} };
@@ -125,42 +129,42 @@ void DialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog, QForm
 
 	NButton->setChecked(true);
 
-	radioButtonsTimeRangeGranularity << NButton << YButton << YMButton<< YMDButton;
+	radioButtonsTimeRangeGranularity << NButton << YButton << YMButton << YMDButton;
 
 }
 
 void DialogHelper::AddTimeRangeSelectorBlock(
 
-												   QDialog & dialog,
-												   QFormLayout & form,
-												   QList<QLineEdit *> & fieldsTimeRange,
-												   QList<QRadioButton *> & radioButtonsTimeRange,
-												   QBoxLayout & formTimeRangeSelection,
+	QDialog & dialog,
+	QFormLayout & form,
+	QList<QLineEdit *> & fieldsTimeRange,
+	QList<QRadioButton *> & radioButtonsTimeRange,
+	QBoxLayout & formTimeRangeSelection,
 
-												   QWidget & YearWidget,
-												   QFormLayout & formYearOptions,
+	QWidget & YearWidget,
+	QFormLayout & formYearOptions,
 
-												   QWidget & YearMonthDayWidget,
-												   QFormLayout & formYearMonthDayOptions,
-												   QWidget & YearMonthDayWidget_ints,
-												   QFormLayout & formYearMonthDayOptions_ints,
-												   QWidget & YearMonthDayWidget_strings,
-												   QFormLayout & formYearMonthDayOptions_strings,
-												   QBoxLayout & formYMDTimeRange_StringVsInt,
-												   QList<QRadioButton *> & radioButtonsYMD_StringVsInt_TimeRange,
+	QWidget & YearMonthDayWidget,
+	QFormLayout & formYearMonthDayOptions,
+	QWidget & YearMonthDayWidget_ints,
+	QFormLayout & formYearMonthDayOptions_ints,
+	QWidget & YearMonthDayWidget_strings,
+	QFormLayout & formYearMonthDayOptions_strings,
+	QBoxLayout & formYMDTimeRange_StringVsInt,
+	QList<QRadioButton *> & radioButtonsYMD_StringVsInt_TimeRange,
 
-												   QWidget & YearMonthWidget,
-												   QFormLayout & formYearMonthOptions,
-												   QWidget & YearMonthWidget_ints,
-												   QFormLayout & formYearMonthOptions_ints,
-												   QWidget & YearMonthWidget_strings,
-												   QFormLayout & formYearMonthOptions_strings,
-												   QBoxLayout & formYMTimeRange_StringVsInt,
-												   QList<QRadioButton *> & radioButtonsYM_StringVsInt_TimeRange,
+	QWidget & YearMonthWidget,
+	QFormLayout & formYearMonthOptions,
+	QWidget & YearMonthWidget_ints,
+	QFormLayout & formYearMonthOptions_ints,
+	QWidget & YearMonthWidget_strings,
+	QFormLayout & formYearMonthOptions_strings,
+	QBoxLayout & formYMTimeRange_StringVsInt,
+	QList<QRadioButton *> & radioButtonsYM_StringVsInt_TimeRange,
 
-												   TIME_GRANULARITY const & time_range_granularity
+	TIME_GRANULARITY const & time_range_granularity
 
-												   )
+)
 {
 
 	// Time range RADIO BUTTONS
@@ -267,37 +271,43 @@ void DialogHelper::AddTimeRangeSelectorBlock(
 	form.addRow(&YearMonthDayWidget);
 
 	YMDIntButton->setChecked(true);
+
 	if (YMDIntButton->isChecked())
 	{
 		YearMonthDayWidget_ints.show();
 	}
+
 	if (YMDStringButton->isChecked())
 	{
 		YearMonthDayWidget_strings.show();
 	}
 
-	QObject::connect(YMDIntButton, &QRadioButton::toggled, [=, &YearMonthDayWidget_ints, &YearMonthDayWidget_strings]()
+	QObject::connect(YMDIntButton, &QRadioButton::toggled, [ =, &YearMonthDayWidget_ints, &YearMonthDayWidget_strings]()
 	{
 		YearMonthDayWidget_ints.hide();
 		YearMonthDayWidget_strings.hide();
+
 		if (YMDIntButton->isChecked())
 		{
 			YearMonthDayWidget_ints.show();
 		}
+
 		if (YMDStringButton->isChecked())
 		{
 			YearMonthDayWidget_strings.show();
 		}
 	});
 
-	QObject::connect(YMDStringButton, &QRadioButton::toggled, [=, &YearMonthDayWidget_ints, &YearMonthDayWidget_strings]()
+	QObject::connect(YMDStringButton, &QRadioButton::toggled, [ =, &YearMonthDayWidget_ints, &YearMonthDayWidget_strings]()
 	{
 		YearMonthDayWidget_ints.hide();
 		YearMonthDayWidget_strings.hide();
+
 		if (YMDIntButton->isChecked())
 		{
 			YearMonthDayWidget_ints.show();
 		}
+
 		if (YMDStringButton->isChecked())
 		{
 			YearMonthDayWidget_strings.show();
@@ -315,7 +325,8 @@ void DialogHelper::AddTimeRangeSelectorBlock(
 	QRadioButton * YMStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes", &YearMonthDayWidget);
 	formYMTimeRange_StringVsInt.addWidget(YMIntButton);
 	formYMTimeRange_StringVsInt.addWidget(YMStringButton);
-	formYMTimeRange_StringVsInt.addWidget(new QLabel("        Examples are \"11/1992\", \"1992/11\", \"1992\\11\" and \"1992-11\"\n        You may also include the day (which will be ignored), such as \"11/20/1992\""));
+	formYMTimeRange_StringVsInt.addWidget(new
+										  QLabel("        Examples are \"11/1992\", \"1992/11\", \"1992\\11\" and \"1992-11\"\n        You may also include the day (which will be ignored), such as \"11/20/1992\""));
 	formYearMonthOptions.addRow(&formYMTimeRange_StringVsInt);
 	formYearMonthOptions.addRow(new QLabel());
 	radioButtonsYM_StringVsInt_TimeRange << YMStringButton << YMIntButton;
@@ -360,37 +371,43 @@ void DialogHelper::AddTimeRangeSelectorBlock(
 	form.addRow(&YearMonthWidget);
 
 	YMIntButton->setChecked(true);
+
 	if (YMIntButton->isChecked())
 	{
 		YearMonthWidget_ints.show();
 	}
+
 	if (YMStringButton->isChecked())
 	{
 		YearMonthWidget_strings.show();
 	}
 
-	QObject::connect(YMIntButton, &QRadioButton::toggled, [=, &YearMonthWidget_ints, &YearMonthWidget_strings]()
+	QObject::connect(YMIntButton, &QRadioButton::toggled, [ =, &YearMonthWidget_ints, &YearMonthWidget_strings]()
 	{
 		YearMonthWidget_ints.hide();
 		YearMonthWidget_strings.hide();
+
 		if (YMIntButton->isChecked())
 		{
 			YearMonthWidget_ints.show();
 		}
+
 		if (YMStringButton->isChecked())
 		{
 			YearMonthWidget_strings.show();
 		}
 	});
 
-	QObject::connect(YMStringButton, &QRadioButton::toggled, [=, &YearMonthWidget_ints, &YearMonthWidget_strings]()
+	QObject::connect(YMStringButton, &QRadioButton::toggled, [ =, &YearMonthWidget_ints, &YearMonthWidget_strings]()
 	{
 		YearMonthWidget_ints.hide();
 		YearMonthWidget_strings.hide();
+
 		if (YMIntButton->isChecked())
 		{
 			YearMonthWidget_ints.show();
 		}
+
 		if (YMStringButton->isChecked())
 		{
 			YearMonthWidget_strings.show();
@@ -437,14 +454,17 @@ void DialogHelper::AddTimeRangeSelectorBlock(
 		YearMonthDayWidget.hide();
 		YearWidget.hide();
 		YearMonthWidget.hide();
+
 		if (YButton->isChecked())
 		{
 			YearWidget.show();
 		}
+
 		if (YMDButton->isChecked())
 		{
 			YearMonthDayWidget.show();
 		}
+
 		if (YMButton->isChecked())
 		{
 			YearMonthWidget.show();
@@ -456,14 +476,17 @@ void DialogHelper::AddTimeRangeSelectorBlock(
 		YearMonthDayWidget.hide();
 		YearWidget.hide();
 		YearMonthWidget.hide();
+
 		if (YButton->isChecked())
 		{
 			YearWidget.show();
 		}
+
 		if (YMDButton->isChecked())
 		{
 			YearMonthDayWidget.show();
 		}
+
 		if (YMButton->isChecked())
 		{
 			YearMonthWidget.show();
@@ -475,14 +498,17 @@ void DialogHelper::AddTimeRangeSelectorBlock(
 		YearMonthDayWidget.hide();
 		YearWidget.hide();
 		YearMonthWidget.hide();
+
 		if (YButton->isChecked())
 		{
 			YearWidget.show();
 		}
+
 		if (YMDButton->isChecked())
 		{
 			YearMonthDayWidget.show();
 		}
+
 		if (YMButton->isChecked())
 		{
 			YearMonthWidget.show();
@@ -493,38 +519,38 @@ void DialogHelper::AddTimeRangeSelectorBlock(
 
 bool DialogHelper::ValidateTimeRangeBlock
 (
-		QDialog & dialog,
-		QFormLayout & form,
-		QList<QLineEdit *> & fieldsTimeRange,
-		QList<QRadioButton *> & radioButtonsTimeRange,
+	QDialog & dialog,
+	QFormLayout & form,
+	QList<QLineEdit *> & fieldsTimeRange,
+	QList<QRadioButton *> & radioButtonsTimeRange,
 
-		QWidget & YearWidget,
-		QFormLayout & formYearOptions,
+	QWidget & YearWidget,
+	QFormLayout & formYearOptions,
 
-		QWidget & YearMonthDayWidget,
-		QFormLayout & formYearMonthDayOptions,
-		QWidget & YearMonthDayWidget_ints,
-		QFormLayout & formYearMonthDayOptions_ints,
-		QWidget & YearMonthDayWidget_strings,
-		QFormLayout & formYearMonthDayOptions_strings,
-		QList<QRadioButton *> & radioButtonsYMD_StringVsInt_TimeRange,
+	QWidget & YearMonthDayWidget,
+	QFormLayout & formYearMonthDayOptions,
+	QWidget & YearMonthDayWidget_ints,
+	QFormLayout & formYearMonthDayOptions_ints,
+	QWidget & YearMonthDayWidget_strings,
+	QFormLayout & formYearMonthDayOptions_strings,
+	QList<QRadioButton *> & radioButtonsYMD_StringVsInt_TimeRange,
 
-		QWidget & YearMonthWidget,
-		QFormLayout & formYearMonthOptions,
-		QWidget & YearMonthWidget_ints,
-		QFormLayout & formYearMonthOptions_ints,
-		QWidget & YearMonthWidget_strings,
-		QFormLayout & formYearMonthOptions_strings,
-		QList<QRadioButton *> & radioButtonsYM_StringVsInt_TimeRange,
+	QWidget & YearMonthWidget,
+	QFormLayout & formYearMonthOptions,
+	QWidget & YearMonthWidget_ints,
+	QFormLayout & formYearMonthOptions_ints,
+	QWidget & YearMonthWidget_strings,
+	QFormLayout & formYearMonthOptions_strings,
+	QList<QRadioButton *> & radioButtonsYM_StringVsInt_TimeRange,
 
-		TIME_GRANULARITY const & time_range_granularity,
-		std::vector<std::string> & dataTimeRange,
-        bool & warnEmptyEndingTimeCols,
-		std::string & errorMsg
+	TIME_GRANULARITY const & time_range_granularity,
+	std::vector<std::string> & dataTimeRange,
+	bool & warnEmptyEndingTimeCols,
+	std::string & errorMsg
 )
 {
 
-    warnEmptyEndingTimeCols = false;
+	warnEmptyEndingTimeCols = false;
 
 	dataTimeRange.clear();
 
@@ -562,6 +588,7 @@ bool DialogHelper::ValidateTimeRangeBlock
 	int currentIndex = 0;
 	QLineEdit * timeRange_y_yearStart = fieldsTimeRange[currentIndex++];
 	QLineEdit * timeRange_y_yearEnd = fieldsTimeRange[currentIndex++];
+
 	if (YButton->isChecked())
 	{
 
@@ -595,15 +622,16 @@ bool DialogHelper::ValidateTimeRangeBlock
 					return false;
 				}
 			}
-            else
-            {
-                warnEmptyEndingTimeCols = true;
-            }
+			else
+			{
+				warnEmptyEndingTimeCols = true;
+			}
 		}
 
 		if (valid)
 		{
 			dataTimeRange.push_back(y_yearStart);
+
 			if (!y_yearEnd.empty())
 			{
 				dataTimeRange.push_back(y_yearEnd);
@@ -622,10 +650,12 @@ bool DialogHelper::ValidateTimeRangeBlock
 	QLineEdit * timeRange_ymd_dayEnd = fieldsTimeRange[currentIndex++];
 	QLineEdit * timeRange_ymd_Start = fieldsTimeRange[currentIndex++];
 	QLineEdit * timeRange_ymd_End = fieldsTimeRange[currentIndex++];
+
 	if (YMDButton->isChecked())
 	{
 
-		if (!timeRange_ymd_yearStart || !timeRange_ymd_yearEnd || !timeRange_ymd_monthStart || !timeRange_ymd_monthEnd || !timeRange_ymd_dayStart || !timeRange_ymd_dayEnd || !timeRange_ymd_Start || !timeRange_ymd_End)
+		if (!timeRange_ymd_yearStart || !timeRange_ymd_yearEnd || !timeRange_ymd_monthStart || !timeRange_ymd_monthEnd || !timeRange_ymd_dayStart || !timeRange_ymd_dayEnd
+			|| !timeRange_ymd_Start || !timeRange_ymd_End)
 		{
 			boost::format msg("Invalid date fields");
 			errorMsg = msg.str();
@@ -644,6 +674,7 @@ bool DialogHelper::ValidateTimeRangeBlock
 		bool valid = true;
 
 		bool using_string_fields = false;
+
 		if (YMDStringButton->isChecked())
 		{
 			using_string_fields = true;
@@ -701,39 +732,44 @@ bool DialogHelper::ValidateTimeRangeBlock
 		if (valid && using_string_fields)
 		{
 			dataTimeRange.push_back(ymd_Start);
+
 			if (!ymd_End.empty())
 			{
 				dataTimeRange.push_back(ymd_End);
 			}
-            else
-            {
-                warnEmptyEndingTimeCols = true;
-            }
+			else
+			{
+				warnEmptyEndingTimeCols = true;
+			}
 		}
 		else if (valid)
 		{
 			dataTimeRange.push_back(ymd_yearStart);
 			dataTimeRange.push_back(ymd_monthStart);
 			dataTimeRange.push_back(ymd_dayStart);
+
 			if (!ymd_yearEnd.empty() || !ymd_monthEnd.empty() || !ymd_dayEnd.empty())
 			{
 				dataTimeRange.push_back(ymd_yearEnd);
 				dataTimeRange.push_back(ymd_monthEnd);
 				dataTimeRange.push_back(ymd_dayEnd);
 			}
-            else
-            {
-                warnEmptyEndingTimeCols = true;
-            }
-        }
+			else
+			{
+				warnEmptyEndingTimeCols = true;
+			}
+		}
 
 		if (valid)
 		{
 			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 			int nEmptyCols = 0;
-			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), [&](std::string & colname){ if (colname.empty()) { ++nEmptyCols; } });
+			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), [&](std::string & colname) { if (colname.empty()) { ++nEmptyCols; } });
+
 			if (nEmptyCols > 0) { --nEmptyCols; }
+
 			std::set<std::string> testtimerangecols(dataTimeRange.cbegin(), dataTimeRange.cend());
+
 			if (testtimerangecols.size() != dataTimeRange.size() - nEmptyCols)
 			{
 				boost::format msg("Duplicate time range column headings");
@@ -752,6 +788,7 @@ bool DialogHelper::ValidateTimeRangeBlock
 	QLineEdit * timeRange_ym_monthEnd = fieldsTimeRange[currentIndex++];
 	QLineEdit * timeRange_ym_Start = fieldsTimeRange[currentIndex++];
 	QLineEdit * timeRange_ym_End = fieldsTimeRange[currentIndex++];
+
 	if (YMButton->isChecked())
 	{
 
@@ -772,6 +809,7 @@ bool DialogHelper::ValidateTimeRangeBlock
 		bool valid = true;
 
 		bool using_string_fields = false;
+
 		if (YMStringButton->isChecked())
 		{
 			using_string_fields = true;
@@ -819,37 +857,42 @@ bool DialogHelper::ValidateTimeRangeBlock
 		if (valid && using_string_fields)
 		{
 			dataTimeRange.push_back(ym_Start);
+
 			if (!ym_End.empty())
 			{
 				dataTimeRange.push_back(ym_End);
 			}
-            else
-            {
-                warnEmptyEndingTimeCols = true;
-            }
-        }
+			else
+			{
+				warnEmptyEndingTimeCols = true;
+			}
+		}
 		else if (valid)
 		{
 			dataTimeRange.push_back(ym_yearStart);
 			dataTimeRange.push_back(ym_monthStart);
+
 			if (!ym_yearEnd.empty() || !ym_monthEnd.empty())
 			{
 				dataTimeRange.push_back(ym_yearEnd);
 				dataTimeRange.push_back(ym_monthEnd);
 			}
-            else
-            {
-                warnEmptyEndingTimeCols = true;
-            }
-        }
+			else
+			{
+				warnEmptyEndingTimeCols = true;
+			}
+		}
 
 		if (valid)
 		{
 			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 			int nEmptyCols = 0;
-			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), [&](std::string & colname){ if (colname.empty()) { ++nEmptyCols; } });
+			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), [&](std::string & colname) { if (colname.empty()) { ++nEmptyCols; } });
+
 			if (nEmptyCols > 0) { --nEmptyCols; }
+
 			std::set<std::string> testtimerangecols(dataTimeRange.cbegin(), dataTimeRange.cend());
+
 			if (testtimerangecols.size() != dataTimeRange.size() - nEmptyCols)
 			{
 				boost::format msg("Duplicate time range column headings");
@@ -869,7 +912,8 @@ bool DialogHelper::ValidateTimeRangeBlock
 
 }
 
-void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories)
+void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes,
+									   QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories)
 {
 
 	QString labelTitle = QString("Define the DMU categories for the new unit of analysis:");
@@ -880,10 +924,10 @@ void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWi
 	middle->setLayout(&formConstructionDivider);
 	rhs = new QListView(&UoaConstructionPanes);
 
-	QSpacerItem * middlespacetop = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+	QSpacerItem * middlespacetop = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
 	QPushButton * add = new QPushButton(">>>", middle);
 	QPushButton * remove = new QPushButton("<<<", middle);
-	QSpacerItem * middlespacebottom = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+	QSpacerItem * middlespacebottom = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed);
 	formConstructionDivider.addItem(middlespacetop);
 	formConstructionDivider.addWidget(add);
 	formConstructionDivider.addWidget(remove);
@@ -917,7 +961,7 @@ void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWi
 				QVariant v;
 				v.setValue(dmu_category);
 				item->setData(v);
-				model->setItem( index, item );
+				model->setItem(index, item);
 
 				++index;
 
@@ -939,37 +983,41 @@ void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWi
 		QObject::connect(add, &QPushButton::clicked, [&]()
 		{
 
-			QStandardItemModel * lhsModel = static_cast<QStandardItemModel*>(lhs->model());
+			QStandardItemModel * lhsModel = static_cast<QStandardItemModel *>(lhs->model());
+
 			if (lhsModel == nullptr)
 			{
 				boost::format msg("Invalid list view items in Construct UOA popup.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
 
-			QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
+			QStandardItemModel * rhsModel = static_cast<QStandardItemModel *>(rhs->model());
+
 			if (rhsModel == nullptr)
 			{
 				boost::format msg("Invalid rhs list view items in Construct UOA popup.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
 
 			QItemSelectionModel * dmu_selectionModel = lhs->selectionModel();
+
 			if (dmu_selectionModel == nullptr)
 			{
 				boost::format msg("Invalid selection in Create UOA widget.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
 
 			QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+
 			if (!selectedIndex.isValid())
 			{
 				// No selection
@@ -988,7 +1036,7 @@ void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWi
 			QVariant v;
 			v.setValue(dmu_category);
 			item->setData(v);
-			rhsModel->appendRow( item );
+			rhsModel->appendRow(item);
 
 			return true;
 
@@ -997,27 +1045,30 @@ void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWi
 		QObject::connect(remove, &QPushButton::clicked, [&]()
 		{
 
-			QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
+			QStandardItemModel * rhsModel = static_cast<QStandardItemModel *>(rhs->model());
+
 			if (rhsModel == nullptr)
 			{
 				boost::format msg("Invalid rhs list view items in Construct UOA popup.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
 
 			QItemSelectionModel * dmu_selectionModel = rhs->selectionModel();
+
 			if (dmu_selectionModel == nullptr)
 			{
 				boost::format msg("Invalid rhs selection in Create UOA widget.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return false;
 			}
 
 			QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+
 			if (!selectedIndex.isValid())
 			{
 				return false;
@@ -1038,12 +1089,12 @@ void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWi
 
 		});
 
-		QObject::connect(lhs, &QListView::doubleClicked, [=](const QModelIndex & index)
+		QObject::connect(lhs, &QListView::doubleClicked, [ = ](const QModelIndex & index)
 		{
 			add->click();
 		});
 
-		QObject::connect(rhs, &QListView::doubleClicked, [=](const QModelIndex & index)
+		QObject::connect(rhs, &QListView::doubleClicked, [ = ](const QModelIndex & index)
 		{
 			remove->click();
 		});
@@ -1052,15 +1103,16 @@ void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWi
 
 }
 
-void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, WidgetInstanceIdentifiers const & uoas)
+void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes,
+									  QHBoxLayout & formConstructionPane, QListView *& listpane, WidgetInstanceIdentifiers const & uoas)
 {
 
 	QString labelTitle = QString("Choose the unit of analysis:");
 	QLabel * title = new QLabel(labelTitle, &dialog);
 
 	listpane = new QListView(&VgConstructionPanes);
-    listpane->setMinimumWidth(400);
-    listpane->setMinimumHeight(400);
+	listpane->setMinimumWidth(400);
+	listpane->setMinimumHeight(400);
 	listpane->setAlternatingRowColors(true);
 
 	formConstructionPane.addWidget(listpane);
@@ -1095,7 +1147,7 @@ void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWid
 				QVariant v;
 				v.setValue(uoa);
 				item->setData(v);
-				model->setItem( index, item );
+				model->setItem(index, item);
 
 				++index;
 
@@ -1105,13 +1157,14 @@ void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWid
 		model->sort(0);
 
 		listpane->setModel(model);
-    	listpane->setItemDelegate(new HtmlDelegate{});
+		listpane->setItemDelegate(new HtmlDelegate{});
 
 	}
 
 }
 
-void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, std::string const & dlgQuestion, std::vector<WidgetInstanceIdentifier> const & vg_list)
+void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall,
+		QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, std::string const & dlgQuestion, std::vector<WidgetInstanceIdentifier> const & vg_list)
 {
 
 	QString labelQuestion = QString(dlgQuestion.c_str());
@@ -1155,7 +1208,7 @@ void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormL
 			QVariant v;
 			v.setValue(vg);
 			item->setData(v);
-			model->setItem( index, item );
+			model->setItem(index, item);
 
 			++index;
 

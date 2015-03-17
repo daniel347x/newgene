@@ -9,7 +9,7 @@ class GlobalSettingChangeResponseIndicator : public QObject, public GlobalSettin
 {
 		Q_OBJECT
 	public:
-		explicit GlobalSettingChangeResponseIndicator( QObject * parent = 0 );
+		explicit GlobalSettingChangeResponseIndicator(QObject * parent = 0);
 
 	signals:
 

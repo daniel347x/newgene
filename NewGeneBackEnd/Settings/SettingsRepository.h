@@ -2,10 +2,10 @@
 #define SETTINGSREPOSITORY_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/filesystem.hpp>
-#	include <boost/format.hpp>
-#	include <boost/property_tree/ptree.hpp>
-#	include <boost/property_tree/xml_parser.hpp>
+	#include <boost/filesystem.hpp>
+	#include <boost/format.hpp>
+	#include <boost/property_tree/ptree.hpp>
+	#include <boost/property_tree/xml_parser.hpp>
 #endif
 #include <map>
 #include "../Messager/Messager.h"
@@ -17,99 +17,99 @@ extern Messager * dummy_messager_ptr;
 class SettingInfo
 {
 
-public:
+	public:
 
-	enum SETTING_CLASS_ENUM
-	{
+		enum SETTING_CLASS_ENUM
+		{
 
-		  SETTING_CLASS_NONE
+			SETTING_CLASS_NONE
 
-		, SETTING_CLASS_BACKEND_GLOBAL_SETTING
-		, SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST
+			, SETTING_CLASS_BACKEND_GLOBAL_SETTING
+			, SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST
 
-		, SETTING_CLASS_BACKEND_PROJECT_INPUT_SETTING
-		, SETTING_CLASS_BACKEND_PROJECT_INPUT_SETTING__PATH_TO_MODEL_SETTINGS
+			, SETTING_CLASS_BACKEND_PROJECT_INPUT_SETTING
+			, SETTING_CLASS_BACKEND_PROJECT_INPUT_SETTING__PATH_TO_MODEL_SETTINGS
 
-		, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING
-		, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_MODEL_SETTINGS
-		, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_KAD_OUTPUT_FILE
+			, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING
+			, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_MODEL_SETTINGS
+			, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_KAD_OUTPUT_FILE
 
-		, SETTING_CLASS_MODEL_INPUT_SETTING
-		, SETTING_CLASS_MODEL_INPUT_SETTING__PATH_TO_MODEL_DATABASE
+			, SETTING_CLASS_MODEL_INPUT_SETTING
+			, SETTING_CLASS_MODEL_INPUT_SETTING__PATH_TO_MODEL_DATABASE
 
-		, SETTING_CLASS_MODEL_OUTPUT_SETTING
-		, SETTING_CLASS_MODEL_OUTPUT_SETTING__PATH_TO_MODEL_DATABASE
+			, SETTING_CLASS_MODEL_OUTPUT_SETTING
+			, SETTING_CLASS_MODEL_OUTPUT_SETTING__PATH_TO_MODEL_DATABASE
 
-		, SETTING_CLASS_UI_GLOBAL_SETTING
-		, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST
-		, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_PROJECTS_LIST
-		, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_PROJECTS_LIST
-		, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_PROJECTS_LIST
-		, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_DATASET_FOLDER_PATH
-		, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_DATASET_FOLDER_PATH
+			, SETTING_CLASS_UI_GLOBAL_SETTING
+			, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST
+			, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_PROJECTS_LIST
+			, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_PROJECTS_LIST
+			, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_PROJECTS_LIST
+			, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_DATASET_FOLDER_PATH
+			, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_DATASET_FOLDER_PATH
 
-		, SETTING_CLASS_UI_PROJECT_INPUT_SETTING
+			, SETTING_CLASS_UI_PROJECT_INPUT_SETTING
 
-		, SETTING_CLASS_UI_PROJECT_OUTPUT_SETTING
+			, SETTING_CLASS_UI_PROJECT_OUTPUT_SETTING
 
-	};
+		};
 
-	enum SETTING_CLASS_CATEGORY
-	{
-		SETTING_CLASS_CATEGORY__UNKNOWN
-		, SETTING_CLASS_CATEGORY__STRING
-		, SETTING_CLASS_CATEGORY__INT32
-	};
+		enum SETTING_CLASS_CATEGORY
+		{
+			SETTING_CLASS_CATEGORY__UNKNOWN
+			, SETTING_CLASS_CATEGORY__STRING
+			, SETTING_CLASS_CATEGORY__INT32
+		};
 
-	SettingInfo()
-		: setting_class(SETTING_CLASS_NONE)
-		, setting_category(SETTING_CLASS_CATEGORY__UNKNOWN)
-		, text("")
-		, default_val_string("")
-		, default_val_int32(0)
-		, enum_index(0)
-	{
+		SettingInfo()
+			: setting_class(SETTING_CLASS_NONE)
+			, setting_category(SETTING_CLASS_CATEGORY__UNKNOWN)
+			, text("")
+			, default_val_string("")
+			, default_val_int32(0)
+			, enum_index(0)
+		{
 
-	}
+		}
 
-	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, int const enum_index_, std::string const & text_, std::string default_val_string_)
-		: setting_class(setting_class_enum_)
-		, setting_category(SETTING_CLASS_CATEGORY__STRING)
-		, text(text_)
-		, default_val_string(default_val_string_)
-		, default_val_int32(0)
-		, enum_index(enum_index_)
-	{
+		SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, int const enum_index_, std::string const & text_, std::string default_val_string_)
+			: setting_class(setting_class_enum_)
+			, setting_category(SETTING_CLASS_CATEGORY__STRING)
+			, text(text_)
+			, default_val_string(default_val_string_)
+			, default_val_int32(0)
+			, enum_index(enum_index_)
+		{
 
-	}
+		}
 
-	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, int const enum_index_, std::string const & text_, std::int32_t default_val_int32_)
-		: setting_class(setting_class_enum_)
-		, setting_category(SETTING_CLASS_CATEGORY__INT32)
-		, text(text_)
-		, default_val_string("")
-		, default_val_int32(default_val_int32_)
-		, enum_index(enum_index_)
-	{
+		SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, int const enum_index_, std::string const & text_, std::int32_t default_val_int32_)
+			: setting_class(setting_class_enum_)
+			, setting_category(SETTING_CLASS_CATEGORY__INT32)
+			, text(text_)
+			, default_val_string("")
+			, default_val_int32(default_val_int32_)
+			, enum_index(enum_index_)
+		{
 
-	}
+		}
 
-	virtual void * getDefaultValue() {return NULL;};
+		virtual void * getDefaultValue() {return NULL;};
 
-	SETTING_CLASS_ENUM setting_class;
-	SETTING_CLASS_CATEGORY setting_category;
-	std::string text;
-	std::string default_val_string;
-	std::int32_t default_val_int32;
-	int enum_index;
+		SETTING_CLASS_ENUM setting_class;
+		SETTING_CLASS_CATEGORY setting_category;
+		std::string text;
+		std::string default_val_string;
+		std::int32_t default_val_int32;
+		int enum_index;
 
 };
 
 template<SettingInfo::SETTING_CLASS_ENUM setting_type>
 class SettingClassTypeTraits
 {
-public:
-	typedef void * type;
+	public:
+		typedef void * type;
 };
 
 template<SettingInfo::SETTING_CLASS_CATEGORY setting_category>
@@ -120,15 +120,15 @@ class SettingCategoryTypeTraits
 template<>
 class SettingCategoryTypeTraits<SettingInfo::SETTING_CLASS_CATEGORY__STRING>
 {
-public:
-	typedef std::string type;
+	public:
+		typedef std::string type;
 };
 
 template<>
 class SettingCategoryTypeTraits<SettingInfo::SETTING_CLASS_CATEGORY__INT32>
 {
-public:
-	typedef std::int32_t type;
+	public:
+		typedef std::int32_t type;
 };
 
 template<typename SETTINGS_ENUM, typename SETTING_CLASS>
@@ -146,11 +146,13 @@ class SettingsRepository
 		{
 			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
 			typename SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
+
 			if (theSetting == _settings_map.cend())
 			{
 				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
 				_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info));
 				theSetting = _settings_map.find(which_setting);
+
 				if (theSetting == _settings_map.cend())
 				{
 					boost::format msg("Setting cannot be created.");
@@ -158,6 +160,7 @@ class SettingsRepository
 					return std::unique_ptr<SETTING_CLASS>(new SETTING_CLASS(messager));
 				}
 			}
+
 			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, theSetting->second.get(), setting_info));
 		}
 
@@ -175,17 +178,17 @@ class SettingsRepository
 
 			bool no_file = false;
 
-			if ( !boost::filesystem::exists(path_to_settings) )
+			if (!boost::filesystem::exists(path_to_settings))
 			{
 				no_file = true; // no file is fine
 			}
 
-			else if ( boost::filesystem::file_size(path_to_settings) == 0 )
+			else if (boost::filesystem::file_size(path_to_settings) == 0)
 			{
 				no_file = true; // empty file is fine
 			}
 
-			else if ( !boost::filesystem::is_regular_file(path_to_settings) )
+			else if (!boost::filesystem::is_regular_file(path_to_settings))
 			{
 				boost::format msg("Settings file %1% is not available.  Using default settings.");
 				msg % path_to_settings;
@@ -209,7 +212,7 @@ class SettingsRepository
 				}
 			}
 
-			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
+			for (int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
 			{
 				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, static_cast<SETTINGS_ENUM>(n));
 				SetMapEntry(messager, setting_info, pt); // sets default value if not present in property tree at this point; i.e., if no path is present
@@ -222,7 +225,7 @@ class SettingsRepository
 		void WriteSettingsToPtree(Messager & messager, boost::property_tree::ptree & pt)
 		{
 
-			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
+			for (int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
 			{
 				SetPTreeEntry(messager, static_cast<SETTINGS_ENUM>(n), pt);
 			}
@@ -234,12 +237,12 @@ class SettingsRepository
 
 			bool no_file = false;
 
-			if ( !boost::filesystem::exists(_path_to_settings.parent_path()) )
+			if (!boost::filesystem::exists(_path_to_settings.parent_path()))
 			{
 				no_file = true;
 			}
 
-			if ( boost::filesystem::is_directory(_path_to_settings) )
+			if (boost::filesystem::is_directory(_path_to_settings))
 			{
 				no_file = true;
 			}

@@ -9,7 +9,7 @@ GlobalSettingsWorkQueue::GlobalSettingsWorkQueue(QObject * parent)
 
 UIAllGlobalSettings * GlobalSettingsWorkQueue::get()
 {
-	return reinterpret_cast<UIAllGlobalSettings*>(inp);
+	return reinterpret_cast<UIAllGlobalSettings *>(inp);
 }
 
 void GlobalSettingsWorkQueue::TestSlot()

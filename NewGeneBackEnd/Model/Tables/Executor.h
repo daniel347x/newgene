@@ -4,7 +4,7 @@
 class Executor
 {
 	public:
-	
+
 		Executor(sqlite3 * db_, bool const begin_transaction = true)
 			: db(db_)
 			, transaction_begun(false)
@@ -60,6 +60,7 @@ class Executor
 						sqlite3_exec(db, "ROLLBACK TRANSACTION;", NULL, NULL, NULL);
 					}
 				}
+
 				transaction_begun = false;
 			}
 		}

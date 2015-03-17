@@ -1,11 +1,11 @@
 #include "KadSampler.h"
 
 #ifndef Q_MOC_RUN
-#	include <boost/scope_exit.hpp>
-#	include <boost/math/special_functions/binomial.hpp>
-#	include <boost/multiprecision/random.hpp>
-#	include <boost/multiprecision/cpp_dec_float.hpp>
-#	include <boost/assert.hpp>
+	#include <boost/scope_exit.hpp>
+	#include <boost/math/special_functions/binomial.hpp>
+	#include <boost/multiprecision/random.hpp>
+	#include <boost/multiprecision/cpp_dec_float.hpp>
+	#include <boost/assert.hpp>
 #endif
 #include <random>
 #include <functional>
@@ -71,9 +71,10 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 	// (whether child, top-level, or primary).
 	//
 	// The actual leaf DMU values are irrelevant.
-	// The secondary values are all that matter, and they 
+	// The secondary values are all that matter, and they
 	// are added to the cache based on the rowid.
 	bool added = false; // true if there is a match
+
 	if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 	{
 		// Always add data for primary variable group
@@ -103,6 +104,7 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 			// No entries in the 'TimeSlices<hits_tag>' map yet
 			// Add the entire new time slice as the first entry in the map
 			bool did_add = AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+
 			if (did_add)
 			{
 				added = true;
@@ -144,6 +146,7 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 				// The new slice is entirely past the end of the map.
 				// Add new map entry consisting solely of the new slice.
 				bool did_add = AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+
 				if (did_add)
 				{
 					added = true;
@@ -174,6 +177,7 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 						// (But past previous map elements, if any.)
 						// Add the entire new time slice as a unit to the map.
 						bool did_add = AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+
 						if (did_add)
 						{
 							added = true;
@@ -195,6 +199,7 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 					if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 					{
 						bool did_add = AddNewTimeSlice(variable_group_number, branch, new_left_slice);
+
 						if (did_add)
 						{
 							added = true;
@@ -249,6 +254,7 @@ std::tuple<bool, bool, TimeSlices<hits_tag>::iterator> KadSampler::HandleIncomin
 			{
 				// Add it solo to the end of the map.
 				bool did_add = AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+
 				if (did_add)
 				{
 					added = true;
@@ -517,7 +523,8 @@ void KadSampler::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const
 }
 
 // Merge time slice data into a map element
-bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_group_branch, TimeSliceLeaf const & incoming_variable_group_time_slice_leaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
+bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_group_branch, TimeSliceLeaf const & incoming_variable_group_time_slice_leaf,
+		TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
 		VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
@@ -612,7 +619,8 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 					// ****************************************************************************************************************** //
 					// The leaf already contains lookup data into the PRIMARY variable group's cache
 					// ****************************************************************************************************************** //
-					bool did_add = primaryVariableGroupBranchPtr->InsertLeaf(incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
+					bool did_add = primaryVariableGroupBranchPtr->InsertLeaf(
+									   incoming_variable_group_time_slice_leaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
 
 					if (did_add)
 					{
@@ -686,7 +694,8 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 							// Note that in the case of NO LEAF, there is still a single "leaf" (with no DMU associated with it)
 							// that nonetheless contains the data index lookup into the raw data for this branch
 							// (the branch, in this case, having only one possible data lookup).
-							current_primary_variable_group_branch.setTopGroupIndexIntoRawData(incoming_variable_group_time_slice_leaf.second, variable_group_number, incoming_variable_group_time_slice_leaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
+							current_primary_variable_group_branch.setTopGroupIndexIntoRawData(incoming_variable_group_time_slice_leaf.second, variable_group_number,
+									incoming_variable_group_time_slice_leaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
 
 							added = true;
 
@@ -723,7 +732,8 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 					ChildDMUInstanceDataVector<hits_tag> all_dmu_keys_child;
 
 					all_dmu_keys_child.insert(all_dmu_keys_child.end(), incoming_variable_group_branch.primary_keys.begin(), incoming_variable_group_branch.primary_keys.end());
-					all_dmu_keys_child.insert(all_dmu_keys_child.end(), incoming_variable_group_time_slice_leaf.second.primary_keys.begin(), incoming_variable_group_time_slice_leaf.second.primary_keys.end());
+					all_dmu_keys_child.insert(all_dmu_keys_child.end(), incoming_variable_group_time_slice_leaf.second.primary_keys.begin(),
+											  incoming_variable_group_time_slice_leaf.second.primary_keys.end());
 
 					// *********************************************************************************** //
 					// Loop through all BRANCHES for the PRIMARY variable group in this time slice
@@ -731,7 +741,8 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 					// For each, we have a set of output rows.
 					// *********************************************************************************** //
 
-					for (auto primaryVariableGroupBranchesPtr = primaryVariableGroupBranches.begin(); primaryVariableGroupBranchesPtr != primaryVariableGroupBranches.end(); ++primaryVariableGroupBranchesPtr)
+					for (auto primaryVariableGroupBranchesPtr = primaryVariableGroupBranches.begin(); primaryVariableGroupBranchesPtr != primaryVariableGroupBranches.end();
+						 ++primaryVariableGroupBranchesPtr)
 					{
 
 						if (CheckCancelled()) { break; }
@@ -763,7 +774,7 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 						// ****************************************************************************************************************** //
 						if (the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows == nullptr)
 						{
-;							boost::format msg("Null child DMU key lookup cache.");
+							;							boost::format msg("Null child DMU key lookup cache.");
 							throw NewGeneException() << newgene_error_description(msg.str());
 						}
 
@@ -793,7 +804,8 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 						// THAT ARE BLANKS -
 						// every child [branch + leaf] MUST map to real values
 						// ****************************************************************************************************************** //
-						bool found = std::binary_search(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), all_dmu_keys_child);
+						bool found = std::binary_search(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(),
+														the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), all_dmu_keys_child);
 
 						if (found)
 						{
@@ -803,7 +815,8 @@ bool KadSampler::MergeNewDataIntoTimeSlice(Branch const & incoming_variable_grou
 							// THAT ARE BLANKS -
 							// every child [branch + leaf] MUST map to real values
 							// ****************************************************************************************************************** //
-							auto const & matchingOutputRows = std::lower_bound(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(), the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), all_dmu_keys_child);
+							auto const & matchingOutputRows = std::lower_bound(the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cbegin(),
+															  the_current_primary_variable_group_branch.helper_lookup__from_child_key_set__to_matching_output_rows->cend(), all_dmu_keys_child);
 
 							// Loop through all matching output rows
 							for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
@@ -928,14 +941,17 @@ void KadSampler::CalculateWeightings(int const K)
 	// That way, when this block exits, even though the 'calculate_consolidated_total_number_rows_tag' memory pool has been purged,
 	// the following vector will still be valid.
 	// (It will be purged when the 'hits_tag' memory pool is purged, which only happens once - at the end of the entire K-ad run.)
-	auto calculateTotalConsolidatedRowsSortFunction = boost::function<bool(InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs)>([&](InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs) -> bool
+	auto calculateTotalConsolidatedRowsSortFunction =
+		boost::function<bool(InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs)>([&](
+					InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs) -> bool
 	{
 
 		if (CheckCancelled()) { return false; }
 
 		if (lhs.size() < 5 || rhs.size() < 5)
 		{
-			boost::format msg("Logic error: InstanceDataVector used to count the total number of consolidated rows has less than the necessary number of columns (time columns and at least one primary key column) in sort function.");
+			boost::format
+			msg("Logic error: InstanceDataVector used to count the total number of consolidated rows has less than the necessary number of columns (time columns and at least one primary key column) in sort function.");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 
@@ -961,10 +977,12 @@ void KadSampler::CalculateWeightings(int const K)
 		if (lhs_time_start == -1 || lhs_time_end == -1)
 		{
 			lhs_time_slice.Reshape(0, 0); // sets both ends to infinite
+
 			if (lhs_time_start != -1)
 			{
 				lhs_time_slice.setStart(lhs_time_start);
 			}
+
 			if (lhs_time_end != -1)
 			{
 				lhs_time_slice.setEnd(lhs_time_end);
@@ -978,10 +996,12 @@ void KadSampler::CalculateWeightings(int const K)
 		if (rhs_time_start == -1 || rhs_time_end == -1)
 		{
 			rhs_time_slice.Reshape(0, 0); // sets both ends to infinite
+
 			if (rhs_time_start != -1)
 			{
 				rhs_time_slice.setStart(rhs_time_start);
 			}
+
 			if (rhs_time_end != -1)
 			{
 				rhs_time_slice.setEnd(rhs_time_end);
@@ -1001,7 +1021,7 @@ void KadSampler::CalculateWeightings(int const K)
 			return lhs_time_slice < rhs_time_slice;
 		}
 
-		// The time slices overlap. 
+		// The time slices overlap.
 		// For this scenario, do a "simple" test - just see if the entire vector matches.
 		// If not, consider them not to match, even though
 		// in reality, some K-ad combinations here WILL be contiguous with previous time slices.
@@ -1017,8 +1037,7 @@ void KadSampler::CalculateWeightings(int const K)
 			// If the size is smaller, consider lhs to be "less than"
 			return true;
 		}
-		else
-		if (rhs.size() < lhs.size())
+		else if (rhs.size() < lhs.size())
 		{
 			// rhs is considered "less than" lhs
 			return false;
@@ -1032,8 +1051,7 @@ void KadSampler::CalculateWeightings(int const K)
 			{
 				return true;
 			}
-			else
-			if (rhs[n] < lhs[n])
+			else if (rhs[n] < lhs[n])
 			{
 				return false;
 			}
@@ -1045,9 +1063,13 @@ void KadSampler::CalculateWeightings(int const K)
 	});
 	weighting_consolidated.setWeighting(0);
 	weighting_consolidated.setWeightingRangeStart(0);
-	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag, decltype(calculateTotalConsolidatedRowsSortFunction)> * branches_and_leaves_set_ = InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows<calculate_consolidated_total_number_rows_tag>>(calculateTotalConsolidatedRowsSortFunction);
-	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag, decltype(calculateTotalConsolidatedRowsSortFunction)> & branches_and_leaves_set = *branches_and_leaves_set_;
-	InstanceDataVector<calculate_consolidated_total_number_rows_tag> * temp_branches_and_leaves_ = InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows__instance_vector<calculate_consolidated_total_number_rows_tag>>();
+	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag, decltype(calculateTotalConsolidatedRowsSortFunction)>
+	* branches_and_leaves_set_ = InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows<calculate_consolidated_total_number_rows_tag>>
+								 (calculateTotalConsolidatedRowsSortFunction);
+	FastSetMemoryTag<InstanceDataVector<calculate_consolidated_total_number_rows_tag>, calculate_consolidated_total_number_rows_tag, decltype(calculateTotalConsolidatedRowsSortFunction)>
+	& branches_and_leaves_set = *branches_and_leaves_set_;
+	InstanceDataVector<calculate_consolidated_total_number_rows_tag> * temp_branches_and_leaves_ =
+		InstantiateUsingTopLevelObjectsPool<tag__calculate_consolidated_total_number_rows__instance_vector<calculate_consolidated_total_number_rows_tag>>();
 	InstanceDataVector<calculate_consolidated_total_number_rows_tag> & temp_branches_and_leaves = *temp_branches_and_leaves_;
 
 	newgene_cpp_int currentWeighting = 0;
@@ -1097,6 +1119,7 @@ void KadSampler::CalculateWeightings(int const K)
 				temp_branches_and_leaves.clear();
 
 				std::uint64_t packed = 0;
+
 				if (timeSlice.startsAtNegativeInfinity())
 				{
 
@@ -1124,6 +1147,7 @@ void KadSampler::CalculateWeightings(int const K)
 				temp_branches_and_leaves.emplace_back(static_cast<std::int32_t>(y));
 
 				packed = 0;
+
 				if (timeSlice.endsAtPlusInfinity())
 				{
 
@@ -1150,12 +1174,16 @@ void KadSampler::CalculateWeightings(int const K)
 				temp_branches_and_leaves.emplace_back(static_cast<std::int32_t>(y));
 
 				temp_branches_and_leaves.insert(temp_branches_and_leaves.cend(), branch.primary_keys.cbegin(), branch.primary_keys.cend());
+
 				for (auto const & leaf : leaves)
 				{
 					if (CheckCancelled()) { break; }
+
 					temp_branches_and_leaves.insert(temp_branches_and_leaves.cend(), leaf.primary_keys.cbegin(), leaf.primary_keys.cend());
 				}
+
 				if (CheckCancelled()) { return; }
+
 				branches_and_leaves_set.insert(temp_branches_and_leaves);
 
 				Weighting & branchWeighting = branch.weighting;
@@ -1217,15 +1245,19 @@ void KadSampler::CalculateWeightings(int const K)
 		size_t total_number_cols = branch_and_leaves_combo.size() - 4; // -4 to account for the time columns
 		size_t total_number_leaf_cols = total_number_cols - number_branch_columns;
 		int total_number_leaves = 0;
+
 		if (number_primary_variable_group_single_leaf_columns > 0)
 		{
 			total_number_leaves = static_cast<int>(total_number_leaf_cols) / number_primary_variable_group_single_leaf_columns;
 		}
+
 		newgene_cpp_int number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
+
 		if (K <= total_number_leaves && total_number_leaves > 0)
 		{
 			number_branch_combinations = BinomialCoefficient(total_number_leaves, K);
 		}
+
 		weighting_consolidated.addWeighting(number_branch_combinations);
 	}
 
@@ -1283,7 +1315,8 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	bool reverse_mode = false;
 
 	void * ptr = RandomVectorPool::malloc();
-	auto remaining_ = new(ptr)FastVectorCppInt(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
+	auto remaining_ = new(ptr)
+	FastVectorCppInt(); // let pointer drop off stack without deleting because this will trigger deletion of elements; let boost pool manage for more rapid deletion
 	auto & remaining = *remaining_;
 
 	FastVectorCppInt::iterator remainingPtr = remaining.begin();
@@ -1387,6 +1420,7 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 	bool skip = false;
 
 	bool dmu_limited = false;
+
 	if (K >= branch.numberLeaves())
 	{
 
@@ -1426,8 +1460,9 @@ void KadSampler::GenerateAllOutputRows(int const K, Branch const & branch)
 	// If Limit DMU's prevented anything from being generated
 	// (even if this function wasn't previously exited in this case),
 	// then nothing will be inserted here - begin() == end()
-	branch.hits[which_time_unit_full_sampling__MINUS_ONE].insert(branch.remaining[which_time_unit_full_sampling__MINUS_ONE].begin(), branch.remaining[which_time_unit_full_sampling__MINUS_ONE].end());
-	
+	branch.hits[which_time_unit_full_sampling__MINUS_ONE].insert(branch.remaining[which_time_unit_full_sampling__MINUS_ONE].begin(),
+			branch.remaining[which_time_unit_full_sampling__MINUS_ONE].end());
+
 	// No! Will be cleared by the memory pool en-bulk after generation of output rows
 	//branch.remaining[which_time_unit].clear();
 
@@ -1459,6 +1494,7 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 	bool skip = false;
 
 	bool dmu_limited = false;
+
 	if (K >= branch.numberLeaves())
 	{
 		skip = true;
@@ -1533,12 +1569,16 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 				//auto remainingPtr = branch.remaining[which_time_unit].begin() + which_remaining_leaf_combination;
 
 				auto remainingPtr = branch.remaining[which_time_unit].begin();
+
 				for (size_t n = 0; n < which_remaining_leaf_combination; ++n)
 				{
 					if (CheckCancelled()) { break; }
+
 					++remainingPtr;
 				}
+
 				if (CheckCancelled()) { break; }
+
 				test_leaf_combination = *remainingPtr;
 
 				branch.remaining[which_time_unit].erase(remainingPtr);
@@ -1553,8 +1593,10 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 				for (int n = 0; n < branch.numberLeaves(); ++n)
 				{
 					if (CheckCancelled()) { break; }
+
 					remaining_leaves.push_back(n);
 				}
+
 				if (CheckCancelled()) { break; }
 
 				// Pull random leaves, one at a time, to create the random row
@@ -1595,7 +1637,7 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 
 	if (CheckCancelled()) { return; }
 
-#	ifdef _DEBUG
+	#	ifdef _DEBUG
 	std::for_each(test_leaf_combination.primary_leaves.cbegin(), test_leaf_combination.primary_leaves.cend(), [&](int const & index)
 	{
 		if (index >= branch.numberLeaves())
@@ -1604,7 +1646,7 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 	});
-#	endif
+	#	endif
 
 	// It might easily be a duplicate - random sampling will produce multiple hits on the same row
 	// because some rows can have a heavier weight than other rows;
@@ -1616,15 +1658,16 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 	auto insert_result = branch.hits[which_time_unit].insert(test_leaf_combination);
 	bool inserted = insert_result.second;
 
-#	ifdef _DEBUG
+	#	ifdef _DEBUG
 	static size_t bytes_allocated = 0;
-#	endif
+	#	endif
 
 	if (inserted)
 	{
 		++random_rows_added;
 
-#		ifdef _DEBUG
+		#		ifdef _DEBUG
+
 		if (false)
 		{
 			bytes_allocated += sizeof(test_leaf_combination);
@@ -1639,7 +1682,8 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 				messager.AppendKadStatusText(mytxt.str(), nullptr);
 			}
 		}
-#		endif
+
+		#		endif
 
 	}
 
@@ -1667,8 +1711,10 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 
 	if (branch.number_branch_combinations > 1000)
 	{
-		messager.SetPerformanceLabel((boost::format("A branch has %1% rows that need to be generated... Looks like this branch will take a while...") % boost::lexical_cast<std::string>(branch.number_branch_combinations)).str());
+		messager.SetPerformanceLabel((boost::format("A branch has %1% rows that need to be generated... Looks like this branch will take a while...") % boost::lexical_cast<std::string>
+									  (branch.number_branch_combinations)).str());
 	}
+
 	while (total_added < branch.number_branch_combinations)
 	{
 
@@ -1682,6 +1728,7 @@ void KadSampler::PopulateAllLeafCombinations(std::int64_t const & which_time_uni
 		++total_added;
 
 	}
+
 	if (branch.number_branch_combinations > 100000)
 	{
 		messager.SetPerformanceLabel("");
@@ -1987,6 +2034,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 
 			// All branch data is the same for each time unit.
 			bool first_time_in_branch = true;
+
 			for (auto outputRowPtr = time_unit_output_rows.second.cbegin(); outputRowPtr != time_unit_output_rows.second.cend(); ++outputRowPtr)
 			{
 
@@ -2015,7 +2063,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 
 					// First in the "child DMU" metadata vector is the metadata for the child's BRANCH DMU's
 					std::for_each(allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cbegin(),
-						allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+								  allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 					{
 
 						if (CheckCancelled()) { return; }
@@ -2026,111 +2074,112 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						{
 
 							case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-							{
+								{
 
-								// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-								child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+									// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+									child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(
+												primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
-							}
-							break;
+								}
+								break;
 
 							case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-							{
-
-								// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-
-								// ************************************************************************** //
-								//
-								// This is currently unsupported
-								//
-								// If it ever becomes supported, we have to do this calculation
-								// EVERY TIME THROUGH THE LOOP
-								// (i.e., for every output row associated with the primary group's branch),
-								// rather than just the first time through the loop
-								//
-								// ************************************************************************** //
-								if (true)
 								{
-									boost::format msg("Logic error: It is currently unsupported for a child variable group's branch column to map to a primary variable group leaf column.");
-									throw NewGeneException() << newgene_error_description(msg.str());
-								}
 
-								// leaf_number tells us which leaf in the top-level DMU
-								// index tells us which index in that leaf
+									// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
 
-								if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
-									(outputRow.primary_leaves_cache.size()))
-								{
-									// EVERY output row selects the same number of leaves and places them into its primary_leaves_cache.
-									// So EVERY output row's primary_leaves_cache is the same size.
-
-									// If one output row has fewer leaves in its primary_leaves_cache than is sufficient to fill
-									// the necessary leaf slots required to form the branch slots for the child,
-									// then all output rows also don't.
-									branch_in_child__cannot_match_all_leaf_slots_in_primary = true;
-									break;
-								}
-
-								if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
-									== 0)
-								{
-									// This is the K=1 case - the matching leaf of the *top-level* UOA
-									// has no primary keys.  This is a logic error, as we should never match
-									// a "leaf" in the top-level UOA in this case.
+									// ************************************************************************** //
 									//
-									// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
-									// in particular the following lines:
-									// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
-									// --> // {
-									// --> //     is_current_index_a_top_level_primary_group_branch = true;
-									// --> // }
+									// This is currently unsupported
+									//
+									// If it ever becomes supported, we have to do this calculation
+									// EVERY TIME THROUGH THE LOOP
+									// (i.e., for every output row associated with the primary group's branch),
+									// rather than just the first time through the loop
+									//
+									// ************************************************************************** //
+									if (true)
+									{
+										boost::format msg("Logic error: It is currently unsupported for a child variable group's branch column to map to a primary variable group leaf column.");
+										throw NewGeneException() << newgene_error_description(msg.str());
+									}
 
-									boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
-									throw NewGeneException() << newgene_error_description(msg.str());
+									// leaf_number tells us which leaf in the top-level DMU
+									// index tells us which index in that leaf
+
+									if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>
+										(outputRow.primary_leaves_cache.size()))
+									{
+										// EVERY output row selects the same number of leaves and places them into its primary_leaves_cache.
+										// So EVERY output row's primary_leaves_cache is the same size.
+
+										// If one output row has fewer leaves in its primary_leaves_cache than is sufficient to fill
+										// the necessary leaf slots required to form the branch slots for the child,
+										// then all output rows also don't.
+										branch_in_child__cannot_match_all_leaf_slots_in_primary = true;
+										break;
+									}
+
+									if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size()
+										== 0)
+									{
+										// This is the K=1 case - the matching leaf of the *top-level* UOA
+										// has no primary keys.  This is a logic error, as we should never match
+										// a "leaf" in the top-level UOA in this case.
+										//
+										// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::KadSamplerFillDataForChildGroups()",
+										// in particular the following lines:
+										// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+										// --> // {
+										// --> //     is_current_index_a_top_level_primary_group_branch = true;
+										// --> // }
+
+										boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
+										throw NewGeneException() << newgene_error_description(msg.str());
+									}
+
+									// ************************************************************************************** //
+									// ************************************************************************************** //
+									//
+									// The following index lookup is one of the trickiest in the entire application.
+									//
+									//
+									// Note that "leaves_cache" belongs GLOBALLY to the PRIMARY VARIABLE GROUP branch object.
+									//
+									// And that "outputRow.primary_leaves_cache" is just a fast lookup into the same data,
+									// with the same index into the data structure via iterating, as "outputRow.primary_leaves".
+									//
+									// And that "childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf"
+									// is the index into the above OUTPUT-ROW SPECIFIC leaf cache.
+									//
+									// And that the value stored in the OUTPUT-ROW SPECIFIC leaf cache
+									// is, itself, just an INDEX into the GLOBAL leaf cache "leaved_cache" noted above.
+									//
+									// Once the actual cached leaf in the GLOBAL leaf cache "leaves_cache" is retrieved via
+									// "leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]]",
+									// the primary key columns of this leaf (because a single leaf can have multiple primary key columns)
+									// is stored in the "primary_keys" data member.
+									//
+									// How do we know which INTERNAL column of DMU instance data inside the individual leaf to retrieve?
+									// That is stored in "childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf".
+									//
+									// If you put all of the above pieces together, you find that the following line of code
+									// stores the DMU instance data corresponding to the proper internal column inside the
+									// PRIMARY VARIABLE GROUP leaf
+									// at the proper index inside the global PRIMARY VARIABLE GROUP leaf cache,
+									// in the "child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components"
+									//
+									// ************************************************************************************** //
+									// ************************************************************************************** //
+									child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(
+												leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+
 								}
-
-								// ************************************************************************************** //
-								// ************************************************************************************** //
-								//
-								// The following index lookup is one of the trickiest in the entire application.
-								//
-								//
-								// Note that "leaves_cache" belongs GLOBALLY to the PRIMARY VARIABLE GROUP branch object.
-								//
-								// And that "outputRow.primary_leaves_cache" is just a fast lookup into the same data,
-								// with the same index into the data structure via iterating, as "outputRow.primary_leaves".
-								//
-								// And that "childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf"
-								// is the index into the above OUTPUT-ROW SPECIFIC leaf cache.
-								//
-								// And that the value stored in the OUTPUT-ROW SPECIFIC leaf cache
-								// is, itself, just an INDEX into the GLOBAL leaf cache "leaved_cache" noted above.
-								//
-								// Once the actual cached leaf in the GLOBAL leaf cache "leaves_cache" is retrieved via
-								// "leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]]",
-								// the primary key columns of this leaf (because a single leaf can have multiple primary key columns)
-								// is stored in the "primary_keys" data member.
-								//
-								// How do we know which INTERNAL column of DMU instance data inside the individual leaf to retrieve?
-								// That is stored in "childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf".
-								//
-								// If you put all of the above pieces together, you find that the following line of code
-								// stores the DMU instance data corresponding to the proper internal column inside the 
-								// PRIMARY VARIABLE GROUP leaf
-								// at the proper index inside the global PRIMARY VARIABLE GROUP leaf cache,
-								// in the "child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components"
-								//
-								// ************************************************************************************** //
-								// ************************************************************************************** //
-								child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.push_back(DMUInstanceData(
-									leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
-
-							}
-							break;
+								break;
 
 							default:
-							{}
-							break;
+								{}
+								break;
 
 						}
 
@@ -2148,7 +2197,9 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 				int current_child_leaf_number = 0;
 				bool missing_top_level_leaf = false;
 				potential_future__child_hit_vector.clear();
-				potential_future__child_hit_vector.insert(potential_future__child_hit_vector.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
+				potential_future__child_hit_vector.insert(potential_future__child_hit_vector.begin(),
+						child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(),
+						child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
 				std::for_each(allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cbegin(),
 							  allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
@@ -2156,7 +2207,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 					if (CheckCancelled()) { return; }
 
 					// ************************************************************************************************************** //
-					// We have a SINGLE COLUMN - 
+					// We have a SINGLE COLUMN -
 					// a single child LEAF (out of potentially more than one),
 					// and within that child leaf a single COLUMN (out of potentially more than one)
 					// ************************************************************************************************************** //
@@ -2173,7 +2224,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 								// TODO: This can be moved into the section that only performs the calculation once,
 								// rather than performing it for every output row...
 								// **************************************************************************************** //
-																		 
+
 								// The next DMU in the child leaf's DMU sequence maps to a branch in the top-level DMU sequence
 								potential_future__child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
@@ -2197,7 +2248,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 									// *********************************************************************************************** //
 									// NOTE THAT ALL OUTPUT ROWS FOR A GIVEN PRIMARY BRANCH
 									// contain the same number of leaves in their "primary_leaves_cache",
-									// so if ONE output row is missing a top level leaf at what would be 
+									// so if ONE output row is missing a top level leaf at what would be
 									// a given index in the potential_future__child_hit_vector, then ALL output rows will be
 									// missing a top level leaf at what would be the same index,
 									// so the indexing will remain consistent and correct
@@ -2220,7 +2271,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 								//
 								// neither a "Limit DMU's" scenario will ever add an empty leaf
 								//   (and this possibility is only present when there is > 1 leaf slot;
-								//    otherwise it's a branch-only scenario in which case in the "Limit DMU's" scenario 
+								//    otherwise it's a branch-only scenario in which case in the "Limit DMU's" scenario
 								//    a branch with any leaves in the restricted list will NOT be added
 								//    to the list of branches and this function will not be called),
 								// nor a "branch-only primary variable group" scenario will ever
@@ -2257,7 +2308,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 								// In which case all leaves are valid
 								// (no restricted leaves from the "Limit DMU's" settings will ever be added).
 								potential_future__child_hit_vector.push_back(DMUInstanceData(
-															   leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
+											leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
 							}
 							break;
@@ -2314,7 +2365,9 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 						child_leaf_index_within_a_single_child_leaf = 0;
 						missing_top_level_leaf = false;
 						potential_future__child_hit_vector.clear();
-						potential_future__child_hit_vector.insert(potential_future__child_hit_vector.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(), child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
+						potential_future__child_hit_vector.insert(potential_future__child_hit_vector.begin(),
+								child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.begin(),
+								child_hit_vector__child_branch_components__currently_always_maps_to_primary_branch_components.end());
 					}
 
 				});
@@ -2348,7 +2401,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(KadSampl
 					// THAT ARE BLANKS -
 					// every child [branch + leaf] MUST map to real values
 					// ****************************************************************************************************************** //
-					(*helper_lookup__from_child_key_set__to_matching_output_rows)[potential_future__child_hit_vector][&outputRow].push_back(0); // When there are no leaf DMU slots, there is always one leaf of index 0 with an empty DMU list
+					(*helper_lookup__from_child_key_set__to_matching_output_rows)[potential_future__child_hit_vector][&outputRow].push_back(
+						0); // When there are no leaf DMU slots, there is always one leaf of index 0 with an empty DMU list
 				}
 
 			}
@@ -2368,6 +2422,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 	std::int32_t random_rows_generated = 0;
 
 	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% randomly selected K-adic combinations..."), static_cast<std::int32_t>(random_numbers.size()));
+
 	while (true)
 	{
 
@@ -2436,8 +2491,9 @@ void KadSampler::PrepareRandomSamples(int const K)
 			BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0
 							 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
 
-			TimeSlices<hits_tag>::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](TimeSlices<hits_tag>::value_type const & timeSliceData,
-					newgene_cpp_int const & test_random_number)
+			TimeSlices<hits_tag>::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(),
+					random_number, [&](TimeSlices<hits_tag>::value_type const & timeSliceData,
+									   newgene_cpp_int const & test_random_number)
 			{
 				VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
 
@@ -2470,7 +2526,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 
 		// Pick a branch randomly (with weight!)
 		Branches<hits_tag>::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch,
-											   newgene_cpp_int const & test_random_number)
+				newgene_cpp_int const & test_random_number)
 		{
 
 			// ************************************************************ //
@@ -2746,9 +2802,9 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	//
 	//if (branch.helper_lookup__from_child_key_set__to_matching_output_rows_consolidating != nullptr)
 	//{
-		sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
-		SpitChildLookup(sdata, branch.helper_lookup__from_child_key_set__to_matching_output_rows_consolidating);
-		sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
+	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
+	SpitChildLookup(sdata, branch.helper_lookup__from_child_key_set__to_matching_output_rows_consolidating);
+	sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH__CONSOLIDATION_PHASE>";
 	//}
 
 	sdata += "<ALL_THE_LEAVES_FOR_THIS_BRANCH>";
@@ -3068,7 +3124,8 @@ void SpitLeaves(std::string & sdata, Branch const & branch)
 
 //#endif
 
-void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, bool const consolidate_rows, bool const random_sampling)
+void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, bool const consolidate_rows,
+		bool const random_sampling)
 {
 
 	// ********************************************************************************************** //
@@ -3209,7 +3266,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// In this example, each [.............] corresponds to a time unit with some output rows -
 	// on average, the dots each represent an output row.
 	//
-	// Each [.............] corresponds to a time range that is precisely equal to 
+	// Each [.............] corresponds to a time range that is precisely equal to
 	// the time granularity corresponding to the primary variable group's unit of analysis,
 	// and furthermore, the [.............] are always guaranteed to be aligned in absolute
 	// coordinates on even multiples of this time unit (starting at the Unix timestamp 0 point,
@@ -3235,7 +3292,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// Note: one or both edges of the "current" slice could match the corresponding edge/s
 	// of the "original" time slice, but will never exceed the corresponding edge of the
 	// original time slice (on the left or right).
-	// 
+	//
 	// B is an example of a "current" time slice that evenly covers two time units.
 	//
 	// A is an example of a "current" time slice that
@@ -3260,7 +3317,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// of the unit of analysis, assure this.
 	//
 	// But merges with non-primary variable groups (both top-level and child) can have any time granularity
-	// (even if it's smaller), just so long as they themselves are aligned on 
+	// (even if it's smaller), just so long as they themselves are aligned on
 	// absolute boundaries corresponding to their own time granularities.
 	//
 	// It's all about counting.
@@ -3292,20 +3349,24 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 			std::int64_t new_hit_number = 0;
 
 			// granulated output, full sampling
-			currentTimeSlice.loop_through_time_units(allWeightings.time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+			currentTimeSlice.loop_through_time_units(allWeightings.time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start,
+					std::int64_t const time_to_use_for_end)
 			{
 				if (CheckCancelled()) { return; }
 
 				bool overlaps = false;
+
 				if (time_to_use_for_start < end && time_to_use_for_end > start)
 				{
 					overlaps = true;
 				}
+
 				if (overlaps)
 				{
 					new_hits[new_hit_number].insert(hits[hit_number].cbegin(), hits[hit_number].cend());
 					++new_hit_number;
 				}
+
 				++hit_number;
 			}));
 

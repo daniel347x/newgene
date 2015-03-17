@@ -17,14 +17,15 @@
 bool UIMessager::ManagersInitialized = false;
 int UIMessager::next_messager_id = 1;
 
-UIMessager::UIMessager(QObject *parent) :
+UIMessager::UIMessager(QObject * parent) :
 	QObject(parent)
-  , do_not_handle_messages_on_destruction(false)
-  , mode(NORMAL)
-  , singleShotActive(false)
+	, do_not_handle_messages_on_destruction(false)
+	, mode(NORMAL)
+	, singleShotActive(false)
 {
 	current_messager_id = next_messager_id;
 	++next_messager_id;
+
 	if (ManagersInitialized)
 	{
 		QObject::connect(this, SIGNAL(PostStatus(STD_STRING, int, bool)), &statusManagerUI(), SLOT(ReceiveStatus(STD_STRING, int, bool)));
@@ -51,7 +52,8 @@ void UIMessager::displayStatusMessages()
 {
 
 	std::vector<std::string> msgs;
-	std::pair<std::set<std::string>::iterator,bool> insert_result;
+	std::pair<std::set<std::string>::iterator, bool> insert_result;
+
 	for (MessagesVector::const_iterator _m = _messages.cbegin(); _m != _messages.cend(); ++_m)
 	{
 		if (_m->get()->_message_category & MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
@@ -62,12 +64,14 @@ void UIMessager::displayStatusMessages()
 
 	std::string msg;
 	bool first = true;
+
 	for (std::vector<std::string>::const_iterator _s = msgs.cbegin(); _s != msgs.cend(); ++_s)
 	{
 		if (first == false)
 		{
 			msg += " ";
 		}
+
 		msg += *_s;
 		first = false;
 	}
@@ -98,6 +102,7 @@ void UIMessager::EmitChangeMessage(DataChangeMessage & changes)
 	{
 		this->EmitOutputProjectChangeMessage(changes);
 	}
+
 	if (changes.inp)
 	{
 		this->EmitInputProjectChangeMessage(changes);
@@ -123,16 +128,19 @@ UIMessagerInputProject::UIMessagerInputProject(QObject * parent)
 void UIMessagerInputProject::set(UIInputProject * inp_)
 {
 	inp = inp_;
+
 	if (ManagersInitialized)
 	{
 		if (get())
 		{
 			connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
+
 			if (get()->mainWindowObject)
 			{
 				try
 				{
 					NewGeneMainWindow * mainWindow = dynamic_cast<NewGeneMainWindow *>(get()->mainWindowObject);
+
 					if (mainWindow)
 					{
 						connect(this, SIGNAL(SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)));
@@ -158,16 +166,19 @@ UIMessagerOutputProject::UIMessagerOutputProject(QObject * parent)
 void UIMessagerOutputProject::set(UIOutputProject * outp_)
 {
 	outp = outp_;
+
 	if (ManagersInitialized)
 	{
 		if (get())
 		{
 			connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
+
 			if (get()->mainWindowObject)
 			{
 				try
 				{
 					NewGeneMainWindow * mainWindow = dynamic_cast<NewGeneMainWindow *>(get()->mainWindowObject);
+
 					if (mainWindow)
 					{
 						connect(this, SIGNAL(SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)));
@@ -175,18 +186,21 @@ void UIMessagerOutputProject::set(UIOutputProject * outp_)
 						connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
 						connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
 						NewGeneGenerateOutput * outputPane = mainWindow->findChild<NewGeneGenerateOutput *>("widgetOutputPane");
+
 						if (outputPane)
 						{
-                            connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const)), outputPane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
-                            connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const)), outputPane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
-                            connect(this, SIGNAL(SignalSetRunStatus(int, RUN_STATUS_ENUM const)), outputPane, SLOT(ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const)));
-                        }
+							connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const)), outputPane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
+							connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const)), outputPane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
+							connect(this, SIGNAL(SignalSetRunStatus(int, RUN_STATUS_ENUM const)), outputPane, SLOT(ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const)));
+						}
+
 						NewGeneTabWidget * tabWidget = mainWindow->findChild<NewGeneTabWidget *>("tabWidgetOutput");
-                        if (tabWidget)
-                        {
-                            connect(this, SIGNAL(SignalSetRunStatus(int, RUN_STATUS_ENUM const)), tabWidget, SLOT(ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const)));
-                        }
-                    }
+
+						if (tabWidget)
+						{
+							connect(this, SIGNAL(SignalSetRunStatus(int, RUN_STATUS_ENUM const)), tabWidget, SLOT(ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const)));
+						}
+					}
 				}
 				catch (std::bad_cast &)
 				{
@@ -200,7 +214,7 @@ void UIMessagerInputProject::ShowMessageBox(std::string msg, bool block)
 {
 	if (block)
 	{
-		QMetaObject::invokeMethod(get(), "SignalMessageBox", Qt::BlockingQueuedConnection, Q_ARG( STD_STRING, msg ));
+		QMetaObject::invokeMethod(get(), "SignalMessageBox", Qt::BlockingQueuedConnection, Q_ARG(STD_STRING, msg));
 	}
 	else
 	{
@@ -211,7 +225,7 @@ void UIMessagerInputProject::ShowMessageBox(std::string msg, bool block)
 bool UIMessagerInputProject::ShowQuestionMessageBox(std::string msg_title, std::string msg_text)
 {
 	bool yes = false;
-	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( bool, yes ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_text ));
+	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG(bool, yes), Q_ARG(STD_STRING, msg_title), Q_ARG(STD_STRING, msg_text));
 	return yes;
 }
 
@@ -244,7 +258,7 @@ void UIMessagerOutputProject::ShowMessageBox(std::string msg, bool block)
 {
 	if (block)
 	{
-		QMetaObject::invokeMethod(get(), "SignalMessageBox", Qt::BlockingQueuedConnection, Q_ARG( STD_STRING, msg ));
+		QMetaObject::invokeMethod(get(), "SignalMessageBox", Qt::BlockingQueuedConnection, Q_ARG(STD_STRING, msg));
 	}
 	else
 	{
@@ -255,20 +269,21 @@ void UIMessagerOutputProject::ShowMessageBox(std::string msg, bool block)
 bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std::string msg_text)
 {
 	bool yes = false;
-	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( bool, yes ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_text ));
+	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG(bool, yes), Q_ARG(STD_STRING, msg_title), Q_ARG(STD_STRING, msg_text));
 	return yes;
 }
 
 int UIMessagerOutputProject::ShowOptionMessageBox(std::string msg_title, std::string msg_question, std::vector<WidgetInstanceIdentifier> option_list)
 {
 	int selection = -1;
-	QMetaObject::invokeMethod(get(), "OptionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( int, selection ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_question ), Q_ARG( STD_VECTOR_WIDGETINSTANCEIDENTIFIER, option_list ));
+	QMetaObject::invokeMethod(get(), "OptionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG(int, selection), Q_ARG(STD_STRING, msg_title), Q_ARG(STD_STRING, msg_question),
+							  Q_ARG(STD_VECTOR_WIDGETINSTANCEIDENTIFIER, option_list));
 	return selection;
 }
 
 void UIMessagerOutputProject::SetRunStatus(RUN_STATUS_ENUM const & runStatus)
 {
-    emit SignalSetRunStatus(current_messager_id, runStatus);
+	emit SignalSetRunStatus(current_messager_id, runStatus);
 }
 
 void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)

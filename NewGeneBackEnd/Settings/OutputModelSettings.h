@@ -8,7 +8,7 @@ namespace OUTPUT_MODEL_SETTINGS_NAMESPACE
 
 	enum OUTPUT_MODEL_SETTINGS
 	{
-		  SETTING_FIRST = 0
+		SETTING_FIRST = 0
 
 		, PATH_TO_MODEL_DATABASE
 
@@ -20,35 +20,35 @@ namespace OUTPUT_MODEL_SETTINGS_NAMESPACE
 class OutputModelSettings : public ModelSettings<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS, OutputModelSetting>
 {
 
-public:
+	public:
 
-	static int const number_worker_threads = 1; // For now, single thread only in pool
+		static int const number_worker_threads = 1; // For now, single thread only in pool
 
-	OutputModelSettings(Messager & messager, boost::filesystem::path const model_settings_path)
-		: ModelSettings(messager, model_settings_path)
-	{}
+		OutputModelSettings(Messager & messager, boost::filesystem::path const model_settings_path)
+			: ModelSettings(messager, model_settings_path)
+		{}
 
-	virtual ~OutputModelSettings() {}
+		virtual ~OutputModelSettings() {}
 
-	template<typename T>
-	void UpdateSetting(Messager & messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS const which_setting, T const & setting_value)
-	{
-		SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
-		_settings_map[which_setting] = std::unique_ptr<OutputModelSetting>(NewSetting(messager, setting_info, setting_value.ToString()));
-		WriteSettingsToFile(messager);
-	}
+		template<typename T>
+		void UpdateSetting(Messager & messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS const which_setting, T const & setting_value)
+		{
+			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+			_settings_map[which_setting] = std::unique_ptr<OutputModelSetting>(NewSetting(messager, setting_info, setting_value.ToString()));
+			WriteSettingsToFile(messager);
+		}
 
-	void WriteSettingsToFile(Messager & messager)
-	{
-		boost::property_tree::ptree pt;
-		WriteSettingsToPtree(messager, pt);
-		WritePtreeToFile(messager, pt);
-	}
+		void WriteSettingsToFile(Messager & messager)
+		{
+			boost::property_tree::ptree pt;
+			WriteSettingsToPtree(messager, pt);
+			WritePtreeToFile(messager, pt);
+		}
 
-	void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
-	OutputModelSetting * CloneSetting(Messager & messager, OutputModelSetting * current_setting, SettingInfo & setting_info) const;
-	OutputModelSetting * NewSetting(Messager & messager, SettingInfo & setting_info, std::string const & setting_value_string);
-	void SetPTreeEntry(Messager & messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS which_setting, boost::property_tree::ptree & pt);
+		void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+		OutputModelSetting * CloneSetting(Messager & messager, OutputModelSetting * current_setting, SettingInfo & setting_info) const;
+		OutputModelSetting * NewSetting(Messager & messager, SettingInfo & setting_info, std::string const & setting_value_string);
+		void SetPTreeEntry(Messager & messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS which_setting, boost::property_tree::ptree & pt);
 
 };
 

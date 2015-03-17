@@ -32,6 +32,7 @@ void Schema::ReorderAccToColumnNames(std::vector<std::string> const & colnames)
 			{
 				return true;
 			}
+
 			return false;
 		});
 

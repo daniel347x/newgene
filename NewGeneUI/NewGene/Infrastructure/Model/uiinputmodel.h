@@ -8,7 +8,7 @@
 class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 {
 
-	Q_OBJECT
+		Q_OBJECT
 
 	public:
 
@@ -59,9 +59,10 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Model implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Model implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return *__impl;
 		}
 
@@ -79,9 +80,10 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Internal model implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Internal model implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return static_cast<InputModel &>(getBackendModel_base<InputModel>(*__impl));
 		}
 
@@ -94,9 +96,10 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Internal model implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Internal model implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return this->getBackendModelSharedPtr_base<InputModel>(*__impl);
 		}
 
@@ -112,7 +115,7 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 		WorkQueueManager<UI_INPUT_MODEL> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
 			InputModelWorkQueue * work_queue = new InputModelWorkQueue(isPool2_);
-			work_queue->SetUIObject(reinterpret_cast<UIInputModel*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIInputModel *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

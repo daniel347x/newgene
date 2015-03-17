@@ -1,10 +1,10 @@
 #ifndef Q_MOC_RUN
-#	include <boost/lexical_cast.hpp>
-#	include <deque>
-#	include <boost/filesystem.hpp>
-#	include <boost/format.hpp>
-#	include <boost/scope_exit.hpp>
-#	include <boost/date_time/local_time/local_time.hpp>
+	#include <boost/lexical_cast.hpp>
+	#include <deque>
+	#include <boost/filesystem.hpp>
+	#include <boost/format.hpp>
+	#include <boost/scope_exit.hpp>
+	#include <boost/date_time/local_time/local_time.hpp>
 #endif
 #include "OutputModel.h"
 #include "../Utilities/NewGeneUUID.h"
@@ -86,7 +86,8 @@ bool OutputModelImportTableFn(Importer * importer, Model_basemost * model_, Impo
 
 				case Importer::INSERT_IN_BULK:
 					{
-						table_->ImportBlockBulk(output_model->getDb(), import_definition, output_model, &output_model->getInputModel(), table_block, number_rows, linenum, badwritelines, goodwritelines, goodupdatelines, errors);
+						table_->ImportBlockBulk(output_model->getDb(), import_definition, output_model, &output_model->getInputModel(), table_block, number_rows, linenum, badwritelines, goodwritelines,
+												goodupdatelines, errors);
 						int number_errors_now = errors.size();
 
 						if (number_errors_now > number_errors_at_start)
@@ -99,7 +100,8 @@ bool OutputModelImportTableFn(Importer * importer, Model_basemost * model_, Impo
 				case Importer::INSERT_OR_UPDATE:
 					{
 						long numlinesupdated = 0;
-						table_->ImportBlockUpdate(output_model->getDb(), import_definition, output_model, &output_model->getInputModel(), table_block, number_rows, linenum, badwritelines, goodwritelines, goodupdatelines, numlinesupdated,
+						table_->ImportBlockUpdate(output_model->getDb(), import_definition, output_model, &output_model->getInputModel(), table_block, number_rows, linenum, badwritelines, goodwritelines,
+												  goodupdatelines, numlinesupdated,
 												  errors);
 						int number_errors_now = errors.size();
 
@@ -457,6 +459,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText((boost::format("Populating K-ad metadata...")).str().c_str(), this);
 		create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
 		Prepare(allWeightings);
+
 		if (failed || CheckCancelled()) { return; }
 
 		if (allWeightings.time_granularity != TIME_GRANULARITY__NONE)
@@ -467,6 +470,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			std::int64_t timerange_start_test_up = TimeRange::determineAligningTimestamp(timerange_start, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
 			std::int64_t timerange_end_test_down = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
 			std::int64_t timerange_end_test_up = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
+
 			if (timerange_start != timerange_start_test_down)
 			{
 				// round
@@ -479,6 +483,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 					timerange_start = timerange_start_test_down;
 				}
 			}
+
 			if (timerange_end != timerange_end_test_up)
 			{
 				// round
@@ -502,6 +507,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// (note: there is only a single DMU for which K can be greater than 1, currently)
 		// ********************************************************************************************************************************************************* //
 		PopulateSchemaForRawDataTables_And_SetK(allWeightings);
+
 		if (failed || CheckCancelled()) { return; }
 
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
@@ -513,19 +519,25 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// This function both creates the table, and loads it with raw data,
 		// but just for the desired columns (and time range), from the permanent raw data tables.
 		// ********************************************************************************************************************************************************* //
-		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(top_level_variable_groups_schema[primary_vg_index__in__top_level_vg_vector], primary_vg_index__in__top_level_vg_vector);
+		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(top_level_variable_groups_schema[primary_vg_index__in__top_level_vg_vector],
+				primary_vg_index__in__top_level_vg_vector);
+
 		if (failed || CheckCancelled()) { return; }
 
 		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(selected_raw_data_table_schema);
+
 		if (failed || CheckCancelled()) { return; }
 
 		primary_group_column_sets.push_back(selected_raw_data_table_schema);
 
 		N_grand_total = ObtainCount(selected_raw_data_table_schema.second);
+
 		if (K > N_grand_total)
 		{
-			SetFailureErrorMessage((boost::format("The chosen value of K (%1%) exceeds the total number of rows of raw data (%2%) for the primary variable group \"%3%\" over the desired time range.  Please decrease the value of K.") % boost::lexical_cast<std::string>(K) % boost::lexical_cast<std::string>(N_grand_total) % selected_raw_data_table_schema.second.variable_group_longhand_names[0]).str().c_str());
+			SetFailureErrorMessage((
+									   boost::format("The chosen value of K (%1%) exceeds the total number of rows of raw data (%2%) for the primary variable group \"%3%\" over the desired time range.  Please decrease the value of K.")
+									   % boost::lexical_cast<std::string>(K) % boost::lexical_cast<std::string>(N_grand_total) % selected_raw_data_table_schema.second.variable_group_longhand_names[0]).str().c_str());
 			failed = true;
 			return;
 		}
@@ -541,9 +553,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Load raw data for primary variable group \"%1%\" over the selected time range...") % Table_VG_CATEGORY::GetVgDisplayTextShort(top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Load raw data for primary variable group \"%1%\" over the selected time range...") % Table_VG_CATEGORY::GetVgDisplayTextShort(
+										  top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
-		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, primary_vg_index__in__top_level_vg_vector, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
+		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, primary_vg_index__in__top_level_vg_vector, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY,
+											errorMessages);
 
 		if (failed || CheckCancelled())
 		{
@@ -583,8 +597,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Do not build the child DMU key lookup cache here.
 		// Do that prior to loading each child variable group.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Build cache of available data for variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Build cache of available data for variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(
+										  top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first)).str().c_str(), this);
 		allWeightings.ResetBranchCaches(-1, false);
+
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
@@ -592,13 +608,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Calculate the total number of K-adic combinations for the given DMU selection/s...")).str().c_str(), this);
 		allWeightings.CalculateWeightings(K);
+
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
 		// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Total number of granulated K-adic combinations available for this run: %1%") %  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Guaranteed upper limit for total number of *consolidated* K-adic combinations: %1% (a quick estimate, but guaranteed to be an upper limit)") % allWeightings.weighting_consolidated.getWeightingString().c_str()).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Total number of granulated K-adic combinations available for this run: %1%") %
+									  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+		messager.AppendKadStatusText((
+										 boost::format("Guaranteed upper limit for total number of *consolidated* K-adic combinations: %1% (a quick estimate, but guaranteed to be an upper limit)") %
+										 allWeightings.weighting_consolidated.getWeightingString().c_str()).str().c_str(), this);
 
 		if (random_sampling)
 		{
@@ -632,13 +652,16 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText((boost::format("Generating %1% random numbers between 1 and %2%...") % boost::lexical_cast<std::string>
 										  (samples).c_str() % allWeightings.weighting.getWeightingString().c_str()).str(), this);
 			allWeightings.PrepareRandomNumbers(samples);
+
 			if (failed || CheckCancelled()) { return; }
 
 			// ********************************************************************************************************************************************************* //
 			// Select the random rows now and stash in memory
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Selecting %1% random K-adic combinations from %2% available granulated combinations...") % boost::lexical_cast<std::string>(samples).c_str() % allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+			messager.AppendKadStatusText((boost::format("Selecting %1% random K-adic combinations from %2% available granulated combinations...") % boost::lexical_cast<std::string>
+										  (samples).c_str() % allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
 			allWeightings.PrepareRandomSamples(K);
+
 			if (failed || CheckCancelled()) { return; }
 
 			// *** OLD COMMENT LEFT IN PLACE TO ADD CLARITY TO CURRENT CODE, SEE BELOW FOR CURRENT STATUS ***
@@ -657,6 +680,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			purge_pool<newgene_cpp_int_random_tag, sizeof(newgene_cpp_int)>();
 			allWeightings.ClearRemaining();
 			messager.SetPerformanceLabel("");
+
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -667,15 +691,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Give text feedback that the sampler is entering full sampling mode
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
+
 			if (consolidate_rows)
 			{
 				messager.AppendKadStatusText((boost::format("Entering full sampling mode, consolidating contiguous identical data.")).str().c_str(), this);
-				messager.AppendKadStatusText((boost::format("Generating all K-adic combinations (no more than %1% consolidated combinations, and probably less)...") % allWeightings.weighting_consolidated.getWeightingString().c_str()).str(), this);
+				messager.AppendKadStatusText((boost::format("Generating all K-adic combinations (no more than %1% consolidated combinations, and probably less)...") %
+											  allWeightings.weighting_consolidated.getWeightingString().c_str()).str(), this);
 			}
 			else
 			{
 				messager.AppendKadStatusText((boost::format("Entering full sampling mode, with time granulation.  All %1% K-adic combinations will be generated.") %
-					allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
+											  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
 				messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % allWeightings.weighting.getWeightingString().c_str()).str(), this);
 			}
 
@@ -683,12 +709,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Generate all K-ad combinations now
 			// ********************************************************************************************************************************************************* //
 			allWeightings.PrepareFullSamples(K);
+
 			if (failed || CheckCancelled()) { return; }
 
 		}
 
 		// "remaining_tag" memory pool is used both by random sampler, and by full sampler
 		allWeightings.PurgeTags<remaining_tag>();
+
 		if (failed || CheckCancelled()) { return; }
 
 		if (false)
@@ -703,6 +731,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// disk-based management during K-ad generation
 			// ********************************************************************************************************************************************************* //
 			KadSamplerCreateOutputTable();
+
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -711,6 +740,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Create the schema for the output
 		// ********************************************************************************************************************************************************* //
 		random_sampling_schema = KadSamplerBuildOutputSchema();
+
 		if (failed || CheckCancelled()) { return; }
 
 		final_result = random_sampling_schema;
@@ -722,8 +752,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Populate (merge) *BOTH* child variable groups *AND* non-primary top-level variable groups
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-			messager.AppendKadStatusText((boost::format("Note: Merging of additional variable groups could increase the number of output rows beyond the numbers indicated above.")).str().c_str(), this);
+			messager.AppendKadStatusText((
+											 boost::format("Note: Merging of additional variable groups could increase the number of output rows beyond the numbers indicated above.")).str().c_str(), this);
 			KadSamplerFillDataForNonPrimaryGroups(allWeightings);
+
 			if (failed || CheckCancelled()) { return; }
 
 			// ********************************************************************************************************************************************************* //
@@ -751,6 +783,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText((boost::format("Prepare cache for creation of output rows...")).str().c_str(), this);
 			allWeightings.ClearBranchCaches();
 			allWeightings.ResetBranchCaches(-1, false); // just update the primary "leaves" vector - not the child leaf lookup cache
+
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -785,6 +818,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Consolidating adjacent rows...")).str(), this);
 			ConsolidateData(random_sampling, allWeightings);
+
 			if (failed || CheckCancelled()) { return; }
 
 		}
@@ -816,6 +850,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.SetPerformanceLabel("Writing results to disk...");
 		KadSamplerWriteResultsToFileOrScreen(allWeightings);
 		messager.AppendKadStatusText((boost::format("Wrote %1% rows to output file \"%2%\"") % allWeightings.rowsWritten % setting_path_to_kad_output.c_str()).str(), this);
+
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
@@ -832,13 +867,15 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// Delete the tables we used to store the selected columns of raw data over the selected time range
 			// ********************************************************************************************************************************************************* //
 			input_model->ClearRemnantTemporaryTables();
+
 			if (failed || CheckCancelled()) { return; }
 		}
 
 		input_model->VacuumDatabase();
 		messager.SetPerformanceLabel("");
 		messager.UpdateProgressBarValue(1000);
-		messager.UpdateStatusBarText((boost::format("Output successfully generated (%1%)") % boost::filesystem::path(setting_path_to_kad_output).filename().string().c_str()).str().c_str(), this);
+		messager.UpdateStatusBarText((boost::format("Output successfully generated (%1%)") % boost::filesystem::path(setting_path_to_kad_output).filename().string().c_str()).str().c_str(),
+									 this);
 		messager.AppendKadStatusText("Done.", this);
 
 	}
@@ -1031,6 +1068,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 		bool is_excluded_dmu_category = false;
 		bool is_excluded_dmu_set_member = false; // this gets set, if necessary, below
+
 		if (add_as_primary_key_column)
 		{
 			// Test if this DMU member is being excluded by the user in the "Limit DMU's" tab
@@ -1049,7 +1087,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_excluded_dmu_category)
 					{
-						is_excluded_dmu_set_member = ! model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_int64);
+						is_excluded_dmu_set_member = ! model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier,
+													 data_int64);
 					}
 
 					std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> binding;
@@ -1068,6 +1107,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_column])
 					{
 						indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.push_back(binding);
+
 						if (is_excluded_dmu_set_member)
 						{
 							leaf_has_excluded_dmu = true;
@@ -1077,6 +1117,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
 					{
 						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(binding);
+
 						if (is_excluded_dmu_set_member)
 						{
 							branch_has_excluded_dmu = true;
@@ -1109,6 +1150,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					{
 						indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT,
 								std::make_pair((int)current_parameter_floats.size() - 1, current_column)));
+
 						if (is_excluded_dmu_set_member)
 						{
 							leaf_has_excluded_dmu = true;
@@ -1119,6 +1161,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					{
 						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT,
 								std::make_pair((int)current_parameter_floats.size() - 1, current_column)));
+
 						if (is_excluded_dmu_set_member)
 						{
 							branch_has_excluded_dmu = true;
@@ -1140,7 +1183,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_excluded_dmu_category)
 					{
-						is_excluded_dmu_set_member = ! model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier, data_string.c_str());
+						is_excluded_dmu_set_member = ! model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier,
+													 data_string.c_str());
 					}
 
 					current_parameter_strings.push_back(data_string);
@@ -1157,6 +1201,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					{
 						indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING,
 								std::make_pair((int)current_parameter_strings.size() - 1, current_column)));
+
 						if (is_excluded_dmu_set_member)
 						{
 							leaf_has_excluded_dmu = true;
@@ -1167,6 +1212,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					{
 						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING,
 								std::make_pair((int)current_parameter_strings.size() - 1, current_column)));
+
 						if (is_excluded_dmu_set_member)
 						{
 							branch_has_excluded_dmu = true;
@@ -1211,7 +1257,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
 					{
-						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0, current_column)));
+						indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0,
+								current_column)));
 					}
 
 					if (is_index_a_secondary_key[current_column])
@@ -2032,6 +2079,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 		new_column.column_name_in_temporary_table += "_";
 		new_column.column_name_in_temporary_table += newUUID(true);
+
 		if (first)
 		{
 			first = false;
@@ -2058,7 +2106,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		first = false;
 
-		if (new_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
+		if (new_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY
+			&& new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += "CAST (";
 		}
@@ -2067,7 +2116,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
 		sql_string += "`";
 
-		if (new_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
+		if (new_column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY
+			&& new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += " AS INTEGER)";
 		}
@@ -2133,6 +2183,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				if (column_in_view.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY)
 				{
 					WidgetInstanceIdentifier const & primary_dmu_category = column_in_view.primary_key_dmu_category_identifier;
+
 					if (!primary_dmu_category.IsEmpty())
 					{
 						if (primary_dmu_category.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, limiting_dmu_category))
@@ -2143,6 +2194,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							sql_string += "` ";
 
 							WidgetInstanceIdentifiers limited_dmu_set_members = model->t_limit_dmus_set_members.getIdentifiers(*limiting_dmu_category.code);
+
 							if (limited_dmu_set_members.empty())
 							{
 								sql_string += " IS NULL OR `";
@@ -2154,12 +2206,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								sql_string += " IN (";
 
 								bool first_limited_dmu = true;
+
 								for (auto const & limited_dmu_set_member : limited_dmu_set_members)
 								{
 									if (!first_limited_dmu)
 									{
 										sql_string += ", ";
 									}
+
 									first_limited_dmu = false;
 
 									if (column_in_view.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -2414,6 +2468,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables_And_SetK(KadSa
 			allWeightings.number_primary_variable_group_single_leaf_columns = 0;
 			NewGeneSchema & columns_in_variable_group_view = top_level_variable_groups_schema.back();
 			columns_in_variable_group_view.is_primary_vg = true;
+
 			for (auto const & column : columns_in_variable_group_view.column_definitions)
 			{
 				if (column.column_type == NewGeneSchema::NewGeneColumnDefinition::COLUMN_TYPE__PRIMARY)
@@ -2554,7 +2609,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 			for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 			{
-				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
+				if (*variable_group_set_member.code ==
+					primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
 				{
 					++count_of_this_raw_variable_column_in_final_output;
 				}
@@ -2590,7 +2646,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 			for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 			{
-				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
+				if (*variable_group_set_member.code ==
+					primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
 				{
 					++count_of_this_raw_variable_column_in_final_output;
 				}
@@ -2622,7 +2679,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 
 				for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 				{
-					if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
+					if (*variable_group_set_member.code ==
+						primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[primary_vg_index__in__top_level_vg_vector].column_name_no_uuid)
 					{
 						++count_of_this_raw_variable_column_in_final_output;
 					}
@@ -2934,15 +2992,16 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 	// VS bug:
 	// Must wrap lambda in a std::function.
 	// See http://connect.microsoft.com/VisualStudio/feedback/details/727957/vc11-beta-compiler-fails-to-compile-lambda-key-comparer-for-maps-and-sets
-	auto dmu_count_comparator = std::function<bool(std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const &, std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const &)>([](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & lhs, std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & rhs) -> bool
+	auto dmu_count_comparator =
+		std::function<bool(std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const &, std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const &)>([](
+					std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & lhs, std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & rhs) -> bool
 	{
 		// Customized comparison that simply counts the number of DMU's
 		if (lhs.second.size() < rhs.second.size())
 		{
 			return true;
 		}
-		else
-		if (lhs.second.size() > rhs.second.size())
+		else if (lhs.second.size() > rhs.second.size())
 		{
 			return false;
 		}
@@ -3289,7 +3348,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	// For child UOA's:
 	// Make sure that, for each child UOA, the UOA k-value for all DMU categories
 	// is either 0, 1, or the corresponding UOA k-value of the primary UOA;
-	// 
+	//
 	// and that it is 1 only if it is also 1 in the primary group for that DMU
 	// or if the primary group has outer multiplicity > 1 in that DMU
 	//
@@ -3355,7 +3414,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 				if (current_child_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, k_count_for_primary_uoa_for_given_dmu_category__info.first))
 				{
-					
+
 					if (current_child_dmu_plus_count.second == k_count_for_primary_uoa_for_given_dmu_category__info.second)
 					{
 
@@ -3427,7 +3486,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					// and therefore this is an acceptable condition - the child has 1 column in this DMU, and the primary has more than 1
 					// (but a primary multiplicity of 1),
 					// so drop through.
-					else if ( ! boost::iequals(*current_child_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code) )
+					else if (! boost::iequals(*current_child_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code))
 					{
 
 						// ... But the current DMU category is not the one with multiplicity greater than 1
@@ -3436,7 +3495,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 						// will be an empty string if there isn't a DMU with multiplicity > 1
 						if (highest_multiplicity_primary_uoa > 1)
 						{
-	
+
 							// *************************************************************************************** //
 							// Subtle edge case failure:
 							//
@@ -3493,11 +3552,11 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					//
 					// Given the previous sentence, we can safely increment the following variable.
 					++primary_dmu_categories_for_which_child_has_less;
-				
+
 				}
-			
+
 			});
-		
+
 		});
 
 		if (primary_dmu_categories_for_which_child_has_less > 1)
@@ -4337,6 +4396,7 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 	SavedRowData sorting_row_of_data;
 
 	ProgressBarMeter meter(messager, std::string("%1% / %2% rows of raw data loaded"), rowsToRead);
+
 	while (StepData())
 	{
 
@@ -4410,7 +4470,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 
 		bool bad = false;
 		std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.cbegin(),
-					  sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+					  sorting_row_of_data.indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const &
+							  binding_info)
 		{
 
 			if (bad)
@@ -4568,8 +4629,8 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 		// Currently, due to UOA validation, all CHILD (as well as primary and top-level)
 		// BRANCH columns map to BRANCH columns in the primary UOA.
 		//
-		// Therefore, if the sorting_row_of_data has a bad branch 
-		// (due to Limit DMU functionality) 
+		// Therefore, if the sorting_row_of_data has a bad branch
+		// (due to Limit DMU functionality)
 		// and it's a CHILD variable group being loaded,
 		// then the corresponding bad branch column/s in the PRIMARY variable group that MIGHT have been loaded would NOT have been,
 		// so skip out now.
@@ -5340,7 +5401,8 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForNonPrimaryGroups(KadSamp
 		// load the selected columns of raw data into the temporary table created with the same schema.
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Merge variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(top_level_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Merge variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(
+										  top_level_variable_groups_vector[current_top_level_vg_index].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
 
@@ -5519,8 +5581,10 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForNonPrimaryGroups(KadSamp
 		// child variable group.
 		// **************************************************************************************** //
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Build cache to prepare for merge of child variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Build cache to prepare for merge of child variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(
+										  child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		allWeightings.ResetBranchCaches(current_child_vg_index, true);
+
 		if (failed || CheckCancelled()) { return; }
 
 		// **************************************************************************************** //
@@ -5539,7 +5603,8 @@ void OutputModel::OutputGenerator::KadSamplerFillDataForNonPrimaryGroups(KadSamp
 		// From the schema for the selected columns for the child variable group,
 		// load the selected columns of raw data into the temporary table created with the same schema.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Merge child variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Merge child variable group \"%1%\"...") % Table_VG_CATEGORY::GetVgDisplayTextShort(
+										  child_variable_groups_vector[current_child_vg_index].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
 		allWeightings.current_child_variable_group_being_merged = current_child_vg_index;
 		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
@@ -5579,6 +5644,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 		// This MUST come after the child groups have been merged!
 		// For unbiased sampling, the child groups may only cross a subset of time units within a branch
 		ConsolidateRowsWithinSingleTimeSlicesAcrossTimeUnits(allWeightings);
+
 		if (failed || CheckCancelled()) { return; }
 	}
 
@@ -5590,7 +5656,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 	auto & saved_historic_rows = allWeightings.consolidated_rows;
 
-	FastSetMemoryTag<MergedTimeSliceRow<ongoing_merged_rows_tag>, ongoing_merged_rows_tag> * ongoing_merged_rows_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_merged_rows<ongoing_merged_rows_tag>>();
+	FastSetMemoryTag<MergedTimeSliceRow<ongoing_merged_rows_tag>, ongoing_merged_rows_tag> * ongoing_merged_rows_ =
+		InstantiateUsingTopLevelObjectsPool<tag__ongoing_merged_rows<ongoing_merged_rows_tag>>();
 	FastSetMemoryTag<MergedTimeSliceRow<ongoing_merged_rows_tag>, ongoing_merged_rows_tag> & ongoing_merged_rows = *ongoing_merged_rows_;
 
 	// ***************************************************************************************************** //
@@ -5708,7 +5775,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 				// Create pointer to prevent automatic deletion.
 				// We are here using a Boost Pool to delete the memory in saved_historic_rows,
 				// because standard deletion through the pool takes forever.
-				FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * incoming_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation<ongoing_consolidation_tag>>();
+				FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * incoming_ =
+					InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation<ongoing_consolidation_tag>>();
 				FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & incoming = *incoming_;
 
 				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
@@ -5795,9 +5863,12 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 				MergedTimeSliceRow_RHS_wins = false;
 
 				// Ditto memory pool comments to "incoming", above
-				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * intersection_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
-				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_previous_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
-				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_new_ = InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
+				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * intersection_ =
+					InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
+				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_previous_ =
+					InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
+				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> * only_new_ =
+					InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation_vector<ongoing_consolidation_tag>>();
 
 				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & intersection = *intersection_;
 				FastVectorMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & only_previous = *only_previous_;
@@ -5903,7 +5974,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
-				
+
 					if (failed || CheckCancelled()) { return; }
 
 					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
@@ -5982,7 +6053,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 	MergedTimeSliceRow_RHS_wins = true; // optimizer might call operator=() during "insert"
 	saved_historic_rows.insert(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend());
 	MergedTimeSliceRow_RHS_wins = false;
-	
+
 	// Do not clear!! Let the Boost Pool management handle this, just below
 	//ongoing_merged_rows.clear();
 	allWeightings.PurgeTags<ongoing_merged_rows_tag>();
@@ -6087,7 +6158,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 			if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 			{
 				output_file << "_";
-				output_file << boost::lexical_cast<std::string>(unformatted_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group);
+				output_file << boost::lexical_cast<std::string>
+							(unformatted_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group);
 			}
 		}
 
@@ -6135,6 +6207,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 				static std::string converted_value;
 				converted_value = boost::lexical_cast<std::string>(data);
+
 				if (converted_value.find(",") != std::string::npos)
 				{
 					// Comma in data: must surround entire field with double quotes
@@ -6157,6 +6230,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 				{
 					output_file << ",";
 				}
+
 				first = false;
 				output_file << output_row.time_slice.toStringStart().c_str();
 				output_file << ",";
@@ -6248,7 +6322,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						size_t number_rows_this_time_slice = output_rows_for_this_full_time_slice.size();
 
 						// granulated output, full sampling
-						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start,
+														  std::int64_t const time_to_use_for_end)
 						{
 							if (failed || CheckCancelled()) { return; }
 
@@ -6257,9 +6332,9 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 					}
 				}
-		
+
 			});
-		
+
 		});
 
 		int which_time_slice = 0;
@@ -6358,6 +6433,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 							{
 								output_file << ",";
 							}
+
 							first = false;
 							output_file << timeSlice.toStringStart().c_str();
 							output_file << ",";
@@ -6411,7 +6487,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 						auto & hits = branch.hits;
 						std::int64_t hit_number = 0;
-						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start,
+														  std::int64_t const time_to_use_for_end)
 						{
 							if (failed || CheckCancelled()) { return; }
 
@@ -6436,7 +6513,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 						// *********************************************************************************** //
 
 						auto const & output_rows_for_this_full_time_slice = branch.hits[-1];
-						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+						timeSlice.loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start,
+														  std::int64_t const time_to_use_for_end)
 						{
 							if (failed || CheckCancelled()) { return; }
 

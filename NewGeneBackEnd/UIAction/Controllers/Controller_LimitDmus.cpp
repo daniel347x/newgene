@@ -1,7 +1,7 @@
 #include "../UIActionManager.h"
 
 #ifndef Q_MOC_RUN
-#	include <boost/scope_exit.hpp>
+	#include <boost/scope_exit.hpp>
 #endif
 #include "../../Project/InputProject.h"
 #include "../../Project/OutputProject.h"
@@ -209,6 +209,7 @@ void UIActionManager::DoLimitDmusChange(Messager & messager__, WidgetActionItemR
 					WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const & actionItemLimitDmuInfo = static_cast<WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const &>(actionItem);
 					std::string is_limited_string = actionItemLimitDmuInfo.getValueString();
 					bool is_limited = false;
+
 					if (is_limited_string == "y")
 					{
 						is_limited = true;

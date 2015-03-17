@@ -7,14 +7,15 @@
 #include <QAbstractButton>
 #include <string>
 
-NewGeneVariablesToolbox::NewGeneVariablesToolbox( QWidget * parent ) :
-	QToolBox( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_TOOLBOX, true) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+NewGeneVariablesToolbox::NewGeneVariablesToolbox(QWidget * parent) :
+	QToolBox(parent),
+	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_TOOLBOX,
+									 true))   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
-    layout()->setSpacing( 4 );
-    setStyleSheet("QToolBox::Tab:selected {font-weight: bold;}");
+	layout()->setSpacing(4);
+	setStyleSheet("QToolBox::Tab:selected {font-weight: bold;}");
 
-    PrepareOutputWidget();
+	PrepareOutputWidget();
 }
 
 void NewGeneVariablesToolbox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
@@ -29,11 +30,12 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONN
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)));
 
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
-		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
+		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this,
+				SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 
-        // Handle clicks on different variable group tabs
-        connect(this, SIGNAL(currentChanged(int)), this, SLOT(tabChange(int)));
-    }
+		// Handle clicks on different variable group tabs
+		connect(this, SIGNAL(currentChanged(int)), this, SLOT(tabChange(int)));
+	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
@@ -67,6 +69,7 @@ void NewGeneVariablesToolbox::RefreshAllWidgets()
 		Empty();
 		return;
 	}
+
 	WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
@@ -81,14 +84,14 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
 			WidgetInstanceIdentifier new_identifier(identifier);
-            NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, this, new_identifier, outp );
-            addItem( tmpGrp, identifier.longhand->c_str() );
+			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup(this, this, new_identifier, outp);
+			addItem(tmpGrp, identifier.longhand->c_str());
 		}
 	});
 
-    // Either this widget populates before the summary widget, or the other way around.
-    // Both scenarios are properly handled because the summary widget caches the value.
-    tabChange(0);
+	// Either this widget populates before the summary widget, or the other way around.
+	// Both scenarios are properly handled because the summary widget caches the value.
+	tabChange(0);
 
 }
 
@@ -97,9 +100,10 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 	if (widget_data.identifier && widget_data.identifier->uuid)
 	{
 		NewGeneWidget * child = outp->FindWidgetFromDataItem(uuid, *widget_data.identifier->uuid);
+
 		if (child)
 		{
-            child->WidgetDataRefreshReceive(widget_data);
+			child->WidgetDataRefreshReceive(widget_data);
 		}
 	}
 }
@@ -107,15 +111,18 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 void NewGeneVariablesToolbox::Empty()
 {
 	int nItems = count();
+
 	for (int n = 0; n < nItems; ++n)
 	{
 		QWidget * child = widget(n);
 		removeItem(n);
+
 		if (child)
 		{
 			delete child;
 			child = nullptr;
 		}
+
 		--n;
 		--nItems;
 	}
@@ -125,6 +132,7 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -145,11 +153,12 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 								if (change.parent_identifier.code && change.parent_identifier.uuid && change.parent_identifier.longhand)
 								{
 									WidgetInstanceIdentifier new_identifier = change.parent_identifier;
-                                    NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, this, new_identifier, outp );
-									addItem( tmpGrp, new_identifier.longhand->c_str() );
+									NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup(this, this, new_identifier, outp);
+									addItem(tmpGrp, new_identifier.longhand->c_str());
 								}
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
@@ -159,12 +168,15 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 									WidgetInstanceIdentifier vg_to_remove(change.parent_identifier);
 
 									int nItems = count();
+
 									for (int n = 0; n < nItems; ++n)
 									{
 										QWidget * testWidget = widget(n);
+
 										try
 										{
-											NewGeneVariableGroup * testVG = dynamic_cast<NewGeneVariableGroup*>(testWidget);
+											NewGeneVariableGroup * testVG = dynamic_cast<NewGeneVariableGroup *>(testWidget);
+
 											if (testVG && testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg_to_remove))
 											{
 
@@ -187,15 +199,18 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
 								// Should never receive this.
 							}
+
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 								// Ditto above.
 							}
 							break;
+
 						default:
 							{
 							}
@@ -203,6 +218,7 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 					}
 				}
 				break;
+
 			default:
 				{
 				}
@@ -214,62 +230,69 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 
 QListView * NewGeneVariablesToolbox::GetListView(int const index)
 {
-	NewGeneVariableGroup * vg = static_cast<NewGeneVariableGroup*>(widget(index));
+	NewGeneVariableGroup * vg = static_cast<NewGeneVariableGroup *>(widget(index));
 	return vg->GetListView();
 }
 
 void NewGeneVariablesToolbox::SetBarColor(bool active, std::string const & name)
 {
-    int nItems = count();
-    int index {-1};
-    for (int n = 0; n < nItems; ++n)
-    {
-        QWidget * testWidget = widget(n);
-        std::string testName {testWidget->objectName().toStdString()};
-        if (testName == name)
-        {
-            index = n;
-            break;
-        }
-    }
+	int nItems = count();
+	int index { -1};
 
-    if (index >= 0)
-    {
-        int i {};
-        foreach (QAbstractButton* button, findChildren<QAbstractButton*>())
-        {
-            // make sure only toolbox button palettes are modified
-            if (button->metaObject()->className() == QString("QToolBoxButton"))
-            {
-                if (i == index)
-                {
-                    // found correct button
-                    QPalette p = button->palette();
-                    if (active)
-                    {
-                        p.setColor(QPalette::Button, "#E0EBFF");
-                    }
-                    else
-                    {
-                        p.setColor(QPalette::Button, "#ECECEC");
-                    }
-                    button->setPalette(p);
-                    break;
-                }
-                i++;
-            }
-        }
-    }
+	for (int n = 0; n < nItems; ++n)
+	{
+		QWidget * testWidget = widget(n);
+		std::string testName {testWidget->objectName().toStdString()};
+
+		if (testName == name)
+		{
+			index = n;
+			break;
+		}
+	}
+
+	if (index >= 0)
+	{
+		int i {};
+
+		foreach (QAbstractButton * button, findChildren<QAbstractButton *>())
+		{
+			// make sure only toolbox button palettes are modified
+			if (button->metaObject()->className() == QString("QToolBoxButton"))
+			{
+				if (i == index)
+				{
+					// found correct button
+					QPalette p = button->palette();
+
+					if (active)
+					{
+						p.setColor(QPalette::Button, "#E0EBFF");
+					}
+					else
+					{
+						p.setColor(QPalette::Button, "#ECECEC");
+					}
+
+					button->setPalette(p);
+					break;
+				}
+
+				i++;
+			}
+		}
+	}
 }
 
 void NewGeneVariablesToolbox::tabChange(int index)
 {
-    if (index != -1)
-    {
-        NewGeneVariableGroup * vg { dynamic_cast<NewGeneVariableGroup*>(widget(index)) };
-        if (vg)
-        {
-            emit DoTabChange(vg->data_instance);
-        }
-    }
+	if (index != -1)
+	{
+		NewGeneVariableGroup * vg { dynamic_cast<NewGeneVariableGroup *>(widget(index)) };
+
+		if (vg)
+		{
+			emit DoTabChange(vg->data_instance);
+		}
+	}
 }

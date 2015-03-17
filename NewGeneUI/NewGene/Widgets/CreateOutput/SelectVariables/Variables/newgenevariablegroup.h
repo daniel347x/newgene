@@ -19,7 +19,8 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		Q_OBJECT
 
 	public:
-        explicit NewGeneVariableGroup(NewGeneVariablesToolbox * toolbox_, QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr );
+		explicit NewGeneVariableGroup(NewGeneVariablesToolbox * toolbox_, QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(),
+									  UIOutputProject * project = nullptr);
 		~NewGeneVariableGroup();
 
 		void HandleChanges(DataChangeMessage const &);
@@ -33,22 +34,22 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
-		void ReceiveVariableItemChanged(QStandardItem*);
+		void ReceiveVariableItemChanged(QStandardItem *);
 
 		// For Squish only: exception to rule regarding slots; return something here
 		QListView * GetListView();
 
 	protected:
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 		bool ResetAll(std::vector<std::pair<WidgetInstanceIdentifier, bool>> const & vg_members_and_bools);
-        void SetEnabledStateSelectAllButtons(QStandardItemModel *);
+		void SetEnabledStateSelectAllButtons(QStandardItemModel *);
 
-private slots:
-        void on_toolButtonSelectAll_clicked();
-        void on_toolButtonDeselectAll_clicked();
+	private slots:
+		void on_toolButtonSelectAll_clicked();
+		void on_toolButtonDeselectAll_clicked();
 
-private:
-        NewGeneVariablesToolbox * toolbox;
+	private:
+		NewGeneVariablesToolbox * toolbox;
 		Ui::NewGeneVariableGroup * ui;
 };
 

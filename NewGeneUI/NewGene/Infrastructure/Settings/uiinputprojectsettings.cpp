@@ -12,14 +12,14 @@ SettingInfo UIProjectInputSetting::GetSettingInfoFromEnum(Messager & messager_, 
 	switch (value_)
 	{
 
-//		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST:
-//			{
-//				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST,
-//								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST),
-//								   "MRU_LIST",
-//								   "");
-//			}
-//			break;
+		//		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST:
+		//			{
+		//				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST,
+		//								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST),
+		//								   "MRU_LIST",
+		//								   "");
+		//			}
+		//			break;
 
 		default:
 			{
@@ -34,7 +34,7 @@ SettingInfo UIProjectInputSetting::GetSettingInfoFromEnum(Messager & messager_, 
 
 }
 
-void UIInputProjectSettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
+void UIInputProjectSettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */)
 {
 
 	UIMessager & messager = static_cast<UIMessager &>(messager_);
@@ -42,12 +42,12 @@ void UIInputProjectSettings::SetMapEntry(Messager & messager_, SettingInfo & set
 	switch (setting_info.setting_class)
 	{
 
-//		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
-//			{
-//				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-//				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList, true>()(messager, string_setting));
-//			}
-//			break;
+		//		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
+		//			{
+		//				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
+		//				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList, true>()(messager, string_setting));
+		//			}
+		//			break;
 
 		default:
 			{
@@ -72,12 +72,12 @@ UIProjectInputSetting * UIInputProjectSettings::CloneSetting(Messager & messager
 		switch (setting_info.setting_class)
 		{
 
-//			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
-//				{
-//					UIGlobalSetting_MRUList * setting = dynamic_cast<UIGlobalSetting_MRUList*>(current_setting);
-//					return new UIGlobalSetting_MRUList(messager, setting->getString());
-//				}
-//				break;
+			//			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
+			//				{
+			//					UIGlobalSetting_MRUList * setting = dynamic_cast<UIGlobalSetting_MRUList*>(current_setting);
+			//					return new UIGlobalSetting_MRUList(messager, setting->getString());
+			//				}
+			//				break;
 
 			default:
 				{
@@ -139,7 +139,7 @@ void UIInputProjectSettings::SetPTreeEntry(Messager &, INPUT_PROJECT_SETTINGS_UI
 void UIInputProjectSettings::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg.c_str() );
+	msgBox.setText(msg.c_str());
 	msgBox.exec();
 }
 

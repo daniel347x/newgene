@@ -2,12 +2,12 @@
 #define RANDOMSAMPLING_NEWGENE_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/multiprecision/number.hpp>
-#	include <boost/multiprecision/cpp_int.hpp>
-#	include <boost/multiprecision/cpp_dec_float.hpp>
-#	include <boost/variant.hpp>
-#	include <boost/pool/pool_alloc.hpp>
-#	include "boost/date_time/posix_time/posix_time.hpp"
+	#include <boost/multiprecision/number.hpp>
+	#include <boost/multiprecision/cpp_int.hpp>
+	#include <boost/multiprecision/cpp_dec_float.hpp>
+	#include <boost/variant.hpp>
+	#include <boost/pool/pool_alloc.hpp>
+	#include "boost/date_time/posix_time/posix_time.hpp"
 #endif
 #include <cstdint>
 #include <vector>
@@ -37,7 +37,7 @@ typedef boost::variant<std::int32_t, double, fast_string> SecondaryInstanceData;
 //
 // MEMORY_TAG is the tag - just an empty, uniquely-named struct - used by the internals
 // of Boost Pool to mark different global memory pools.
-// 
+//
 // Whenever the code instantiates an instance of any of the classes below,
 // the code (namely, us) gets to choose which pool in which to store the object in memory.
 //
@@ -45,7 +45,7 @@ typedef boost::variant<std::int32_t, double, fast_string> SecondaryInstanceData;
 // without calling the destructor for any of the objects in the pool, which is a major
 // profiler-demonstrated optimization.
 //
-// By controlling which pool each object is created in, NewGene has the ability to 
+// By controlling which pool each object is created in, NewGene has the ability to
 // have fine-grain control over which objects are freed at any given time.
 //
 // This code has pool-enabled a variety of different classes, for convenience.
@@ -77,7 +77,8 @@ template <typename MEMORY_TAG>
 using fast_short_to_int_map = FastMapMemoryTag<std::int16_t, std::int32_t, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast_short_to_int_map__loaded = FastMapMemoryTag<std::int16_t, std::int32_t, MEMORY_TAG>; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
+using fast_short_to_int_map__loaded =
+	FastMapMemoryTag<std::int16_t, std::int32_t, MEMORY_TAG>; // known memory allocation hog that can crash in a somewhat fragmented heap, so throttle it way down by forcing small maximum block sizes but that won't crash
 
 template <typename MEMORY_TAG>
 using fast__short__to__fast_short_to_int_map__loaded = FastMapMemoryTag<std::int16_t, fast_short_to_int_map__loaded<MEMORY_TAG>, MEMORY_TAG>;
@@ -149,6 +150,7 @@ class TimeSlice
 		std::string toStringStart() const
 		{
 			bool do_calc = false;
+
 			if (none)
 			{
 				if (!minus_infinity)
@@ -172,6 +174,7 @@ class TimeSlice
 		std::string toStringEnd() const
 		{
 			bool do_calc = false;
+
 			if (none)
 			{
 				if (!plus_infinity)
@@ -402,14 +405,14 @@ class TimeSlice
 		void loop_through_time_units(TIME_GRANULARITY const & time_granularity, boost::function<void(std::int64_t const, std::int64_t const)> & misc_function) const
 		{
 			// ************************************************************************** //
-			// This function is called in the case where ALL we need to do is 
+			// This function is called in the case where ALL we need to do is
 			// determine the time widths (starting & ending values) of the
 			// sub-time-units in each TimeSlice - and then call a
 			// miscellaneous function with these values for each such sub-time-unit.
-			// 
+			//
 			// Note that all such time widths of sub-time-units (each corresponding
 			// to an entry in the "hits" array of the given branch) will have
-			// the width of the basic time unit of the time granularity of the 
+			// the width of the basic time unit of the time granularity of the
 			// unit of analysis associated with the primary variable group,
 			// EXCEPT possibly for the FIRST and LAST sub-time-units, which may
 			// be cropped.
@@ -432,6 +435,7 @@ class TimeSlice
 					std::int64_t current_start_time_incremented_by_1_ms = time_to_use_for_start + 1;
 					std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
 					std::int64_t time_to_use_for_end = time_start_aligned_higher;
+
 					if (time_to_use_for_end > time_end) { time_to_use_for_end = time_end; }
 
 					misc_function(time_to_use_for_start, time_to_use_for_end);
@@ -461,7 +465,8 @@ class TimeSlice
 			}
 
 			int number_of_time_units = 0;
-			loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start, std::int64_t const time_to_use_for_end)
+			loop_through_time_units(time_granularity, boost::function<void(std::int64_t const, std::int64_t const)>([&](std::int64_t const time_to_use_for_start,
+									std::int64_t const time_to_use_for_end)
 			{
 				++number_of_time_units;
 			}));
@@ -1015,8 +1020,8 @@ class Weighting
 
 		Weighting(Weighting const & rhs)
 			: weighting { rhs.weighting }
-		, weighting_range_start { rhs.weighting_range_start }
-		, weighting_range_end { rhs.weighting_range_end }
+			, weighting_range_start { rhs.weighting_range_start }
+			, weighting_range_end { rhs.weighting_range_end }
 		{
 			++how_many_weightings;
 			InternalSetWeighting();
@@ -1085,20 +1090,20 @@ class Weighting
 		newgene_cpp_int weighting;
 		newgene_cpp_int weighting_range_start;
 		newgene_cpp_int weighting_range_end;
-#	ifdef _DEBUG
+		#	ifdef _DEBUG
 		//std::string weighting_string;
 		//std::string weighting_range_start_string;
 		//std::string weighting_range_end_string;
-#	endif
+		#	endif
 
 		void InternalSetWeighting()
 		{
 			weighting_range_end = weighting_range_start + weighting - 1;
-#		ifdef _DEBUG
+			#		ifdef _DEBUG
 			//weighting_string = weighting.str();
 			//weighting_range_start_string = weighting_range_start.str();
 			//weighting_range_end_string = weighting_range_end.str();
-#		endif
+			#		endif
 		}
 
 };
@@ -1311,7 +1316,8 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 		{
 		}
 
-		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0, bool const has_excluded_dmu_member_ = false)
+		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0,
+				bool const has_excluded_dmu_member_ = false)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data { index_into_raw_data_ }
 			, has_excluded_dmu_member{ has_excluded_dmu_member_ }
@@ -1320,17 +1326,17 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
-			, index_into_raw_data ( rhs.index_into_raw_data )
-			, other_top_level_indices_into_raw_data ( rhs.other_top_level_indices_into_raw_data )
-			, has_excluded_dmu_member ( rhs.has_excluded_dmu_member )
+			, index_into_raw_data(rhs.index_into_raw_data)
+			, other_top_level_indices_into_raw_data(rhs.other_top_level_indices_into_raw_data)
+			, has_excluded_dmu_member(rhs.has_excluded_dmu_member)
 		{
 		}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
 			: PrimaryKeysGrouping(std::move(rhs))
-			, index_into_raw_data ( rhs.index_into_raw_data )
-			, other_top_level_indices_into_raw_data ( std::move(rhs.other_top_level_indices_into_raw_data) )
-			, has_excluded_dmu_member ( rhs.has_excluded_dmu_member )
+			, index_into_raw_data(rhs.index_into_raw_data)
+			, other_top_level_indices_into_raw_data(std::move(rhs.other_top_level_indices_into_raw_data))
+			, has_excluded_dmu_member(rhs.has_excluded_dmu_member)
 		{
 		}
 
@@ -1392,6 +1398,7 @@ class BranchOutputRow
 			{
 				child_indices_into_raw_data[rhs_map.first].insert(rhs_map.second.cbegin(), rhs_map.second.cend());
 			}
+
 			SaveCache();
 		}
 
@@ -1421,12 +1428,12 @@ class BranchOutputRow
 		// specialize for own type
 		BranchOutputRow(BranchOutputRow<MEMORY_TAG> && rhs)
 
-			// No need to use a move iterator - these are just ints, and the move syntax is tedious because of the need for const_cast and move_iterator, resulting in no benefit because these are just int's
-			//: primary_leaves(std::move_iterator(rhs.primary_leaves.begin()), std::move_iterator(rhs.primary_leaves.end()))
+		// No need to use a move iterator - these are just ints, and the move syntax is tedious because of the need for const_cast and move_iterator, resulting in no benefit because these are just int's
+		//: primary_leaves(std::move_iterator(rhs.primary_leaves.begin()), std::move_iterator(rhs.primary_leaves.end()))
 			: primary_leaves(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend())
 
-			// ditto
-			//, primary_leaves_cache(std::move_iterator(rhs.primary_leaves_cache.begin()), std::move_iterator(rhs.primary_leaves_cache.end()))
+			  // ditto
+			  //, primary_leaves_cache(std::move_iterator(rhs.primary_leaves_cache.begin()), std::move_iterator(rhs.primary_leaves_cache.end()))
 			, primary_leaves_cache(rhs.primary_leaves_cache.cbegin(), rhs.primary_leaves_cache.cend())
 		{
 			child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
@@ -1458,11 +1465,12 @@ class BranchOutputRow
 			}
 
 			primary_leaves.clear();
-			
+
 			// Set of int's: no need to do a move, which requires tedious const_cast and move_iterator syntax and won't result in any benefit because they're just integers being moved
 			primary_leaves.insert(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend());
 
 			child_indices_into_raw_data.clear();
+
 			for (auto & rhs_map : rhs.child_indices_into_raw_data)
 			{
 				for (auto & rhs_vec : rhs_map.second)
@@ -1472,6 +1480,7 @@ class BranchOutputRow
 					child_indices_into_raw_data[rhs_map.first][rhs_vec.first] = std::move(rhs_vec.second);
 				}
 			}
+
 			SaveCache();
 			return *this;
 		}
@@ -1538,9 +1547,9 @@ class BranchOutputRow
 			SaveCache();
 		}
 
-#	ifndef _DEBUG
+		#	ifndef _DEBUG
 		//	private: // for debugging convenience, make public; but be sure it builds when private
-#	endif
+		#	endif
 
 		// ******************************************************************* //
 		// Index into the branch's Leaf set.
@@ -1622,13 +1631,16 @@ template <typename MEMORY_TAG>
 using fast__int64__to__fast_branch_output_row_set = FastMapMemoryTag<std::int64_t, fast_branch_output_row_set<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast__int64__to__fast_branch_output_row_vector = FastMapMemoryTag<std::int64_t, fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining<MEMORY_TAG>, MEMORY_TAG>;
+using fast__int64__to__fast_branch_output_row_vector =
+	FastMapMemoryTag<std::int64_t, fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast__int64__to__fast_branch_output_row_list = FastMapMemoryTag<std::int64_t, fast_branch_output_row_list_____currently_only_used_for_Branch_remaining<MEMORY_TAG>, MEMORY_TAG>;
+using fast__int64__to__fast_branch_output_row_list =
+	FastMapMemoryTag<std::int64_t, fast_branch_output_row_list_____currently_only_used_for_Branch_remaining<MEMORY_TAG>, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using fast__lookup__from_child_dmu_set__to__output_rows = FastMapMemoryTag<ChildDMUInstanceDataVector<MEMORY_TAG>, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>, MEMORY_TAG>;
+using fast__lookup__from_child_dmu_set__to__output_rows =
+	FastMapMemoryTag<ChildDMUInstanceDataVector<MEMORY_TAG>, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>, MEMORY_TAG>;
 
 // Supports using a separate, templatized memory pool "child_dmu_lookup_tag" to store the performance-intensive-on-delete
 // "helper_lookup__from_child_key_set__to_matching_output_rows" data structure,
@@ -1638,27 +1650,30 @@ using fast__lookup__from_child_dmu_set__to__output_rows = FastMapMemoryTag<Child
 // which must accept the full std::map::value_type as arguments (i.e., a std::pair<K const, V>),
 // even though all we are using to do the comparison is simply the key.
 template <typename MEMORY_TAG_LHS, typename MEMORY_TAG_RHS>
-bool operator<(std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_LHS>> const & lhs, std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_RHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_RHS>> const & rhs)
+bool operator<(std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_LHS>> const & lhs,
+			   std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_RHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_RHS>> const & rhs)
 {
 	size_t lhs_size = lhs.first.size();
 	size_t rhs_size = rhs.first.size();
 	size_t min_size = std::min(lhs_size, rhs_size);
+
 	for (size_t n = 0; n < min_size; ++n)
 	{
 		if (lhs.first[n] < rhs.first[n])
 		{
 			return true;
 		}
-		else
-		if (rhs.first[n] < lhs.first[n])
+		else if (rhs.first[n] < lhs.first[n])
 		{
 			return false;
 		}
 	}
+
 	if (lhs_size < rhs_size)
 	{
 		return true;
 	}
+
 	return false;
 }
 
@@ -1666,27 +1681,30 @@ bool operator<(std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const, fast_
 // but ALSO to compare a test ChildDMUInstanceDataVector<MEMORY_TAG> on the left or right against such a map element for use in std::binary_search.
 // See comments above.
 template <typename MEMORY_TAG_LHS, typename MEMORY_TAG_RHS>
-bool operator<(std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_LHS>> const & lhs, ChildDMUInstanceDataVector<MEMORY_TAG_RHS> const & rhs)
+bool operator<(std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_LHS>> const & lhs,
+			   ChildDMUInstanceDataVector<MEMORY_TAG_RHS> const & rhs)
 {
 	size_t lhs_size = lhs.first.size();
 	size_t rhs_size = rhs.size();
 	size_t min_size = std::min(lhs_size, rhs_size);
+
 	for (size_t n = 0; n < min_size; ++n)
 	{
 		if (lhs.first[n] < rhs[n])
 		{
 			return true;
 		}
-		else
-		if (rhs[n] < lhs.first[n])
+		else if (rhs[n] < lhs.first[n])
 		{
 			return false;
 		}
 	}
+
 	if (lhs_size < rhs_size)
 	{
 		return true;
 	}
+
 	return false;
 }
 
@@ -1694,27 +1712,30 @@ bool operator<(std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const, fast_
 // but ALSO to compare a test ChildDMUInstanceDataVector<MEMORY_TAG> on the left or right against such a map element for use in std::binary_search.
 // See comments above.
 template <typename MEMORY_TAG_LHS, typename MEMORY_TAG_RHS>
-bool operator<(ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const & lhs, std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_RHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_RHS>> const & rhs)
+bool operator<(ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const & lhs,
+			   std::pair<ChildDMUInstanceDataVector<MEMORY_TAG_RHS> const, fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG_RHS>> const & rhs)
 {
 	size_t lhs_size = lhs.size();
 	size_t rhs_size = rhs.first.size();
 	size_t min_size = std::min(lhs_size, rhs_size);
+
 	for (size_t n = 0; n < min_size; ++n)
 	{
 		if (lhs[n] < rhs.first[n])
 		{
 			return true;
 		}
-		else
-		if (rhs.first[n] < lhs[n])
+		else if (rhs.first[n] < lhs[n])
 		{
 			return false;
 		}
 	}
+
 	if (lhs_size < rhs_size)
 	{
 		return true;
 	}
+
 	return false;
 }
 
@@ -1730,7 +1751,7 @@ void SpitLeaf(std::string & sdata, Leaf const & leaf)
 	sdata += "</LEAF_DMU_DATALIST>";
 	sdata += "<OTHER_NON_PRIMARY_TOP_LEVEL_INDICES__ONE_PER_LEAF__POINTING_INTO_DATA_CACHE>";
 	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(),
-		leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & leafindicesintorawdata)
+				  leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & leafindicesintorawdata)
 	{
 		sdata += "<VARIABLE_GROUP>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
@@ -1803,7 +1824,7 @@ void SpitHit(std::string & sdata, std::int64_t const time_unit, T const & hit)
 // It is highly recommended to call this function willy-nilly for debugging purposes,
 // in the code while the output is being progressively generated.
 // It will shed a spotlight on how the data is stored!
-// 
+//
 // But warning: The XML file so generated becomes very large very quickly, so only
 // call the function when debugging with small data sets.
 //
@@ -1918,7 +1939,8 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow<MEMORY_TAG> const & row)
 	sdata += "<CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
 	sdata += boost::lexical_cast<std::string>(sizeof(row.child_indices_into_raw_data));
 	sdata += "</CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
-	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map__loaded<MEMORY_TAG>::value_type const & childindices)
+	std::for_each(row.child_indices_into_raw_data.cbegin(),
+				  row.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map__loaded<MEMORY_TAG>::value_type const & childindices)
 	{
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA>";
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA_OBJECT_ITSELF>";
@@ -2015,7 +2037,7 @@ struct tag__fast__lookup__from_child_dmu_set__to__output_rows
 //
 // See detailed comments inside this class declaration.
 //
-// Note: The branch represented by this class corresponds to 
+// Note: The branch represented by this class corresponds to
 // a single time slice (but the branch itself has no information
 // about its corresponding time slice)
 //
@@ -2044,14 +2066,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
-			, weighting ( rhs.weighting )
-			, hits ( rhs.hits )
-			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
+			, weighting(rhs.weighting)
+			, hits(rhs.hits)
+			  //, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
 			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
-			, number_branch_combinations ( rhs.number_branch_combinations )
-			, leaves ( rhs.leaves )
-			, leaves_cache ( rhs.leaves_cache )
+			, number_branch_combinations(rhs.number_branch_combinations)
+			, leaves(rhs.leaves)
+			, leaves_cache(rhs.leaves_cache)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 			, has_excluded_leaves(rhs.has_excluded_leaves)
 		{
@@ -2059,14 +2081,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne && rhs)
 			: PrimaryKeysGrouping(rhs)
-			, weighting ( rhs.weighting )
-			, hits ( rhs.hits )
-			//, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
-			, remaining_ (InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
-			, remaining (*remaining_)
-			, number_branch_combinations ( rhs.number_branch_combinations )
-			, leaves ( rhs.leaves )
-			, leaves_cache ( rhs.leaves_cache )
+			, weighting(rhs.weighting)
+			, hits(rhs.hits)
+			  //, remaining { rhs.remaining } // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
+			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
+			, remaining(*remaining_)
+			, number_branch_combinations(rhs.number_branch_combinations)
+			, leaves(rhs.leaves)
+			, leaves_cache(rhs.leaves_cache)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
 			, has_excluded_leaves(rhs.has_excluded_leaves)
 		{
@@ -2278,6 +2300,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				this->has_excluded_leaves = true;
 				return false;
 			}
+
 			leaves.insert(leaf);
 			ResetLeafCache();
 			return true;
@@ -2360,7 +2383,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		void ValidateOutputRowLeafIndexes() const
 		{
-#			ifdef _DEBUG
+			#			ifdef _DEBUG
 			std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hitsEntry)
 			{
 				auto const & hits = hitsEntry.second;
@@ -2376,7 +2399,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 					});
 				});
 			});
-#			endif
+			#			endif
 		}
 
 		void ResetLeafCache() const
@@ -2490,6 +2513,7 @@ class VariableGroupTimeSliceData
 			{
 				return *this;
 			}
+
 			*branches_and_leaves = *rhs.branches_and_leaves;
 			weighting = rhs.weighting;
 			return *this;
@@ -2501,6 +2525,7 @@ class VariableGroupTimeSliceData
 			{
 				return *this;
 			}
+
 			branches_and_leaves = rhs.branches_and_leaves;
 			rhs.branches_and_leaves = nullptr;
 			weighting = rhs.weighting;
@@ -2551,6 +2576,7 @@ class bind_visitor : public boost::static_visitor<>
 			bool use_converted { false };
 			static fast_string converted_value;
 			converted_value = data;
+
 			if (converted_value.find(",") != std::string::npos)
 			{
 				// Comma in data: must surround entire field with double quotes
@@ -2602,6 +2628,7 @@ class create_output_row_visitor : public boost::static_visitor<>
 
 				bool use_converted { false };
 				converted_value = boost::lexical_cast<fast_string>(data_value);
+
 				if (converted_value.find(",") != std::string::npos)
 				{
 					// Comma in data: must surround entire field with double quotes
@@ -2614,18 +2641,18 @@ class create_output_row_visitor : public boost::static_visitor<>
 				{
 					(*output_file) << ",";
 
-#					ifdef _DEBUG
-						row_in_process += ",";
-#					endif
+					#					ifdef _DEBUG
+					row_in_process += ",";
+					#					endif
 				}
 
-#				ifdef _DEBUG
-					else
-					{
-						row_in_process.clear();
-					}
+				#				ifdef _DEBUG
+				else
+				{
+					row_in_process.clear();
+				}
 
-#				endif
+				#				endif
 
 				if (use_converted)
 				{
@@ -2636,14 +2663,14 @@ class create_output_row_visitor : public boost::static_visitor<>
 					(*output_file) << data_value;
 				}
 
-#				ifdef _DEBUG
-					row_in_process += boost::lexical_cast<std::string>(converted_value);
-					//int m = 0;
-					//if (row_in_process == "257,2,255,2,300,1918")
-					//{
-					//	int n = 0;
-					//}
-#				endif
+				#				ifdef _DEBUG
+				row_in_process += boost::lexical_cast<std::string>(converted_value);
+				//int m = 0;
+				//if (row_in_process == "257,2,255,2,300,1918")
+				//{
+				//	int n = 0;
+				//}
+				#				endif
 
 			}
 
@@ -2651,6 +2678,7 @@ class create_output_row_visitor : public boost::static_visitor<>
 			{
 				bool use_converted { false };
 				converted_value = boost::lexical_cast<fast_string>(data_value);
+
 				if (converted_value.find(",") != std::string::npos)
 				{
 					// Comma in data: must surround entire field with double quotes
@@ -2756,22 +2784,24 @@ class MergedTimeSliceRow
 			size_t lhs_size = output_row.size();
 			size_t rhs_size = rhs.output_row.size();
 			size_t min_size = std::min(lhs_size, rhs_size);
+
 			for (size_t n = 0; n < min_size; ++n)
 			{
 				if (output_row[n] < rhs.output_row[n])
 				{
 					return true;
 				}
-				else
-				if (rhs.output_row[n] < output_row[n])
+				else if (rhs.output_row[n] < output_row[n])
 				{
 					return false;
 				}
 			}
+
 			if (lhs_size < rhs_size)
 			{
 				return true;
 			}
+
 			return false;
 		}
 
@@ -2870,7 +2900,8 @@ struct tag__ongoing_consolidation_vector
 template <typename MEMORY_TAG>
 struct tag__calculate_consolidated_total_number_rows
 {
-	typedef FastSetMemoryTag<InstanceDataVector<MEMORY_TAG>, MEMORY_TAG, boost::function<bool(InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs)>> type;
+	typedef FastSetMemoryTag<InstanceDataVector<MEMORY_TAG>, MEMORY_TAG, boost::function<bool(InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs)>>
+			type;
 };
 
 template <typename MEMORY_TAG>
@@ -3014,7 +3045,8 @@ class KadSampler
 		void getMySize() const;
 
 		// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
-		DataCache<hits_tag> dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
+		DataCache<hits_tag>
+		dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
 		fast_short_to_data_cache_map<hits_tag> otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
 		fast_short_to_data_cache_map<hits_tag> childCache; // Ditto, but for child variable groups
 
@@ -3180,17 +3212,19 @@ class KadSampler
 
 	protected:
 
-		bool HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr, int const & variable_group_number,
+		bool HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices<hits_tag>::iterator & mapElementPtr,
+									   int const & variable_group_number,
 									   VARIABLE_GROUP_MERGE_MODE const merge_mode, bool const consolidate_rows, bool const random_sampling);
 
 		bool AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf);
 
 		// Breaks an existing map entry into two pieces and returns an iterator to both.
 		void SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices<hits_tag>::iterator & newMapElementLeftPtr,
-			TimeSlices<hits_tag>::iterator & newMapElementRightPtr, bool const consolidate_rows, bool const random_sampling);
+						   TimeSlices<hits_tag>::iterator & newMapElementRightPtr, bool const consolidate_rows, bool const random_sampling);
 
 		// Breaks an existing map entry into three pieces and returns an iterator to the middle piece.
-		void SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices<hits_tag>::iterator & newMapElementMiddlePtr, bool const consolidate_rows, bool const random_sampling);
+		void SliceMapEntry(TimeSlices<hits_tag>::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right,
+						   TimeSlices<hits_tag>::iterator & newMapElementMiddlePtr, bool const consolidate_rows, bool const random_sampling);
 
 		// Slices off the left part of the "incoming_slice" TimeSliceLeaf and returns it in the "new_left_slice" TimeSliceLeaf.
 		// The "incoming_slice" TimeSliceLeaf is adjusted to become equal to the remaining part on the right.

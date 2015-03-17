@@ -16,12 +16,12 @@ class NewGeneManageInput : public QWidget, public NewGeneWidget // do not reorde
 
 	public:
 
-		explicit NewGeneManageInput( QWidget * parent = 0 );
+		explicit NewGeneManageInput(QWidget * parent = 0);
 		~NewGeneManageInput();
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	public:
 
@@ -29,15 +29,15 @@ class NewGeneManageInput : public QWidget, public NewGeneWidget // do not reorde
 
 	public slots:
 		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
-        void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 
 	private:
 
 		Ui::NewGeneManageInput * ui;
 
-    protected:
+	protected:
 
-        static QString titleBarBaseText;
+		static QString titleBarBaseText;
 
 };
 

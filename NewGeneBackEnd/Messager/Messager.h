@@ -2,11 +2,11 @@
 #define MESSAGER_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/multiprecision/number.hpp>
-#	include <boost/multiprecision/cpp_int.hpp>
-#	include <boost/multiprecision/cpp_dec_float.hpp>
-#	include <boost/pool/pool_alloc.hpp>
-#endif 
+	#include <boost/multiprecision/number.hpp>
+	#include <boost/multiprecision/cpp_int.hpp>
+	#include <boost/multiprecision/cpp_dec_float.hpp>
+	#include <boost/pool/pool_alloc.hpp>
+#endif
 #include <vector>
 #include <set>
 #include <memory>
@@ -14,18 +14,20 @@
 #include "../UIData/DataWidgets.h"
 #include "../UIAction/ActionChanges.h"
 
-struct newgene_cpp_int_tag 
+struct newgene_cpp_int_tag
 {};
 
 struct newgene_cpp_int_random_tag
 {};
 
-typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<0, 0, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, boost::fast_pool_allocator<boost::multiprecision::limb_type, boost::default_user_allocator_malloc_free, newgene_cpp_int_tag, boost::details::pool::null_mutex>>> newgene_cpp_int;
-typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<0, 0, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, boost::fast_pool_allocator<boost::multiprecision::limb_type, boost::default_user_allocator_malloc_free, newgene_cpp_int_random_tag, boost::details::pool::null_mutex>>> newgene_random_cpp_int;
+typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<0, 0, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, boost::fast_pool_allocator<boost::multiprecision::limb_type, boost::default_user_allocator_malloc_free, newgene_cpp_int_tag, boost::details::pool::null_mutex>>>
+newgene_cpp_int;
+typedef boost::multiprecision::number<boost::multiprecision::cpp_int_backend<0, 0, boost::multiprecision::signed_magnitude, boost::multiprecision::unchecked, boost::fast_pool_allocator<boost::multiprecision::limb_type, boost::default_user_allocator_malloc_free, newgene_cpp_int_random_tag, boost::details::pool::null_mutex>>>
+newgene_random_cpp_int;
 
 enum MESSAGER_MESSAGE_ENUM
 {
-	  MESSAGER_MESSAGE__FIRST
+	MESSAGER_MESSAGE__FIRST
 
 	, MESSAGER_MESSAGE__GENERAL_MESSAGE
 	, MESSAGER_MESSAGE__GENERAL_WARNING
@@ -56,13 +58,13 @@ enum MESSAGER_MESSAGE_ENUM
 
 enum RUN_STATUS_ENUM
 {
-	  RUN_STATUS__NOT_RUNNING = 0
+	RUN_STATUS__NOT_RUNNING = 0
 	, RUN_STATUS__RUNNING
 };
 
 enum MESSAGER_MESSAGE_CATEGORY_ENUM
 {
-	  MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE = 0x00000001
+	MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE = 0x00000001
 	, MESSAGER_MESSAGE_CATEGORY__LOG_MESSAGE = 0x00000002
 	, MESSAGER_MESSAGE_CATEGORY__WARNING = 0x00000004
 	, MESSAGER_MESSAGE_CATEGORY__ERROR = 0x00000008
@@ -165,12 +167,12 @@ class Messager
 		// The following functions are all overridden in [Input|Output]-specific Messager class that derives from this class
 		// ***************************************************************************************************************//
 
-        virtual void EmitChangeMessage(DataChangeMessage &) {}
+		virtual void EmitChangeMessage(DataChangeMessage &) {}
 
 		virtual void ShowMessageBox(std::string, bool block = true) {}
 		virtual bool ShowQuestionMessageBox(std::string, std::string) { return false; } // title, question text
 		virtual int  ShowOptionMessageBox(std::string, std::string, std::vector<WidgetInstanceIdentifier>) { return 0; } // title, question, option list
-        virtual void StartProgressBar(std::int64_t const, std::int64_t const) {}
+		virtual void StartProgressBar(std::int64_t const, std::int64_t const) {}
 		virtual void EndProgressBar() {}
 		virtual void UpdateProgressBarValue(std::int64_t const) {}
 		virtual void UpdateStatusBarText(std::string const &) {}
@@ -180,21 +182,21 @@ class Messager
 		virtual void SetPerformanceLabel(std::string const &) {}
 		virtual void SetRunStatus(RUN_STATUS_ENUM const &) {}
 
-        // Output
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROLS_AREA &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB &) {}
-        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB &) {}
+		// Output
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROLS_AREA &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB &) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_LIMIT_DMUS_TAB &) {}
 
-        // Input
-        virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET &) {}
+		// Input
+		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET &) {}
 		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET &) {}
 		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_VGS_WIDGET &) {}
 		virtual void EmitSignalUpdateVGImportProgressBar(int, int, int, int) {}
@@ -236,7 +238,8 @@ class ProgressBarMeter
 				messager.StartProgressBar(0, progress_bar_max_value);
 				messager.UpdateProgressBarValue(0);
 				update_every_how_often = progress_bar_max_value / 100;
-				if (update_every_how_often == 0) ++update_every_how_often;
+
+				if (update_every_how_often == 0) { ++update_every_how_often; }
 			}
 
 		}
@@ -257,8 +260,10 @@ class ProgressBarMeter
 
 			messager.StartProgressBar(0, 100);
 			messager.UpdateProgressBarValue(0);
-			update_every_how_often = max_value.convert_to<std::int64_t>() / 100; // If we are using the progress bar in this way, it's because the user chose "output full samples" in which case the number of total rows will need to fit in a 64-bit integer
-			if (update_every_how_often == 0) ++update_every_how_often;
+			update_every_how_often = max_value.convert_to<std::int64_t>() /
+									 100; // If we are using the progress bar in this way, it's because the user chose "output full samples" in which case the number of total rows will need to fit in a 64-bit integer
+
+			if (update_every_how_often == 0) { ++update_every_how_often; }
 
 		}
 

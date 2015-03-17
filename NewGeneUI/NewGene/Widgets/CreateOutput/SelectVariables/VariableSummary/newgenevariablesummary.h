@@ -17,7 +17,7 @@ class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not re
 
 	public:
 
-		explicit NewGeneVariableSummary( QWidget * parent = 0 );
+		explicit NewGeneVariableSummary(QWidget * parent = 0);
 		~NewGeneVariableSummary();
 
 	signals:
@@ -29,15 +29,15 @@ class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not re
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 
 		Ui::NewGeneVariableSummary * ui;
 
-    public:
+	public:
 
-        friend class NewGeneMainWindow;
+		friend class NewGeneMainWindow;
 
 };
 

@@ -1,31 +1,31 @@
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#	include <boost/date_time/local_time/local_time.hpp>
+	#include <boost/algorithm/string.hpp>
+	#include <boost/date_time/local_time/local_time.hpp>
 #endif
 #include "newgenedatetimewidget.h"
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject *) :
+NewGeneDateTimeWidget::NewGeneDateTimeWidget(QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject *) :
 
-	QDateTimeEdit( parent ),
+	QDateTimeEdit(parent),
 
-	NewGeneWidget( WidgetCreationInfo(
-										this, // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-										parent,
-										WIDGET_NATURE_OUTPUT_WIDGET,
-										DATETIME_WIDGET,
-										true,
-										data_instance_
-									 )
-				   )
+	NewGeneWidget(WidgetCreationInfo(
+					  this, // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+					  parent,
+					  WIDGET_NATURE_OUTPUT_WIDGET,
+					  DATETIME_WIDGET,
+					  true,
+					  data_instance_
+				  )
+				 )
 
 {
 
-   PrepareOutputWidget();
+	PrepareOutputWidget();
 
-   connect(this, SIGNAL(dateTimeChanged(QDateTime const &)), this, SLOT(ReceiveVariableItemChanged(QDateTime const &)));
+	connect(this, SIGNAL(dateTimeChanged(QDateTime const &)), this, SLOT(ReceiveVariableItemChanged(QDateTime const &)));
 
 }
 
@@ -111,7 +111,8 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNEC
 		}
 
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET)));
-		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE)));
+		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE)), outp->getConnector(),
+				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET)));
 
 	}
@@ -129,11 +130,12 @@ void NewGeneDateTimeWidget::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECT
 void NewGeneDateTimeWidget::WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET widget_data)
 {
 
-	if (!data_instance.code || !widget_data.identifier || !widget_data.identifier->code || *widget_data.identifier->code != "0" || (widget_data.identifier->flags != "s" && widget_data.identifier->flags != "e"))
+	if (!data_instance.code || !widget_data.identifier || !widget_data.identifier->code || *widget_data.identifier->code != "0" || (widget_data.identifier->flags != "s"
+			&& widget_data.identifier->flags != "e"))
 	{
 		boost::format msg("Invalid widget refresh in NewGeneDateTimeWidget widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -166,7 +168,7 @@ void NewGeneDateTimeWidget::ReceiveVariableItemChanged(QDateTime const & newValu
 	std::int64_t different_from_1970_in_ms = static_cast<std::int64_t>(datetime_1970.msecsTo(newValue));
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(data_instance, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__DateTime(different_from_1970_in_ms)))));
+	actionItems.push_back(std::make_pair(data_instance, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__DateTime(different_from_1970_in_ms)))));
 	WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 	emit SignalReceiveVariableItemChanged(action_request);
 
@@ -175,13 +177,14 @@ void NewGeneDateTimeWidget::ReceiveVariableItemChanged(QDateTime const & newValu
 void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_message)
 {
 
-    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 
-    std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{
 		switch (change.change_type)
 		{
@@ -195,6 +198,7 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 								// Should never receive this.
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
 
@@ -213,6 +217,7 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 										{
 
 											DataChangePacket_int64 * packet = static_cast<DataChangePacket_int64 *>(change.getPacket());
+
 											if (packet)
 											{
 
@@ -249,11 +254,13 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 								});
 
 							}
+
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 								// Ditto above.
 							}
 							break;
+
 						default:
 							{
 							}
@@ -261,6 +268,7 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 					}
 				}
 				break;
+
 			default:
 				{
 				}

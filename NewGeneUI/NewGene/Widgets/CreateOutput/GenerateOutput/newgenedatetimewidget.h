@@ -10,7 +10,7 @@ class NewGeneDateTimeWidget : public QDateTimeEdit, public NewGeneWidget
 
 	public:
 
-		explicit NewGeneDateTimeWidget( QWidget *parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr );
+		explicit NewGeneDateTimeWidget(QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr);
 		~NewGeneDateTimeWidget();
 
 		void HandleChanges(DataChangeMessage const &);

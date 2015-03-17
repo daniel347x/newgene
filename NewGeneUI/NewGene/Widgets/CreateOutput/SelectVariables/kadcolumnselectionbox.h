@@ -16,12 +16,12 @@ class KAdColumnSelectionBox : public QFrame, public NewGeneWidget // do not reor
 
 	public:
 
-		explicit KAdColumnSelectionBox( QWidget * parent = 0 );
+		explicit KAdColumnSelectionBox(QWidget * parent = 0);
 		~KAdColumnSelectionBox();
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 

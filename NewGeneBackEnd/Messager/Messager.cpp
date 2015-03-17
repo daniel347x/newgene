@@ -9,6 +9,7 @@ void Messager::AppendMessage(MessagerMessage * message)
 bool Messager::HasStatus()
 {
 	bool hasStatus = false;
+
 	for (MessagesVector::const_iterator m_ = _messages.cbegin(); m_ != _messages.cend(); ++m_)
 	{
 		if (static_cast<std::int32_t>(m_->get()->_message_category) & MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
@@ -17,12 +18,14 @@ bool Messager::HasStatus()
 			break;
 		}
 	}
+
 	return hasStatus;
 }
 
 bool Messager::RequiresLogging()
 {
 	bool requiresLogging = false;
+
 	for (MessagesVector::const_iterator m_ = _messages.cbegin(); m_ != _messages.cend(); ++m_)
 	{
 		if (static_cast<std::int32_t>(m_->get()->_message_category) & MESSAGER_MESSAGE_CATEGORY__LOG_MESSAGE)
@@ -31,12 +34,14 @@ bool Messager::RequiresLogging()
 			break;
 		}
 	}
+
 	return requiresLogging;
 }
 
 bool Messager::IsWarning()
 {
 	bool isWarning = false;
+
 	for (MessagesVector::const_iterator m_ = _messages.cbegin(); m_ != _messages.cend(); ++m_)
 	{
 		if (static_cast<std::int32_t>(m_->get()->_message_category) & MESSAGER_MESSAGE_CATEGORY__WARNING)
@@ -45,12 +50,14 @@ bool Messager::IsWarning()
 			break;
 		}
 	}
+
 	return isWarning;
 }
 
 bool Messager::IsError()
 {
 	bool isError = false;
+
 	if (IsErrorCatastrophic())
 	{
 		isError = true;
@@ -66,12 +73,14 @@ bool Messager::IsError()
 			}
 		}
 	}
+
 	return isError;
 }
 
 bool Messager::IsErrorCatastrophic()
 {
 	bool isErrorCatastrophic = false;
+
 	for (MessagesVector::const_iterator m_ = _messages.cbegin(); m_ != _messages.cend(); ++m_)
 	{
 		if (static_cast<std::int32_t>(m_->get()->_message_category) & MESSAGER_MESSAGE_CATEGORY__ERROR_CATASTROPHIC)
@@ -80,6 +89,7 @@ bool Messager::IsErrorCatastrophic()
 			break;
 		}
 	}
+
 	return isErrorCatastrophic;
 }
 
@@ -89,6 +99,7 @@ void Messager::UpdateStatusBarText(std::string const & the_text, void * generato
 	{
 		// Very ugly, but it's the only way to avoid major circular #include hassles
 		OutputModel::OutputGenerator * the_generator = reinterpret_cast<OutputModel::OutputGenerator *>(generator);
+
 		if (the_generator)
 		{
 			if (the_generator->debug_sql_file.is_open())
@@ -105,6 +116,7 @@ void Messager::AppendKadStatusText(std::string const & kad_status_text, void * g
 	{
 		// Very ugly, but it's the only way to avoid major circular #include hassles
 		OutputModel::OutputGenerator * the_generator = reinterpret_cast<OutputModel::OutputGenerator *>(generator);
+
 		if (the_generator)
 		{
 			if (the_generator->debug_sql_file.is_open())

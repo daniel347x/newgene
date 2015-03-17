@@ -14,7 +14,7 @@
 template<typename MANAGER_CLASS>
 MANAGER_CLASS & get_a_manager()
 {
-	return static_cast<MANAGER_CLASS&>(MANAGER_CLASS::getManager());
+	return static_cast<MANAGER_CLASS &>(MANAGER_CLASS::getManager());
 }
 
 SettingsManager & settingsManager()

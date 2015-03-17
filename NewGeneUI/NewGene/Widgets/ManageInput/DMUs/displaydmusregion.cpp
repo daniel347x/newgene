@@ -1,6 +1,6 @@
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#	include <boost/regex.hpp>
+	#include <boost/algorithm/string.hpp>
+	#include <boost/regex.hpp>
 #endif
 #include "displaydmusregion.h"
 #include "ui_displaydmusregion.h"
@@ -26,9 +26,10 @@
 #include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
 #include "../../../../NewGeneBackEnd/Model/Tables/Import/Import.h"
 
-DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
+DisplayDMUsRegion::DisplayDMUsRegion(QWidget * parent) :
 	QWidget(parent),
-	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_INPUT_WIDGET, MANAGE_DMUS_WIDGET, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_INPUT_WIDGET, MANAGE_DMUS_WIDGET,
+									 true)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui(new Ui::DisplayDMUsRegion)
 {
 
@@ -36,9 +37,9 @@ DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
 	ui->label_importProgress->hide();
 	ui->progressBar_importDMU->hide();
 	ui->pushButton_cancel->hide();
-    ui->splitter_dmus_dmu_members->setStretchFactor(0, 1);
-    ui->splitter_dmus_dmu_members->setStretchFactor(1, 3);
-    PrepareInputWidget(true);
+	ui->splitter_dmus_dmu_members->setStretchFactor(0, 1);
+	ui->splitter_dmus_dmu_members->setStretchFactor(1, 3);
+	PrepareInputWidget(true);
 
 	refresh_dmu_called_after_create = false;
 
@@ -49,14 +50,14 @@ DisplayDMUsRegion::~DisplayDMUsRegion()
 	delete ui;
 }
 
-void DisplayDMUsRegion::changeEvent( QEvent * e )
+void DisplayDMUsRegion::changeEvent(QEvent * e)
 {
-	QWidget::changeEvent( e );
+	QWidget::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:
@@ -76,16 +77,18 @@ void DisplayDMUsRegion::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		connect(this, SIGNAL(AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU)), inp->getConnector(), SLOT(AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU)));
 		connect(this, SIGNAL(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)), inp->getConnector(), SLOT(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)));
 		connect(this, SIGNAL(AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS)), inp->getConnector(), SLOT(AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS)));
-		connect(this, SIGNAL(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)), inp->getConnector(), SLOT(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)));
-		connect(this, SIGNAL(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)), inp->getConnector(), SLOT(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)));
+		connect(this, SIGNAL(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)), inp->getConnector(),
+				SLOT(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)));
+		connect(this, SIGNAL(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)), inp->getConnector(),
+				SLOT(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)));
 		connect(project->getConnector(), SIGNAL(SignalUpdateDMUImportProgressBar(int, int, int, int)), this, SLOT(UpdateDMUImportProgressBar(int, int, int, int)));
 
 		if (project)
 		{
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE, false, "");
-            ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED);
-        }
+			ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED);
+		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
@@ -93,6 +96,7 @@ void DisplayDMUsRegion::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		{
 			inp->UnregisterInterestInChanges(this);
 		}
+
 		Empty();
 	}
 
@@ -108,8 +112,9 @@ void DisplayDMUsRegion::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 		if (project)
 		{
 			connect(this, SIGNAL(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)), project->getConnector(), SLOT(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)));
-            connect(this, SIGNAL(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)), project->getConnector(), SLOT(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)));
-        }
+			connect(this, SIGNAL(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)), project->getConnector(),
+					SLOT(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)));
+		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
@@ -127,6 +132,7 @@ void DisplayDMUsRegion::RefreshAllWidgets()
 		Empty();
 		return;
 	}
+
 	WidgetDataItemRequest_MANAGE_DMUS_WIDGET request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
@@ -135,6 +141,7 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -146,12 +153,13 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel *>(ui->listView_dmus->model());
+
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -161,10 +169,12 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 	QStandardItemModel * model = new QStandardItemModel(ui->listView_dmus);
 
 	int index = 0;
-	std::for_each(widget_data.dmus_and_members.cbegin(), widget_data.dmus_and_members.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & dmu_and_members)
+	std::for_each(widget_data.dmus_and_members.cbegin(), widget_data.dmus_and_members.cend(), [this, &index,
+				  &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & dmu_and_members)
 	{
 		WidgetInstanceIdentifier const & dmu = dmu_and_members.first;
 		WidgetInstanceIdentifiers const & dmu_members = dmu_and_members.second;
+
 		if (dmu.code && !dmu.code->empty())
 		{
 
@@ -176,7 +186,7 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 			QVariant v;
 			v.setValue(dmu_and_members);
 			item->setData(v);
-			model->setItem( index, item );
+			model->setItem(index, item);
 
 			++index;
 
@@ -186,11 +196,13 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 	model->sort(0);
 
 	ui->listView_dmus->setModel(model);
-	if (oldSelectionModel) delete oldSelectionModel;
+
+	if (oldSelectionModel) { delete oldSelectionModel; }
 
 	EmptyDmuMembersPane();
 
-	connect( ui->listView_dmus->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection &, const QItemSelection &)));
+	connect(ui->listView_dmus->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection &,
+			const QItemSelection &)));
 
 }
 
@@ -201,7 +213,7 @@ void DisplayDMUsRegion::Empty()
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -213,7 +225,8 @@ void DisplayDMUsRegion::Empty()
 
 	EmptyDmuMembersPane();
 
-	oldDmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	oldDmuModel = static_cast<QStandardItemModel *>(ui->listView_dmus->model());
+
 	if (oldDmuModel != nullptr)
 	{
 		delete oldDmuModel;
@@ -221,13 +234,14 @@ void DisplayDMUsRegion::Empty()
 	}
 
 	oldSelectionModel = ui->listView_dmus->selectionModel();
+
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
 
-    ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_PROJECT_OPEN);
+	ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_PROJECT_OPEN);
 
 }
 
@@ -235,6 +249,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -246,28 +261,28 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
-	if(!selected.indexes().isEmpty())
+	if (!selected.indexes().isEmpty())
 	{
 
-		QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+		QStandardItemModel * dmuModel = static_cast<QStandardItemModel *>(ui->listView_dmus->model());
 		QModelIndex selectedIndex = selected.indexes().first();
 		QVariant dmu_and_members_variant = dmuModel->item(selectedIndex.row())->data();
 		std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
 		WidgetInstanceIdentifier & dmu_category = dmu_and_members.first;
 		WidgetInstanceIdentifiers & dmu_members = dmu_and_members.second;
 
-        ResetDmuMembersPane(dmu_category, dmu_members);
+		ResetDmuMembersPane(dmu_category, dmu_members);
 
 	}
-    else
-    {
-        ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED);
-    }
+	else
+	{
+		ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED);
+	}
 
 }
 
@@ -280,11 +295,11 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
 	QList<QLineEdit *> fields;
-	QLineEdit *lineEditName = new QLineEdit(&dialog);
+	QLineEdit * lineEditName = new QLineEdit(&dialog);
 	QString labelName = QString("Enter Decision Making Unit (DMU) category name:");
 	form.addRow(labelName, lineEditName);
 	fields << lineEditName;
-	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
+	QLineEdit * lineEditDescription = new QLineEdit(&dialog);
 	QString labelDescription = QString("Short description (max 20 characters):");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
@@ -307,15 +322,17 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 
 		QLineEdit * proposed_dmu_name_field = fields[0];
 		QLineEdit * dmu_description_field = fields[1];
+
 		if (proposed_dmu_name_field && dmu_description_field)
 		{
 			proposed_dmu_name = proposed_dmu_name_field->text().toStdString();
 			dmu_description = dmu_description_field->text().toStdString();
+
 			if (proposed_dmu_name.empty())
 			{
 				boost::format msg("The DMU category must have a name.");
 				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
+				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
 				return;
 			}
@@ -324,7 +341,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 		{
 			boost::format msg("Unable to determine new DMU name and description.");
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 			return;
 		}
@@ -336,7 +353,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 		{
 			boost::format msg("The DMU category you entered is empty.");
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 			return;
 		}
@@ -358,7 +375,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 			boost::format msg("%1%");
 			msg % errorMsg;
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 			return;
 		}
@@ -376,7 +393,8 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 	}
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_name, dmu_description})))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(),
+										 std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__StringVector(std::vector<std::string> {proposed_dmu_name, dmu_description})))));
 	WidgetActionItemRequest_ACTION_ADD_DMU action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit AddDMU(action_request);
@@ -387,6 +405,7 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -398,7 +417,7 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -406,17 +425,19 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 	WidgetInstanceIdentifier dmu;
 	WidgetInstanceIdentifiers dmu_members;
 	bool is_selected = GetSelectedDmuCategory(dmu, dmu_members);
+
 	if (!is_selected)
 	{
 		return;
 	}
 
-	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	QStandardItemModel * dmuModel = static_cast<QStandardItemModel *>(ui->listView_dmus->model());
+
 	if (dmuModel == nullptr)
 	{
 		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -425,24 +446,27 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 	{
 		boost::format msg("Invalid DMU being deleted.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
 	QMessageBox::StandardButton reply;
-	boost::format msg("Are you certain you wish to delete the DMU \"%1%\"?  This will permanently delete all associated units of analysis and variable groups.  Proceed with deletion?");
+	boost::format
+	msg("Are you certain you wish to delete the DMU \"%1%\"?  This will permanently delete all associated units of analysis and variable groups.  Proceed with deletion?");
 	msg % *dmu.code;
 	boost::format msgTitle("Delete DMU \"%1%\"?");
 	msgTitle % *dmu.code;
 	reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 	if (reply == QMessageBox::No)
 	{
 		return;
 	}
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu)))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu),
+										 std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__WidgetInstanceIdentifier(dmu)))));
 	WidgetActionItemRequest_ACTION_DELETE_DMU action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
 	emit DeleteDMU(action_request);
 
@@ -457,25 +481,29 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		// give warning
 		refresh_dmu_called_after_create = false;
 		boost::format msg_title("Refreshing data can be slow");
-		boost::format msg_text("Warning: If there is a large amount of existing data AND a large amount of data being refreshed, it will be MUCH, MUCH faster to delete the existing DMU, and re-import from scratch.  However, this will also delete all units of analysis and variable groups associated with this DMU - so it might be worth the wait.  Continue?");
+		boost::format
+		msg_text("Warning: If there is a large amount of existing data AND a large amount of data being refreshed, it will be MUCH, MUCH faster to delete the existing DMU, and re-import from scratch.  However, this will also delete all units of analysis and variable groups associated with this DMU - so it might be worth the wait.  Continue?");
 		QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 		if (reply == QMessageBox::No)
 		{
 			return;
 		}
 	}
+
 	bool do_refresh_not_plain_insert = !refresh_dmu_called_after_create;
 	refresh_dmu_called_after_create = false;
 
 	WidgetInstanceIdentifier dmu_category;
 	WidgetInstanceIdentifiers dmu_members;
 	bool found = GetSelectedDmuCategory(dmu_category, dmu_members);
+
 	if (!found)
 	{
 		boost::format msg("A DMU category must be selected.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -492,17 +520,17 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	//form.addRow(new QLabel("DMU member refresh details"));
 
 	QString labelColumnNameUuid = QString("Enter 'code' column heading (data uniquely identifies each DMU member):");
-	QLineEdit *lineEditColumnNameUuid = new QLineEdit(&dialog);
+	QLineEdit * lineEditColumnNameUuid = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameUuid, lineEditColumnNameUuid);
 	fields << lineEditColumnNameUuid;
 
 	QString labelColumnNameCode = QString("Enter 'abbreviation' column heading (if present):");
-	QLineEdit *lineEditColumnNameCode = new QLineEdit(&dialog);
+	QLineEdit * lineEditColumnNameCode = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameCode, lineEditColumnNameCode);
 	fields << lineEditColumnNameCode;
 
 	QString labelColumnNameDescription = QString("Enter 'description' column heading (if present):");
-	QLineEdit *lineEditColumnNameDescription = new QLineEdit(&dialog);
+	QLineEdit * lineEditColumnNameDescription = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameDescription, lineEditColumnNameDescription);
 	fields << lineEditColumnNameDescription;
 
@@ -582,6 +610,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		{
 			valid = DialogHelper::ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
 		}
+
 		//if (valid)
 		//{
 		//	valid = DialogHelper::ValidateTimeRangeBlock(fieldsTimeRange, radioButtonsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
@@ -591,7 +620,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		{
 			boost::format msg(errorMsg);
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 		}
 
@@ -613,7 +642,8 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	InstanceActionItems actionItems;
 	std::vector<std::string> column_names{data_column_file_pathname.string(), data_column_name_uuid, data_column_name_code, data_column_name_description};
 	//column_names.insert(column_names.end(), dataTimeRange.begin(), dataTimeRange.end());
-	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector_Plus_Int(column_names, do_refresh_not_plain_insert ? 1 : 0)))));
+	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__StringVector_Plus_Int(column_names,
+										 do_refresh_not_plain_insert ? 1 : 0)))));
 	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
 	emit RefreshDMUsFromFile(action_request);
 
@@ -626,6 +656,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 	WidgetInstanceIdentifier dmu_category;
 	WidgetInstanceIdentifiers dmu_members;
 	bool is_selected = GetSelectedDmuCategory(dmu_category, dmu_members);
+
 	if (!is_selected)
 	{
 		return;
@@ -640,15 +671,15 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 	title % *dmu_category.code;
 	form.addRow(new QLabel(title.str().c_str()));
 	QList<QLineEdit *> fields;
-	QLineEdit *lineEditCode = new QLineEdit(&dialog);
+	QLineEdit * lineEditCode = new QLineEdit(&dialog);
 	QString labelCode = QString("Enter uniquely identifying DMU member code:");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
-	QLineEdit *lineEditName = new QLineEdit(&dialog);
+	QLineEdit * lineEditName = new QLineEdit(&dialog);
 	QString labelName = QString("(Optional) Enter a short abbreviation:");
 	form.addRow(labelName, lineEditName);
 	fields << lineEditName;
-	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
+	QLineEdit * lineEditDescription = new QLineEdit(&dialog);
 	QString labelDescription = QString("(Optional) Enter full descriptive text:");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
@@ -675,6 +706,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 		QLineEdit * proposed_dmu_member_uuid_field = fields[0];
 		QLineEdit * proposed_dmu_member_code_field = fields[1];
 		QLineEdit * proposed_dmu_member_description_field = fields[2];
+
 		if (!proposed_dmu_member_uuid_field || !proposed_dmu_member_code_field || !proposed_dmu_member_description_field)
 		{
 
@@ -726,7 +758,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 	}
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_member_uuid, proposed_dmu_member_code, proposed_dmu_member_description})))));
+	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__StringVector(std::vector<std::string> {proposed_dmu_member_uuid, proposed_dmu_member_code, proposed_dmu_member_description})))));
 	WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit AddDMUMembers(action_request);
@@ -737,6 +769,7 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -748,23 +781,25 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
-	QSortFilterProxyModel_NumbersLast * dmuMembersModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
+	QSortFilterProxyModel_NumbersLast * dmuMembersModel = static_cast<QSortFilterProxyModel_NumbersLast *>(ui->listView_dmu_members->model());
+
 	if (dmuMembersModel == nullptr)
 	{
 		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
 	QStandardItemModel * model = nullptr;
 	bool bad = false;
+
 	try
 	{
 		model = dynamic_cast<QStandardItemModel *>(dmuMembersModel->sourceModel());
@@ -783,15 +818,17 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 	{
 		boost::format msg("Unable to obtain model for DMU member list.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
 	QMessageBox::StandardButton reply;
-	boost::format msg("Are you certain you wish to delete the selected DMU members?  This will permanently delete all data rows tied to the given DMU members.  Proceed with deletion?");
+	boost::format
+	msg("Are you certain you wish to delete the selected DMU members?  This will permanently delete all data rows tied to the given DMU members.  Proceed with deletion?");
 	boost::format msgTitle("Delete DMU members?");
 	reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 	if (reply == QMessageBox::No)
 	{
 		return;
@@ -804,10 +841,12 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 
 		QModelIndex testIndex = dmuMembersModel->index(i, 0);
 		QStandardItem * testItem = model->item(testIndex.row());
+
 		if (testItem->checkState() == Qt::Checked)
 		{
 			WidgetInstanceIdentifier dmu_member = testItem->data().value<WidgetInstanceIdentifier>();
-			actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu_member), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu_member)))));
+			actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu_member),
+												 std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__WidgetInstanceIdentifier(dmu_member)))));
 		}
 
 	}
@@ -823,26 +862,30 @@ void DisplayDMUsRegion::on_pushButton_deselect_all_dmu_members_clicked()
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
-	QSortFilterProxyModel_NumbersLast * model = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
+
+	QSortFilterProxyModel_NumbersLast * model = static_cast<QSortFilterProxyModel_NumbersLast *>(ui->listView_dmu_members->model());
+
 	if (model == nullptr)
 	{
 		return;
 	}
 
 	QAbstractItemModel * sourceModel = model->sourceModel();
+
 	if (sourceModel == nullptr)
 	{
 		return;
 	}
 
 	QStandardItemModel * sourceStandardModel = nullptr;
+
 	try
 	{
-		sourceStandardModel = dynamic_cast<QStandardItemModel*>(sourceModel);
+		sourceStandardModel = dynamic_cast<QStandardItemModel *>(sourceModel);
 	}
 	catch (std::bad_cast &)
 	{
@@ -857,8 +900,11 @@ void DisplayDMUsRegion::on_pushButton_deselect_all_dmu_members_clicked()
 	}
 
 	int nrows = sourceStandardModel->rowCount();
-	for (int row=0; row<nrows; ++row) {
+
+	for (int row = 0; row < nrows; ++row)
+	{
 		QStandardItem * item = sourceStandardModel->item(row, 0);
+
 		if (item)
 		{
 			item->setCheckState(Qt::Unchecked);
@@ -872,26 +918,30 @@ void DisplayDMUsRegion::on_pushButton_select_all_dmu_members_clicked()
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
-	QSortFilterProxyModel_NumbersLast * model = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
+
+	QSortFilterProxyModel_NumbersLast * model = static_cast<QSortFilterProxyModel_NumbersLast *>(ui->listView_dmu_members->model());
+
 	if (model == nullptr)
 	{
 		return;
 	}
 
 	QAbstractItemModel * sourceModel = model->sourceModel();
+
 	if (sourceModel == nullptr)
 	{
 		return;
 	}
 
 	QStandardItemModel * sourceStandardModel = nullptr;
+
 	try
 	{
-		sourceStandardModel = dynamic_cast<QStandardItemModel*>(sourceModel);
+		sourceStandardModel = dynamic_cast<QStandardItemModel *>(sourceModel);
 	}
 	catch (std::bad_cast &)
 	{
@@ -906,8 +956,11 @@ void DisplayDMUsRegion::on_pushButton_select_all_dmu_members_clicked()
 	}
 
 	int nrows = sourceStandardModel->rowCount();
-	for (int row=0; row<nrows; ++row) {
+
+	for (int row = 0; row < nrows; ++row)
+	{
 		QStandardItem * item = sourceStandardModel->item(row, 0);
+
 		if (item)
 		{
 			item->setCheckState(Qt::Checked);
@@ -919,6 +972,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
 	if (project == nullptr)
 	{
 		return;
@@ -930,17 +984,18 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * itemModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	QStandardItemModel * itemModel = static_cast<QStandardItemModel *>(ui->listView_dmus->model());
+
 	if (itemModel == nullptr)
 	{
 		boost::format msg("Invalid list view items in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -966,7 +1021,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								{
 									boost::format msg("Invalid new DMU name.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
@@ -984,9 +1039,10 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								QVariant v;
 								v.setValue(dmu_and_members);
 								item->setData(v);
-								itemModel->appendRow( item );
+								itemModel->appendRow(item);
 
 								QItemSelectionModel * selectionModel = ui->listView_dmus->selectionModel();
+
 								if (selectionModel != nullptr)
 								{
 									QModelIndex itemIndex = itemModel->indexFromItem(item);
@@ -1006,16 +1062,18 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								{
 									boost::format msg("Invalid DMU name or description.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
 
 								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(change.parent_identifier);
 								QList<QStandardItem *> items = itemModel->findItems(text.c_str());
+
 								if (items.count() == 1)
 								{
 									QStandardItem * dmu_to_remove = items.at(0);
+
 									if (dmu_to_remove != nullptr)
 									{
 										QModelIndex index_to_remove = itemModel->indexFromItem(dmu_to_remove);
@@ -1025,6 +1083,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 										dmu_to_remove = nullptr;
 
 										QItemSelectionModel * selectionModel = ui->listView_dmus->selectionModel();
+
 										if (selectionModel != nullptr)
 										{
 
@@ -1064,27 +1123,28 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE:
 				{
 
-					QSortFilterProxyModel_NumbersLast * memberModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
+					QSortFilterProxyModel_NumbersLast * memberModel = static_cast<QSortFilterProxyModel_NumbersLast *>(ui->listView_dmu_members->model());
+
 					if (memberModel == nullptr)
 					{
 						boost::format msg("Invalid members list view items in DisplayDMUsRegion widget.");
 						QMessageBox msgBox;
-						msgBox.setText( msg.str().c_str() );
+						msgBox.setText(msg.str().c_str());
 						msgBox.exec();
 						return;
 					}
 
 					/*
-                     * This is being handled server-side to deal with UI glitches
-                     * when attempting to manage adding/removing individual DMU members
-                     * here - namely, we are currently not properly adding/removing the DMU's
-                     * from the upper pane's data structures, as well as the lower pane's.
-                     * Fixing this will wait for a later version of NewGene.
-                     * For now, just force a full refresh of the entire DMU category,
-                     * because the back end will send DATA_CHANGE_INTENTION__RESET_ALL,
-                     * rather than sending DATA_CHANGE_INTENTION__ADD or DATA_CHANGE_INTENTION__REMOVE.
+					 * This is being handled server-side to deal with UI glitches
+					 * when attempting to manage adding/removing individual DMU members
+					 * here - namely, we are currently not properly adding/removing the DMU's
+					 * from the upper pane's data structures, as well as the lower pane's.
+					 * Fixing this will wait for a later version of NewGene.
+					 * For now, just force a full refresh of the entire DMU category,
+					 * because the back end will send DATA_CHANGE_INTENTION__RESET_ALL,
+					 * rather than sending DATA_CHANGE_INTENTION__ADD or DATA_CHANGE_INTENTION__REMOVE.
 					*/
-                    if (false)
+					if (false)
 					{
 						RefreshAllWidgets();
 						break;
@@ -1100,7 +1160,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								{
 									boost::format msg("Invalid new DMU member.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
@@ -1108,13 +1168,15 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifier new_dmu_member(change.parent_identifier);
 
 								QAbstractItemModel * memberSourceModel = memberModel->sourceModel();
+
 								if (memberSourceModel)
 								{
 
 									QStandardItemModel * memberStandardSourceModel = nullptr;
+
 									try
 									{
-										memberStandardSourceModel = dynamic_cast<QStandardItemModel*>(memberSourceModel);
+										memberStandardSourceModel = dynamic_cast<QStandardItemModel *>(memberSourceModel);
 									}
 									catch (std::bad_cast &)
 									{
@@ -1127,7 +1189,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 										// guess not
 										return;
 									}
-								
+
 									QStandardItem * item = new QStandardItem();
 									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(new_dmu_member);
 
@@ -1152,7 +1214,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								{
 									boost::format msg("Invalid DMU member.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
@@ -1165,9 +1227,10 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								{
 
 									QStandardItemModel * memberStandardSourceModel = nullptr;
+
 									try
 									{
-										memberStandardSourceModel = dynamic_cast<QStandardItemModel*>(memberSourceModel);
+										memberStandardSourceModel = dynamic_cast<QStandardItemModel *>(memberSourceModel);
 									}
 									catch (std::bad_cast &)
 									{
@@ -1180,12 +1243,14 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 										// guess not
 										return;
 									}
-								
+
 									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
 									QList<QStandardItem *> items = memberStandardSourceModel->findItems(text.c_str());
+
 									if (items.count() == 1)
 									{
 										QStandardItem * dmu_member_to_remove = items.at(0);
+
 										if (dmu_member_to_remove != nullptr)
 										{
 											QModelIndex index_to_remove = memberStandardSourceModel->indexFromItem(dmu_member_to_remove);
@@ -1214,7 +1279,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								{
 									boost::format msg("Invalid DMU member.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
@@ -1224,11 +1289,12 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
 								QList<QStandardItem *> theItems = itemModel->findItems(text.c_str());
+
 								if (theItems.size() != 1)
 								{
 									boost::format msg("Cannot find DMU in the list.");
 									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
+									msgBox.setText(msg.str().c_str());
 									msgBox.exec();
 									return;
 								}
@@ -1273,11 +1339,12 @@ bool DisplayDMUsRegion::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 {
 
 	QItemSelectionModel * dmu_selectionModel = ui->listView_dmus->selectionModel();
+
 	if (dmu_selectionModel == nullptr)
 	{
 		boost::format msg("Invalid selection in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -1294,7 +1361,7 @@ bool DisplayDMUsRegion::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 	{
 		boost::format msg("Simultaneous selections not allowed.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -1307,12 +1374,13 @@ bool DisplayDMUsRegion::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 		return false;
 	}
 
-	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	QStandardItemModel * dmuModel = static_cast<QStandardItemModel *>(ui->listView_dmus->model());
+
 	if (dmuModel == nullptr)
 	{
 		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -1330,7 +1398,7 @@ void DisplayDMUsRegion::ResetDmuMembersPane(WidgetInstanceIdentifier const & dmu
 {
 
 	EmptyDmuMembersPane();
-    ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::DMU_IS_SELECTED);
+	ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::DMU_IS_SELECTED);
 
 	QItemSelectionModel * oldSelectionModel = ui->listView_dmu_members->selectionModel();
 	QStandardItemModel * model = new QStandardItemModel();
@@ -1350,25 +1418,26 @@ void DisplayDMUsRegion::ResetDmuMembersPane(WidgetInstanceIdentifier const & dmu
 			QVariant v;
 			v.setValue(dmu_member);
 			item->setData(v);
-			model->setItem( index, item );
+			model->setItem(index, item);
 
 			++index;
 
 		}
 	});
 
-	QSortFilterProxyModel_NumbersLast *proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_dmu_members);
+	QSortFilterProxyModel_NumbersLast * proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_dmu_members);
 	proxyModel->setDynamicSortFilter(true);
 	proxyModel->setSourceModel(model);
 	proxyModel->sort(0);
 	ui->listView_dmu_members->setModel(proxyModel);
-	if (oldSelectionModel) delete oldSelectionModel;
 
-    connect( model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveBottomPaneSelectionCheckChanged(QStandardItem*)));
+	if (oldSelectionModel) { delete oldSelectionModel; }
+
+	connect(model, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(ReceiveBottomPaneSelectionCheckChanged(QStandardItem *)));
 
 }
 
-bool DisplayDMUsRegion::event ( QEvent * e )
+bool DisplayDMUsRegion::event(QEvent * e)
 {
 
 	bool returnVal = false;
@@ -1378,6 +1447,7 @@ bool DisplayDMUsRegion::event ( QEvent * e )
 		WidgetInstanceIdentifier dmu_category;
 		WidgetInstanceIdentifiers dmu_members;
 		bool is_selected = GetSelectedDmuCategory(dmu_category, dmu_members);
+
 		if (!is_selected)
 		{
 			return true; // Even though no DMU is selected, we have recognized and processed our own custom event
@@ -1388,15 +1458,16 @@ bool DisplayDMUsRegion::event ( QEvent * e )
 		msg % *dmu_category.code;
 		boost::format msgTitle("Import data?");
 		reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 		if (reply == QMessageBox::Yes)
 		{
 			QEvent * event = new QEvent(QEVENT_CLICK_DMU_REFRESH);
 			QApplication::postEvent(this, event);
 		}
+
 		returnVal = true;
 	}
-	else
-	if (e->type() == QEVENT_CLICK_DMU_REFRESH)
+	else if (e->type() == QEVENT_CLICK_DMU_REFRESH)
 	{
 		refresh_dmu_called_after_create = true;
 		ui->pushButton_refresh_dmu_members_from_file->click();
@@ -1462,17 +1533,20 @@ void DisplayDMUsRegion::EmptyDmuMembersPane()
 {
 
 	QItemSelectionModel * oldSelectionModel = ui->listView_dmu_members->selectionModel();
+
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
 
-	QSortFilterProxyModel_NumbersLast * dmuSetMembersProxyModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
+	QSortFilterProxyModel_NumbersLast * dmuSetMembersProxyModel = static_cast<QSortFilterProxyModel_NumbersLast *>(ui->listView_dmu_members->model());
+
 	if (dmuSetMembersProxyModel != nullptr)
 	{
 
 		QAbstractItemModel * dmuSetMembersSourceModel = dmuSetMembersProxyModel->sourceModel();
+
 		if (dmuSetMembersSourceModel != nullptr)
 		{
 
@@ -1486,7 +1560,7 @@ void DisplayDMUsRegion::EmptyDmuMembersPane()
 
 	}
 
-    ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED);
+	ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED);
 
 }
 
@@ -1494,10 +1568,12 @@ void DisplayDMUsRegion::on_pushButton_cancel_clicked()
 {
 	{
 		std::lock_guard<std::recursive_mutex> guard(Importer::is_performing_import_mutex);
+
 		if (Importer::is_performing_import)
 		{
 			QMessageBox::StandardButton reply;
 			reply = QMessageBox::question(nullptr, QString("Cancel?"), QString("Are you sure you wish to cancel?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 			if (reply == QMessageBox::Yes)
 			{
 				// No lock - not necessary for a boolean whose read/write is guaranteed to be in proper sequence
@@ -1510,115 +1586,123 @@ void DisplayDMUsRegion::on_pushButton_cancel_clicked()
 void DisplayDMUsRegion::ReceiveBottomPaneSelectionCheckChanged(QStandardItem *)
 {
 
-    UIInputProject * project = projectManagerUI().getActiveUIInputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
 
-    UIMessager messager(project);
+	if (project == nullptr)
+	{
+		return;
+	}
 
-    if (!ui->listView_dmus || !ui->listView_dmu_members)
-    {
-        boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	UIMessager messager(project);
 
-    QSortFilterProxyModel_NumbersLast * dmuMembersModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
-    if (dmuMembersModel == nullptr)
-    {
-        boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	if (!ui->listView_dmus || !ui->listView_dmu_members)
+	{
+		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
 
-    QStandardItemModel * model = nullptr;
-    bool bad = false;
-    try
-    {
-        model = dynamic_cast<QStandardItemModel *>(dmuMembersModel->sourceModel());
-    }
-    catch (std::bad_cast &)
-    {
-        bad = true;
-    }
+	QSortFilterProxyModel_NumbersLast * dmuMembersModel = static_cast<QSortFilterProxyModel_NumbersLast *>(ui->listView_dmu_members->model());
 
-    if (model == nullptr)
-    {
-        bad = true;
-    }
+	if (dmuMembersModel == nullptr)
+	{
+		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
 
-    if (bad)
-    {
-        boost::format msg("Unable to obtain model for DMU member list.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	QStandardItemModel * model = nullptr;
+	bool bad = false;
 
-    int numberChecked {};
-    for (int i = 0; i < dmuMembersModel->rowCount(); ++i)
-    {
+	try
+	{
+		model = dynamic_cast<QStandardItemModel *>(dmuMembersModel->sourceModel());
+	}
+	catch (std::bad_cast &)
+	{
+		bad = true;
+	}
 
-        QModelIndex testIndex = dmuMembersModel->index(i, 0);
-        QStandardItem * testItem = model->item(testIndex.row());
-        if (testItem->checkState() == Qt::Checked)
-        {
-            ++numberChecked;
-        }
+	if (model == nullptr)
+	{
+		bad = true;
+	}
 
-    }
+	if (bad)
+	{
+		boost::format msg("Unable to obtain model for DMU member list.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
 
-    ui->pushButton_delete_selected_dmu_members->setEnabled(numberChecked > 0);
-    ui->pushButton_deselect_all_dmu_members->setEnabled(numberChecked > 0);
-    ui->pushButton_select_all_dmu_members->setEnabled(numberChecked != dmuMembersModel->rowCount());
+	int numberChecked {};
+
+	for (int i = 0; i < dmuMembersModel->rowCount(); ++i)
+	{
+
+		QModelIndex testIndex = dmuMembersModel->index(i, 0);
+		QStandardItem * testItem = model->item(testIndex.row());
+
+		if (testItem->checkState() == Qt::Checked)
+		{
+			++numberChecked;
+		}
+
+	}
+
+	ui->pushButton_delete_selected_dmu_members->setEnabled(numberChecked > 0);
+	ui->pushButton_deselect_all_dmu_members->setEnabled(numberChecked > 0);
+	ui->pushButton_select_all_dmu_members->setEnabled(numberChecked != dmuMembersModel->rowCount());
 
 }
 
 void DisplayDMUsRegion::ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE const state)
 {
-    switch (state)
-    {
-        case LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED:
-            {
-                ui->pushButton_add_dmu->setEnabled(true);
-                ui->pushButton_delete_dmu->setEnabled(false);
-                ui->pushButton_refresh_dmu_members_from_file->setEnabled(false);
-                ui->pushButton_add_dmu_member_by_hand->setEnabled(false);
-                ui->pushButton_delete_selected_dmu_members->setEnabled(false);
-                ui->pushButton_select_all_dmu_members->setEnabled(false);
-                ui->pushButton_deselect_all_dmu_members->setEnabled(false);
-            }
-            break;
-        case LOWER_PANE_BUTTON_ENABLED_STATE::DMU_IS_SELECTED:
-            {
-                ui->pushButton_add_dmu->setEnabled(true);
-                ui->pushButton_delete_dmu->setEnabled(true);
-                ui->pushButton_refresh_dmu_members_from_file->setEnabled(true);
-                ui->pushButton_add_dmu_member_by_hand->setEnabled(true);
-                ui->pushButton_delete_selected_dmu_members->setEnabled(false);
-                ui->pushButton_select_all_dmu_members->setEnabled(true);
-                ui->pushButton_deselect_all_dmu_members->setEnabled(false);
-            }
-            break;
-        case LOWER_PANE_BUTTON_ENABLED_STATE::NO_PROJECT_OPEN:
-            {
-                ui->pushButton_add_dmu->setEnabled(false);
-                ui->pushButton_delete_dmu->setEnabled(false);
-                ui->pushButton_refresh_dmu_members_from_file->setEnabled(false);
-                ui->pushButton_add_dmu_member_by_hand->setEnabled(false);
-                ui->pushButton_delete_selected_dmu_members->setEnabled(false);
-                ui->pushButton_select_all_dmu_members->setEnabled(false);
-                ui->pushButton_deselect_all_dmu_members->setEnabled(false);
-            }
-            break;
-        default:
-            break;
-    }
+	switch (state)
+	{
+		case LOWER_PANE_BUTTON_ENABLED_STATE::NO_DMU_SELECTED:
+			{
+				ui->pushButton_add_dmu->setEnabled(true);
+				ui->pushButton_delete_dmu->setEnabled(false);
+				ui->pushButton_refresh_dmu_members_from_file->setEnabled(false);
+				ui->pushButton_add_dmu_member_by_hand->setEnabled(false);
+				ui->pushButton_delete_selected_dmu_members->setEnabled(false);
+				ui->pushButton_select_all_dmu_members->setEnabled(false);
+				ui->pushButton_deselect_all_dmu_members->setEnabled(false);
+			}
+			break;
+
+		case LOWER_PANE_BUTTON_ENABLED_STATE::DMU_IS_SELECTED:
+			{
+				ui->pushButton_add_dmu->setEnabled(true);
+				ui->pushButton_delete_dmu->setEnabled(true);
+				ui->pushButton_refresh_dmu_members_from_file->setEnabled(true);
+				ui->pushButton_add_dmu_member_by_hand->setEnabled(true);
+				ui->pushButton_delete_selected_dmu_members->setEnabled(false);
+				ui->pushButton_select_all_dmu_members->setEnabled(true);
+				ui->pushButton_deselect_all_dmu_members->setEnabled(false);
+			}
+			break;
+
+		case LOWER_PANE_BUTTON_ENABLED_STATE::NO_PROJECT_OPEN:
+			{
+				ui->pushButton_add_dmu->setEnabled(false);
+				ui->pushButton_delete_dmu->setEnabled(false);
+				ui->pushButton_refresh_dmu_members_from_file->setEnabled(false);
+				ui->pushButton_add_dmu_member_by_hand->setEnabled(false);
+				ui->pushButton_delete_selected_dmu_members->setEnabled(false);
+				ui->pushButton_select_all_dmu_members->setEnabled(false);
+				ui->pushButton_deselect_all_dmu_members->setEnabled(false);
+			}
+			break;
+
+		default:
+			break;
+	}
 }

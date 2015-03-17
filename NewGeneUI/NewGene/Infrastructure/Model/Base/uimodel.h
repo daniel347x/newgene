@@ -2,7 +2,7 @@
 #define UIMODEL_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/atomic.hpp>
+	#include <boost/atomic.hpp>
 #endif
 #include <QObject>
 #include "../../../NewGeneBackEnd/Model/Model.h"
@@ -59,9 +59,10 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 						{
 							if (!_model)
 							{
-								boost::format msg( "Model instance not yet constructed." );
-								throw NewGeneException() << newgene_error_description( msg.str() );
+								boost::format msg("Model instance not yet constructed.");
+								throw NewGeneException() << newgene_error_description(msg.str());
 							}
+
 							return *_model;
 						}
 
@@ -88,9 +89,10 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				{
 					if (!__impl)
 					{
-						boost::format msg( "Internal backend model implementation not yet constructed." );
-						throw NewGeneException() << newgene_error_description( msg.str() );
+						boost::format msg("Internal backend model implementation not yet constructed.");
+						throw NewGeneException() << newgene_error_description(msg.str());
 					}
+
 					return *(__impl.get());
 				}
 

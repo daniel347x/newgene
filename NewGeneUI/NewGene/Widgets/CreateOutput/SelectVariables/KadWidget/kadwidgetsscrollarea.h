@@ -11,10 +11,10 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 
 	public:
 
-		explicit KadWidgetsScrollArea(QWidget *parent = 0);
+		explicit KadWidgetsScrollArea(QWidget * parent = 0);
 
 		void HandleChanges(DataChangeMessage const &);
-        void EmptyTextCheck();
+		void EmptyTextCheck();
 
 	signals:
 
@@ -32,8 +32,8 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 
 		void AddKadSpinWidget(WidgetInstanceIdentifier const & identifier, WidgetInstanceIdentifiers const & active_dmus);
 		void Empty();
-        void resizeEvent(QResizeEvent *);
-        void paintEvent(QPaintEvent *);
+		void resizeEvent(QResizeEvent *);
+		void paintEvent(QPaintEvent *);
 
 };
 

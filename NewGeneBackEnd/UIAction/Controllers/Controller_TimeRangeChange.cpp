@@ -1,7 +1,7 @@
 #include "../UIActionManager.h"
 
 #ifndef Q_MOC_RUN
-#	include <boost/scope_exit.hpp>
+	#include <boost/scope_exit.hpp>
 #endif
 #include "../../Project/InputProject.h"
 #include "../../Project/OutputProject.h"
@@ -34,72 +34,78 @@ void UIActionManager::DoTimeRangeChange(Messager & messager, WidgetActionItemReq
 
 	switch (action_request.reason)
 	{
-	case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
-		{
-
-		}
-		break;
-	case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
-		{
-
-		}
-		break;
-	case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
-		{
-
-			DataChangeMessage change_response(&project);
-
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
 			{
 
-				Executor executor(input_model.getDb());
+			}
+			break;
 
-				if (!instanceActionItem.second)
+		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
+			{
+
+			}
+			break;
+
+		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
+			{
+
+				DataChangeMessage change_response(&project);
+
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
-					return;
-				}
-				WidgetInstanceIdentifier const & identifier = instanceActionItem.first;
-				if (!identifier.code || *identifier.code != "0")
-				{
-					return;
-				}
-				if (identifier.flags != "s" && identifier.flags != "e")
-				{
-					return;
-				}
 
-				// ************************************* //
-				// Retrieve data sent by user interface
-				// ************************************* //
-				WidgetActionItem const & actionItem = *instanceActionItem.second;
-				WidgetActionItem__DateTime const & actionItemDateTime = static_cast<WidgetActionItem__DateTime const &>(actionItem);
+					Executor executor(input_model.getDb());
 
-				// ***************************************** //
-				// Prepare data to send back to user interface
-				// ***************************************** //
-				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE;
-				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
-				WidgetInstanceIdentifiers child_identifiers;
-				child_identifiers.push_back(identifier);
-				DataChange change(type, intention, WidgetInstanceIdentifier(identifier), child_identifiers);
-				change.SetPacket(std::make_shared<DataChangePacket_int64>(actionItemDateTime.getValue()));
-				change_response.changes.push_back(change);
+					if (!instanceActionItem.second)
+					{
+						return;
+					}
 
-				// ***************************************** //
-				// Update database and cache
-				// ***************************************** //
-				output_model.t_time_range.Update(output_model.getDb(), output_model, input_model, change_response);
+					WidgetInstanceIdentifier const & identifier = instanceActionItem.first;
 
-				executor.success();
+					if (!identifier.code || *identifier.code != "0")
+					{
+						return;
+					}
 
-			});
+					if (identifier.flags != "s" && identifier.flags != "e")
+					{
+						return;
+					}
 
-			messager.EmitChangeMessage(change_response);
+					// ************************************* //
+					// Retrieve data sent by user interface
+					// ************************************* //
+					WidgetActionItem const & actionItem = *instanceActionItem.second;
+					WidgetActionItem__DateTime const & actionItemDateTime = static_cast<WidgetActionItem__DateTime const &>(actionItem);
 
-		}
-		break;
-        default:
-            break;
+					// ***************************************** //
+					// Prepare data to send back to user interface
+					// ***************************************** //
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
+					WidgetInstanceIdentifiers child_identifiers;
+					child_identifiers.push_back(identifier);
+					DataChange change(type, intention, WidgetInstanceIdentifier(identifier), child_identifiers);
+					change.SetPacket(std::make_shared<DataChangePacket_int64>(actionItemDateTime.getValue()));
+					change_response.changes.push_back(change);
+
+					// ***************************************** //
+					// Update database and cache
+					// ***************************************** //
+					output_model.t_time_range.Update(output_model.getDb(), output_model, input_model, change_response);
+
+					executor.success();
+
+				});
+
+				messager.EmitChangeMessage(change_response);
+
+			}
+			break;
+
+		default:
+			break;
 	}
 
 }

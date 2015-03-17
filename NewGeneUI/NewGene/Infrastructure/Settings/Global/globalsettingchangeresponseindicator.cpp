@@ -1,7 +1,7 @@
 #include "globalsettingchangeresponseindicator.h"
 
-GlobalSettingChangeResponseIndicator::GlobalSettingChangeResponseIndicator( QObject * parent ) :
-	QObject( parent )
+GlobalSettingChangeResponseIndicator::GlobalSettingChangeResponseIndicator(QObject * parent) :
+	QObject(parent)
 	, GlobalSettingChangeIndicator()
 	, SettingChangeResponseIndicator()
 {

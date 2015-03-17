@@ -21,8 +21,8 @@
 class NewGeneMainWindow;
 
 class UIProjectManager : public QObject,
-						 public UIManager<UIProjectManager, ProjectManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT>,
-						 public EventLoopThreadManager<UI_PROJECT_MANAGER>
+	public UIManager<UIProjectManager, ProjectManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT>,
+	public EventLoopThreadManager<UI_PROJECT_MANAGER>
 {
 
 		Q_OBJECT
@@ -133,7 +133,7 @@ class UIProjectManager : public QObject,
 
 	public:
 
-#		if 0 // possibly to be implemented in a later version of NewGene to manage multiple tabs for input or output
+		#		if 0 // possibly to be implemented in a later version of NewGene to manage multiple tabs for input or output
 		typedef std::vector<std::shared_ptr<UIInputProject>> UIInputProjectsList;
 		typedef std::vector<std::shared_ptr<UIOutputProject>> UIOutputProjectsList;
 
@@ -149,9 +149,9 @@ class UIProjectManager : public QObject,
 		typedef std::vector<std::shared_ptr<InputModel>> BackendInputModelsList;
 		typedef std::vector<std::shared_ptr<OutputModel>> BackendOutputModelsList;
 
-		typedef std::map<NewGeneMainWindow*, UIInputProjectsList> InputProjectsMap;
-		typedef std::map<NewGeneMainWindow*, UIOutputProjectsList> OutputProjectsMap;
-#		endif
+		typedef std::map<NewGeneMainWindow *, UIInputProjectsList> InputProjectsMap;
+		typedef std::map<NewGeneMainWindow *, UIOutputProjectsList> OutputProjectsMap;
+		#		endif
 
 		// ************************************************************************************************************************************* //
 		// Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
@@ -185,7 +185,8 @@ class UIProjectManager : public QObject,
 			std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>> project;
 			std::unique_ptr<UI_MESSAGER_CLASS> messager;
 
-			ProjectTabContents(ProjectPaths && paths_, UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM> * project_, UI_MESSAGER_CLASS * messager_)
+			ProjectTabContents(ProjectPaths && paths_, UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM> *
+							   project_, UI_MESSAGER_CLASS * messager_)
 				: paths(std::move(paths_))
 				, project(project_)
 				, messager(messager_)
@@ -202,29 +203,31 @@ class UIProjectManager : public QObject,
 		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM, typename UI_MESSAGER_CLASS>
 		struct ProjectTab
 		{
-            // ************************************************************************************************************************************* //
-            // Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
-            // ************************************************************************************************************************************* //
-            //typedef std::pair<ProjectPaths, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>>> type;
+			// ************************************************************************************************************************************* //
+			// Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
+			// ************************************************************************************************************************************* //
+			//typedef std::pair<ProjectPaths, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>>> type;
 			typedef ProjectTabContents<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS> type;
 		};
 
 		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM, typename UI_MESSAGER_CLASS>
 		struct ProjectTabs
 		{
-			typedef std::vector<typename ProjectTab<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS>::type> type;
+			typedef std::vector<typename ProjectTab<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS>::type>
+			type;
 		};
 
 		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM, typename UI_MESSAGER_CLASS>
 		struct Tabs
 		{
-			typedef std::map<NewGeneMainWindow *, typename ProjectTabs<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS>::type> type;
+			typedef std::map<NewGeneMainWindow *, typename ProjectTabs<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS>::type>
+			type;
 		};
 
-		explicit UIProjectManager( QObject * parent, UIMessager & messager );
+		explicit UIProjectManager(QObject * parent, UIMessager & messager);
 		~UIProjectManager();
 
-		void LoadOpenProjects(NewGeneMainWindow*, QObject*);
+		void LoadOpenProjects(NewGeneMainWindow *, QObject *);
 
 		UIInputProject * getActiveUIInputProject();
 		UIOutputProject * getActiveUIOutputProject();
@@ -272,7 +275,7 @@ class UIProjectManager : public QObject,
 		WorkQueueManager<UI_PROJECT_MANAGER> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			UIProjectManagerWorkQueue * work_queue = new UIProjectManagerWorkQueue();
-			work_queue->SetUIObject(reinterpret_cast<UIProjectManager*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIProjectManager *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

@@ -14,18 +14,18 @@ class NewGeneVariables : public QWidget, public NewGeneWidget // do not reorder 
 		Q_OBJECT
 
 	public:
-		explicit NewGeneVariables( QWidget * parent = 0 );
+		explicit NewGeneVariables(QWidget * parent = 0);
 		~NewGeneVariables();
 
 	protected:
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 		Ui::NewGeneVariables * ui;
 
-    public:
+	public:
 
-        friend class NewGeneMainWindow;
+		friend class NewGeneMainWindow;
 
 };
 

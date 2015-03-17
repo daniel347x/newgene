@@ -19,7 +19,7 @@
 #include <QFileDialog>
 #include <QCoreApplication>
 
-UIProjectManager::UIProjectManager( QObject * parent, UIMessager & messager )
+UIProjectManager::UIProjectManager(QObject * parent, UIMessager & messager)
 	: QObject(parent)
 	, loading(false)
 	, UIManager(messager)
@@ -44,7 +44,7 @@ UIProjectManager::~UIProjectManager()
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
 			// Release the pointer so that when the "tabs" map is destroyed, its destructor will do the job
-			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
+			UIInputProject * project_ptr = static_cast<UIInputProject *>(tab.project.release());
 			RawCloseInputProject(project_ptr);
 		});
 
@@ -56,7 +56,7 @@ UIProjectManager::~UIProjectManager()
 		OutputProjectTabs & tabs = windows.second;
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
-			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
+			UIOutputProject * project_ptr = static_cast<UIOutputProject *>(tab.project.release());
 			RawCloseOutputProject(project_ptr);
 		});
 
@@ -75,7 +75,7 @@ void UIProjectManager::EndAllLoops()
 		{
 
 			//ProjectPaths & paths = tab.first;
-			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
+			UIInputProject * project_ptr = static_cast<UIInputProject *>(tab.project.release());
 			RawCloseInputProject(project_ptr);
 
 		});
@@ -90,7 +90,7 @@ void UIProjectManager::EndAllLoops()
 		{
 
 			//ProjectPaths & paths = tab.first;
-			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
+			UIOutputProject * project_ptr = static_cast<UIOutputProject *>(tab.project.release());
 			RawCloseOutputProject(project_ptr);
 
 		});
@@ -101,7 +101,7 @@ void UIProjectManager::EndAllLoops()
 
 };
 
-void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject * mainWindowObject)
+void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject * mainWindowObject)
 {
 
 	loading = true;
@@ -122,26 +122,31 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 	if (input_project_list->files.size() == 0)
 	{
 
-        // Disable the following block:
-        // For now, do not prompt to open input dataset if none is found.
-        if (false)
-        {
-            boost::format msg_title("Open input project at default location?");
-            boost::format msg_text("You have no input project open.  Would you like to open the project at the default location?");
-            QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-            if (reply == QMessageBox::No)
-            {
-                loading = false;
-                return;
-            }
-        }
+		// Disable the following block:
+		// For now, do not prompt to open input dataset if none is found.
+		if (false)
+		{
+			boost::format msg_title("Open input project at default location?");
+			boost::format msg_text("You have no input project open.  Would you like to open the project at the default location?");
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
-		boost::filesystem::path input_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Input", NewGeneFileNames::defaultInputProjectFileName);
+			if (reply == QMessageBox::No)
+			{
+				loading = false;
+				return;
+			}
+		}
+
+		boost::filesystem::path input_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Input",
+				NewGeneFileNames::defaultInputProjectFileName);
+
 		if (input_project_path != boost::filesystem::path())
 		{
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_path.string().c_str()));
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, input_project_path.parent_path()));
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager,
+					input_project_path.string().c_str()));
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
+					input_project_path.parent_path()));
 			input_project_list = InputProjectFilesList::get(messager);
 		}
 	}
@@ -221,7 +226,7 @@ void UIProjectManager::SignalMessageBox(STD_STRING msg)
 {
 
 	QMessageBox msgBox;
-	msgBox.setText( msg.c_str() );
+	msgBox.setText(msg.c_str());
 	msgBox.exec();
 
 }
@@ -236,7 +241,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 
 	if (!getActiveUIInputProject()->is_model_equivalent(messager.get(), model_))
 	{
-		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODELS_DO_NOT_MATCH, "Input model has completed loading from database, but does not match current input model."));
+		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODELS_DO_NOT_MATCH,
+									 "Input model has completed loading from database, but does not match current input model."));
 		return;
 	}
 
@@ -249,13 +255,16 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 	projectManager().input_project_is_open = true;
 
 	UIInputProject * input_project = getActiveUIInputProject();
+
 	if (!input_project)
 	{
 		return;
 	}
 
-	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager.get(), input_project->projectSettings().getUISettings().GetSettingsPath().string().c_str()));
-	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager.get(), input_project->projectSettings().getUISettings().GetSettingsPath().parent_path()));
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager.get(),
+			input_project->projectSettings().getUISettings().GetSettingsPath().string().c_str()));
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager.get(),
+			input_project->projectSettings().getUISettings().GetSettingsPath().parent_path()));
 
 	getActiveUIInputProject()->DoRefreshAllWidgets();
 
@@ -267,26 +276,31 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 		if (output_project_list->files.size() == 0)
 		{
 
-            // Disable the following block:
-            // For now, during initial load,
-            // do not prompt to open output dataset if none is found
-            if (false)
-            {
-                boost::format msg_title("Open output project at default location?");
-                boost::format msg_text("You have no output project open.  Would you like to open the project at the default location?");
-                QMessageBox::StandardButton reply;
-                reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-                if (reply == QMessageBox::No)
-                {
-                    return;
-                }
-            }
+			// Disable the following block:
+			// For now, during initial load,
+			// do not prompt to open output dataset if none is found
+			if (false)
+			{
+				boost::format msg_title("Open output project at default location?");
+				boost::format msg_text("You have no output project open.  Would you like to open the project at the default location?");
+				QMessageBox::StandardButton reply;
+				reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
-			boost::filesystem::path output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Output", NewGeneFileNames::defaultOutputProjectFileName);
+				if (reply == QMessageBox::No)
+				{
+					return;
+				}
+			}
+
+			boost::filesystem::path output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Output",
+					NewGeneFileNames::defaultOutputProjectFileName);
+
 			if (output_project_path != boost::filesystem::path())
 			{
-				settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(), output_project_path.string().c_str()));
-				settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager.get(), output_project_path.parent_path()));
+				settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(),
+						output_project_path.string().c_str()));
+				settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager.get(),
+						output_project_path.parent_path()));
 				output_project_list = OutputProjectFilesList::get(messager.get());
 			}
 		}
@@ -299,9 +313,11 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 			bool create_new_instance = false;
 
 			NewGeneMainWindow * mainWindow = nullptr;
+
 			try
 			{
 				mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+
 				if (mainWindow == nullptr)
 				{
 					return;
@@ -331,28 +347,35 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 	{
 
 		QMessageBox::StandardButton reply;
-		reply = QMessageBox::question(nullptr, QString("Open output project?"), QString("Would you also like to open an associated output project?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+		reply = QMessageBox::question(nullptr, QString("Open output project?"), QString("Would you also like to open an associated output project?"),
+									  QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 		if (reply == QMessageBox::Yes)
 		{
 			OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager.get());
 			QWidget * mainWindow = nullptr;
+
 			try
 			{
-				mainWindow = dynamic_cast<QWidget*>(mainWindowObject);
+				mainWindow = dynamic_cast<QWidget *>(mainWindowObject);
 			}
 			catch (std::bad_cast &)
 			{
 
 			}
+
 			if (mainWindow)
 			{
-				QString the_file = QFileDialog::getOpenFileName(mainWindow, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene output settings file (*.newgene.out.xml)");
+				QString the_file = QFileDialog::getOpenFileName(mainWindow, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
+								   "NewGene output settings file (*.newgene.out.xml)");
+
 				if (the_file.size())
 				{
 					if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
 					{
 						boost::filesystem::path file_path(the_file.toStdString());
-						settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager.get(), file_path.parent_path()));
+						settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager.get(),
+								file_path.parent_path()));
 						OpenOutputDataset(file_path.string(), mainWindowObject);
 					}
 				}
@@ -371,17 +394,20 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObje
 
 	if (!getActiveUIOutputProject()->is_model_equivalent(messager.get(), model_))
 	{
-		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODELS_DO_NOT_MATCH, "Output model has completed loading from database, but does not match current output model."));
+		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODELS_DO_NOT_MATCH,
+									 "Output model has completed loading from database, but does not match current output model."));
 		return;
 	}
 
 	if (!model_->loaded())
 	{
-		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_NOT_LOADED, "Output model has completed loading from database, but is marked as not loaded."));
+		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_NOT_LOADED,
+									 "Output model has completed loading from database, but is marked as not loaded."));
 		return;
 	}
 
 	UIOutputProject * output_project = getActiveUIOutputProject();
+
 	if (!output_project)
 	{
 		return;
@@ -389,7 +415,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObje
 
 	projectManager().output_project_is_open = true;
 
-	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(), output_project->projectSettings().getUISettings().GetSettingsPath().string()));
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(),
+			output_project->projectSettings().getUISettings().GetSettingsPath().string()));
 
 	getActiveUIOutputProject()->DoRefreshAllWidgets();
 
@@ -404,11 +431,12 @@ void UIProjectManager::OpenOutputDataset(STD_STRING the_output_dataset, QObject 
 	UIMessager messager;
 
 	UIInputProject * input_project = getActiveUIInputProject();
+
 	if (!input_project)
 	{
 		boost::format msg("Please open or create an input dataset before attempting to open or create an output dataset.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -428,6 +456,7 @@ void UIProjectManager::CloseCurrentOutputDataset()
 	{
 		return;
 	}
+
 	OutputProjectTabs & tabs = (*output_tabs.begin()).second;
 
 	// One per project (corresponding to an actual physical tab; currently only 1 per main window supported)
@@ -435,6 +464,7 @@ void UIProjectManager::CloseCurrentOutputDataset()
 	{
 		return;
 	}
+
 	OutputProjectTab & tab = *tabs.begin();
 
 	if (!tab.project)
@@ -443,7 +473,7 @@ void UIProjectManager::CloseCurrentOutputDataset()
 		return;
 	}
 
-	UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
+	UIOutputProject * project_ptr = static_cast<UIOutputProject *>(tab.project.release());
 	RawCloseOutputProject(project_ptr);
 
 	tabs.clear();
@@ -465,6 +495,7 @@ void UIProjectManager::OpenInputDataset(STD_STRING the_input_dataset, QObject * 
 	bool success = false;
 
 	UIMessager messager;
+
 	if (!boost::filesystem::is_directory(the_input_dataset))
 	{
 		RawOpenInputProject(messager, boost::filesystem::path(the_input_dataset), mainWindowObject);
@@ -483,6 +514,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 	{
 		return;
 	}
+
 	InputProjectTabs & tabs = (*input_tabs.begin()).second;
 
 	// One per project (corresponding to an actual physical tab; currently only 1 per main window supported)
@@ -490,6 +522,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 	{
 		return;
 	}
+
 	InputProjectTab & tab = *tabs.begin();
 
 	if (!tab.project)
@@ -498,7 +531,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 		return;
 	}
 
-	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
+	UIInputProject * project_ptr = static_cast<UIInputProject *>(tab.project.release());
 	RawCloseInputProject(project_ptr);
 
 	tabs.clear();
@@ -531,33 +564,40 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	// an instance of backend-layer model settings
 	auto path_to_model_settings_ = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
 	boost::filesystem::path path_to_model_settings = path_to_model_settings_->getPath();
+
 	if (path_to_model_settings.is_relative())
 	{
 		boost::filesystem::path new_path = input_project_settings_path.parent_path();
 		new_path /= path_to_model_settings;
 		path_to_model_settings = new_path;
 	}
+
 	if (boost::filesystem::is_directory(path_to_model_settings))
 	{
 		path_to_model_settings /= (input_project_settings_path.stem().string() + ".model.xml");
 	}
+
 	std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
 	// Backend model does not know about the current project's settings, because multiple settings might point to the same model.
 	auto path_to_model_database_ = InputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
 	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
+
 	if (path_to_model_database.is_relative())
 	{
 		boost::filesystem::path new_path = path_to_model_settings.parent_path();
 		new_path /= path_to_model_database;
 		path_to_model_database = new_path;
 	}
+
 	if (boost::filesystem::is_directory(path_to_model_database))
 	{
 		path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
 	}
+
 	std::shared_ptr<InputModel> backend_model;
+
 	try
 	{
 		backend_model.reset(ModelFactory<InputModel>()(messager, path_to_model_database));
@@ -565,11 +605,12 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	catch (boost::exception & e)
 	{
 		loading = false;
+
 		if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
 		{
-			boost::format msg( error_desc->c_str() );
+			boost::format msg(error_desc->c_str());
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 		}
 		else
@@ -578,16 +619,19 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 			boost::format msg("Error: %1%");
 			msg % the_error.c_str();
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 		}
-		boost::format msg( "Unable to create input project database." );
+
+		boost::format msg("Unable to create input project database.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
 		return;
 	}
+
 	std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
 
 	NewGeneMainWindow * mainWindow = nullptr;
+
 	try
 	{
 		mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
@@ -611,8 +655,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	std::unique_ptr<UIMessagerInputProject> messager_ptr(new UIMessagerInputProject(nullptr));
 	std::unique_ptr<UIInputProject> project_ptr(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr));
 	input_tabs[mainWindow].emplace_back(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
-		project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
-		messager_ptr.release());
+										project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
+										messager_ptr.release());
 
 	UIInputProject * project = getActiveUIInputProject();
 
@@ -664,21 +708,25 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	// an instance of backend-layer model settings
 	auto path_to_model_settings_ = OutputProjectPathToModel::get(messager, project_settings->getBackendSettings());
 	boost::filesystem::path path_to_model_settings = path_to_model_settings_->getPath();
+
 	if (path_to_model_settings.is_relative())
 	{
 		boost::filesystem::path new_path = output_project_settings_path.parent_path();
 		new_path /= path_to_model_settings;
 		path_to_model_settings = new_path;
 	}
+
 	if (boost::filesystem::is_directory(path_to_model_settings))
 	{
 		path_to_model_settings /= (output_project_settings_path.stem().string() + ".model.xml");
 	}
+
 	std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
 	// The input model and settings are necessary in order to instantiate the output model
 	UIInputProject * input_project = getActiveUIInputProject();
+
 	if (!input_project)
 	{
 		boost::format msg("NULL input project during attempt to instantiate output project.");
@@ -690,20 +738,25 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	// Backend model does not know about the current project's settings, because multiple settings might point to the same model.
 	auto path_to_model_database_ = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
 	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
+
 	if (path_to_model_database.is_relative())
 	{
 		boost::filesystem::path new_path = path_to_model_settings.parent_path();
 		new_path /= path_to_model_database;
 		path_to_model_database = new_path;
 	}
+
 	if (boost::filesystem::is_directory(path_to_model_database))
 	{
 		path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
 	}
+
 	std::shared_ptr<OutputModel> backend_model;
+
 	try
 	{
-		backend_model.reset(ModelFactory<OutputModel>()(messager, path_to_model_database, std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
+		backend_model.reset(ModelFactory<OutputModel>()(messager, path_to_model_database, std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()),
+							input_project->backend().modelSharedPtr()));
 	}
 	catch (boost::exception & e)
 	{
@@ -720,17 +773,20 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 			boost::format msg("Error: %1%");
 			msg % the_error.c_str();
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 		}
+
 		boost::format msg("Unable to create output project database.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
 		loading = false;
 		return;
 	}
+
 	std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
 
 	NewGeneMainWindow * mainWindow = nullptr;
+
 	try
 	{
 		mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
@@ -750,8 +806,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	std::unique_ptr<UIMessagerOutputProject> messager_ptr(new UIMessagerOutputProject(nullptr));
 	std::unique_ptr<UIOutputProject> project_ptr(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr, input_project));
 	output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
-		project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
-		messager_ptr.release());
+										 project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
+										 messager_ptr.release());
 
 	UIOutputProject * project = getActiveUIOutputProject();
 
@@ -833,6 +889,7 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 	UIMessagerSingleShot messager_(messager);
 
 	UIInputProject * active_input_project = getActiveUIInputProject();
+
 	if (active_input_project != nullptr)
 	{
 
@@ -847,33 +904,38 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 
 		bool project_settings_exist = boost::filesystem::exists(input_project_settings_path);
 		bool model_settings_exist = boost::filesystem::exists(path_to_model_settings);
-		bool model_database_exists =boost::filesystem::exists(path_to_model_database);
+		bool model_database_exists = boost::filesystem::exists(path_to_model_database);
 
 		if (project_settings_exist || model_settings_exist || model_database_exists)
 		{
 			QMessageBox::StandardButton reply;
 			std::string formatting("The following files will be overwritten:\n");
 			int count = 0;
+
 			if (project_settings_exist)
 			{
 				formatting += "%1%\n";
 				++count;
 			}
+
 			if (model_settings_exist)
 			{
 				formatting += "%2%\n";
 				++count;
 			}
+
 			if (model_database_exists)
 			{
 				formatting += "%3%\n";
 				++count;
 			}
+
 			formatting += "Would you like to overwrite ";
 			formatting += (count > 1 ? " these files?" : "this file?");
 			boost::format msg(formatting.c_str());
 			msg % input_project_settings_path.string() % path_to_model_settings.string() % path_to_model_database.string();
 			reply = QMessageBox::question(nullptr, QString("Overwrite files?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 			if (reply == QMessageBox::No)
 			{
 				return;
@@ -883,10 +945,12 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 			{
 				boost::filesystem::remove(input_project_settings_path);
 			}
+
 			if (model_settings_exist)
 			{
 				boost::filesystem::remove(path_to_model_settings);
 			}
+
 			if (model_database_exists)
 			{
 				boost::filesystem::remove(path_to_model_database);
@@ -896,9 +960,12 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		// Set the new path for the project settings in the currently open project
 		active_input_project->SetProjectPaths(input_project_settings_path, path_to_model_settings);
 
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_settings_path.string().c_str()));
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, input_project_settings_path.parent_path()));
-		active_input_project->projectSettings().getBackendSettings().UpdateSetting(messager, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, InputProjectPathToModel(messager, input_project_settings_path.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager,
+				input_project_settings_path.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
+				input_project_settings_path.parent_path()));
+		active_input_project->projectSettings().getBackendSettings().UpdateSetting(messager, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, InputProjectPathToModel(messager,
+				input_project_settings_path.string().c_str()));
 
 		// Write the project settings to file
 		active_input_project->projectSettings().WriteSettingsToFile(messager);
@@ -910,12 +977,15 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		active_input_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
 
 		// Now set path to database - it must be done last so that the previous path is available, above, when the database is copied
-		active_input_project->modelSettings().getBackendSettings().UpdateSetting(messager, INPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, InputModelPathToDatabase(messager, path_to_model_database.string().c_str()));
+		active_input_project->modelSettings().getBackendSettings().UpdateSetting(messager, INPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, InputModelPathToDatabase(messager,
+				path_to_model_database.string().c_str()));
 
 		NewGeneMainWindow * mainWindow = nullptr;
+
 		try
 		{
 			mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+
 			if (mainWindow == nullptr)
 			{
 				return;
@@ -940,6 +1010,7 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 	UIMessagerSingleShot messager_(messager);
 
 	UIOutputProject * active_output_project = getActiveUIOutputProject();
+
 	if (active_output_project != nullptr)
 	{
 
@@ -954,33 +1025,38 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 
 		bool project_settings_exist = boost::filesystem::exists(output_project_settings_path);
 		bool model_settings_exist = boost::filesystem::exists(path_to_model_settings);
-		bool model_database_exists =boost::filesystem::exists(path_to_model_database);
+		bool model_database_exists = boost::filesystem::exists(path_to_model_database);
 
 		if (project_settings_exist || model_settings_exist || model_database_exists)
 		{
 			QMessageBox::StandardButton reply;
 			std::string formatting("The following files will be overwritten:\n");
 			int count = 0;
+
 			if (project_settings_exist)
 			{
 				formatting += "%1%\n";
 				++count;
 			}
+
 			if (model_settings_exist)
 			{
 				formatting += "%2%\n";
 				++count;
 			}
+
 			if (model_database_exists)
 			{
 				formatting += "%3%\n";
 				++count;
 			}
+
 			formatting += "Would you like to overwrite ";
 			formatting += (count > 1 ? " these files?" : "this file?");
 			boost::format msg(formatting.c_str());
 			msg % output_project_settings_path.string() % path_to_model_settings.string() % path_to_model_database.string();
 			reply = QMessageBox::question(nullptr, QString("Overwrite files?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 			if (reply == QMessageBox::No)
 			{
 				return;
@@ -990,10 +1066,12 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 			{
 				boost::filesystem::remove(output_project_settings_path);
 			}
+
 			if (model_settings_exist)
 			{
 				boost::filesystem::remove(path_to_model_settings);
 			}
+
 			if (model_database_exists)
 			{
 				boost::filesystem::remove(path_to_model_database);
@@ -1003,9 +1081,12 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 		// Set the new path for the project settings in the currently open project
 		active_output_project->SetProjectPaths(output_project_settings_path, path_to_model_settings);
 
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_settings_path.string().c_str()));
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, output_project_settings_path.parent_path()));
-		active_output_project->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, OutputProjectPathToModel(messager, output_project_settings_path.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager,
+				output_project_settings_path.string().c_str()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
+				output_project_settings_path.parent_path()));
+		active_output_project->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL, OutputProjectPathToModel(messager,
+				output_project_settings_path.string().c_str()));
 
 		// Write the project settings to file
 		active_output_project->projectSettings().WriteSettingsToFile(messager);
@@ -1017,12 +1098,15 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 		active_output_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
 
 		// Now set path to database - it must be done last so that the previous path is available, above, when the database is copied
-		active_output_project->modelSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, OutputModelPathToDatabase(messager, path_to_model_database.string().c_str()));
+		active_output_project->modelSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE, OutputModelPathToDatabase(messager,
+				path_to_model_database.string().c_str()));
 
 		NewGeneMainWindow * mainWindow = nullptr;
+
 		try
 		{
 			mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+
 			if (mainWindow == nullptr)
 			{
 				return;

@@ -4,7 +4,7 @@
 #include <QStatusBar>
 #include "Widgets/newgenemainwindow.h"
 
-UIStatusManager::UIStatusManager( QObject * parent, UIMessager & messager )
+UIStatusManager::UIStatusManager(QObject * parent, UIMessager & messager)
 	: QObject(parent)
 	, UIManager(messager)
 {
@@ -15,40 +15,42 @@ UIStatusManager::UIStatusManager( QObject * parent, UIMessager & messager )
 
 }
 
-void UIStatusManager::LogStatus( const QString & /* status_ */, const UIStatusManager::IMPORTANCE /* importance_level */ )
+void UIStatusManager::LogStatus(const QString & /* status_ */, const UIStatusManager::IMPORTANCE /* importance_level */)
 {
 }
 
-void UIStatusManager::PostStatus( QString const & _status, UIStatusManager::IMPORTANCE const importance_level, bool const /* forbidWritingToLog */ )
+void UIStatusManager::PostStatus(QString const & _status, UIStatusManager::IMPORTANCE const importance_level, bool const /* forbidWritingToLog */)
 {
 
-	switch ( importance_level )
+	switch (importance_level)
 	{
 		case IMPORTANCE_DEBUG:
 		case IMPORTANCE_HIGH:
 		case IMPORTANCE_CRITICAL:
 			{
-				LogStatus( _status, importance_level );
+				LogStatus(_status, importance_level);
 			}
 			break;
-			default:
+
+		default:
 			{
 			}
 			break;
 	}
 
-	if ( importance_level == IMPORTANCE_CRITICAL )
+	if (importance_level == IMPORTANCE_CRITICAL)
 	{
 		QMessageBox msgBox;
-		msgBox.setText( _status );
+		msgBox.setText(_status);
 		msgBox.exec();
 	}
 
 	bool success = false;
+
 	try
 	{
 		NewGeneMainWindow & mainWindow = getMainWindow();
-		mainWindow.statusBar()->showMessage( _status );
+		mainWindow.statusBar()->showMessage(_status);
 		success = true;
 	}
 	catch (NewGeneException &)
@@ -58,14 +60,14 @@ void UIStatusManager::PostStatus( QString const & _status, UIStatusManager::IMPO
 	if (!success)
 	{
 		QMessageBox msgBox;
-		msgBox.setText( _status );
+		msgBox.setText(_status);
 		msgBox.exec();
 
 		if (importance_level == IMPORTANCE_CRITICAL)
 		{
-			boost::format msg( "Unrecoverable error: NewGene will now exit." );
+			boost::format msg("Unrecoverable error: NewGene will now exit.");
 			msg % which_descriptor.toStdString();
-			throw NewGeneException() << newgene_error_description( msg.str() );
+			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 	}
 

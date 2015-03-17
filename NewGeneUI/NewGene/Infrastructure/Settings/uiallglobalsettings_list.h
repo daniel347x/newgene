@@ -2,18 +2,19 @@
 #define UIALLGLOBALSETTINGS_LIST_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#	include <boost/regex.hpp>
-#	include <boost/algorithm/string/regex.hpp>
-#	include <boost/filesystem.hpp>
-#	include <boost/filesystem/operations.hpp>
+	#include <boost/algorithm/string.hpp>
+	#include <boost/regex.hpp>
+	#include <boost/algorithm/string/regex.hpp>
+	#include <boost/filesystem.hpp>
+	#include <boost/filesystem/operations.hpp>
 #endif
 #include "uisettingsmanager.h"
 #include <fstream>
 
 
 template<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI SETTING>
-class UIGlobalSetting_Path : public UIGlobalSetting, public PathSetting, public SimpleAccessSetting<UIGlobalSetting_Path<SETTING>, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, SETTING, UISettingsManager>
+class UIGlobalSetting_Path : public UIGlobalSetting, public PathSetting,
+	public SimpleAccessSetting<UIGlobalSetting_Path<SETTING>, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, SETTING, UISettingsManager>
 {
 
 	public:
@@ -31,7 +32,8 @@ class UIGlobalSetting_Path : public UIGlobalSetting, public PathSetting, public 
 };
 
 template<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI SETTING>
-class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public StringSetting, public SimpleAccessSetting<UIGlobalSetting_Projects_Files_List<SETTING>, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, SETTING, UISettingsManager>
+class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public StringSetting,
+	public SimpleAccessSetting<UIGlobalSetting_Projects_Files_List<SETTING>, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, SETTING, UISettingsManager>
 {
 
 	public:
@@ -61,22 +63,24 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 					{
 						settings = files_[0];
 
-#						ifdef Q_OS_WIN32
-							if (boost::filesystem::is_directory(settings.parent_path()) && boost::filesystem::windows_name(settings.filename().string()))
-#						else
-							if (boost::filesystem::is_directory(settings.parent_path()) && boost::filesystem::portable_posix_name(settings.filename().string()))
-#						endif
+						#						ifdef Q_OS_WIN32
+
+						if (boost::filesystem::is_directory(settings.parent_path()) && boost::filesystem::windows_name(settings.filename().string()))
+						#						else
+						if (boost::filesystem::is_directory(settings.parent_path()) && boost::filesystem::portable_posix_name(settings.filename().string()))
+						#						endif
+						{
+							if (!boost::filesystem::exists(settings))
 							{
-								if (!boost::filesystem::exists(settings))
+								std::ofstream _touch;
+								_touch.open(settings.string());
+
+								if (_touch.is_open())
 								{
-									std::ofstream _touch;
-									_touch.open(settings.string());
-									if (_touch.is_open())
-									{
-										_touch.close();
-									}
+									_touch.close();
 								}
 							}
+						}
 
 						if (boost::filesystem::is_regular_file(settings))
 						{
@@ -84,7 +88,7 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 						}
 					}
 				}
-				catch(boost::filesystem::filesystem_error & e)
+				catch (boost::filesystem::filesystem_error & e)
 				{
 					boost::format msg("Invalid path \"%1%\": %2%");
 					msg % settings.string() % e.what();
@@ -104,48 +108,48 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST>
 {
-public:
-	typedef UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::MRU_INPUT_PROJECTS_LIST> type;
+	public:
+		typedef UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::MRU_INPUT_PROJECTS_LIST> type;
 };
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST>::type InputMRUFilesList;
 
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_PROJECTS_LIST>
 {
-public:
-	typedef UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::MRU_OUTPUT_PROJECTS_LIST> type;
+	public:
+		typedef UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::MRU_OUTPUT_PROJECTS_LIST> type;
 };
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_PROJECTS_LIST>::type OutputMRUFilesList;
 
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_PROJECTS_LIST>
 {
-public:
-	typedef UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST> type;
+	public:
+		typedef UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST> type;
 };
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_PROJECTS_LIST>::type InputProjectFilesList;
 
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_PROJECTS_LIST>
 {
-public:
-	typedef UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST> type;
+	public:
+		typedef UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST> type;
 };
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_PROJECTS_LIST>::type OutputProjectFilesList;
 
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_DATASET_FOLDER_PATH>
 {
-public:
-	typedef UIGlobalSetting_Path<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH> type;
+	public:
+		typedef UIGlobalSetting_Path<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH> type;
 };
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_DATASET_FOLDER_PATH>::type OpenInputFilePath;
 
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_DATASET_FOLDER_PATH>
 {
-public:
-	typedef UIGlobalSetting_Path<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH> type;
+	public:
+		typedef UIGlobalSetting_Path<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH> type;
 };
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_DATASET_FOLDER_PATH>::type OpenOutputFilePath;
 

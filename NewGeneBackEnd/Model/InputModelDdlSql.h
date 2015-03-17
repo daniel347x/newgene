@@ -1,8 +1,8 @@
 #ifndef INPUTMODELDDLSQL_H
-#define INPUTMODELDDLSQL_H
+	#define INPUTMODELDDLSQL_H
 
-#include <string>
+	#include <string>
 
-std::string InputModelDDLSQL();
+	std::string InputModelDDLSQL();
 
 #endif

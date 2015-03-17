@@ -2,9 +2,9 @@
 #define IMPORT_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/filesystem.hpp>
-#	include <boost/date_time/local_time/local_time.hpp>
-#	include <boost/date_time/gregorian/gregorian.hpp>
+	#include <boost/filesystem.hpp>
+	#include <boost/date_time/local_time/local_time.hpp>
+	#include <boost/date_time/gregorian/gregorian.hpp>
 #endif
 #include "../Fields.h"
 #include "../Schema.h"
@@ -24,7 +24,7 @@ class NameOrIndex
 
 		enum NAME_OR_INDEX
 		{
-			  NAME
+			NAME
 			, INDEX
 		};
 
@@ -52,8 +52,8 @@ class NameOrIndex
 		NameOrIndex(NAME_OR_INDEX const name_or_index_, std::string const name_)
 			: name_or_index(name_or_index_)
 			, index(-1)
-            , name(name_)
-        {
+			, name(name_)
+		{
 		}
 
 		NAME_OR_INDEX name_or_index;
@@ -76,7 +76,7 @@ class FieldMapping
 
 		enum FIELD_MAPPING_TYPE
 		{
-			  FIELD_MAPPING_TYPE__UNKNOWN
+			FIELD_MAPPING_TYPE__UNKNOWN
 			, FIELD_MAPPING_TYPE__ROW
 			, FIELD_MAPPING_TYPE__ONE_TO_ONE
 			, FIELD_MAPPING_TYPE__TIME_RANGE
@@ -153,7 +153,7 @@ class FieldMapping
 
 class RowFieldMapping : public FieldMapping
 {
-	
+
 	public:
 
 		RowFieldMapping()
@@ -234,43 +234,43 @@ class OneToOneFieldMapping : public RowFieldMapping
 class HardCodedFieldMapping : public RowFieldMapping
 {
 
-public:
+	public:
 
-	HardCodedFieldMapping()
-		: RowFieldMapping(FIELD_MAPPING_TYPE__HARD_CODED)
-	{
-	}
+		HardCodedFieldMapping()
+			: RowFieldMapping(FIELD_MAPPING_TYPE__HARD_CODED)
+		{
+		}
 
-	HardCodedFieldMapping(std::shared_ptr<BaseField> data_)
-		: RowFieldMapping(FIELD_MAPPING_TYPE__HARD_CODED)
-		, data(data_)
-	{
-	}
+		HardCodedFieldMapping(std::shared_ptr<BaseField> data_)
+			: RowFieldMapping(FIELD_MAPPING_TYPE__HARD_CODED)
+			, data(data_)
+		{
+		}
 
-	HardCodedFieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_, std::shared_ptr<BaseField> data_)
-		: RowFieldMapping(field_mapping_type_)
-		, data(data_)
-	{
-	}
+		HardCodedFieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_, std::shared_ptr<BaseField> data_)
+			: RowFieldMapping(field_mapping_type_)
+			, data(data_)
+		{
+		}
 
-	HardCodedFieldMapping(std::shared_ptr<BaseField> input_data_, FieldTypeEntry const & output_table_entry)
-		: RowFieldMapping(FIELD_MAPPING_TYPE__HARD_CODED, output_table_entry, false)
-		, data(input_data_)
-	{
-	}
+		HardCodedFieldMapping(std::shared_ptr<BaseField> input_data_, FieldTypeEntry const & output_table_entry)
+			: RowFieldMapping(FIELD_MAPPING_TYPE__HARD_CODED, output_table_entry, false)
+			, data(input_data_)
+		{
+		}
 
-	HardCodedFieldMapping(HardCodedFieldMapping const & rhs)
-		: RowFieldMapping(rhs)
-		, data(rhs.data)
-	{
-	}
+		HardCodedFieldMapping(HardCodedFieldMapping const & rhs)
+			: RowFieldMapping(rhs)
+			, data(rhs.data)
+		{
+		}
 
-	bool Validate()
-	{
-		return true;
-	}
+		bool Validate()
+		{
+			return true;
+		}
 
-	std::shared_ptr<BaseField> data;
+		std::shared_ptr<BaseField> data;
 
 };
 
@@ -298,18 +298,18 @@ class TimeRangeFieldMapping : public RowFieldMapping
 		enum TIME_RANGE_FIELD_MAPPING_TYPE
 		{
 
-			  TIME_RANGE_FIELD_MAPPING_TYPE__START = 0
+			TIME_RANGE_FIELD_MAPPING_TYPE__START = 0
 
 
-			  
-			// *************************************************************************************** //  
-			// Year mappings
-			// *************************************************************************************** //  
 
-			// Integer field
-			// that is used for both the starting YEAR and ending YEAR
-			// (with the ending year being set to the
-			// zeroeth second of the year AFTER the specified ending year)
+												   // *************************************************************************************** //
+												   // Year mappings
+												   // *************************************************************************************** //
+
+												   // Integer field
+												   // that is used for both the starting YEAR and ending YEAR
+												   // (with the ending year being set to the
+												   // zeroeth second of the year AFTER the specified ending year)
 			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__START_YEAR_ONLY
 
 			// Two integer fields are provided,
@@ -336,9 +336,9 @@ class TimeRangeFieldMapping : public RowFieldMapping
 
 
 
-			// *************************************************************************************** //  
+			// *************************************************************************************** //
 			// Month mappings
-			// *************************************************************************************** //  
+			// *************************************************************************************** //
 
 			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__START_MONTH_ONLY
 			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH
@@ -349,9 +349,9 @@ class TimeRangeFieldMapping : public RowFieldMapping
 
 
 
-			// *************************************************************************************** //  
+			// *************************************************************************************** //
 			// Day mappings
-			// *************************************************************************************** //  
+			// *************************************************************************************** //
 
 			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__START_DAY_ONLY
 			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__FROM__START_DAY__TO__END_DAY
@@ -367,9 +367,9 @@ class TimeRangeFieldMapping : public RowFieldMapping
 
 
 
-			// *************************************************************************************** //  
+			// *************************************************************************************** //
 			// Unused mappings
-			// *************************************************************************************** //  
+			// *************************************************************************************** //
 
 			// Special-case: Not used for NewGene application,
 			// but only for internal special-coded loading of Maoz, etc. data
@@ -392,7 +392,8 @@ class TimeRangeFieldMapping : public RowFieldMapping
 
 		}
 
-		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_, FIELD_MAPPING_TYPE const field_mapping_type_, FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
+		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_, FIELD_MAPPING_TYPE const field_mapping_type_, FieldTypeEntry const & input_field_entry,
+							  FieldTypeEntry const & output_table_entry)
 			: RowFieldMapping(field_mapping_type_, input_field_entry, output_table_entry)
 			, time_range_type(time_range_type_)
 		{
@@ -417,7 +418,7 @@ class TimeRangeFieldMapping : public RowFieldMapping
 		{
 
 		}
-		
+
 		bool Validate()
 		{
 			return true;
@@ -441,13 +442,13 @@ class ImportDefinition
 
 		enum IMPORT_TYPE
 		{
-			  IMPORT_TYPE__INPUT_MODEL
+			IMPORT_TYPE__INPUT_MODEL
 			, IMPORT_TYPE__OUTPUT_MODEL
 		};
 
 		enum FORMAT_QUALIFIERS
 		{
-			  FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED                        = 0X01
+			FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED                        = 0X01
 			, FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED                        = 0X02
 			, FORMAT_QUALIFIERS__STRINGS_ARE_EITHER_DOUBLEQUOTED_OR_SINGLEQUOTED = 0X04
 			, FORMAT_QUALIFIERS__COMMA_DELIMITED                                 = 0X08
@@ -489,7 +490,7 @@ class Importer
 
 		enum Mode
 		{
-			  INSERT_IN_BULK = 0
+			INSERT_IN_BULK = 0
 			, INSERT_OR_UPDATE
 		};
 
@@ -497,25 +498,27 @@ class Importer
 
 		enum WHICH_IMPORT
 		{
-			  IMPORT_DMU_SET_MEMBER = 0
+			IMPORT_DMU_SET_MEMBER = 0
 			, IMPORT_VG_INSTANCE_DATA
 		};
 
 	public:
 
-		typedef bool(*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors);
+		typedef bool(*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block,
+											 int const number_rows, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors);
 
 		static int const block_size_sqlite_limit = 500; // Maximum number of rows supported for block insert by SQLite
 		static int const block_size_no_sqlite_limit = 1000; // It doesn't really help to increase this much
 		int block_size;
 
-		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_, WHICH_IMPORT const & which_import_, std::string & errorMsg);
+		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_,
+				 TableImportCallbackFn table_write_callback_, WHICH_IMPORT const & which_import_, std::string & errorMsg);
 		virtual ~Importer();
 
 		bool DoImport(std::string & errorMsg, Messager & messager);
 
 	protected:
-	
+
 		ImportDefinition import_definition;
 		DataBlock input_block;
 		DataBlock output_block;
@@ -525,24 +528,28 @@ class Importer
 		TableImportCallbackFn table_write_callback;
 
 	protected:
-	
+
 		bool ValidateMapping();
 		void InitializeFields();
 		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg, Messager & messager);
-		void ReadFieldFromFile(char * & current_line_ptr, int & current_lines_read, int const & current_column_index, char * & parsed_line_ptr, bool & stop, SchemaEntry const & column, long const line, int const col, bool const is_final_col, std::string & errorMsg);
+		void ReadFieldFromFile(char *& current_line_ptr, int & current_lines_read, int const & current_column_index, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column,
+							   long const line, int const col, bool const is_final_col, std::string & errorMsg);
 
 	public:
 
-		static void InstantiateDataFieldInstance(FIELD_TYPE field_type, std::string field_name, DataFields &fields);
-		static void ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition, long const line, int const col, bool const is_final_col, std::string & errorMsg);
-		static void SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, long line, int col, bool const is_final_col, std::string & errorMsg);
+		static void InstantiateDataFieldInstance(FIELD_TYPE field_type, std::string field_name, DataFields & fields);
+		static void ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField,
+											ImportDefinition const & import_definition, long const line, int const col, bool const is_final_col, std::string & errorMsg);
+		static void SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, long line, int col, bool const is_final_col,
+									std::string & errorMsg);
 
 	protected:
 
-		static void ReadOneDataField(SchemaEntry const &column, BaseField & theField, char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, long const line, int const col, std::string & errorMsg);
-		static void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg);
-		static void EatWhitespace(char * & current_line_ptr, ImportDefinition const & import_definition);
-		static void EatSeparator(char * & current_line_ptr, ImportDefinition const & import_definition);
+		static void ReadOneDataField(SchemaEntry const & column, BaseField & theField, char *& current_line_ptr, char *& parsed_line_ptr, bool & stop,
+									 ImportDefinition const & import_definition, long const line, int const col, std::string & errorMsg);
+		static void RetrieveStringField(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg);
+		static void EatWhitespace(char *& current_line_ptr, ImportDefinition const & import_definition);
+		static void EatSeparator(char *& current_line_ptr, ImportDefinition const & import_definition);
 
 	public:
 

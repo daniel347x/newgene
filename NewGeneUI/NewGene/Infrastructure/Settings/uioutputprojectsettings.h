@@ -13,13 +13,14 @@ namespace OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE
 
 	enum OUTPUT_PROJECT_SETTINGS_UI
 	{
-		  SETTING_FIRST = 0
+		SETTING_FIRST = 0
 		, SETTING_LAST
 	};
 
 }
 
-class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting, UI_OUTPUT_PROJECT_SETTINGS>
+class UIOutputProjectSettings : public QObject, public
+	UIAllProjectSettings<OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting, UI_OUTPUT_PROJECT_SETTINGS>
 {
 
 		Q_OBJECT
@@ -61,10 +62,10 @@ class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<Outp
 
 	protected:
 
-        WorkQueueManager<UI_OUTPUT_PROJECT_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
+		WorkQueueManager<UI_OUTPUT_PROJECT_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			OutputProjectSettingsWorkQueue * work_queue = new OutputProjectSettingsWorkQueue();
-			work_queue->SetUIObject(reinterpret_cast<UIOutputProjectSettings*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIOutputProjectSettings *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

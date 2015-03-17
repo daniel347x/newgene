@@ -41,10 +41,11 @@ void InputModel::LoadTables()
 			if (variable_group_identifier.code)
 			{
 				std::unique_ptr<Table_VariableGroupData> vg_instance_data(new Table_VariableGroupData(*variable_group_identifier.code));
-#				if 0
-					// Do not load!  Wait until output dataset is generated
-					vg_instance_data->Load(db, this);
-#				endif
+				#				if 0
+				// Do not load!  Wait until output dataset is generated
+				vg_instance_data->Load(db, this);
+				#				endif
+
 				if (!tableManager().TableExists(db, vg_instance_data->table_name))
 				{
 
@@ -54,6 +55,7 @@ void InputModel::LoadTables()
 					{
 
 						ImportDefinition new_definition = ImportDefinitions::CreateImportDefinition(*variable_group_identifier.code);
+
 						if (new_definition.IsEmpty())
 						{
 							// Todo: log warning
@@ -61,7 +63,8 @@ void InputModel::LoadTables()
 						}
 
 						std::string errorMsg;
-						Importer table_importer(new_definition, this, vg_instance_data.get(), Importer::INSERT_IN_BULK, variable_group_identifier, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
+						Importer table_importer(new_definition, this, vg_instance_data.get(), Importer::INSERT_IN_BULK, variable_group_identifier, InputModelImportTableFn,
+												Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
 
 						// disable, now that real import is completed
 
@@ -92,17 +95,20 @@ void InputModel::LoadTables()
 
 }
 
-bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors)
+bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block,
+							 int const number_rows, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors)
 {
 
 	int number_errors_at_start = errors.size();
 	std::string errorMsg;
+
 	try
 	{
 		if (table_->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
 		{
 
-			InputModel * input_model = dynamic_cast<InputModel*>(model_);
+			InputModel * input_model = dynamic_cast<InputModel *>(model_);
+
 			if (!input_model)
 			{
 				boost::format msg("Bad input model in InputModelImportTableFn");
@@ -111,6 +117,7 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 				errorMsg.clear();
 				return false;
 			}
+
 			if (input_model->getDb() == nullptr)
 			{
 				boost::format msg("Bad input model db in InputModelImportTableFn");
@@ -121,41 +128,45 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 			}
 
 			errorMsg.clear();
+
 			switch (importer->mode)
 			{
 
 				case Importer::INSERT_IN_BULK:
-				{
-					long numlinesupdated = 0;
-					table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, goodwritelines, goodupdatelines, errors);
-					int number_errors_now = errors.size();
-					if (number_errors_now > number_errors_at_start)
 					{
-						return false;
+						long numlinesupdated = 0;
+						table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, goodwritelines, goodupdatelines, errors);
+						int number_errors_now = errors.size();
+
+						if (number_errors_now > number_errors_at_start)
+						{
+							return false;
+						}
 					}
-				}
 					break;
 
 				case Importer::INSERT_OR_UPDATE:
-				{
-					long numlinesupdated = 0;
-					table_->ImportBlockUpdate(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, goodwritelines, goodupdatelines, numlinesupdated, errors);
-					int number_errors_now = errors.size();
-					if (number_errors_now > number_errors_at_start)
 					{
-						return false;
+						long numlinesupdated = 0;
+						table_->ImportBlockUpdate(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, goodwritelines, goodupdatelines,
+												  numlinesupdated, errors);
+						int number_errors_now = errors.size();
+
+						if (number_errors_now > number_errors_at_start)
+						{
+							return false;
+						}
 					}
-				}
 					break;
 
 				default:
-				{
-					boost::format msg("Incorrect import mode attempting to call block update function.");
-					errorMsg = msg.str();
-					errors.push_back(errorMsg);
-					errorMsg.clear();
-					return false;
-				}
+					{
+						boost::format msg("Incorrect import mode attempting to call block update function.");
+						errorMsg = msg.str();
+						errors.push_back(errorMsg);
+						errorMsg.clear();
+						return false;
+					}
 					break;
 
 			}

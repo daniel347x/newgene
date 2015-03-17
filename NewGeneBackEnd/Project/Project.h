@@ -2,7 +2,7 @@
 #define PROJECT_H
 
 #ifndef Q_MOC_RUN
-//#	include <boost/thread/recursive_timed_mutex.hpp>
+	//#	include <boost/thread/recursive_timed_mutex.hpp>
 #endif
 #include <memory>
 #include "../Settings/ProjectSettings.h"
@@ -20,8 +20,8 @@ class Project
 		static int const number_worker_threads = 1; // For now, single thread only in pool
 
 		Project(std::shared_ptr<ProjectSettings<PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS> > const & project_settings,
-									 std::shared_ptr<ModelSettings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>> const & model_settings,
-									 std::shared_ptr<MODEL_CLASS> const & model)
+				std::shared_ptr<ModelSettings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>> const & model_settings,
+				std::shared_ptr<MODEL_CLASS> const & model)
 			: _project_settings(project_settings)
 			, _model_settings(model_settings)
 			, _model(model)
@@ -61,7 +61,7 @@ class Project
 		std::shared_ptr<MODEL_CLASS> const _model;
 
 	public:
-	
+
 		std::recursive_timed_mutex data_mutex;
 
 };

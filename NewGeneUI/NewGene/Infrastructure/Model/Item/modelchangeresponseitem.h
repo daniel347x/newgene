@@ -8,7 +8,7 @@ class ModelChangeResponseItem : public ModelChangeItem
 {
 		Q_OBJECT
 	public:
-		explicit ModelChangeResponseItem( QObject * parent = 0 );
+		explicit ModelChangeResponseItem(QObject * parent = 0);
 
 	signals:
 

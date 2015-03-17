@@ -20,7 +20,7 @@ Messager * dummy_messager_ptr = &dummy_messager;
 template<typename MANAGER_CLASS>
 MANAGER_CLASS & get_a_ui_manager(UIMessager * messager)
 {
-	return static_cast<MANAGER_CLASS&>(MANAGER_CLASS::getManager(messager));
+	return static_cast<MANAGER_CLASS &>(MANAGER_CLASS::getManager(messager));
 }
 
 UISettingsManager & settingsManagerUI(UIMessager * messager)

@@ -13,7 +13,7 @@ class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 	public:
 
-        UIModelSettings(UIMessager & messager, int const number_worker_threads)
+		UIModelSettings(UIMessager & messager, int const number_worker_threads)
 			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(messager, number_worker_threads)
 		{
 
@@ -49,7 +49,7 @@ class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 					protected:
 
-                        _RelatedImpl_base(UIMessager &, boost::filesystem::path const)
+						_RelatedImpl_base(UIMessager &, boost::filesystem::path const)
 						{
 
 						}
@@ -65,9 +65,10 @@ class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 						{
 							if (!_settings_repository)
 							{
-								boost::format msg( "Settings repository instance not yet constructed." );
-								throw NewGeneException() << newgene_error_description( msg.str() );
+								boost::format msg("Settings repository instance not yet constructed.");
+								throw NewGeneException() << newgene_error_description(msg.str());
 							}
+
 							return *_settings_repository;
 						}
 
@@ -95,9 +96,10 @@ class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				{
 					if (!__backend_impl)
 					{
-						boost::format msg( "Internal backend settings implementation not yet constructed." );
-						throw NewGeneException() << newgene_error_description( msg.str() );
+						boost::format msg("Internal backend settings implementation not yet constructed.");
+						throw NewGeneException() << newgene_error_description(msg.str());
 					}
+
 					return *(__backend_impl.get());
 				}
 
@@ -115,14 +117,14 @@ class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		Settings<SETTINGS_ENUM, SETTING_CLASS> &
 		getBackendSettings_base(_impl_base<BACKEND_SETTINGS_CLASS> & impl)
 		{
-            return static_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(impl.getInternalBackendImplementation().getSettingsRepository());
-        }
+			return static_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(impl.getInternalBackendImplementation().getSettingsRepository());
+		}
 
 		template<typename BACKEND_SETTINGS_CLASS>
 		std::shared_ptr<BACKEND_SETTINGS_CLASS>
 		getBackendSettingsSharedPtr_base(_impl_base<BACKEND_SETTINGS_CLASS> & impl)
 		{
-            return impl.getInternalBackendImplementation().getSettingsRepositorySharedPtr();
+			return impl.getInternalBackendImplementation().getSettingsRepositorySharedPtr();
 		}
 
 };

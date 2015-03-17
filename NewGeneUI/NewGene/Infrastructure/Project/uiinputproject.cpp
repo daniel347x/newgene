@@ -4,7 +4,7 @@
 void UIInputProject::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg.c_str() );
+	msgBox.setText(msg.c_str());
 	msgBox.exec();
 }
 
@@ -12,10 +12,12 @@ bool UIInputProject::QuestionMessageBox(STD_STRING msg_title, STD_STRING msg_tex
 {
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 	if (reply == QMessageBox::Yes)
 	{
 		return true;
 	}
+
 	return false;
 }
 
@@ -30,10 +32,12 @@ bool UIInputProject::is_model_equivalent(UIMessager & messager, UIInputModel * m
 	{
 		boost::filesystem::path this_path = model().backend().getPathToDatabaseFile();
 		boost::filesystem::path that_path = model_->backend().getPathToDatabaseFile();
+
 		try
 		{
 			bool this_exists = boost::filesystem::exists(this_path);
 			bool that_exists = boost::filesystem::exists(that_path);
+
 			if (this_exists != that_exists)
 			{
 				return false;

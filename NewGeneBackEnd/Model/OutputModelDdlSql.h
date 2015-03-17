@@ -1,8 +1,8 @@
 #ifndef OUTPUTMODELDDLSQL_H
-#define OUTPUTMODELDDLSQL_H
+	#define OUTPUTMODELDDLSQL_H
 
-#include <string>
+	#include <string>
 
-std::string OutputModelDDLSQL();
+	std::string OutputModelDDLSQL();
 
 #endif

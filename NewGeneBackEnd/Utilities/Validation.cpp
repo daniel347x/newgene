@@ -1,9 +1,9 @@
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#	include <boost/regex.hpp>
-#	include <boost/format.hpp>
-#	include <boost/lexical_cast.hpp>
-#	include "boost/date_time/gregorian/gregorian.hpp"
+	#include <boost/algorithm/string.hpp>
+	#include <boost/regex.hpp>
+	#include <boost/format.hpp>
+	#include <boost/lexical_cast.hpp>
+	#include "boost/date_time/gregorian/gregorian.hpp"
 #endif
 #include "Validation.h"
 #include <cstdint>
@@ -24,15 +24,18 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, b
 	}
 
 	std::string regex_string_uuid("([a-zA-Z_0-9 *#.-]*)");
+
 	if (isIntegerType)
 	{
 		std::string regex_string_uuid("([0-9-]*)");
 	}
+
 	boost::regex regex_uuid(regex_string_uuid);
 	boost::cmatch matches_uuid;
 
 	bool valid = false;
 	std::string invalid_string;
+
 	if (boost::regex_match(proposed_dmu_member_uuid.c_str(), matches_uuid, regex_uuid))
 	{
 		// matches[0] contains the original string.  matches[n]
@@ -173,6 +176,7 @@ bool Validation::ValidateDmuMemberDescription(std::string & proposed_dmu_member_
 	boost::trim(proposed_dmu_member_description);
 
 	bool valid = true;
+
 	if (proposed_dmu_member_description.size() > 4096)
 	{
 		boost::format msg("The description is too long (maximum length: 4096).");
@@ -294,7 +298,8 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 
 }
 
-bool Validation::ValidateColumnDescription(std::string & proposed_column_description, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
+bool Validation::ValidateColumnDescription(std::string & proposed_column_description, std::string const & column_description_for_invalid_message, bool const required,
+		std::string & errorMsg)
 {
 
 	errorMsg.clear();
@@ -494,6 +499,7 @@ bool Validation::ValidateUoaDescription(std::string & proposed_uoa_description, 
 	boost::trim(proposed_uoa_description);
 
 	bool valid = true;
+
 	if (proposed_uoa_description.size() > 4096)
 	{
 		boost::format msg("The description is too long (maximum length: 4096).");
@@ -614,7 +620,8 @@ bool Validation::ValidateVgDescription(std::string & proposed_vg_description, st
 
 }
 
-bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short & theYear, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
+bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short & theYear, std::string const & column_description_for_invalid_message, bool const required,
+									 std::string & errorMsg)
 {
 
 	errorMsg.clear();
@@ -645,6 +652,7 @@ bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short 
 		boost::cmatch matches;
 
 		valid = false;
+
 		if (boost::regex_match(proposed_year_integer.c_str(), matches, regex))
 		{
 			// matches[0] contains the original string.  matches[n]
@@ -705,7 +713,8 @@ bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short 
 
 }
 
-bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, short & theMonth, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
+bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, short & theMonth, std::string const & column_description_for_invalid_message, bool const required,
+									  std::string & errorMsg)
 {
 
 	errorMsg.clear();
@@ -736,6 +745,7 @@ bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, shor
 		boost::cmatch matches;
 
 		valid = false;
+
 		if (boost::regex_match(proposed_month_integer.c_str(), matches, regex))
 		{
 			// matches[0] contains the original string.  matches[n]
@@ -754,6 +764,7 @@ bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, shor
 					{
 						std::string the_month_string(matches[1].first, matches[1].second);
 						theMonth = boost::lexical_cast<short>(the_month_string);
+
 						if (theMonth >= 1 && theMonth <= 12)
 						{
 							valid = true;
@@ -794,7 +805,8 @@ bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, shor
 
 }
 
-bool Validation::ValidateDayInteger(short const theYear, short const theMonth, std::string & proposed_day_integer, short & theDay, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
+bool Validation::ValidateDayInteger(short const theYear, short const theMonth, std::string & proposed_day_integer, short & theDay,
+									std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
 {
 
 	errorMsg.clear();
@@ -891,6 +903,7 @@ bool Validation::ValidateDayInteger(short const theYear, short const theMonth, s
 				errorMsg = msg.str();
 			}
 		}
+
 		if (!valid)
 		{
 			boost::format msg("The '%1%' is invalid.");

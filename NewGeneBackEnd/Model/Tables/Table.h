@@ -2,8 +2,8 @@
 #define TABLE_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#	include <boost/lexical_cast.hpp>
+	#include <boost/algorithm/string.hpp>
+	#include <boost/lexical_cast.hpp>
 #endif
 #include <tuple>
 #include <vector>
@@ -34,7 +34,7 @@ class TableMetadata : public TableMetadata_base
 
 enum TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE
 {
-	  TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__NONE
+	TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__NONE
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT
@@ -76,11 +76,13 @@ class Table_basemost
 		virtual void Load(sqlite3 *, InputModel * = nullptr) { };
 		virtual void Load(sqlite3 *, OutputModel * = nullptr, InputModel * = nullptr) { };
 		virtual bool ImportStart(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
-		virtual void ImportBlockBulk(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors);
-		virtual void ImportBlockUpdate(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, long & numlinesupdated, std::vector<std::string> & errors);
+		virtual void ImportBlockBulk(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines,
+									 long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors);
+		virtual void ImportBlockUpdate(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines,
+									   long & goodwritelines, long & goodupdatelines, long & numlinesupdated, std::vector<std::string> & errors);
 
-		int TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db, std::string & errorMsg);
-		int TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db, std::string & errorMsg);
+		int TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db, std::string & errorMsg);
+		int TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db, std::string & errorMsg);
 
 		void FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert, bool const no_quotes = false);
 
@@ -93,15 +95,18 @@ class Table_basemost
 		{
 			std::string out;
 			char const * cs = s.c_str();
+
 			while (*cs != '\0')
 			{
 				if (*cs == '\'')
 				{
 					out += '\'';
 				}
+
 				out += *cs;
 				++cs;
 			}
+
 			return out;
 		}
 
@@ -236,7 +241,8 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			bool found = false;
-			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&code, &parent_uuid, &found, &the_identifier](std::pair<NewGeneUUID, WidgetInstanceIdentifiers> const & identifiers_)
+			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&code, &parent_uuid, &found,
+						  &the_identifier](std::pair<NewGeneUUID, WidgetInstanceIdentifiers> const & identifiers_)
 			{
 				if (found)
 				{
@@ -269,7 +275,8 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			WidgetInstanceIdentifier the_identifier;
 			bool found = false;
-			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&uuid_, &parent_uuid, &found, &the_identifier, &use_code_for_parent](std::pair<NewGeneUUID, WidgetInstanceIdentifiers> const & identifiers_)
+			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&uuid_, &parent_uuid, &found, &the_identifier,
+						  &use_code_for_parent](std::pair<NewGeneUUID, WidgetInstanceIdentifiers> const & identifiers_)
 			{
 				if (found)
 				{
@@ -281,7 +288,8 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 
 					// The category matches
 
-					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&uuid_, &parent_uuid, &found, &the_identifier, &use_code_for_parent](WidgetInstanceIdentifier const & identifier_)
+					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&uuid_, &parent_uuid, &found, &the_identifier,
+								  &use_code_for_parent](WidgetInstanceIdentifier const & identifier_)
 					{
 
 						if (!use_code_for_parent)

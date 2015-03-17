@@ -26,7 +26,7 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 			, messager(messager_)
 		{
 			messager.set(this);
-            is_input_project = true;
+			is_input_project = true;
 		}
 
 		void UpdateConnections();
@@ -53,7 +53,7 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 		WorkQueueManager<UI_INPUT_PROJECT> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			InputProjectWorkQueue * work_queue = new InputProjectWorkQueue();
-			work_queue->SetUIObject(reinterpret_cast<UIInputProject*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIInputProject *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

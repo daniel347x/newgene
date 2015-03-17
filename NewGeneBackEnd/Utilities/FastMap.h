@@ -2,9 +2,9 @@
 #define _FASTMAP_NEWGENE_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/pool/pool_alloc.hpp>
-#	include <boost/container/flat_map.hpp>
-#	include <boost/container/flat_set.hpp>
+	#include <boost/pool/pool_alloc.hpp>
+	#include <boost/container/flat_map.hpp>
+	#include <boost/container/flat_set.hpp>
 #endif
 #include <utility>
 #include <set>
@@ -30,7 +30,8 @@ struct calculate_consolidated_total_number_rows_tag {};
 
 // Vectors
 
-typedef std::vector<newgene_random_cpp_int, boost::pool_allocator<newgene_random_cpp_int, boost::default_user_allocator_malloc_free, newgene_cpp_int_random_tag, boost::details::pool::null_mutex>> FastVectorCppInt;
+typedef std::vector<newgene_random_cpp_int, boost::pool_allocator<newgene_random_cpp_int, boost::default_user_allocator_malloc_free, newgene_cpp_int_random_tag, boost::details::pool::null_mutex>>
+		FastVectorCppInt;
 
 template <typename K, typename MEMORY_TAG>
 using FastVectorMemoryTag = std::vector<K, boost::pool_allocator<K, boost::default_user_allocator_malloc_free, MEMORY_TAG, boost::details::pool::null_mutex>>;
@@ -50,7 +51,8 @@ using FastListMemoryTag = std::list<K, boost::fast_pool_allocator<K, boost::defa
 //using FastMapCppInt = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K, V>, boost::default_user_allocator_malloc_free, newgene_cpp_int_tag, boost::details::pool::null_mutex>>;
 
 template<typename K, typename V, typename MEMORY_TAG, class Comp_ = std::less<K>>
-using FastMapMemoryTag = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K, V>, boost::default_user_allocator_malloc_free, MEMORY_TAG, boost::details::pool::null_mutex>>;
+using FastMapMemoryTag =
+	std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K, V>, boost::default_user_allocator_malloc_free, MEMORY_TAG, boost::details::pool::null_mutex>>;
 
 //template<typename K, typename V, class Comp_ = std::less<K>>
 //using FastMapFlat =
@@ -60,7 +62,8 @@ using FastMapMemoryTag = std::map<K, V, Comp_, boost::fast_pool_allocator<std::p
 
 // Sets
 
-typedef std::set<newgene_random_cpp_int, std::less<newgene_cpp_int>, boost::fast_pool_allocator<newgene_cpp_int, boost::default_user_allocator_malloc_free, newgene_cpp_int_random_tag, boost::details::pool::null_mutex>> FastSetCppInt;
+typedef std::set<newgene_random_cpp_int, std::less<newgene_cpp_int>, boost::fast_pool_allocator<newgene_cpp_int, boost::default_user_allocator_malloc_free, newgene_cpp_int_random_tag, boost::details::pool::null_mutex>>
+		FastSetCppInt;
 
 template<typename K, typename MEMORY_TAG, class Comp_ = std::less<K>>
 using FastSetMemoryTag = std::set<K, Comp_, boost::fast_pool_allocator<K, boost::default_user_allocator_malloc_free, MEMORY_TAG, boost::details::pool::null_mutex>>;

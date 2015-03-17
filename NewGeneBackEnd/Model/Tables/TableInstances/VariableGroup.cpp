@@ -1,5 +1,5 @@
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
+	#include <boost/algorithm/string.hpp>
 #endif
 #include "VariableGroup.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
@@ -644,10 +644,11 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 			// ************************************************************************************************************ //
 			//if (std::string(code) != "DATETIME_ROW_START" && std::string(code) != "DATETIME_ROW_END")
 			//{
-				WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(fk_vg_uuid);
-				vg_category_identifier.time_granularity = vg_category_identifier.identifier_parent->time_granularity;
-				identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, vg_category_identifier, code, longhand, seqnumber, flags, vg_category_identifier.identifier_parent->time_granularity,
-					MakeNotes(notes1, notes2, notes3)));
+			WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(fk_vg_uuid);
+			vg_category_identifier.time_granularity = vg_category_identifier.identifier_parent->time_granularity;
+			identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, vg_category_identifier, code, longhand, seqnumber, flags,
+												  vg_category_identifier.identifier_parent->time_granularity,
+												  MakeNotes(notes1, notes2, notes3)));
 			//}
 		}
 	}
@@ -659,7 +660,8 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 	}
 }
 
-bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition, std::string & errorMsg)
+bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition,
+		std::string & errorMsg)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -732,10 +734,11 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 		// ************************************************************************************************************ //
 		//if (table_schema_entry.field_name != "DATETIME_ROW_START" && table_schema_entry.field_name != "DATETIME_ROW_END")
 		//{
-			WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(*variable_group.uuid);
-			std::string flags;
-			identifiers_map[*variable_group.uuid].push_back(WidgetInstanceIdentifier(new_uuid, vg_category_identifier, table_schema_entry.field_name, table_schema_entry.field_description, sequence_number, flags.c_str(), vg_category_identifier.time_granularity));
-			++sequence_number;
+		WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(*variable_group.uuid);
+		std::string flags;
+		identifiers_map[*variable_group.uuid].push_back(WidgetInstanceIdentifier(new_uuid, vg_category_identifier, table_schema_entry.field_name, table_schema_entry.field_description,
+				sequence_number, flags.c_str(), vg_category_identifier.time_granularity));
+		++sequence_number;
 		//}
 
 	});

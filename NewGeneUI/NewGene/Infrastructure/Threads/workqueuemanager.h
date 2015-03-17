@@ -10,7 +10,7 @@
 
 enum WORK_QUEUE_THREAD_LOOP_CLASS_ENUM
 {
-	  UI_INPUT_PROJECT
+	UI_INPUT_PROJECT
 	, UI_OUTPUT_PROJECT
 	, UI_INPUT_PROJECT_SETTINGS
 	, UI_OUTPUT_PROJECT_SETTINGS
@@ -31,7 +31,7 @@ class WorkQueueManagerBase : public QObject
 
 	public:
 
-		explicit WorkQueueManagerBase(bool isPool2_ = false, QObject *parent = 0);
+		explicit WorkQueueManagerBase(bool isPool2_ = false, QObject * parent = 0);
 
 		// **********************************************************************************************************//
 		// Called in context of Boost WORK POOL threads - NOT in context of this work queue manager's event loop thread
@@ -160,7 +160,7 @@ class WorkQueueManager : public WorkQueueManagerBase
 
 	public:
 
-		explicit WorkQueueManager(bool isPool2_ = false, QObject *parent = 0)
+		explicit WorkQueueManager(bool isPool2_ = false, QObject * parent = 0)
 			: WorkQueueManagerBase(isPool2_, parent)
 		{
 

@@ -5,13 +5,14 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-NewGeneVariableSummaryScrollArea::NewGeneVariableSummaryScrollArea( QWidget * parent ) :
-	QWidget( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_SUMMARY_SCROLL_AREA, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneVariableSummaryScrollArea )
+NewGeneVariableSummaryScrollArea::NewGeneVariableSummaryScrollArea(QWidget * parent) :
+	QWidget(parent),
+	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_SUMMARY_SCROLL_AREA,
+									 true)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	ui(new Ui::NewGeneVariableSummaryScrollArea)
 {
 
-	ui->setupUi( this );
+	ui->setupUi(this);
 
 	PrepareOutputWidget();
 
@@ -22,14 +23,14 @@ NewGeneVariableSummaryScrollArea::~NewGeneVariableSummaryScrollArea()
 	delete ui;
 }
 
-void NewGeneVariableSummaryScrollArea::changeEvent( QEvent * e )
+void NewGeneVariableSummaryScrollArea::changeEvent(QEvent * e)
 {
-	QWidget::changeEvent( e );
+	QWidget::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:
@@ -43,17 +44,20 @@ void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(NewGeneWidget::UP
 
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
-		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)));
+		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)), outp->getConnector(),
+				SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)));
 
 		// *** This is a parent (top-level) widget, so connect to refreshes here (... child widgets don't connect to refreshes) *** //
-		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)));
+		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)), this,
+				SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)));
 
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
-		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)));
+		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)), this,
+				SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)));
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
-        cached_active_vg = WidgetInstanceIdentifier{};
+		cached_active_vg = WidgetInstanceIdentifier{};
 		Empty();
 	}
 }
@@ -85,6 +89,7 @@ void NewGeneVariableSummaryScrollArea::RefreshAllWidgets()
 		Empty();
 		return;
 	}
+
 	WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
@@ -99,13 +104,14 @@ void NewGeneVariableSummaryScrollArea::WidgetDataRefreshReceive(WidgetDataItem_V
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
 			WidgetInstanceIdentifier new_identifier(identifier);
-			NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this, new_identifier, outp );
+			NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup(this, new_identifier, outp);
 			tmpGrp->setTitle(identifier.longhand->c_str());
 			layout()->addWidget(tmpGrp);
-            if (new_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
-            {
-                DoTabChange(new_identifier);
-            }
+
+			if (new_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+			{
+				DoTabChange(new_identifier);
+			}
 		}
 	});
 
@@ -116,6 +122,7 @@ void NewGeneVariableSummaryScrollArea::WidgetDataRefreshReceive(WidgetDataItem_V
 	if (widget_data.identifier && widget_data.identifier->uuid)
 	{
 		NewGeneWidget * child = outp->FindWidgetFromDataItem(uuid, *widget_data.identifier->uuid);
+
 		if (child)
 		{
 			child->WidgetDataRefreshReceive(widget_data);
@@ -125,9 +132,10 @@ void NewGeneVariableSummaryScrollArea::WidgetDataRefreshReceive(WidgetDataItem_V
 
 void NewGeneVariableSummaryScrollArea::Empty()
 {
-    //cached_active_vg = WidgetInstanceIdentifier{}; // No - this is sometimes called after the variable selection widget has loaded, but before this widget has begun loading - we need to save the cached value
-    DoTabChange(cached_active_vg);
-	QLayoutItem *child;
+	//cached_active_vg = WidgetInstanceIdentifier{}; // No - this is sometimes called after the variable selection widget has loaded, but before this widget has begun loading - we need to save the cached value
+	DoTabChange(cached_active_vg);
+	QLayoutItem * child;
+
 	while ((child = layout()->takeAt(0)) != 0)
 	{
 		delete child->widget();
@@ -139,13 +147,14 @@ void NewGeneVariableSummaryScrollArea::Empty()
 void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & change_message)
 {
 
-    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 
-    UIMessager messager(project);
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
 
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{
@@ -162,17 +171,17 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 								if (change.parent_identifier.uuid && change.parent_identifier.code && change.parent_identifier.longhand)
 								{
 									WidgetInstanceIdentifier new_identifier(change.parent_identifier);
-									NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this, new_identifier, outp );
+									NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup(this, new_identifier, outp);
 									tmpGrp->setTitle(new_identifier.longhand->c_str());
 									layout()->addWidget(tmpGrp);
 
-                                    // Upon first project load, the variable selection widget may have loaded before we did.
-                                    // We cache the proper VG and then set its text to bold here.
-                                    if (new_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
-                                    {
-                                        DoTabChange(new_identifier);
-                                    }
-                                }
+									// Upon first project load, the variable selection widget may have loaded before we did.
+									// We cache the proper VG and then set its text to bold here.
+									if (new_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+									{
+										DoTabChange(new_identifier);
+									}
+								}
 
 							}
 							break;
@@ -190,22 +199,27 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 									QWidget * widgetToRemove = nullptr;
 									QLayoutItem * layoutItemToRemove = nullptr;
 									int i = 0;
-									for (i=0; i<current_number; ++i)
+
+									for (i = 0; i < current_number; ++i)
 									{
 										QLayoutItem * testLayoutItem = layout()->itemAt(i);
 										QWidget * testWidget(testLayoutItem->widget());
+
 										try
 										{
-											NewGeneVariableSummaryGroup * testVG = dynamic_cast<NewGeneVariableSummaryGroup*>(testWidget);
+											NewGeneVariableSummaryGroup * testVG = dynamic_cast<NewGeneVariableSummaryGroup *>(testWidget);
+
 											if (testVG && testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg_to_remove))
 											{
 												widgetToRemove = testVG;
 												layoutItemToRemove = testLayoutItem;
 												found = true;
-                                                if (testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
-                                                {
-                                                    cached_active_vg = WidgetInstanceIdentifier{};
-                                                }
+
+												if (testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+												{
+													cached_active_vg = WidgetInstanceIdentifier{};
+												}
+
 												break;
 											}
 										}
@@ -250,6 +264,7 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 					}
 				}
 				break;
+
 			default:
 				{
 				}
@@ -261,27 +276,30 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 
 void NewGeneVariableSummaryScrollArea::DoTabChange(WidgetInstanceIdentifier data)
 {
-    cached_active_vg = data;
+	cached_active_vg = data;
 
-    int current_number = layout()->count();
-    bool found = false;
-    for (int i=0; i<current_number; ++i)
-    {
-        QLayoutItem * layoutItem = layout()->itemAt(i);
-        if (layoutItem)
-        {
-            auto vg = dynamic_cast<NewGeneVariableSummaryGroup*>(layoutItem->widget());
-            if (vg)
-            {
-                if (vg->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, data))
-                {
-                    vg->setStyleSheet("QGroupBox {font-weight: bold; color: #101078;}");
-                }
-                else
-                {
-                    vg->setStyleSheet("QGroupBox {font-weight: normal; color: black;}");
-                }
-            }
-        }
-    }
+	int current_number = layout()->count();
+	bool found = false;
+
+	for (int i = 0; i < current_number; ++i)
+	{
+		QLayoutItem * layoutItem = layout()->itemAt(i);
+
+		if (layoutItem)
+		{
+			auto vg = dynamic_cast<NewGeneVariableSummaryGroup *>(layoutItem->widget());
+
+			if (vg)
+			{
+				if (vg->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, data))
+				{
+					vg->setStyleSheet("QGroupBox {font-weight: bold; color: #101078;}");
+				}
+				else
+				{
+					vg->setStyleSheet("QGroupBox {font-weight: normal; color: black;}");
+				}
+			}
+		}
+	}
 }

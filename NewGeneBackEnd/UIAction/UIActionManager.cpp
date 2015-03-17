@@ -1,7 +1,7 @@
 #include "UIActionManager.h"
 
 #ifndef Q_MOC_RUN
-#	include <boost/thread/thread.hpp>
+	#include <boost/thread/thread.hpp>
 #endif
 
 std::recursive_mutex UIActionManager::is_busy_mutex;
@@ -14,6 +14,7 @@ bool UIActionManager::FailIfBusy(Messager & messager)
 	{
 		{
 			std::lock_guard<std::recursive_mutex> guard(is_busy_mutex);
+
 			if (!is_busy)
 			{
 				is_busy = true;

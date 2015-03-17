@@ -1,5 +1,5 @@
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
+	#include <boost/algorithm/string.hpp>
 #endif
 #include "qsortfilterproxymodel_numberslast.h"
 #include "../../../../NewGeneBackEnd/Utilities/WidgetIdentifier.h"
@@ -12,11 +12,12 @@ QSortFilterProxyModel_NumbersLast::QSortFilterProxyModel_NumbersLast(QObject * p
 {
 }
 
-bool QSortFilterProxyModel_NumbersLast::lessThan(const QModelIndex &left, const QModelIndex &right) const
+bool QSortFilterProxyModel_NumbersLast::lessThan(const QModelIndex & left, const QModelIndex & right) const
 {
 
 	QStandardItemModel * model = nullptr;
 	bool bad = false;
+
 	try
 	{
 		model = dynamic_cast<QStandardItemModel *>(sourceModel());
@@ -47,36 +48,42 @@ bool QSortFilterProxyModel_NumbersLast::lessThan(const QModelIndex &left, const 
 	//WidgetInstanceIdentifier identifierRight = sourceModel()->data(right).value<WidgetInstanceIdentifier>();
 
 	bool has_code_left = false;
+
 	if (identifierLeft.code && !identifierLeft.code->empty())
 	{
 		has_code_left = true;
 	}
 
 	bool has_description_left = false;
+
 	if (identifierLeft.longhand && !identifierLeft.longhand->empty())
 	{
 		has_description_left = true;
 	}
 
 	bool has_text_left = false;
+
 	if (has_code_left || has_description_left)
 	{
 		has_text_left = true;
 	}
 
 	bool has_code_right = false;
+
 	if (identifierRight.code && !identifierRight.code->empty())
 	{
 		has_code_right = true;
 	}
 
 	bool has_description_right = false;
+
 	if (identifierRight.longhand && !identifierRight.longhand->empty())
 	{
 		has_description_right = true;
 	}
 
 	bool has_text_right = false;
+
 	if (has_code_right || has_description_right)
 	{
 		has_text_right = true;

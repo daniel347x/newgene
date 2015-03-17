@@ -41,16 +41,17 @@ template<>
 class ModelFactory<InputModel>
 {
 
-public:
+	public:
 
-	InputModel * operator()(Messager & messager, boost::filesystem::path const path_to_model_database)
-	{
-		InputModel * new_model = new InputModel(messager, path_to_model_database);
-		return new_model;
-	}
+		InputModel * operator()(Messager & messager, boost::filesystem::path const path_to_model_database)
+		{
+			InputModel * new_model = new InputModel(messager, path_to_model_database);
+			return new_model;
+		}
 
 };
 
-bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors);
+bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block,
+							 int const number_rows, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors);
 
 #endif

@@ -17,16 +17,16 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 
 	public:
 
-		explicit NewGeneManageVGs( QWidget * parent = 0 );
+		explicit NewGeneManageVGs(QWidget * parent = 0);
 		~NewGeneManageVGs();
 
-		bool event ( QEvent * e );
+		bool event(QEvent * e);
 
 		void HandleChanges(DataChangeMessage const &);
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 		void Empty();
 
 	private:
@@ -55,8 +55,8 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 		bool GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstanceIdentifier & uoa);
 
 	private slots:
-        void ReceiveVGSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        void on_pushButton_add_vg_clicked();
+		void ReceiveVGSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+		void on_pushButton_add_vg_clicked();
 		void on_pushButton_remove_vg_clicked();
 		void on_pushButton_refresh_vg_clicked();
 

@@ -18,7 +18,7 @@ class NewGeneWidget
 
 		enum WIDGET_NATURE
 		{
-			  WIDGET_NATURE_UNKNOWN
+			WIDGET_NATURE_UNKNOWN
 			, WIDGET_NATURE_GENERAL
 			, WIDGET_NATURE_INPUT_WIDGET
 			, WIDGET_NATURE_OUTPUT_WIDGET
@@ -26,7 +26,7 @@ class NewGeneWidget
 
 		enum UPDATE_CONNECTIONS_TYPE
 		{
-			  RELEASE_CONNECTIONS_INPUT_PROJECT
+			RELEASE_CONNECTIONS_INPUT_PROJECT
 			, ESTABLISH_CONNECTIONS_INPUT_PROJECT
 			, RELEASE_CONNECTIONS_OUTPUT_PROJECT
 			, ESTABLISH_CONNECTIONS_OUTPUT_PROJECT
@@ -34,7 +34,7 @@ class NewGeneWidget
 
 	public:
 
-		NewGeneWidget( WidgetCreationInfo const & creation_info );
+		NewGeneWidget(WidgetCreationInfo const & creation_info);
 
 		virtual ~NewGeneWidget();
 
@@ -137,10 +137,10 @@ class NewGeneWidget
 
 		virtual void Empty() {}
 
-    protected:
+	protected:
 
-        bool inputConnected;
-        bool outputConnected;
+		bool inputConnected;
+		bool outputConnected;
 
 };
 
@@ -150,13 +150,13 @@ class WidgetCreationInfo
 	public:
 
 		WidgetCreationInfo(
-							   QWidget * const self_,
-							   NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN,
-							   DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE,
-							   NewGeneUUID const & uuid_parent_ = "",
-							   bool const top_level_ = false,
-							   WidgetInstanceIdentifier data_instance_ = WidgetInstanceIdentifier()
-						   )
+			QWidget * const self_,
+			NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN,
+			DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE,
+			NewGeneUUID const & uuid_parent_ = "",
+			bool const top_level_ = false,
+			WidgetInstanceIdentifier data_instance_ = WidgetInstanceIdentifier()
+		)
 			: self(self_)
 			, widget_nature(widget_nature_)
 			, widget_type(widget_type_)
@@ -168,13 +168,13 @@ class WidgetCreationInfo
 		}
 
 		WidgetCreationInfo(
-							   QWidget * const self_,
-							   QWidget * parent,
-							   NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN,
-							   DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE,
-							   bool const top_level_ = false,
-							   WidgetInstanceIdentifier data_instance_ = WidgetInstanceIdentifier()
-						   )
+			QWidget * const self_,
+			QWidget * parent,
+			NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN,
+			DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE,
+			bool const top_level_ = false,
+			WidgetInstanceIdentifier data_instance_ = WidgetInstanceIdentifier()
+		)
 			: self(self_)
 			, widget_nature(widget_nature_)
 			, widget_type(widget_type_)
@@ -185,7 +185,8 @@ class WidgetCreationInfo
 			{
 				try
 				{
-					NewGeneWidget * newgene_parent_widget = dynamic_cast<NewGeneWidget*>(parent);
+					NewGeneWidget * newgene_parent_widget = dynamic_cast<NewGeneWidget *>(parent);
+
 					if (newgene_parent_widget)
 					{
 						uuid_parent = newgene_parent_widget->uuid;

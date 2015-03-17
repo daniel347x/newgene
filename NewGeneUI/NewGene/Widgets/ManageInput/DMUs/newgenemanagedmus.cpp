@@ -1,12 +1,13 @@
 #include "newgenemanagedmus.h"
 #include "ui_newgenemanagedmus.h"
 
-NewGeneManageDMUs::NewGeneManageDMUs( QWidget * parent ) :
-	QWidget( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_INPUT_WIDGET) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneManageDMUs )
+NewGeneManageDMUs::NewGeneManageDMUs(QWidget * parent) :
+	QWidget(parent),
+	NewGeneWidget(WidgetCreationInfo(this,
+									 WIDGET_NATURE_INPUT_WIDGET)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	ui(new Ui::NewGeneManageDMUs)
 {
-	ui->setupUi( this );
+	ui->setupUi(this);
 }
 
 NewGeneManageDMUs::~NewGeneManageDMUs()
@@ -14,14 +15,14 @@ NewGeneManageDMUs::~NewGeneManageDMUs()
 	delete ui;
 }
 
-void NewGeneManageDMUs::changeEvent( QEvent * e )
+void NewGeneManageDMUs::changeEvent(QEvent * e)
 {
-	QWidget::changeEvent( e );
+	QWidget::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:

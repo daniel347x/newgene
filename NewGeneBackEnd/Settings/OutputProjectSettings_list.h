@@ -5,45 +5,47 @@
 #include "SettingsManager.h"
 
 template<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND SETTING>
-class OutputProjectBackendSetting__string : public BackendProjectOutputSetting, public StringSetting, public SimpleAccessProjectModelSetting<OutputProjectBackendSetting__string<SETTING>, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, SETTING, SettingsManager, OutputProjectSettings>
+class OutputProjectBackendSetting__string : public BackendProjectOutputSetting, public StringSetting,
+	public SimpleAccessProjectModelSetting<OutputProjectBackendSetting__string<SETTING>, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, SETTING, SettingsManager, OutputProjectSettings>
 {
 
-public:
+	public:
 
-	OutputProjectBackendSetting__string(Messager & messager, std::string const & setting)
-		: Setting(messager)
-		, BackendSetting(messager)
-		, ProjectSetting(messager)
-		, OutputSetting(messager)
-		, BackendProjectOutputSetting(messager)
-		, StringSetting(messager, setting)
-	{}
+		OutputProjectBackendSetting__string(Messager & messager, std::string const & setting)
+			: Setting(messager)
+			, BackendSetting(messager)
+			, ProjectSetting(messager)
+			, OutputSetting(messager)
+			, BackendProjectOutputSetting(messager)
+			, StringSetting(messager, setting)
+		{}
 
 };
 
 template<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND SETTING>
-class OutputProjectBackendSetting__path : public BackendProjectOutputSetting, public PathSetting, public SimpleAccessProjectModelSetting<OutputProjectBackendSetting__path<SETTING>, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, SETTING, SettingsManager, OutputProjectSettings>
+class OutputProjectBackendSetting__path : public BackendProjectOutputSetting, public PathSetting,
+	public SimpleAccessProjectModelSetting<OutputProjectBackendSetting__path<SETTING>, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, SETTING, SettingsManager, OutputProjectSettings>
 {
 
-public:
+	public:
 
-	OutputProjectBackendSetting__path(Messager & messager, boost::filesystem::path const & setting)
-		: Setting(messager)
-		, BackendSetting(messager)
-		, ProjectSetting(messager)
-		, OutputSetting(messager)
-		, BackendProjectOutputSetting(messager)
-		, PathSetting(messager, setting)
-	{
-		int m = 0; // for debugging only
-	}
+		OutputProjectBackendSetting__path(Messager & messager, boost::filesystem::path const & setting)
+			: Setting(messager)
+			, BackendSetting(messager)
+			, ProjectSetting(messager)
+			, OutputSetting(messager)
+			, BackendProjectOutputSetting(messager)
+			, PathSetting(messager, setting)
+		{
+			int m = 0; // for debugging only
+		}
 
-	~OutputProjectBackendSetting__path()
-	{
-		int m = 0; // for debugging only
-	}
+		~OutputProjectBackendSetting__path()
+		{
+			int m = 0; // for debugging only
+		}
 
-	std::string ToString() const { return PathSetting::ToString(); }
+		std::string ToString() const { return PathSetting::ToString(); }
 
 };
 
@@ -54,8 +56,8 @@ public:
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_MODEL_SETTINGS>
 {
-public:
-	typedef OutputProjectBackendSetting__path<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL> type;
+	public:
+		typedef OutputProjectBackendSetting__path<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL> type;
 };
 
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_MODEL_SETTINGS>::type OutputProjectPathToModel;
@@ -67,8 +69,8 @@ typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_OUTPUT
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_KAD_OUTPUT_FILE>
 {
-public:
-	typedef OutputProjectBackendSetting__path<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE> type;
+	public:
+		typedef OutputProjectBackendSetting__path<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE> type;
 };
 
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_KAD_OUTPUT_FILE>::type OutputProjectPathToKadOutputFile;

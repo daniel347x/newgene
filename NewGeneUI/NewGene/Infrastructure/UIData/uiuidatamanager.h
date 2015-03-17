@@ -7,11 +7,12 @@
 
 class NewGeneMainWindow;
 
-class UIUIDataManager : public QObject, public UIManager<UIUIDataManager, UIDataManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_DATA_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_DATA>
+class UIUIDataManager : public QObject, public
+	UIManager<UIUIDataManager, UIDataManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_DATA_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_DATA>
 {
 		Q_OBJECT
 	public:
-		explicit UIUIDataManager( QObject * parent, UIMessager & messager );
+		explicit UIUIDataManager(QObject * parent, UIMessager & messager);
 
 	signals:
 

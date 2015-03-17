@@ -8,7 +8,7 @@ class ModelChangeResponse : public ModelChangeIndicator
 {
 		Q_OBJECT
 	public:
-		explicit ModelChangeResponse( QObject * parent = 0 );
+		explicit ModelChangeResponse(QObject * parent = 0);
 
 	signals:
 

@@ -8,7 +8,7 @@
 class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 {
 
-	Q_OBJECT
+		Q_OBJECT
 
 	public:
 
@@ -59,9 +59,10 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Model implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Model implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return *__impl;
 		}
 
@@ -79,9 +80,10 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Internal model implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Internal model implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return static_cast<OutputModel &>(getBackendModel_base<OutputModel>(*__impl));
 		}
 
@@ -94,9 +96,10 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Internal model implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Internal model implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return getBackendModelSharedPtr_base<OutputModel>(*__impl);
 		}
 
@@ -112,7 +115,7 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 		WorkQueueManager<UI_OUTPUT_MODEL> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
 			OutputModelWorkQueue * work_queue = new OutputModelWorkQueue(isPool2_);
-			work_queue->SetUIObject(reinterpret_cast<UIOutputModel*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIOutputModel *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

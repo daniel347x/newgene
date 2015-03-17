@@ -8,7 +8,7 @@ class NewGeneTabWidgetManageInput : public QTabWidget, public NewGeneWidget // d
 {
 		Q_OBJECT
 	public:
-		explicit NewGeneTabWidgetManageInput( QWidget * parent = 0 );
+		explicit NewGeneTabWidgetManageInput(QWidget * parent = 0);
 
 	signals:
 

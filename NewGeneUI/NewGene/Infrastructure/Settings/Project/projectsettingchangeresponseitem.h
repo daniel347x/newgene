@@ -9,7 +9,7 @@ class ProjectSettingChangeResponseItem : public QObject, public ProjectSettingCh
 {
 		Q_OBJECT
 	public:
-		explicit ProjectSettingChangeResponseItem( QObject * parent = 0 );
+		explicit ProjectSettingChangeResponseItem(QObject * parent = 0);
 
 	signals:
 

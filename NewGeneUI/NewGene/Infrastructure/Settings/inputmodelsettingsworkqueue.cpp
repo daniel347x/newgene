@@ -9,7 +9,7 @@ InputModelSettingsWorkQueue::InputModelSettingsWorkQueue(QObject * parent)
 
 UIInputModelSettings * InputModelSettingsWorkQueue::get()
 {
-	return reinterpret_cast<UIInputModelSettings*>(inp);
+	return reinterpret_cast<UIInputModelSettings *>(inp);
 }
 
 void InputModelSettingsWorkQueue::TestSlot()

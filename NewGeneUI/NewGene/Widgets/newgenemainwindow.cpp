@@ -1,6 +1,6 @@
 #ifndef Q_MOC_RUN
-#	include <boost/thread/thread.hpp>
-#	include <boost/filesystem.hpp>
+	#include <boost/thread/thread.hpp>
+	#include <boost/filesystem.hpp>
 #endif
 #include "newgenemainwindow.h"
 #include "ui_newgenemainwindow.h"
@@ -43,10 +43,11 @@
 #include "ui_newgenevariablesummaryscrollarea.h"
 #include "splash.h"
 
-NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
-	QMainWindow( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_GENERAL) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneMainWindow ),
+NewGeneMainWindow::NewGeneMainWindow(QWidget * parent) :
+	QMainWindow(parent),
+	NewGeneWidget(WidgetCreationInfo(this,
+									 WIDGET_NATURE_GENERAL)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	ui(new Ui::NewGeneMainWindow),
 	messager(parent)
 {
 
@@ -72,24 +73,24 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 
 		UIMessager::ManagersInitialized = true;
 
-		ui->setupUi( this );
+		ui->setupUi(this);
 
-		NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget *>( "tabWidgetMain" );
+		NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget *>("tabWidgetMain");
 
-		if ( pTWmain )
+		if (pTWmain)
 		{
 			pTWmain->NewGeneUIInitialize();
 		}
 
 	}
-	catch ( boost::exception & e )
+	catch (boost::exception & e)
 	{
 
-		if ( std::string const * error_desc = boost::get_error_info<newgene_error_description>( e ) )
+		if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
 		{
-			boost::format msg( error_desc->c_str() );
+			boost::format msg(error_desc->c_str());
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 		}
 		else
@@ -98,19 +99,19 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 			boost::format msg("Error: %1%");
 			msg % the_error.c_str();
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 		}
 
-		QCoreApplication::exit( -1 );
+		QCoreApplication::exit(-1);
 
 	}
-	catch ( std::exception & e )
+	catch (std::exception & e)
 	{
 
-		boost::format msg( "Exception thrown: %1%" );
+		boost::format msg("Exception thrown: %1%");
 		msg % e.what();
-		QCoreApplication::exit( -1 );
+		QCoreApplication::exit(-1);
 
 	}
 
@@ -123,6 +124,7 @@ NewGeneMainWindow::~NewGeneMainWindow()
 	{
 		outp->UnregisterInterestInChanges(this);
 	}
+
 	if (inp)
 	{
 		inp->UnregisterInterestInChanges(this);
@@ -138,14 +140,14 @@ NewGeneMainWindow::~NewGeneMainWindow()
 
 }
 
-void NewGeneMainWindow::changeEvent( QEvent * e )
+void NewGeneMainWindow::changeEvent(QEvent * e)
 {
-	QMainWindow::changeEvent( e );
+	QMainWindow::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:
@@ -156,9 +158,9 @@ void NewGeneMainWindow::changeEvent( QEvent * e )
 void NewGeneMainWindow::doInitialize()
 {
 
-    QTimer::singleShot( 500, this, SLOT( displaySplashOpening() ) );
+	QTimer::singleShot(500, this, SLOT(displaySplashOpening()));
 
-    UIMessager messager;
+	UIMessager messager;
 
 	// Load global settings in main thread
 	settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
@@ -167,7 +169,7 @@ void NewGeneMainWindow::doInitialize()
 	PrepareInputWidget();
 	PrepareOutputWidget();
 
-    PrepareGlobalConnections();
+	PrepareGlobalConnections();
 
 	projectManagerUI().LoadOpenProjects(this, this);
 
@@ -176,23 +178,23 @@ void NewGeneMainWindow::doInitialize()
 void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
-    NewGeneWidget::UpdateOutputConnections(connection_type, project);
+	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
-    {
-        SetTitle();
-        ui->actionClose_Current_Output_Dataset->setEnabled(true);
-        ui->actionDisplay_output_dataset_path->setEnabled(true);
-        ui->actionSave_Output_Dataset_As->setEnabled(true);
-    }
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		SetTitle();
+		ui->actionClose_Current_Output_Dataset->setEnabled(true);
+		ui->actionDisplay_output_dataset_path->setEnabled(true);
+		ui->actionSave_Output_Dataset_As->setEnabled(true);
+	}
 
-    if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
-    {
-        SetTitle();
-        ui->actionClose_Current_Output_Dataset->setEnabled(false);
-        ui->actionDisplay_output_dataset_path->setEnabled(false);
-        ui->actionSave_Output_Dataset_As->setEnabled(false);
-    }
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		SetTitle();
+		ui->actionClose_Current_Output_Dataset->setEnabled(false);
+		ui->actionDisplay_output_dataset_path->setEnabled(false);
+		ui->actionSave_Output_Dataset_As->setEnabled(false);
+	}
 
 }
 
@@ -203,19 +205,19 @@ void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
 	{
-        SetTitle();
-        ui->actionClose_Current_Input_Dataset->setEnabled(true);
-        ui->actionDisplay_input_dataset_path->setEnabled(true);
-        ui->actionSave_Input_Dataset_As->setEnabled(true);
-    }
+		SetTitle();
+		ui->actionClose_Current_Input_Dataset->setEnabled(true);
+		ui->actionDisplay_input_dataset_path->setEnabled(true);
+		ui->actionSave_Input_Dataset_As->setEnabled(true);
+	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
-        SetTitle();
-        ui->actionClose_Current_Input_Dataset->setEnabled(false);
-        ui->actionDisplay_input_dataset_path->setEnabled(false);
-        ui->actionSave_Input_Dataset_As->setEnabled(false);
-    }
+		SetTitle();
+		ui->actionClose_Current_Input_Dataset->setEnabled(false);
+		ui->actionDisplay_input_dataset_path->setEnabled(false);
+		ui->actionSave_Input_Dataset_As->setEnabled(false);
+	}
 
 }
 
@@ -223,7 +225,7 @@ void NewGeneMainWindow::SignalMessageBox(STD_STRING msg)
 {
 
 	QMessageBox msgBox;
-	msgBox.setText( msg.c_str() );
+	msgBox.setText(msg.c_str());
 	msgBox.exec();
 
 }
@@ -271,6 +273,7 @@ void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id,
 		if (status_bar_progress_bars.find(progress_bar_id) != status_bar_progress_bars.cend())
 		{
 			status_bar_progress_bars[progress_bar_id]->setValue(new_value);
+
 			if (new_value == 0)
 			{
 				status_bar_progress_bars[progress_bar_id]->hide();
@@ -299,13 +302,16 @@ void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
-	QString the_file = QFileDialog::getOpenFileName(this, "Choose input dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene input settings file (*.newgene.in.xml)");
+	QString the_file = QFileDialog::getOpenFileName(this, "Choose input dataset", folder_path ? folder_path->getPath().string().c_str() : "",
+					   "NewGene input settings file (*.newgene.in.xml)");
+
 	if (the_file.size())
 	{
 		if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
 		{
 			boost::filesystem::path file_path(the_file.toStdString());
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, file_path.parent_path()));
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
+					file_path.parent_path()));
 
 			emit SignalOpenInputDataset(the_file.toStdString(), this);
 		}
@@ -325,13 +331,16 @@ void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
-	QString the_file = QFileDialog::getOpenFileName(this, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene output settings file (*.newgene.out.xml)");
+	QString the_file = QFileDialog::getOpenFileName(this, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
+					   "NewGene output settings file (*.newgene.out.xml)");
+
 	if (the_file.size())
 	{
 		if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
 		{
 			boost::filesystem::path file_path(the_file.toStdString());
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
+					file_path.parent_path()));
 
 			emit SignalOpenOutputDataset(the_file.toStdString(), this);
 		}
@@ -346,15 +355,18 @@ void NewGeneMainWindow::on_actionClose_Current_Output_Dataset_triggered()
 
 }
 
-void NewGeneMainWindow::closeEvent(QCloseEvent *event)
+void NewGeneMainWindow::closeEvent(QCloseEvent * event)
 {
 
 	{
 		std::lock_guard<std::recursive_mutex> guard(OutputModel::OutputGenerator::is_generating_output_mutex);
+
 		if (OutputModel::OutputGenerator::is_generating_output)
 		{
 			QMessageBox::StandardButton reply;
-			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("A K-ad output set is being generated.  Are you sure you wish to exit?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("A K-ad output set is being generated.  Are you sure you wish to exit?"),
+										  QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 			if (reply == QMessageBox::Yes)
 			{
 				// No lock - not necessary for a boolean checked multiple times by back end and that will not cause an error if it is messed up in extraordinarily rare circumstances
@@ -370,10 +382,13 @@ void NewGeneMainWindow::closeEvent(QCloseEvent *event)
 
 	{
 		std::lock_guard<std::recursive_mutex> guard(Importer::is_performing_import_mutex);
+
 		if (Importer::is_performing_import)
 		{
 			QMessageBox::StandardButton reply;
-			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("An import is taking place.  Are you sure you wish to exit?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("An import is taking place.  Are you sure you wish to exit?"),
+										  QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
 			if (reply == QMessageBox::Yes)
 			{
 				// No lock - not necessary for a boolean sequenced properly
@@ -396,13 +411,16 @@ void NewGeneMainWindow::on_actionNew_Input_Dataset_triggered()
 
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
-	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the new input dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene input settings file (*.newgene.in.xml)");
+	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the new input dataset", folder_path ? folder_path->getPath().string().c_str() : "",
+					   "NewGene input settings file (*.newgene.in.xml)");
+
 	if (the_file.size())
 	{
 		if (!boost::filesystem::exists(the_file.toStdString()))
 		{
 			boost::filesystem::path file_path(the_file.toStdString());
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, file_path.parent_path()));
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
+					file_path.parent_path()));
 
 			emit SignalOpenInputDataset(the_file.toStdString(), this);
 		}
@@ -415,13 +433,16 @@ void NewGeneMainWindow::on_actionNew_Output_Dataset_triggered()
 
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
-	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the new output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene output settings file (*.newgene.out.xml)");
+	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the new output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
+					   "NewGene output settings file (*.newgene.out.xml)");
+
 	if (the_file.size())
 	{
 		if (!boost::filesystem::exists(the_file.toStdString()))
 		{
 			boost::filesystem::path file_path(the_file.toStdString());
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
+					file_path.parent_path()));
 
 			emit SignalOpenOutputDataset(the_file.toStdString(), this);
 		}
@@ -434,11 +455,14 @@ void NewGeneMainWindow::on_actionSave_Input_Dataset_As_triggered()
 
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
-    QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied input dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene input settings file (*.newgene.in.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
+	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied input dataset", folder_path ? folder_path->getPath().string().c_str() : "",
+					   "NewGene input settings file (*.newgene.in.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
+
 	if (the_file.size())
 	{
 		boost::filesystem::path file_path(the_file.toStdString());
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, file_path.parent_path()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
+				file_path.parent_path()));
 		emit SignalSaveCurrentInputDatasetAs(the_file.toStdString(), this);
 	}
 
@@ -449,11 +473,14 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
-    QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene output settings file (*.newgene.out.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
+	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
+					   "NewGene output settings file (*.newgene.out.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
+
 	if (the_file.size())
 	{
 		boost::filesystem::path file_path(the_file.toStdString());
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
+				file_path.parent_path()));
 		emit SignalSaveCurrentOutputDatasetAs(the_file.toStdString(), this);
 	}
 
@@ -461,158 +488,161 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 
 void NewGeneMainWindow::on_actionDisplay_input_dataset_path_triggered()
 {
-    std::string input = inp->backend().projectSettings().GetSettingsPath().string();
-    if (!input.empty())
-    {
-        // From http://stackoverflow.com/a/17512615/368896
-        QDialog dialog(this);
-        dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
-        QFormLayout form(&dialog);
-        form.addRow(new QLabel("Input dataset path:"));
-        QLineEdit *lineEdit = new QLineEdit(&dialog);
-        lineEdit->setText(input.c_str());
-        lineEdit->setReadOnly(true);
-        lineEdit->setMinimumWidth(600);
-        form.addRow(lineEdit);
-        QDialogButtonBox buttonBox(QDialogButtonBox::Ok, Qt::Horizontal, &dialog);
-        form.addRow(&buttonBox);
-        QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
-        {
-            dialog.close();
-        });
-        dialog.exec();
-    }
+	std::string input = inp->backend().projectSettings().GetSettingsPath().string();
+
+	if (!input.empty())
+	{
+		// From http://stackoverflow.com/a/17512615/368896
+		QDialog dialog(this);
+		dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
+		QFormLayout form(&dialog);
+		form.addRow(new QLabel("Input dataset path:"));
+		QLineEdit * lineEdit = new QLineEdit(&dialog);
+		lineEdit->setText(input.c_str());
+		lineEdit->setReadOnly(true);
+		lineEdit->setMinimumWidth(600);
+		form.addRow(lineEdit);
+		QDialogButtonBox buttonBox(QDialogButtonBox::Ok, Qt::Horizontal, &dialog);
+		form.addRow(&buttonBox);
+		QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
+		{
+			dialog.close();
+		});
+		dialog.exec();
+	}
 }
 
 void NewGeneMainWindow::on_actionDisplay_output_dataset_path_triggered()
 {
-    std::string output = outp->backend().projectSettings().GetSettingsPath().string();
-    if (!output.empty())
-    {
-        // From http://stackoverflow.com/a/17512615/368896
-        QDialog dialog(this);
-        dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
-        QFormLayout form(&dialog);
-        form.addRow(new QLabel("Output dataset path:"));
-        QLineEdit *lineEdit = new QLineEdit(&dialog);
-        lineEdit->setText(output.c_str());
-        lineEdit->setReadOnly(true);
-        lineEdit->setMinimumWidth(600);
-        form.addRow(lineEdit);
-        QDialogButtonBox buttonBox(QDialogButtonBox::Ok, Qt::Horizontal, &dialog);
-        form.addRow(&buttonBox);
-        QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
-        {
-            dialog.close();
-        });
-        dialog.exec();
-    }
+	std::string output = outp->backend().projectSettings().GetSettingsPath().string();
+
+	if (!output.empty())
+	{
+		// From http://stackoverflow.com/a/17512615/368896
+		QDialog dialog(this);
+		dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
+		QFormLayout form(&dialog);
+		form.addRow(new QLabel("Output dataset path:"));
+		QLineEdit * lineEdit = new QLineEdit(&dialog);
+		lineEdit->setText(output.c_str());
+		lineEdit->setReadOnly(true);
+		lineEdit->setMinimumWidth(600);
+		form.addRow(lineEdit);
+		QDialogButtonBox buttonBox(QDialogButtonBox::Ok, Qt::Horizontal, &dialog);
+		form.addRow(&buttonBox);
+		QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
+		{
+			dialog.close();
+		});
+		dialog.exec();
+	}
 }
 
 void NewGeneMainWindow::SetTitle()
 {
 
-    boost::filesystem::path output_path;
-    boost::filesystem::path input_path;
+	boost::filesystem::path output_path;
+	boost::filesystem::path input_path;
 
-    if (outp)
-    {
-        output_path = outp->backend().projectSettings().GetSettingsPath();
-    }
+	if (outp)
+	{
+		output_path = outp->backend().projectSettings().GetSettingsPath();
+	}
 
-    if (inp)
-    {
-        input_path = inp->backend().projectSettings().GetSettingsPath();
-    }
+	if (inp)
+	{
+		input_path = inp->backend().projectSettings().GetSettingsPath();
+	}
 
-    std::string output {output_path.string()};
-    std::string input {input_path.string()};
+	std::string output {output_path.string()};
+	std::string input {input_path.string()};
 
-    std::string title {"NewGene"};
-    std::string status {};
+	std::string title {"NewGene"};
+	std::string status {};
 
-    if (!input.empty())
-    {
-        title += " [Input: ";
-        title += input_path.filename().string();
-        title += "]";
-    }
+	if (!input.empty())
+	{
+		title += " [Input: ";
+		title += input_path.filename().string();
+		title += "]";
+	}
 
-    if (!output.empty())
-    {
-        title += " [Output: ";
-        title += output_path.filename().string();
-        title += "]";
-    }
+	if (!output.empty())
+	{
+		title += " [Output: ";
+		title += output_path.filename().string();
+		title += "]";
+	}
 
-    if (input.empty() && !output.empty())
-    {
-        status = "Please open or create an input dataset";
-    }
-    else if (!input.empty() && output.empty())
-    {
-        status = "Please open or create an output dataset";
-    }
-    else if (input.empty() && output.empty())
-    {
-        status = "Please open or create an input and output dataset";
-    }
+	if (input.empty() && !output.empty())
+	{
+		status = "Please open or create an input dataset";
+	}
+	else if (!input.empty() && output.empty())
+	{
+		status = "Please open or create an output dataset";
+	}
+	else if (input.empty() && output.empty())
+	{
+		status = "Please open or create an input and output dataset";
+	}
 
-    this->setWindowTitle(title.c_str());
+	this->setWindowTitle(title.c_str());
 
-    ui->statusBar->showMessage(status.c_str());
+	ui->statusBar->showMessage(status.c_str());
 
 }
 
 void NewGeneMainWindow::PrepareGlobalConnections()
 {
-    QWidget * source = ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSelections->ui->scrollAreaWidgetContents->ui->toolbox->newgeneToolBox;
-    QWidget * target = ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSummary->ui->scrollAreaWidgetContents;
-    connect(source, SIGNAL(DoTabChange(WidgetInstanceIdentifier)), target, SLOT(DoTabChange(WidgetInstanceIdentifier)));
+	QWidget * source =
+		ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSelections->ui->scrollAreaWidgetContents->ui->toolbox->newgeneToolBox;
+	QWidget * target = ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSummary->ui->scrollAreaWidgetContents;
+	connect(source, SIGNAL(DoTabChange(WidgetInstanceIdentifier)), target, SLOT(DoTabChange(WidgetInstanceIdentifier)));
 }
 
 void NewGeneMainWindow::doDisable()
 {
-    // No - this also disables clicking on the splash screen to close it
-    //this->setEnabled(false);
+	// No - this also disables clicking on the splash screen to close it
+	//this->setEnabled(false);
 
-    ui->centralWidget->setEnabled(false);
-    ui->menuBar->setEnabled(false);
-    ui->statusBar->setEnabled(false);
+	ui->centralWidget->setEnabled(false);
+	ui->menuBar->setEnabled(false);
+	ui->statusBar->setEnabled(false);
 }
 
 void NewGeneMainWindow::doEnable()
 {
-    //this->setEnabled(true);
-    ui->centralWidget->setEnabled(true);
-    ui->menuBar->setEnabled(true);
-    ui->statusBar->setEnabled(true);
+	//this->setEnabled(true);
+	ui->centralWidget->setEnabled(true);
+	ui->menuBar->setEnabled(true);
+	ui->statusBar->setEnabled(true);
 }
 
 void NewGeneMainWindow::on_actionAbout_NewGene_triggered()
 {
-    QTimer::singleShot( 50, this, SLOT( displaySplashAbout() ) );
+	QTimer::singleShot(50, this, SLOT(displaySplashAbout()));
 }
 
 void NewGeneMainWindow::displaySplashOpening()
 {
-    displaySplash(false);
+	displaySplash(false);
 }
 
 void NewGeneMainWindow::displaySplashAbout()
 {
-    displaySplash(true);
+	displaySplash(true);
 }
 
 void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
 {
-    Splash * view {new Splash{nullptr, this, opened_as_about_box}};
-    Qt::WindowFlags flags = view->windowFlags();
-    flags |= Qt::WindowStaysOnTopHint;
-    flags |= Qt::SplashScreen;
-    flags &= ~Qt::WindowContextHelpButtonHint;
-    view->installEventFilter(view);
-    view->setWindowFlags(flags);
-    view->show();
-    view->activateWindow();
+	Splash * view {new Splash{nullptr, this, opened_as_about_box}};
+	Qt::WindowFlags flags = view->windowFlags();
+	flags |= Qt::WindowStaysOnTopHint;
+	flags |= Qt::SplashScreen;
+	flags &= ~Qt::WindowContextHelpButtonHint;
+	view->installEventFilter(view);
+	view->setWindowFlags(flags);
+	view->show();
+	view->activateWindow();
 }

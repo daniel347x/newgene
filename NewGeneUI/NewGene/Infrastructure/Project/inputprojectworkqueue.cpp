@@ -16,7 +16,7 @@ InputProjectWorkQueue::InputProjectWorkQueue(QObject * parent)
 
 UIInputProject * InputProjectWorkQueue::get()
 {
-	return reinterpret_cast<UIInputProject*>(inp);
+	return reinterpret_cast<UIInputProject *>(inp);
 }
 
 void InputProjectWorkQueue::TestSlot()
@@ -34,11 +34,12 @@ void InputProjectWorkQueue::SetConnections()
 // **********************************************************************************************************//
 void InputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 {
-	 WidgetChangeMessages widget_change_messages = get()->HandleChanges(changes);
-	 if (!widget_change_messages.empty())
-	 {
-		 emit DataChangeMessageSignal(widget_change_messages);
-	 }
+	WidgetChangeMessages widget_change_messages = get()->HandleChanges(changes);
+
+	if (!widget_change_messages.empty())
+	{
+		emit DataChangeMessageSignal(widget_change_messages);
+	}
 }
 
 

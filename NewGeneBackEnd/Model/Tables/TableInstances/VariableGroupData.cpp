@@ -1,5 +1,5 @@
 #ifndef Q_MOC_RUN
-#	include <boost/lexical_cast.hpp>
+	#include <boost/lexical_cast.hpp>
 #endif
 #include "VariableGroupData.h"
 #include "../TableManager.h"
@@ -325,7 +325,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 	definition.first_row_is_header_row = true;
 	definition.second_row_is_column_description_row = inputFileContainsColumnDescriptions;
 	definition.third_row_is_data_type_row = inputFileContainsColumnDataTypes;
-	definition.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED | ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_EITHER_DOUBLEQUOTED_OR_SINGLEQUOTED | ImportDefinition::FORMAT_QUALIFIERS__BACKSLASH_ESCAPE_CHAR;
+	definition.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED | ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_EITHER_DOUBLEQUOTED_OR_SINGLEQUOTED |
+								   ImportDefinition::FORMAT_QUALIFIERS__BACKSLASH_ESCAPE_CHAR;
 
 	Schema schema_input;
 	Schema schema_output;
@@ -439,7 +440,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 				BaseField & dataField = *fields[0];
 				SchemaEntry entry(field_type, colnames[ncol]);
 				std::string fieldReadErrorMsg;
-				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition, linenum, ncol + 1, ncol == nCols-1, fieldReadErrorMsg);
+				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition, linenum, ncol + 1, ncol == nCols - 1, fieldReadErrorMsg);
 
 				if (stop)
 				{
@@ -692,7 +693,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			// Determine if this is a primary key column
 			if (std::find_if(dmusAndCols.cbegin(), dmusAndCols.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & dmuAndCol) -> bool
-			{
+		{
 			if (dmuAndCol.second == colname)
 				{
 					the_dmu = dmuAndCol.first;
@@ -745,7 +746,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			// Determine if this is a time range column
 			if (std::find_if(timeRangeCols.cbegin(), timeRangeCols.cend(), [&](std::string const & timeRangeCol) -> bool
-			{
+		{
 			if (timeRangeCol == colname)
 				{
 					return true;
@@ -779,6 +780,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 									boost::format msg("There must be 1 or 2 string time range columns.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
+
 								time_ranges_are_strings = true;
 							}
 							else
@@ -788,6 +790,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 									boost::format msg("The time range columns must be an integral type.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
+
 								if (timeRangeCols.size() != 6 && timeRangeCols.size() != 3)
 								{
 									boost::format msg("There must be 3 or 6 time range columns.");
@@ -804,6 +807,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 								boost::format msg("The time range column/s must be either a string or an integral type.");
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
+
 							if (IsFieldTypeString(fieldtypes[colindex]))
 							{
 								if (timeRangeCols.size() != 2 && timeRangeCols.size() != 1)
@@ -811,6 +815,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 									boost::format msg("There must be 1 or 2 string time range columns.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
+
 								time_ranges_are_strings = true;
 							}
 							else
@@ -820,6 +825,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 									boost::format msg("The time range column/s must be an integral type.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
+
 								if (timeRangeCols.size() != 2 && timeRangeCols.size() != 1)
 								{
 									boost::format msg("There must be 1 or 2 time range columns.");
@@ -838,6 +844,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 									boost::format msg("There must be 1 or 2 string time range columns.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
+
 								time_ranges_are_strings = true;
 							}
 							else
@@ -847,6 +854,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 									boost::format msg("The time range columns must be an integral type.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
+
 								if (timeRangeCols.size() != 4 && timeRangeCols.size() != 2)
 								{
 									boost::format msg("There must be 2 or 4 time range columns.");
@@ -1033,6 +1041,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						// Now add the input time range columns to the mapping
 						// (they have already been added to the schema, because they are just regular input columns)
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
+
 						if (!timeRangeHasOnlyStartDate)
 						{
 							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__FROM__START_DAY__TO__END_DAY);
@@ -1041,6 +1050,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__START_DAY_ONLY);
 						}
+
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
 						int colindex = 0;
@@ -1173,6 +1183,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						// Now add the input time range columns to the mapping
 						// (they have already been added to the schema, because they are just regular input columns)
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
+
 						if (!timeRangeHasOnlyStartDate)
 						{
 							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__FROM__START_DAY__TO__END_DAY);
@@ -1181,6 +1192,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__START_DAY_ONLY);
 						}
+
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
 						int colindex = 0;
@@ -1267,6 +1279,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						// Now add the input time range columns to the mapping
 						// (they have already been added to the schema, because they are just regular input columns)
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
+
 						if (!timeRangeHasOnlyStartDate)
 						{
 							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH);
@@ -1275,6 +1288,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__START_MONTH_ONLY);
 						}
+
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
 						int colindex = 0;
@@ -1377,6 +1391,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						// Now add the input time range columns to the mapping
 						// (they have already been added to the schema, because they are just regular input columns)
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
+
 						if (!timeRangeHasOnlyStartDate)
 						{
 							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__FROM__START_MONTH__TO__END_MONTH);
@@ -1385,6 +1400,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__START_MONTH_ONLY);
 						}
+
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
 						int colindex = 0;
@@ -1473,7 +1489,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							// Treat as text string if it doesn't validate as an integer
 
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__START_YEAR_ONLY);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
+									(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__START_YEAR_ONLY);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
 							int colindex = 0;
@@ -1506,7 +1523,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 						}
 						else
 						{
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__START_YEAR_ONLY);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
+									(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__START_YEAR_ONLY);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
 							int colindex = 0;
@@ -1550,7 +1568,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							// Treat as text string
 
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__FROM__START_YEAR__TO__END_YEAR);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
+									(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__FROM__START_YEAR__TO__END_YEAR);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
 							int colindex = 0;
@@ -1599,7 +1618,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 						else
 						{
 
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__FROM__START_YEAR__TO__END_YEAR);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
+									(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__FROM__START_YEAR__TO__END_YEAR);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
 							int colindex = 0;
@@ -1608,9 +1628,9 @@ bool Table_VariableGroupData::BuildImportDefinition
 							input_file_fields.push_back(input_time_field__YearStart);
 							input_file_fields.push_back(input_time_field__YearEnd);
 							FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
-								FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+									FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
 							FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName),
-								FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
+									FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
 							output_table_fields.push_back(output_time_field__YearStart);
 							output_table_fields.push_back(output_time_field__YearEnd);
 							time_range_mapping->input_file_fields = input_file_fields;
@@ -1651,7 +1671,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 				}
 				break;
 
-				case TIME_GRANULARITY__NONE:
+			case TIME_GRANULARITY__NONE:
 				{
 					// no-op: no time range columns appear in the variable group instance table when the time granularity is none
 				}
@@ -2017,7 +2037,8 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 
 }
 
-bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string & errorMsg, TIME_GRANULARITY const time_granularity)
+bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string & errorMsg,
+		TIME_GRANULARITY const time_granularity)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -2051,6 +2072,7 @@ bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, Inp
 	boost::format
 	add_stmt("INSERT INTO VG_DATA_METADATA__DATETIME_COLUMNS (VG_DATA_TABLE_NAME, VG_DATETIME_START_COLUMN_NAME, VG_DATETIME_END_COLUMN_NAME, VG_DATA_FK_VG_CATEGORY_UUID) VALUES ('%1%', '%2%', '%3%', '%4%')");
 	add_stmt % new_table_name;
+
 	if (time_granularity != TIME_GRANULARITY__NONE)
 	{
 		add_stmt % DefaultDatetimeStartColumnName % DefaultDatetimeEndColumnName;
@@ -2059,6 +2081,7 @@ bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, Inp
 	{
 		add_stmt % std::string() % std::string();
 	}
+
 	add_stmt % *vg.uuid;
 	char * errmsg = nullptr;
 	sqlite3_exec(db, add_stmt.str().c_str(), NULL, NULL, &errmsg);

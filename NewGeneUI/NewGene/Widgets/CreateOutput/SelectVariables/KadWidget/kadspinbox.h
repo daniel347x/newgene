@@ -11,7 +11,7 @@ class KadSpinBox : public QSpinBox, public NewGeneWidget // do not reorder base 
 
 	public:
 
-		explicit KadSpinBox( QWidget *parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr );
+		explicit KadSpinBox(QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr);
 		~KadSpinBox();
 
 		void HandleChanges(DataChangeMessage const &);

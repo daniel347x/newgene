@@ -7,9 +7,9 @@
 enum TABLE_TYPES
 {
 
-	  TABLE_TYPE_NONE = 0
+	TABLE_TYPE_NONE = 0
 
-	// Input model tables
+					  // Input model tables
 	, TABLE__DMU_IDENTIFIER
 	, TABLE__DMU_INSTANCE
 	, TABLE__CMU_IDENTIFIER

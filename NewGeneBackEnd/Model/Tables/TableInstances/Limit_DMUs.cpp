@@ -1,6 +1,6 @@
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#	include <boost/lexical_cast.hpp>
+	#include <boost/algorithm/string.hpp>
+	#include <boost/lexical_cast.hpp>
 #endif
 #include "Limit_DMUs.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
@@ -27,25 +27,32 @@ void Table__Limit_DMUS__Categories::Load(sqlite3 * db, OutputModel * output_mode
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM LIMIT_DMUS__CATEGORIES");
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		return;
 	}
+
 	int step_result = 0;
+
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		char const * dmu_category_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__LIMIT_DMUS__DMU_CATEGORY_STRING_CODE));
+
 		if (dmu_category_code && /* strlen(dmu_category_code) == UUID_LENGTH && */ strlen(dmu_category_code))
 		{
 			WidgetInstanceIdentifier dmu_category;
 			input_model_->t_dmu_category.getIdentifierFromStringCode(dmu_category_code, dmu_category);
+
 			if (dmu_category.IsEmpty())
 			{
 				continue;
 			}
+
 			identifiers.push_back(dmu_category);
 		}
 	}
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -61,7 +68,8 @@ bool Table__Limit_DMUS__Categories::ExistsInCache(sqlite3 * db, OutputModel & ou
 	return getIdentifierFromStringCode(dmu_category_code, WidgetInstanceIdentifier());
 }
 
-bool Table__Limit_DMUS__Categories::Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category_code, bool const also_confirm_using_cache)
+bool Table__Limit_DMUS__Categories::Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, std::string const & dmu_category_code,
+		bool const also_confirm_using_cache)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -71,22 +79,27 @@ bool Table__Limit_DMUS__Categories::Exists(sqlite3 * db, OutputModel & output_mo
 	sql += dmu_category_code;
 	sql += "'";
 	int error_or_success_code = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare SELECT statement to search for an existing DMU category in the Limit DMUs categories table: %1%");
 		msg % sqlite3_errstr(error_or_success_code);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	int step_result = 0;
 	bool exists = false;
+
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		int existing_dmu_count = sqlite3_column_int(stmt, 0);
+
 		if (existing_dmu_count == 1)
 		{
 			exists = true;
 		}
 	}
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -117,6 +130,7 @@ bool Table__Limit_DMUS__Categories::AddDMU(sqlite3 * db, OutputModel & output_mo
 	//Executor theExecutor(db);
 
 	bool already_exists = Exists(db, output_model_, input_model_, dmu_category_code);
+
 	if (already_exists)
 	{
 		return false;
@@ -124,6 +138,7 @@ bool Table__Limit_DMUS__Categories::AddDMU(sqlite3 * db, OutputModel & output_mo
 
 	WidgetInstanceIdentifier dmu_category;
 	input_model_.t_dmu_category.getIdentifierFromStringCode(dmu_category_code, dmu_category);
+
 	if (dmu_category.IsEmpty())
 	{
 		boost::format msg("Cannot add a non-existent DMU category to the Limit DMUs categories table: %1%");
@@ -136,20 +151,24 @@ bool Table__Limit_DMUS__Categories::AddDMU(sqlite3 * db, OutputModel & output_mo
 	sql += dmu_category_code;
 	sql += "')";
 	int error_or_success_code = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare INSERT statement to create a new DMU category in the Limit DMUs categories table: %1%");
 		msg % sqlite3_errstr(error_or_success_code);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
+
 	if (step_result != SQLITE_DONE)
 	{
 		boost::format msg("Unable to execute INSERT statement to create a new DMU category in the Limit DMUs categories table: %1%");
 		msg % sqlite3_errstr(step_result);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -180,6 +199,7 @@ bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output
 	}
 
 	bool already_exists = Exists(db, output_model_, input_model_, *dmu_category.code);
+
 	if (!already_exists)
 	{
 		return false;
@@ -188,21 +208,25 @@ bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("DELETE FROM LIMIT_DMUS__CATEGORIES WHERE LIMIT_DMUS__DMU_CATEGORY_STRING_CODE = ?");
 	int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare DELETE statement to delete a DMU category from the Limit DMUs category table: %1%");
 		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	sqlite3_bind_text(stmt, 1, dmu_category.code->c_str(), -1, SQLITE_TRANSIENT);
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
+
 	if (step_result != SQLITE_DONE)
 	{
 		boost::format msg("Unable to execute DELETE statement to delete a DMU category from the Limit DMUs category table: %1%");
 		msg % sqlite3_errstr(step_result);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -211,7 +235,8 @@ bool Table__Limit_DMUS__Categories::RemoveDMU(sqlite3 * db, OutputModel & output
 
 	// Remove from cache
 	std::string flags;
-	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu_category)), identifiers.end());
+	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1,
+									 WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu_category)), identifiers.end());
 
 	// ***************************************** //
 	// Prepare data to send back to user interface
@@ -240,29 +265,36 @@ void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM LIMIT_DMUS__ELEMENTS");
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		return;
 	}
+
 	int step_result = 0;
 
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		char const * parent_dmu_category_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__LIMIT_DMUS__DMU_CATEGORY_STRING_CODE));
 		char const * dmu_set_member_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__LIMIT_DMUS__DMU_SET_MEMBER_UUID));
+
 		if (parent_dmu_category_code && dmu_set_member_uuid && strlen(parent_dmu_category_code) && strlen(dmu_set_member_uuid))
 		{
 			WidgetInstanceIdentifier parent_dmu_category;
 			input_model_->t_dmu_category.getIdentifierFromStringCode(parent_dmu_category_code, parent_dmu_category);
+
 			if (parent_dmu_category.IsEmpty())
 			{
 				continue;
 			}
+
 			WidgetInstanceIdentifier dmu_set_member = input_model_->t_dmu_setmembers.getIdentifier(dmu_set_member_uuid, *parent_dmu_category.uuid);
+
 			if (dmu_set_member.IsEmpty())
 			{
 				continue;
 			}
+
 			identifiers_map[parent_dmu_category_code].push_back(dmu_set_member);
 		}
 	}
@@ -275,17 +307,20 @@ void Table__Limit_DMUs__Elements::Load(sqlite3 * db, OutputModel * output_model_
 
 }
 
-bool Table__Limit_DMUs__Elements::ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
+bool Table__Limit_DMUs__Elements::ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category,
+		std::string const & dmu_member_uuid)
 {
 	return ! getIdentifier(dmu_member_uuid, *dmu_category.code, true).IsEmpty();
 }
 
-bool Table__Limit_DMUs__Elements::ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::int64_t const & dmu_member_uuid)
+bool Table__Limit_DMUs__Elements::ExistsInCache(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category,
+		std::int64_t const & dmu_member_uuid)
 {
 	return ! getIdentifier(boost::lexical_cast<std::string>(dmu_member_uuid), *dmu_category.code, true).IsEmpty();
 }
 
-bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, bool const also_confirm_using_cache)
+bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category,
+		std::string const & dmu_member_uuid, bool const also_confirm_using_cache)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -302,21 +337,26 @@ bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_mode
 	sql += dmu_member_uuid;
 	sql += "'";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare SELECT statement to search for an existing DMU member from the Limit DMUs category table.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	int step_result = 0;
 	bool exists = false;
+
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		int existing_dmu_count = sqlite3_column_int(stmt, 0);
+
 		if (existing_dmu_count == 1)
 		{
 			exists = true;
 		}
 	}
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -337,7 +377,8 @@ bool Table__Limit_DMUs__Elements::Exists(sqlite3 * db, OutputModel & output_mode
 
 }
 
-WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
+WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_,
+		WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -345,12 +386,14 @@ WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db,
 	//Executor theExecutor(db);
 
 	bool already_exists = Exists(db, output_model_, input_model_, dmu_category, dmu_member_uuid);
+
 	if (already_exists)
 	{
 		return getIdentifier(dmu_member_uuid, *dmu_category.code, true);
 	}
 
 	WidgetInstanceIdentifier dmu_set_member = input_model_.t_dmu_setmembers.getIdentifier(dmu_member_uuid, *dmu_category.uuid);
+
 	if (dmu_set_member.IsEmpty())
 	{
 		boost::format msg("Unable to locate existing DMU set member while attempting to insert a new DMU set member in the Limit DMU set members table");
@@ -366,20 +409,24 @@ WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db,
 	sql += dmu_member_uuid;
 	sql += "')";
 	int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare INSERT statement to create a new DMU member for the Limit DMUs member table: %1%");
 		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
+
 	if (step_result != SQLITE_DONE)
 	{
 		boost::format msg("Unable to execute INSERT statement to create a new DMU member in the Limit DMUs member table: %1%");
 		msg % sqlite3_errstr(step_result);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -395,7 +442,8 @@ WidgetInstanceIdentifier Table__Limit_DMUs__Elements::AddDmuMember(sqlite3 * db,
 
 }
 
-bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid)
+bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category,
+		std::string const & dmu_member_uuid)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -406,6 +454,7 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 	if (!dmu_member_uuid.empty())
 	{
 		bool already_exists = Exists(db, output_model_, input_model_, dmu_category, dmu_member_uuid);
+
 		if (!already_exists)
 		{
 			return false;
@@ -414,6 +463,7 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 
 	sqlite3_stmt * stmt = NULL;
 	int err = 0;
+
 	if (dmu_member_uuid.empty())
 	{
 		// Empty dmu_member_uuid means "remove all members for the given DMU category"
@@ -427,20 +477,24 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 		sql % *dmu_category.code % dmu_member_uuid;
 		err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
 	}
+
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare DELETE statement to delete DMU member from the Limit DMUs member table: %1%");
 		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
+
 	if (step_result != SQLITE_DONE)
 	{
 		boost::format msg("Unable to execute DELETE statement to delete DMU member from the Limit DMUs member table: %1%");
 		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -455,12 +509,14 @@ bool Table__Limit_DMUs__Elements::RemoveDmuMember(sqlite3 * db, OutputModel & ou
 	}
 	else
 	{
-		identifiers_map[*dmu_category.code].erase(std::remove_if(identifiers_map[*dmu_category.code].begin(), identifiers_map[*dmu_category.code].end(), [&](WidgetInstanceIdentifier & test_dmu_member)
+		identifiers_map[*dmu_category.code].erase(std::remove_if(identifiers_map[*dmu_category.code].begin(),
+				identifiers_map[*dmu_category.code].end(), [&](WidgetInstanceIdentifier & test_dmu_member)
 		{
 			if (boost::iequals(*test_dmu_member.uuid, dmu_member_uuid))
 			{
 				return true;
 			}
+
 			return false;
 		}), identifiers_map[*dmu_category.code].end());
 	}

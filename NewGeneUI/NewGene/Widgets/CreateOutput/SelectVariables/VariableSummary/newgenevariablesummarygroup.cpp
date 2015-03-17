@@ -8,25 +8,25 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-NewGeneVariableSummaryGroup::NewGeneVariableSummaryGroup( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
+NewGeneVariableSummaryGroup::NewGeneVariableSummaryGroup(QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project) :
 
-	QGroupBox( parent ),
+	QGroupBox(parent),
 
-	NewGeneWidget( WidgetCreationInfo(
-										this, // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-										parent,
-										WIDGET_NATURE_OUTPUT_WIDGET,
-										VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE,
-										false,
-										data_instance_
-									 )
-				   ),
+	NewGeneWidget(WidgetCreationInfo(
+					  this, // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+					  parent,
+					  WIDGET_NATURE_OUTPUT_WIDGET,
+					  VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE,
+					  false,
+					  data_instance_
+				  )
+				 ),
 
-	ui( new Ui::NewGeneVariableSummaryGroup )
+	ui(new Ui::NewGeneVariableSummaryGroup)
 
 {
 
-	ui->setupUi( this );
+	ui->setupUi(this);
 
 	PrepareOutputWidget();
 
@@ -50,17 +50,18 @@ NewGeneVariableSummaryGroup::~NewGeneVariableSummaryGroup()
 	{
 		outp->UnregisterInterestInChanges(this);
 	}
+
 	delete ui;
 }
 
-void NewGeneVariableSummaryGroup::changeEvent( QEvent * e )
+void NewGeneVariableSummaryGroup::changeEvent(QEvent * e)
 {
-	QGroupBox::changeEvent( e );
+	QGroupBox::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:
@@ -79,8 +80,10 @@ void NewGeneVariableSummaryGroup::UpdateOutputConnections(NewGeneWidget::UPDATE_
 
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
-		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)));
-		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)));
+		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)), outp->getConnector(),
+				SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)));
+		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)), outp->getConnector(),
+				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)));
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
@@ -95,6 +98,7 @@ void NewGeneVariableSummaryGroup::RefreshAllWidgets()
 		Empty();
 		return;
 	}
+
 	WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
@@ -102,11 +106,11 @@ void NewGeneVariableSummaryGroup::RefreshAllWidgets()
 void NewGeneVariableSummaryGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE widget_data)
 {
 
-	if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
+	if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid))
 	{
 		boost::format msg("Invalid widget refresh in NewGeneVariableSummary widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return;
 	}
@@ -121,7 +125,8 @@ void NewGeneVariableSummaryGroup::ReceiveVariableItemChanged(QStandardItem * /* 
 
 	// Since the items are not checkboxes yet, this slot will never currently be called - unlike the Variable Group items (not the summary), which *are* checkboxes
 
-	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+	QStandardItemModel * model = static_cast<QStandardItemModel *>(ui->listView->model());
+
 	if (model == nullptr)
 	{
 		// Todo: messager error
@@ -137,159 +142,173 @@ void NewGeneVariableSummaryGroup::ReceiveVariableItemChanged(QStandardItem * /* 
 void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change_message)
 {
 
-    UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
-    if (project == nullptr)
-    {
-        return;
-    }
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
 
-  std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
-  {
-	  switch (change.change_type)
-	  {
-		  case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION:
-			  {
-				  switch (change.change_intention)
-				  {
-					  case DATA_CHANGE_INTENTION__ADD:
-					  case DATA_CHANGE_INTENTION__REMOVE:
-						  {
-							  // This is the OUTPUT model changing.
-							  // "Add" means to simply add an item that is CHECKED (previously unchecked) -
-							  // NOT to add a new variable.  That would be an input model change type.
+	if (project == nullptr)
+	{
+		return;
+	}
 
-							  QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-							  if (model == nullptr)
-							  {
-								  return; // from lambda
-							  }
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
+	{
+		switch (change.change_type)
+		{
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION:
+				{
+					switch (change.change_intention)
+					{
+						case DATA_CHANGE_INTENTION__ADD:
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+								// This is the OUTPUT model changing.
+								// "Add" means to simply add an item that is CHECKED (previously unchecked) -
+								// NOT to add a new variable.  That would be an input model change type.
 
-							  if (change.child_identifiers.size() == 0)
-							  {
-								  return; // from lambda
-							  }
+								QStandardItemModel * model = static_cast<QStandardItemModel *>(ui->listView->model());
 
-							  std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&model, &change, this](WidgetInstanceIdentifier const & child_identifier)
-							  {
-								   int number_variables = model->rowCount();
-								   bool found = false;
-								   for (int n=0; n<number_variables; ++n)
-								   {
-									   QStandardItem * currentItem = model->item(n);
-									   if (currentItem)
-									   {
-										   QVariant currentIdentifier = currentItem->data();
-										   WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
-										   if (identifier.uuid && child_identifier.uuid && *identifier.uuid == *child_identifier.uuid)
-										   {
+								if (model == nullptr)
+								{
+									return; // from lambda
+								}
 
-											   // Existing item found - remove it
+								if (change.child_identifiers.size() == 0)
+								{
+									return; // from lambda
+								}
 
-											   if (change.change_intention == DATA_CHANGE_INTENTION__REMOVE)
-											   {
-												   model->removeRow(n);
-												   --n;
-												   --number_variables;
-												   found = true;
-											   }
+								std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&model, &change, this](WidgetInstanceIdentifier const & child_identifier)
+								{
+									int number_variables = model->rowCount();
+									bool found = false;
 
-										   }
+									for (int n = 0; n < number_variables; ++n)
+									{
+										QStandardItem * currentItem = model->item(n);
 
-									   }
-								   }
+										if (currentItem)
+										{
+											QVariant currentIdentifier = currentItem->data();
+											WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
 
-								   if (!found)
-								   {
+											if (identifier.uuid && child_identifier.uuid && *identifier.uuid == *child_identifier.uuid)
+											{
 
-									   // Item not found - add it
+												// Existing item found - remove it
 
-									   if (change.change_intention == DATA_CHANGE_INTENTION__ADD)
-									   {
-										   bool added = false;
-										   for (int n=0; n<number_variables; ++n)
-										   {
-											   QStandardItem * currentItem = model->item(n);
-											   if (currentItem)
-											   {
-												   QVariant currentIdentifier = currentItem->data();
-												   WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
-												   if (child_identifier < identifier)
-												   {
-													   QStandardItem * item = new QStandardItem();
-													   item->setText(QString(child_identifier.longhand->c_str()));
-													   item->setEditable(false);
-													   QVariant v;
-													   v.setValue(child_identifier);
-													   item->setData(v);
-													   model->insertRow( n, item );
-													   ++n;
-													   ++number_variables;
-													   added = true;
-													   break;
-												   }
-											   }
-										   }
-										   if (!added)
-										   {
-											   QStandardItem * item = new QStandardItem();
-											   item->setText(QString(child_identifier.longhand->c_str()));
-											   item->setEditable(false);
-											   QVariant v;
-											   v.setValue(child_identifier);
-											   item->setData(v);
-											   model->insertRow( number_variables, item );
-											   added = true;
-										   }
-									   }
-								   }
+												if (change.change_intention == DATA_CHANGE_INTENTION__REMOVE)
+												{
+													model->removeRow(n);
+													--n;
+													--number_variables;
+													found = true;
+												}
 
-							  });
+											}
 
-						  }
-						  break;
-					  case DATA_CHANGE_INTENTION__UPDATE:
-						  {
-							  // Should never receive this.
-						  }
-					  case DATA_CHANGE_INTENTION__RESET_ALL:
-						  {
-						  }
-						  break;
-					  default:
-						  {
-						  }
-						  break;
-				  }
-			  }
-			  break;
-		  default:
-			  {
-			  }
-			  break;
-	  }
-  });
+										}
+									}
 
-  HideShow();
+									if (!found)
+									{
+
+										// Item not found - add it
+
+										if (change.change_intention == DATA_CHANGE_INTENTION__ADD)
+										{
+											bool added = false;
+
+											for (int n = 0; n < number_variables; ++n)
+											{
+												QStandardItem * currentItem = model->item(n);
+
+												if (currentItem)
+												{
+													QVariant currentIdentifier = currentItem->data();
+													WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
+
+													if (child_identifier < identifier)
+													{
+														QStandardItem * item = new QStandardItem();
+														item->setText(QString(child_identifier.longhand->c_str()));
+														item->setEditable(false);
+														QVariant v;
+														v.setValue(child_identifier);
+														item->setData(v);
+														model->insertRow(n, item);
+														++n;
+														++number_variables;
+														added = true;
+														break;
+													}
+												}
+											}
+
+											if (!added)
+											{
+												QStandardItem * item = new QStandardItem();
+												item->setText(QString(child_identifier.longhand->c_str()));
+												item->setEditable(false);
+												QVariant v;
+												v.setValue(child_identifier);
+												item->setData(v);
+												model->insertRow(number_variables, item);
+												added = true;
+											}
+										}
+									}
+
+								});
+
+							}
+							break;
+
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								// Should never receive this.
+							}
+
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+							}
+							break;
+
+						default:
+							{
+							}
+							break;
+					}
+				}
+				break;
+
+			default:
+				{
+				}
+				break;
+		}
+	});
+
+	HideShow();
 
 }
 
 void NewGeneVariableSummaryGroup::HideShow()
 {
 
-    QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-    if (model == nullptr)
-    {
-        return;
-    }
+	QStandardItemModel * model = static_cast<QStandardItemModel *>(ui->listView->model());
 
-    if (model->rowCount() == 0)
-    {
-        this->hide();
-    }
-    else
-    {
-        this->show();
-    }
+	if (model == nullptr)
+	{
+		return;
+	}
+
+	if (model->rowCount() == 0)
+	{
+		this->hide();
+	}
+	else
+	{
+		this->show();
+	}
 
 }
 
@@ -300,12 +319,13 @@ bool NewGeneVariableSummaryGroup::ResetAll(WidgetInstanceIdentifiers const & vg_
 	{
 		boost::format msg("Invalid list view in NewGeneVariableSummaryGroup widget.");
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel *>(ui->listView->model());
+
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -326,7 +346,7 @@ bool NewGeneVariableSummaryGroup::ResetAll(WidgetInstanceIdentifiers const & vg_
 			QVariant v;
 			v.setValue(identifier);
 			item->setData(v);
-			model->setItem( index, item );
+			model->setItem(index, item);
 
 			++index;
 
@@ -334,11 +354,12 @@ bool NewGeneVariableSummaryGroup::ResetAll(WidgetInstanceIdentifiers const & vg_
 	});
 
 	// Since these are not checkboxes yet, the following signal will never currently be called - unlike the Variable Group items (not the summary), which *are* checkboxes
-	connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
+	connect(model, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(ReceiveVariableItemChanged(QStandardItem *)));
 
 	ui->listView->setModel(model);
-	if (oldSelectionModel) delete oldSelectionModel;
 
-    HideShow();
+	if (oldSelectionModel) { delete oldSelectionModel; }
+
+	HideShow();
 
 }

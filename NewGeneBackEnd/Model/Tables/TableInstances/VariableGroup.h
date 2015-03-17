@@ -1,7 +1,7 @@
 #ifndef VARIABLEGROUP_H
 #define VARIABLEGROUP_H
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
+	#include <boost/algorithm/string.hpp>
 #endif
 #include "../Table.h"
 
@@ -21,7 +21,7 @@ class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY, TABLE_INSTANCE_IDENTI
 
 		enum COLUMN_INDEX
 		{
-			  INDEX__VG_CATEGORY_UUID = 0
+			INDEX__VG_CATEGORY_UUID = 0
 			, INDEX__VG_CATEGORY_STRING_CODE
 			, INDEX__VG_CATEGORY_STRING_LONGHAND
 			, INDEX__VG_CATEGORY_NOTES1
@@ -73,7 +73,7 @@ class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER, TABLE_INSTANCE_ID
 
 		enum COLUMN_INDEX
 		{
-			  INDEX__VG_SET_MEMBER_UUID = 0
+			INDEX__VG_SET_MEMBER_UUID = 0
 			, INDEX__VG_SET_MEMBER_STRING_CODE
 			, INDEX__VG_SET_MEMBER_STRING_LONGHAND
 			, INDEX__VG_SET_MEMBER_SEQUENCE_NUMBER
@@ -93,7 +93,8 @@ class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER, TABLE_INSTANCE_ID
 		}
 
 		void Load(sqlite3 * db, InputModel * input_model_ = nullptr);
-		bool AddNewVGTableEntries(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition, std::string & errorMsg);
+		bool AddNewVGTableEntries(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition,
+								  std::string & errorMsg);
 		bool DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg);
 
 };

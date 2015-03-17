@@ -2,14 +2,14 @@
 #define ACTIONWIDGETS_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/filesystem.hpp>
+	#include <boost/filesystem.hpp>
 #endif
 #include "../Utilities/WidgetIdentifier.h"
 
 enum WIDGET_ACTIONS
 {
 
-	  WIDGET_ACTIONS_FIRST = 0
+	WIDGET_ACTIONS_FIRST = 0
 	, ACTION_TYPE_NONE = WIDGET_ACTIONS_FIRST
 
 	, ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
@@ -40,7 +40,7 @@ enum WIDGET_ACTIONS
 enum WIDGET_ACTION_ITEM_REQUEST_REASON
 {
 
-	  WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN
+	WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN
 
 	, WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS
 	, WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS
@@ -288,120 +288,121 @@ class WidgetActionItem__WidgetInstanceIdentifiers : public WidgetActionItem
 class WidgetActionItem__WidgetInstanceIdentifiers_Plus_String : public WidgetActionItem__WidgetInstanceIdentifiers
 {
 
-public:
+	public:
 
-	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetInstanceIdentifiers const & value__, std::string const & the_string__)
-		: WidgetActionItem__WidgetInstanceIdentifiers(value__)
-		, the_string_(the_string__)
-	{
+		WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetInstanceIdentifiers const & value__, std::string const & the_string__)
+			: WidgetActionItem__WidgetInstanceIdentifiers(value__)
+			, the_string_(the_string__)
+		{
 
-	}
+		}
 
-	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const & rhs)
-		: WidgetActionItem__WidgetInstanceIdentifiers(rhs)
-		, the_string_(rhs.the_string_)
-	{
+		WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const & rhs)
+			: WidgetActionItem__WidgetInstanceIdentifiers(rhs)
+			, the_string_(rhs.the_string_)
+		{
 
-	}
+		}
 
-	~WidgetActionItem__WidgetInstanceIdentifiers_Plus_String()
-	{
+		~WidgetActionItem__WidgetInstanceIdentifiers_Plus_String()
+		{
 
-	}
+		}
 
-	void setValueString(std::string const & the_string__)
-	{
-		the_string_ = the_string__;
-	}
+		void setValueString(std::string const & the_string__)
+		{
+			the_string_ = the_string__;
+		}
 
-	std::string getValueString() const
-	{
-		return the_string_;
-	}
+		std::string getValueString() const
+		{
+			return the_string_;
+		}
 
-protected:
+	protected:
 
-	std::string the_string_;
+		std::string the_string_;
 
 };
 
 class WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int : public WidgetActionItem__WidgetInstanceIdentifiers_Plus_String
 {
 
-public:
+	public:
 
-	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(WidgetInstanceIdentifiers const & value__, std::string const & the_string__, int const & the_int__)
-		: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(value__, the_string__)
-		, the_int_(the_int__)
-	{
+		WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(WidgetInstanceIdentifiers const & value__, std::string const & the_string__, int const & the_int__)
+			: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(value__, the_string__)
+			, the_int_(the_int__)
+		{
 
-	}
+		}
 
-	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int const & rhs)
-		: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(rhs)
-		, the_int_(rhs.the_int_)
-	{
+		WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int const & rhs)
+			: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(rhs)
+			, the_int_(rhs.the_int_)
+		{
 
-	}
+		}
 
-	~WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int()
-	{
+		~WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int()
+		{
 
-	}
+		}
 
-	void setValueInt(int const & the_int__)
-	{
-		the_int_ = the_int__;
-	}
+		void setValueInt(int const & the_int__)
+		{
+			the_int_ = the_int__;
+		}
 
-	int getValueInt() const
-	{
-		return the_int_;
-	}
+		int getValueInt() const
+		{
+			return the_int_;
+		}
 
-protected:
+	protected:
 
-	int the_int_;
+		int the_int_;
 
 };
 
 class WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int : public WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int
 {
 
-public:
+	public:
 
-	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int(WidgetInstanceIdentifiers const & value__, std::string const & the_string__, std::string const & the_string2__, int const & the_int__)
-		: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(value__, the_string__, the_int__)
-		, the_string2_(the_string2__)
-	{
+		WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int(WidgetInstanceIdentifiers const & value__, std::string const & the_string__,
+				std::string const & the_string2__, int const & the_int__)
+			: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(value__, the_string__, the_int__)
+			, the_string2_(the_string2__)
+		{
 
-	}
+		}
 
-	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int(WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const & rhs)
-		: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(rhs)
-		, the_string2_(rhs.the_string2_)
-	{
+		WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int(WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const & rhs)
+			: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(rhs)
+			, the_string2_(rhs.the_string2_)
+		{
 
-	}
+		}
 
-	~WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int()
-	{
+		~WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int()
+		{
 
-	}
+		}
 
-	void setValueString2(std::string const & the_string2__)
-	{
-		the_string2_ = the_string2__;
-	}
+		void setValueString2(std::string const & the_string2__)
+		{
+			the_string2_ = the_string2__;
+		}
 
-	std::string getValueString2() const
-	{
-		return the_string2_;
-	}
+		std::string getValueString2() const
+		{
+			return the_string2_;
+		}
 
-protected:
+	protected:
 
-	std::string the_string2_;
+		std::string the_string2_;
 
 };
 
@@ -448,40 +449,40 @@ class WidgetActionItem__String : public WidgetActionItem
 class WidgetActionItem__StringVector : public WidgetActionItem
 {
 
-public:
+	public:
 
-	WidgetActionItem__StringVector(std::vector<std::string> const value__)
-		: WidgetActionItem()
-		, value_(value__)
-	{
+		WidgetActionItem__StringVector(std::vector<std::string> const value__)
+			: WidgetActionItem()
+			, value_(value__)
+		{
 
-	}
+		}
 
-	WidgetActionItem__StringVector(WidgetActionItem__StringVector const & rhs)
-		: WidgetActionItem(rhs)
-		, value_(rhs.value_)
-	{
+		WidgetActionItem__StringVector(WidgetActionItem__StringVector const & rhs)
+			: WidgetActionItem(rhs)
+			, value_(rhs.value_)
+		{
 
-	}
+		}
 
-	~WidgetActionItem__StringVector()
-	{
+		~WidgetActionItem__StringVector()
+		{
 
-	}
+		}
 
-	void setValue(std::vector<std::string> const & value__)
-	{
-		value_ = value__;
-	}
+		void setValue(std::vector<std::string> const & value__)
+		{
+			value_ = value__;
+		}
 
-	std::vector<std::string> getValue() const
-	{
-		return value_;
-	}
+		std::vector<std::string> getValue() const
+		{
+			return value_;
+		}
 
-protected:
+	protected:
 
-	std::vector<std::string> value_;
+		std::vector<std::string> value_;
 
 };
 
@@ -568,115 +569,117 @@ class WidgetActionItem__DateTime : public WidgetActionItem
 class WidgetActionItem__ImportVariableGroup : public WidgetActionItem
 {
 
-public:
+	public:
 
-	WidgetActionItem__ImportVariableGroup(WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols, std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity, bool const inputFileContainsColumnDescriptions_, bool const inputFileContainsColumnDataTypes_, bool const do_refresh_not_plain_insert_)
-		: WidgetActionItem()
-		, variable_group(vg)
-		, timeRangeColumnNames(timeRangeCols)
-		, dmusAndColumnNames(dmusAndCols)
-		, filePathName(filepathname)
-		, time_granularity(the_time_granularity)
-		, inputFileContainsColumnDescriptions(inputFileContainsColumnDescriptions_)
-		, inputFileContainsColumnDataTypes(inputFileContainsColumnDataTypes_)
-		, do_refresh_not_plain_insert(do_refresh_not_plain_insert_)
-	{
+		WidgetActionItem__ImportVariableGroup(WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols,
+											  std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity,
+											  bool const inputFileContainsColumnDescriptions_, bool const inputFileContainsColumnDataTypes_, bool const do_refresh_not_plain_insert_)
+			: WidgetActionItem()
+			, variable_group(vg)
+			, timeRangeColumnNames(timeRangeCols)
+			, dmusAndColumnNames(dmusAndCols)
+			, filePathName(filepathname)
+			, time_granularity(the_time_granularity)
+			, inputFileContainsColumnDescriptions(inputFileContainsColumnDescriptions_)
+			, inputFileContainsColumnDataTypes(inputFileContainsColumnDataTypes_)
+			, do_refresh_not_plain_insert(do_refresh_not_plain_insert_)
+		{
 
-	}
+		}
 
-	WidgetActionItem__ImportVariableGroup(WidgetActionItem__ImportVariableGroup const & rhs)
-		: WidgetActionItem(rhs)
-		, variable_group(rhs.variable_group)
-		, timeRangeColumnNames(rhs.timeRangeColumnNames)
-		, dmusAndColumnNames(rhs.dmusAndColumnNames)
-		, filePathName(rhs.filePathName)
-		, time_granularity(rhs.time_granularity)
-		, inputFileContainsColumnDescriptions(rhs.inputFileContainsColumnDescriptions)
-		, inputFileContainsColumnDataTypes(rhs.inputFileContainsColumnDataTypes)
-		, do_refresh_not_plain_insert(rhs.do_refresh_not_plain_insert)
-	{
+		WidgetActionItem__ImportVariableGroup(WidgetActionItem__ImportVariableGroup const & rhs)
+			: WidgetActionItem(rhs)
+			, variable_group(rhs.variable_group)
+			, timeRangeColumnNames(rhs.timeRangeColumnNames)
+			, dmusAndColumnNames(rhs.dmusAndColumnNames)
+			, filePathName(rhs.filePathName)
+			, time_granularity(rhs.time_granularity)
+			, inputFileContainsColumnDescriptions(rhs.inputFileContainsColumnDescriptions)
+			, inputFileContainsColumnDataTypes(rhs.inputFileContainsColumnDataTypes)
+			, do_refresh_not_plain_insert(rhs.do_refresh_not_plain_insert)
+		{
 
-	}
+		}
 
-	~WidgetActionItem__ImportVariableGroup()
-	{
+		~WidgetActionItem__ImportVariableGroup()
+		{
 
-	}
+		}
 
-	WidgetInstanceIdentifier getVG() const
-	{
-		return variable_group;
-	}
+		WidgetInstanceIdentifier getVG() const
+		{
+			return variable_group;
+		}
 
-	std::vector<std::string> getTimeRangeColNames() const
-	{
-		return timeRangeColumnNames;
-	}
+		std::vector<std::string> getTimeRangeColNames() const
+		{
+			return timeRangeColumnNames;
+		}
 
-	std::vector<std::pair<WidgetInstanceIdentifier, std::string>> getDmusAndColNames() const
-	{
-		return dmusAndColumnNames;
-	}
+		std::vector<std::pair<WidgetInstanceIdentifier, std::string>> getDmusAndColNames() const
+		{
+			return dmusAndColumnNames;
+		}
 
-	boost::filesystem::path getFilePathName() const
-	{
-		return filePathName;
-	}
+		boost::filesystem::path getFilePathName() const
+		{
+			return filePathName;
+		}
 
-	TIME_GRANULARITY getTimeGranularity() const
-	{
-		return time_granularity;
-	}
+		TIME_GRANULARITY getTimeGranularity() const
+		{
+			return time_granularity;
+		}
 
-	bool doesInputFileContainsColumnDescriptions() const
-	{
-		return inputFileContainsColumnDescriptions;
-	}
-	
-	bool doesInputFileContainsColumnDataTypes() const
-	{
-		return inputFileContainsColumnDataTypes;
-	}
+		bool doesInputFileContainsColumnDescriptions() const
+		{
+			return inputFileContainsColumnDescriptions;
+		}
 
-	bool doRefreshNotPlainInsert() const
-	{
-		return do_refresh_not_plain_insert;
-	}
+		bool doesInputFileContainsColumnDataTypes() const
+		{
+			return inputFileContainsColumnDataTypes;
+		}
 
-protected:
+		bool doRefreshNotPlainInsert() const
+		{
+			return do_refresh_not_plain_insert;
+		}
 
-	WidgetInstanceIdentifier variable_group;
-	std::vector<std::string> timeRangeColumnNames;
-	std::vector<std::pair<WidgetInstanceIdentifier, std::string>> dmusAndColumnNames;
-	boost::filesystem::path filePathName;
-	TIME_GRANULARITY time_granularity;
-	bool inputFileContainsColumnDescriptions;
-	bool inputFileContainsColumnDataTypes;
-	bool do_refresh_not_plain_insert;
+	protected:
+
+		WidgetInstanceIdentifier variable_group;
+		std::vector<std::string> timeRangeColumnNames;
+		std::vector<std::pair<WidgetInstanceIdentifier, std::string>> dmusAndColumnNames;
+		boost::filesystem::path filePathName;
+		TIME_GRANULARITY time_granularity;
+		bool inputFileContainsColumnDescriptions;
+		bool inputFileContainsColumnDataTypes;
+		bool do_refresh_not_plain_insert;
 
 };
 
 class WidgetActionItem__GenerateOutput : public WidgetActionItem
 {
 
-public:
+	public:
 
-	WidgetActionItem__GenerateOutput()
-		: WidgetActionItem()
-	{
+		WidgetActionItem__GenerateOutput()
+			: WidgetActionItem()
+		{
 
-	}
+		}
 
-	WidgetActionItem__GenerateOutput(WidgetActionItem__GenerateOutput const & rhs)
-		: WidgetActionItem(rhs)
-	{
+		WidgetActionItem__GenerateOutput(WidgetActionItem__GenerateOutput const & rhs)
+			: WidgetActionItem(rhs)
+		{
 
-	}
+		}
 
-	~WidgetActionItem__GenerateOutput()
-	{
+		~WidgetActionItem__GenerateOutput()
+		{
 
-	}
+		}
 
 };
 
@@ -718,7 +721,8 @@ template<>
 class WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> : public WidgetActionItemRequest_base
 {
 	public:
-		WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+		WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN,
+				InstanceActionItems items_ = InstanceActionItems())
 			: WidgetActionItemRequest_base(reason_, items_)
 		{
 		}
@@ -736,7 +740,8 @@ template<>
 class WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> : public WidgetActionItemRequest_base
 {
 	public:
-		WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+		WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN,
+				InstanceActionItems items_ = InstanceActionItems())
 			: WidgetActionItemRequest_base(reason_, items_)
 		{
 		}
@@ -754,7 +759,8 @@ template<>
 class WidgetActionItemRequest<ACTION_DO_RANDOM_SAMPLING_CHANGE> : public WidgetActionItemRequest_base
 {
 	public:
-		WidgetActionItemRequest<ACTION_DO_RANDOM_SAMPLING_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+		WidgetActionItemRequest<ACTION_DO_RANDOM_SAMPLING_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN,
+				InstanceActionItems items_ = InstanceActionItems())
 			: WidgetActionItemRequest_base(reason_, items_)
 		{
 		}
@@ -772,7 +778,8 @@ template<>
 class WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE> : public WidgetActionItemRequest_base
 {
 	public:
-		WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+		WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN,
+				InstanceActionItems items_ = InstanceActionItems())
 			: WidgetActionItemRequest_base(reason_, items_)
 		{
 		}
@@ -790,7 +797,8 @@ template<>
 class WidgetActionItemRequest<ACTION_CONSOLIDATE_ROWS_CHANGE> : public WidgetActionItemRequest_base
 {
 	public:
-		WidgetActionItemRequest<ACTION_CONSOLIDATE_ROWS_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+		WidgetActionItemRequest<ACTION_CONSOLIDATE_ROWS_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN,
+				InstanceActionItems items_ = InstanceActionItems())
 			: WidgetActionItemRequest_base(reason_, items_)
 		{
 		}
@@ -808,7 +816,8 @@ template<>
 class WidgetActionItemRequest<ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE> : public WidgetActionItemRequest_base
 {
 	public:
-		WidgetActionItemRequest<ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+		WidgetActionItemRequest<ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN,
+				InstanceActionItems items_ = InstanceActionItems())
 			: WidgetActionItemRequest_base(reason_, items_)
 		{
 		}
@@ -826,7 +835,8 @@ template<>
 class WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE> : public WidgetActionItemRequest_base
 {
 	public:
-		WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+		WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN,
+				InstanceActionItems items_ = InstanceActionItems())
 			: WidgetActionItemRequest_base(reason_, items_)
 		{
 		}
@@ -843,15 +853,16 @@ typedef WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE> WidgetActionItemRe
 template<>
 class WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_GENERATE_OUTPUT>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_GENERATE_OUTPUT>(WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_GENERATE_OUTPUT>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_GENERATE_OUTPUT>(WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> WidgetActionItemRequest_ACTION_GENERATE_OUTPUT;
 
@@ -861,15 +872,16 @@ typedef WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> WidgetActionItemRequest_
 template<>
 class WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE>(WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE>(WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE> WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE;
 
@@ -879,15 +891,16 @@ typedef WidgetActionItemRequest<ACTION_LIMIT_DMU_MEMBERS_CHANGE> WidgetActionIte
 template<>
 class WidgetActionItemRequest<ACTION_ADD_DMU> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_ADD_DMU>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_ADD_DMU>(WidgetActionItemRequest<ACTION_ADD_DMU> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_ADD_DMU>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+												InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_ADD_DMU>(WidgetActionItemRequest<ACTION_ADD_DMU> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_ADD_DMU> WidgetActionItemRequest_ACTION_ADD_DMU;
 
@@ -897,15 +910,16 @@ typedef WidgetActionItemRequest<ACTION_ADD_DMU> WidgetActionItemRequest_ACTION_A
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_DMU> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_DELETE_DMU>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_DELETE_DMU>(WidgetActionItemRequest<ACTION_DELETE_DMU> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_DELETE_DMU>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_DELETE_DMU>(WidgetActionItemRequest<ACTION_DELETE_DMU> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_DELETE_DMU> WidgetActionItemRequest_ACTION_DELETE_DMU;
 
@@ -915,15 +929,16 @@ typedef WidgetActionItemRequest<ACTION_DELETE_DMU> WidgetActionItemRequest_ACTIO
 template<>
 class WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS>(WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS>(WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS;
 
@@ -933,15 +948,16 @@ typedef WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> WidgetActionItemRequest_
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS>(WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS>(WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS;
 
@@ -951,15 +967,16 @@ typedef WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> WidgetActionItemReque
 template<>
 class WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE>(WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE>(WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE;
 
@@ -969,15 +986,16 @@ typedef WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> WidgetActionItemR
 template<>
 class WidgetActionItemRequest<ACTION_ADD_UOA> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_ADD_UOA>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_ADD_UOA>(WidgetActionItemRequest<ACTION_ADD_UOA> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_ADD_UOA>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+												InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_ADD_UOA>(WidgetActionItemRequest<ACTION_ADD_UOA> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_ADD_UOA> WidgetActionItemRequest_ACTION_ADD_UOA;
 
@@ -987,15 +1005,16 @@ typedef WidgetActionItemRequest<ACTION_ADD_UOA> WidgetActionItemRequest_ACTION_A
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_UOA> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_DELETE_UOA>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_DELETE_UOA>(WidgetActionItemRequest<ACTION_DELETE_UOA> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_DELETE_UOA>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_DELETE_UOA>(WidgetActionItemRequest<ACTION_DELETE_UOA> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_DELETE_UOA> WidgetActionItemRequest_ACTION_DELETE_UOA;
 
@@ -1005,15 +1024,16 @@ typedef WidgetActionItemRequest<ACTION_DELETE_UOA> WidgetActionItemRequest_ACTIO
 template<>
 class WidgetActionItemRequest<ACTION_CREATE_VG> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_CREATE_VG>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_CREATE_VG>(WidgetActionItemRequest<ACTION_CREATE_VG> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_CREATE_VG>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_CREATE_VG>(WidgetActionItemRequest<ACTION_CREATE_VG> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_CREATE_VG> WidgetActionItemRequest_ACTION_CREATE_VG;
 
@@ -1023,15 +1043,16 @@ typedef WidgetActionItemRequest<ACTION_CREATE_VG> WidgetActionItemRequest_ACTION
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_VG> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_DELETE_VG>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_DELETE_VG>(WidgetActionItemRequest<ACTION_DELETE_VG> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_DELETE_VG>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_DELETE_VG>(WidgetActionItemRequest<ACTION_DELETE_VG> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_DELETE_VG> WidgetActionItemRequest_ACTION_DELETE_VG;
 
@@ -1041,15 +1062,16 @@ typedef WidgetActionItemRequest<ACTION_DELETE_VG> WidgetActionItemRequest_ACTION
 template<>
 class WidgetActionItemRequest<ACTION_REFRESH_VG> : public WidgetActionItemRequest_base
 {
-public:
-	WidgetActionItemRequest<ACTION_REFRESH_VG>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
-		: WidgetActionItemRequest_base(reason_, items_)
-	{
-	}
-	WidgetActionItemRequest<ACTION_REFRESH_VG>(WidgetActionItemRequest<ACTION_REFRESH_VG> const & rhs)
-		: WidgetActionItemRequest_base(rhs)
-	{
-	}
+	public:
+		WidgetActionItemRequest<ACTION_REFRESH_VG>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_REFRESH_VG>(WidgetActionItemRequest<ACTION_REFRESH_VG> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
 };
 typedef WidgetActionItemRequest<ACTION_REFRESH_VG> WidgetActionItemRequest_ACTION_REFRESH_VG;
 

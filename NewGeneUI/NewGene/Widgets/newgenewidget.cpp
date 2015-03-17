@@ -10,8 +10,8 @@
 
 NewGeneMainWindow * NewGeneWidget::theMainWindow = nullptr;
 
-NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
-	: self( creation_info.self )
+NewGeneWidget::NewGeneWidget(WidgetCreationInfo const & creation_info)
+	: self(creation_info.self)
 	, widget_nature(creation_info.widget_nature)
 	, uuid(newUUID())
 	, uuid_parent(creation_info.uuid_parent)
@@ -20,8 +20,8 @@ NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
 	, widget_type(creation_info.widget_type)
 	, data_instance(creation_info.data_instance)
 	, top_level(creation_info.top_level)
-    , inputConnected(false)
-    , outputConnected(false)
+	, inputConnected(false)
+	, outputConnected(false)
 {
 }
 
@@ -31,6 +31,7 @@ NewGeneWidget::~NewGeneWidget()
 	{
 		outp->UnregisterInterestInChanges(this);
 	}
+
 	if (inp)
 	{
 		inp->UnregisterInterestInChanges(this);
@@ -39,23 +40,29 @@ NewGeneWidget::~NewGeneWidget()
 	if (inp)
 	{
 		inp->RemoveWidgetFromUUIDMap(uuid);
+
 		if (data_instance.uuid)
 		{
 			inp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
 		}
 	}
+
 	if (outp)
 	{
 		outp->RemoveWidgetFromUUIDMap(uuid);
+
 		if (data_instance.uuid)
 		{
 			outp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
 		}
+
 		UIInputProject * _inp = outp->getUIInputProject();
+
 		if (_inp)
 		{
 			_inp->UnregisterInterestInChanges(this);
 			_inp->RemoveWidgetFromUUIDMap(uuid);
+
 			if (data_instance.uuid)
 			{
 				_inp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
@@ -70,15 +77,19 @@ void NewGeneWidget::PrepareInputWidget(bool const also_link_output)
 	{
 		return;
 	}
-    if (!inputConnected)
-    {
-        self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
-        inputConnected = true;
-    }
-    if (also_link_output && !outputConnected)
+
+	if (!inputConnected)
 	{
-		self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
-        outputConnected = true;
+		self->connect((QObject *)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self,
+					  SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
+		inputConnected = true;
+	}
+
+	if (also_link_output && !outputConnected)
+	{
+		self->connect((QObject *)&projectManagerUI(), SIGNAL(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self,
+					  SLOT(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
+		outputConnected = true;
 	}
 }
 
@@ -88,16 +99,20 @@ void NewGeneWidget::PrepareOutputWidget()
 	{
 		return;
 	}
-    if (!inputConnected)
-    {
-        self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
-        inputConnected = true;
-    }
-    if (!outputConnected)
-    {
-        self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
-        outputConnected = true;
-    }
+
+	if (!inputConnected)
+	{
+		self->connect((QObject *)&projectManagerUI(), SIGNAL(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self,
+					  SLOT(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
+		inputConnected = true;
+	}
+
+	if (!outputConnected)
+	{
+		self->connect((QObject *)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self,
+					  SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
+		outputConnected = true;
+	}
 }
 
 NewGeneMainWindow & NewGeneWidget::mainWindow()
@@ -109,7 +124,7 @@ NewGeneMainWindow & NewGeneWidget::mainWindow()
 void NewGeneWidget::ShowMessageBox(std::string msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg.c_str() );
+	msgBox.setText(msg.c_str());
 	msgBox.exec();
 }
 
@@ -131,11 +146,13 @@ void NewGeneWidget::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 		if (project && project == inp)
 		{
 			inp->RemoveWidgetFromUUIDMap(uuid);
+
 			if (data_instance.uuid)
 			{
 				inp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
 			}
 		}
+
 		inp = nullptr;
 
 		// TODO: release connections here
@@ -147,22 +164,24 @@ void NewGeneWidget::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 
 		if (!inp)
 		{
-			statusManagerUI().PostStatus( "Input project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
+			statusManagerUI().PostStatus("Input project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true);
 			return;
 		}
+
 		try
 		{
-			inp->AddWidgetUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid);
+			inp->AddWidgetUUIDToUUIDMap(dynamic_cast<NewGeneWidget *>(self), uuid);
+
 			if (data_instance.uuid)
 			{
-				inp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid_parent, *data_instance.uuid);
+				inp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget *>(self), uuid_parent, *data_instance.uuid);
 			}
 		}
 		catch (std::bad_cast & bc)
 		{
 			boost::format msg("Unable to obtain proper widget during construction: %1%");
 			msg % bc.what();
-			statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
+			statusManagerUI().PostStatus(msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true);
 			return;
 		}
 
@@ -182,11 +201,13 @@ void NewGeneWidget::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TY
 		if (project && project == outp)
 		{
 			outp->RemoveWidgetFromUUIDMap(uuid);
+
 			if (data_instance.uuid)
 			{
 				outp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
 			}
 		}
+
 		outp = nullptr;
 
 		// TODO: release connections here
@@ -198,22 +219,24 @@ void NewGeneWidget::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TY
 
 		if (!outp)
 		{
-			statusManagerUI().PostStatus( "Output project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
+			statusManagerUI().PostStatus("Output project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true);
 			return;
 		}
+
 		try
 		{
-			outp->AddWidgetUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid);
+			outp->AddWidgetUUIDToUUIDMap(dynamic_cast<NewGeneWidget *>(self), uuid);
+
 			if (data_instance.uuid)
 			{
-				outp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid_parent, *data_instance.uuid);
+				outp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget *>(self), uuid_parent, *data_instance.uuid);
 			}
 		}
 		catch (std::bad_cast & bc)
 		{
 			boost::format msg("Unable to obtain proper widget during construction: %1%");
 			msg % bc.what();
-			statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
+			statusManagerUI().PostStatus(msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true);
 			return;
 		}
 

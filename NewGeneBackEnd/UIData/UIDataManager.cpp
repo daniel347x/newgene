@@ -23,6 +23,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 		messager.ShowMessageBox("SQLite is not threadsafe!");
 		return;
 	}
+
 	InputModel & input_model = project.model().getInputModel();
 	WidgetDataItem_VARIABLE_GROUPS_TOOLBOX variable_groups(widget_request);
 	variable_groups.identifiers = input_model.t_vgp_identifiers.getIdentifiers();
@@ -37,6 +38,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	InputModel & input_model = project.model().getInputModel();
 	OutputModel & output_model = project.model();
 	WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE variable_group(widget_request);
+
 	if (widget_request.identifier && widget_request.identifier->uuid)
 	{
 		WidgetInstanceIdentifiers identifiers = input_model.t_vgp_setmembers.getIdentifiers(*widget_request.identifier->uuid);
@@ -52,6 +54,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 					return; // from lambda
 				}
 			});
+
 			if (found)
 			{
 				variable_group.identifiers.push_back(std::make_pair(identifier, true));
@@ -62,6 +65,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 			}
 		});
 	}
+
 	std::sort(variable_group.identifiers.begin(), variable_group.identifiers.end());
 	messager.EmitOutputWidgetDataRefresh(variable_group);
 }
@@ -81,14 +85,17 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 /************************************************************************/
 // VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE
 /************************************************************************/
-void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE const & widget_request, OutputProject & project)
+void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE const & widget_request,
+		OutputProject & project)
 {
 	OutputModel & output_model = project.model();
 	WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE variable_group(widget_request);
+
 	if (widget_request.identifier && widget_request.identifier->uuid)
 	{
 		variable_group.identifiers = output_model.t_variables_selected_identifiers.getIdentifiers(*widget_request.identifier->uuid);
 	}
+
 	messager.EmitOutputWidgetDataRefresh(variable_group);
 }
 
@@ -111,11 +118,13 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 {
 	OutputModel & output_model = project.model();
 	WidgetDataItem_KAD_SPIN_CONTROL_WIDGET kad_spincontrol(widget_request);
+
 	if (widget_request.identifier && widget_request.identifier->uuid)
 	{
 		WidgetInstanceIdentifier_Int_Pair spinControlData = output_model.t_kad_count.getIdentifier(*widget_request.identifier->uuid);
 		kad_spincontrol.count = spinControlData.second;
 	}
+
 	messager.EmitOutputWidgetDataRefresh(kad_spincontrol);
 }
 
@@ -142,12 +151,14 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 {
 	OutputModel & output_model = project.model();
 	WidgetDataItem_DATETIME_WIDGET timerange_datetimecontrol(widget_request);
+
 	if (widget_request.identifier && widget_request.identifier->code && *widget_request.identifier->code == "0")
 	{
 		if (widget_request.identifier->flags == "s")
 		{
 			WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
 			bool found = output_model.t_time_range.getIdentifierFromStringCodeAndFlags("0", "s", timerange_start_identifier);
+
 			if (found)
 			{
 				timerange_datetimecontrol.the_date_time = timerange_start_identifier.second;
@@ -157,12 +168,14 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 		{
 			WidgetInstanceIdentifier_Int64_Pair timerange_end_identifier;
 			bool found = output_model.t_time_range.getIdentifierFromStringCodeAndFlags("0", "e", timerange_end_identifier);
+
 			if (found)
 			{
 				timerange_datetimecontrol.the_date_time = timerange_end_identifier.second;
 			}
 		}
 	}
+
 	messager.EmitOutputWidgetDataRefresh(timerange_datetimecontrol);
 }
 
@@ -188,6 +201,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	std::vector<dmu_category_limit_members_info_tuple> & dmu_category_limit_members_info = dmu_limit_info.dmu_category_limit_members_info;
 
 	WidgetInstanceIdentifiers dmu_categories = project.model().getInputModel().t_dmu_category.getIdentifiers();
+
 	for (auto & dmu_category : dmu_categories)
 	{
 		WidgetInstanceIdentifiers dmu_set_members__all = project.model().getInputModel().t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
@@ -197,7 +211,8 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 		std::sort(dmu_set_members__limited.begin(), dmu_set_members__limited.end());
 
 		WidgetInstanceIdentifiers dmu_set_members_not_limited;
-		std::set_difference(dmu_set_members__all.cbegin(), dmu_set_members__all.cend(), dmu_set_members__limited.cbegin(), dmu_set_members__limited.cend(), std::inserter(dmu_set_members_not_limited, dmu_set_members_not_limited.begin()));
+		std::set_difference(dmu_set_members__all.cbegin(), dmu_set_members__all.cend(), dmu_set_members__limited.cbegin(), dmu_set_members__limited.cend(),
+							std::inserter(dmu_set_members_not_limited, dmu_set_members_not_limited.begin()));
 
 		dmu_category_limit_members_info.emplace_back(std::make_tuple(dmu_category, is_limited, dmu_set_members__all, dmu_set_members_not_limited, dmu_set_members__limited));
 	}
@@ -236,6 +251,7 @@ void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequ
 			boost::format msg("Bad UOA in action handler.");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
+
 		WidgetInstanceIdentifiers dmu_categories = input_model.t_uoa_category.RetrieveDMUCategories(input_model.getDb(), &input_model, *single_uoa.uuid);
 		uoa_management.uoas_and_dmu_categories.push_back(std::make_pair(single_uoa, dmu_categories));
 	});
@@ -257,6 +273,7 @@ void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequ
 			boost::format msg("Bad VG in action handler.");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
+
 		vg_management.vgs_and_uoa.push_back(std::make_pair(single_vg, *single_vg.identifier_parent));
 	});
 	messager.EmitInputWidgetDataRefresh(vg_management);

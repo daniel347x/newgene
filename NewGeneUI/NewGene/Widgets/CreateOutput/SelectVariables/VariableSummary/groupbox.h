@@ -13,11 +13,11 @@ class GroupBox : public QGroupBox
 		Q_OBJECT
 
 	public:
-		explicit GroupBox( QWidget * parent = 0 );
+		explicit GroupBox(QWidget * parent = 0);
 		~GroupBox();
 
 	protected:
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 		Ui::GroupBox * ui;

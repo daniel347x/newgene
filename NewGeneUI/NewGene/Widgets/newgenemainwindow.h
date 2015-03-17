@@ -21,7 +21,7 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		Q_OBJECT
 
 	public:
-		explicit NewGeneMainWindow( QWidget * parent = 0 );
+		explicit NewGeneMainWindow(QWidget * parent = 0);
 		~NewGeneMainWindow();
 
 		UIMessager messager;
@@ -36,16 +36,16 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 
 	public:
 
-        void SetTitle();
-        void displaySplash(bool const);
+		void SetTitle();
+		void displaySplash(bool const);
 
 	public slots:
-        void displaySplashOpening();
-        void displaySplashAbout();
-        void doInitialize();
-        void doDisable();
-        void doEnable();
-        void SignalMessageBox(STD_STRING);
+		void displaySplashOpening();
+		void displaySplashAbout();
+		void doInitialize();
+		void doDisable();
+		void doEnable();
+		void SignalMessageBox(STD_STRING);
 		void ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const);
 		void ReceiveSignalStopProgressBar(int);
 		void ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const);
@@ -54,9 +54,9 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 
 	protected:
-		void changeEvent( QEvent * e );
-		void closeEvent(QCloseEvent *event);
-        void PrepareGlobalConnections();
+		void changeEvent(QEvent * e);
+		void closeEvent(QCloseEvent * event);
+		void PrepareGlobalConnections();
 
 	private slots:
 		void on_actionOpen_Input_Dataset_triggered();
@@ -67,12 +67,12 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void on_actionNew_Output_Dataset_triggered();
 		void on_actionSave_Input_Dataset_As_triggered();
 		void on_actionSave_Output_Dataset_As_triggered();
-        void on_actionDisplay_input_dataset_path_triggered();
-        void on_actionDisplay_output_dataset_path_triggered();
+		void on_actionDisplay_input_dataset_path_triggered();
+		void on_actionDisplay_output_dataset_path_triggered();
 
-        void on_actionAbout_NewGene_triggered();
+		void on_actionAbout_NewGene_triggered();
 
-private:
+	private:
 		Ui::NewGeneMainWindow * ui;
 
 		friend class NewGeneWidget;

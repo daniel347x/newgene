@@ -17,7 +17,7 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 
 	public:
 
-		explicit limit_dmus_region(QWidget *parent = 0);
+		explicit limit_dmus_region(QWidget * parent = 0);
 		~limit_dmus_region();
 
 		void HandleChanges(DataChangeMessage const &);
@@ -39,22 +39,22 @@ class limit_dmus_region : public QWidget, public NewGeneWidget // do not reorder
 	private slots:
 
 		void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        void ReceiveBottomLeftSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        void ReceiveBottomRightSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        void on_pushButton_limit_dmus_move_right_clicked();
+		void ReceiveBottomLeftSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+		void ReceiveBottomRightSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+		void on_pushButton_limit_dmus_move_right_clicked();
 		void on_pushButton_limit_dmus_move_left_clicked();
 		void on_checkBox_limit_dmus_toggled(bool checked);
-        void on_toolButtonSelectAllBottomLeft_clicked();
-        void on_toolButtonDeselectAllBottomLeft_clicked();
-        void on_toolButtonSelectAllBottomRight_clicked();
-        void on_toolButtonDeselectAllBottomRight_clicked();
+		void on_toolButtonSelectAllBottomLeft_clicked();
+		void on_toolButtonDeselectAllBottomLeft_clicked();
+		void on_toolButtonSelectAllBottomRight_clicked();
+		void on_toolButtonDeselectAllBottomRight_clicked();
 
-protected:
+	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 		void Empty();
 		void PrepareItem(QStandardItem * item, std::string const & text, WidgetInstanceIdentifier const & identifier, bool const is_limited);
-        void SetEnabledStateMoveButtons();
+		void SetEnabledStateMoveButtons();
 
 	private:
 
@@ -63,7 +63,8 @@ protected:
 		void EmptyBottomLeftPane();
 		void EmptyBottomRightPane();
 
-		void ResetDmuMembersPanes(WidgetInstanceIdentifier const & dmu_category, bool const is_limited, WidgetInstanceIdentifiers const & dmu_set_members__all, WidgetInstanceIdentifiers const & dmu_set_members_not_limited, WidgetInstanceIdentifiers const & dmu_set_members__limited);
+		void ResetDmuMembersPanes(WidgetInstanceIdentifier const & dmu_category, bool const is_limited, WidgetInstanceIdentifiers const & dmu_set_members__all,
+								  WidgetInstanceIdentifiers const & dmu_set_members_not_limited, WidgetInstanceIdentifiers const & dmu_set_members__limited);
 		void ResetBottomLeftPane(WidgetInstanceIdentifiers const & dmu_set_members__not_limited);
 		void ResetBottomRightPane(WidgetInstanceIdentifiers const & dmu_set_members__limited);
 

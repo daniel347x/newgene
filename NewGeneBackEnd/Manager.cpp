@@ -49,6 +49,7 @@ namespace MANAGER_DESCRIPTION_NAMESPACE
 		{
 			return "ModelActionManager";
 		}
+
 		return std::string();
 	}
 

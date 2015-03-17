@@ -1,7 +1,7 @@
 #include "../UIActionManager.h"
 
 #ifndef Q_MOC_RUN
-#	include <boost/scope_exit.hpp>
+	#include <boost/scope_exit.hpp>
 #endif
 #include "../../Project/InputProject.h"
 #include "../../Project/OutputProject.h"
@@ -72,12 +72,14 @@ void UIActionManager::CreateVG(Messager & messager__, WidgetActionItemRequest_AC
 					WidgetActionItem const & actionItem = *instanceActionItem.second;
 					WidgetActionItem__StringVector const & actionItemStrings = static_cast<WidgetActionItem__StringVector const &>(actionItem);
 					std::vector<std::string> const & vg_strings = actionItemStrings.getValue();
+
 					if (vg_strings.size() == 0)
 					{
 						boost::format msg("Incorrect internal data format for VG creation.");
 						messager__.ShowMessageBox(msg.str());
 						return;
 					}
+
 					std::string const & new_vg_code = vg_strings[0];
 					std::string const & vg_description = vg_strings[1];
 
@@ -163,6 +165,7 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 					ProjectManager & project_manager = projectManager();
 					std::string errorMsg;
 					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
+
 					if (!proceed)
 					{
 						boost::format msg("Error deleting variable group: %1%");
@@ -170,9 +173,11 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
+
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
 						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
+
 						if (!success)
 						{
 							boost::format msg("Error deleting variable group: %1%. Please restart NewGene.");
@@ -265,12 +270,14 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 
 				DataChangeMessage change_response(&project);
 
-				for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager,
+						 &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
 					ProjectManager & project_manager = projectManager();
 					std::string errorMsg;
 					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
+
 					if (!proceed)
 					{
 						boost::format msg("Error deleting variable group: %1%");
@@ -278,9 +285,11 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
+
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
 						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
+
 						if (!success)
 						{
 							boost::format msg("Error deleting variable group: %1%. Please restart NewGene.");
@@ -331,7 +340,7 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 				});
 
 				messager.EmitChangeMessage(change_response);
-		
+
 			}
 			break;
 
@@ -362,6 +371,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 	{
 		std::lock_guard<std::recursive_mutex> guard(Importer::is_performing_import_mutex);
+
 		if (Importer::is_performing_import)
 		{
 			boost::format msg("Another import operation is in progress.  Please wait for that operation to complete first.");
@@ -413,15 +423,19 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 					std::string errorMsg;
 					std::unique_ptr<Table_VariableGroupData> new_table(new Table_VariableGroupData(*variable_group.code));
+
 					if (new_table == nullptr)
 					{
 						boost::format msg("Out of memory.  Cannot import the variable group data.");
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
+
 					ImportDefinition import_definition;
 					errorMsg.clear();
-					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, inputFileContainsColumnDescriptions, inputFileContainsColumnDataTypes, import_definition, errorMsg);
+					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity,
+								   inputFileContainsColumnDescriptions, inputFileContainsColumnDataTypes, import_definition, errorMsg);
+
 					if (!success)
 					{
 						new_table->DeleteDataTable(input_model.getDb(), &input_model);
@@ -435,6 +449,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					errorMsg.clear();
 
 					Importer::Mode import_mode;
+
 					if (do_refresh_not_plain_insert)
 					{
 						import_mode = Importer::INSERT_OR_UPDATE;
@@ -443,7 +458,9 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					{
 						import_mode = Importer::INSERT_IN_BULK;
 					}
+
 					Importer table_importer(import_definition, &input_model, new_table.get(), import_mode, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
+
 					if (!errorMsg.empty())
 					{
 						boost::format msg("Unable to create data table: %1%");
@@ -459,10 +476,12 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						// Add the data columns of the table to the VG_SET_MEMBER table
 						errorMsg.clear();
 						success = input_model.t_vgp_setmembers.AddNewVGTableEntries(input_model.getDb(), &input_model, variable_group, import_definition, errorMsg);
+
 						if (!success)
 						{
 							new_table->DeleteDataTable(input_model.getDb(), &input_model);
 							boost::format msg("%1%");
+
 							if (!errorMsg.empty())
 							{
 								msg % errorMsg;
@@ -471,6 +490,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							{
 								msg % "Unable to create metadata entries describing the columns for the variable group.";
 							}
+
 							messager.ShowMessageBox(msg.str());
 							return;
 						}
@@ -478,10 +498,12 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						// Add the metadata for the new table to the VG_DATA_METADATA__DATETIME_COLUMNS table
 						errorMsg.clear();
 						success = input_model.t_vgp_data_metadata__datetime_columns.AddDataTable(input_model.getDb(), &input_model, variable_group, errorMsg, time_granularity);
+
 						if (!success)
 						{
 							new_table->DeleteDataTable(input_model.getDb(), &input_model);
 							boost::format msg("%1%");
+
 							if (!errorMsg.empty())
 							{
 								msg % errorMsg;
@@ -490,6 +512,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							{
 								msg % "Unable to create date/time column entries for the variable group.";
 							}
+
 							messager.ShowMessageBox(msg.str());
 							return;
 						}
@@ -497,9 +520,11 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						// Add the metadata for the new table to the VG_DATA_METADATA__PRIMARY_KEYS table
 						errorMsg.clear();
 						success = input_model.t_vgp_data_metadata__primary_keys.AddDataTable(input_model.getDb(), &input_model, variable_group, import_definition.primary_keys_info, errorMsg);
+
 						if (!success)
 						{
 							new_table->DeleteDataTable(input_model.getDb(), &input_model);
+
 							if (!errorMsg.empty())
 							{
 								boost::format msg("%1%: %2%");
@@ -513,6 +538,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								msg % "Unable to create primary key metadata column entries for the variable group.";
 								messager.ShowMessageBox(msg.str());
 							}
+
 							return;
 						}
 
@@ -526,6 +552,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						errorMsg.clear();
 						std::string msgBoxErrors;
 						success = table_importer.DoImport(errorMsg, messager);
+
 						if (table_importer.badreadlines > 0)
 						{
 							boost::format msg("Number rows of data failed to read from import file: %1%");
@@ -534,6 +561,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							msgBoxErrors += msg.str();
 							msgBoxErrors += "\n";
 						}
+
 						if (table_importer.badwritelines > 0)
 						{
 							boost::format msg("Number rows of data failed to write to database: %1%");
@@ -542,7 +570,9 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							msgBoxErrors += msg.str();
 							msgBoxErrors += "\n";
 						}
+
 						boost::posix_time::ptime current_date_time = boost::posix_time::second_clock::local_time();
+
 						if (!success)
 						{
 							boost::format msg("%1%: Unable to import or refresh the variable group from the file: %2%");
@@ -552,6 +582,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							msgBoxErrors += msg.str();
 							msgBoxErrors += "\n";
 						}
+
 						if (!table_importer.errors.empty())
 						{
 							boost::format msg("%1%: There were messages during import.  These will be appended to log \"newgene.import.log\"");
@@ -573,6 +604,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							importlog.close();
 							messager.ShowMessageBox(msgBoxErrors);
 						}
+
 						if (!success)
 						{
 							new_table->DeleteDataTable(input_model.getDb(), &input_model);
@@ -585,10 +617,12 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						input_model.t_vgp_data_vector.push_back(std::move(new_table));
 
 						std::string cancelAddendum;
+
 						if (Importer::cancelled)
 						{
 							cancelAddendum = " (until cancelled)";
 						}
+
 						if (table_importer.badreadlines > 0 || table_importer.badwritelines > 0)
 						{
 							if (table_importer.badreadlines > 0 && table_importer.badwritelines > 0)
@@ -596,80 +630,84 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								if (do_refresh_not_plain_insert)
 								{
 									// Handle incoming data row-by-row, distinguishing between inserts and updates
-									boost::format msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to, %7% updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+									boost::format
+									msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to, %7% updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-										% boost::lexical_cast<std::string>(table_importer.badreadlines)
-										% boost::lexical_cast<std::string>(table_importer.badwritelines)
-										% cancelAddendum
-										% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-										% boost::lexical_cast<std::string>(table_importer.goodwritelines)
-										% boost::lexical_cast<std::string>(table_importer.goodupdatelines);
+									% boost::lexical_cast<std::string>(table_importer.badreadlines)
+									% boost::lexical_cast<std::string>(table_importer.badwritelines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines)
+									% boost::lexical_cast<std::string>(table_importer.goodupdatelines);
 									messager.ShowMessageBox(msg.str());
 								}
 								else
 								{
 									// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
-									boost::format msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to and/or updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+									boost::format
+									msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to and/or updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-										% boost::lexical_cast<std::string>(table_importer.badreadlines)
-										% boost::lexical_cast<std::string>(table_importer.badwritelines)
-										% cancelAddendum
-										% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-										% boost::lexical_cast<std::string>(table_importer.goodwritelines + table_importer.goodupdatelines);
+									% boost::lexical_cast<std::string>(table_importer.badreadlines)
+									% boost::lexical_cast<std::string>(table_importer.badwritelines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines + table_importer.goodupdatelines);
 									messager.ShowMessageBox(msg.str());
 								}
 							}
-							else
-							if (table_importer.badreadlines == 0 && table_importer.badwritelines > 0)
+							else if (table_importer.badreadlines == 0 && table_importer.badwritelines > 0)
 							{
 								if (do_refresh_not_plain_insert)
 								{
 									// Handle incoming data row-by-row, distinguishing between inserts and updates
-									boost::format msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to, %6% updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+									boost::format
+									msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to, %6% updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-										% boost::lexical_cast<std::string>(table_importer.badwritelines)
-										% cancelAddendum
-										% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-										% boost::lexical_cast<std::string>(table_importer.goodwritelines)
-										% boost::lexical_cast<std::string>(table_importer.goodupdatelines);
+									% boost::lexical_cast<std::string>(table_importer.badwritelines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines)
+									% boost::lexical_cast<std::string>(table_importer.goodupdatelines);
 									messager.ShowMessageBox(msg.str());
 								}
 								else
 								{
 									// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
-									boost::format msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to and/or updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+									boost::format
+									msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to and/or updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-										% boost::lexical_cast<std::string>(table_importer.badwritelines)
-										% cancelAddendum
-										% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-										% boost::lexical_cast<std::string>(table_importer.goodwritelines + table_importer.goodupdatelines);
+									% boost::lexical_cast<std::string>(table_importer.badwritelines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines + table_importer.goodupdatelines);
 									messager.ShowMessageBox(msg.str());
 								}
 							}
-							else
-							if (table_importer.badreadlines > 0 && table_importer.badwritelines == 0)
+							else if (table_importer.badreadlines > 0 && table_importer.badwritelines == 0)
 							{
 								if (do_refresh_not_plain_insert)
 								{
 									// Handle incoming data row-by-row, distinguishing between inserts and updates
-									boost::format msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to, %6% updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+									boost::format
+									msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to, %6% updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-										% boost::lexical_cast<std::string>(table_importer.badreadlines)
-										% cancelAddendum
-										% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-										% boost::lexical_cast<std::string>(table_importer.goodwritelines)
-										% boost::lexical_cast<std::string>(table_importer.goodupdatelines);
+									% boost::lexical_cast<std::string>(table_importer.badreadlines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines)
+									% boost::lexical_cast<std::string>(table_importer.goodupdatelines);
 									messager.ShowMessageBox(msg.str());
 								}
 								else
 								{
 									// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
-									boost::format msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to and/or updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+									boost::format
+									msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to and/or updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-										% boost::lexical_cast<std::string>(table_importer.badreadlines)
-										% cancelAddendum
-										% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-										% boost::lexical_cast<std::string>(table_importer.goodwritelines + table_importer.goodupdatelines);
+									% boost::lexical_cast<std::string>(table_importer.badreadlines)
+									% cancelAddendum
+									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+									% boost::lexical_cast<std::string>(table_importer.goodwritelines + table_importer.goodupdatelines);
 									messager.ShowMessageBox(msg.str());
 								}
 							}
@@ -678,19 +716,22 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						{
 							if (!table_importer.CheckCancelled() && (table_importer.goodreadlines != table_importer.goodwritelines + table_importer.goodupdatelines))
 							{
-								boost::format msg("During refresh of variable group, although there were no read or write failures, nonetheless the number of successful lines read from input file (%1%) does not match the number of successful lines written to (%2%) and updated in (%3%) the database.");
-								msg % boost::lexical_cast<std::string>(table_importer.goodreadlines) % boost::lexical_cast<std::string>(table_importer.goodwritelines) % boost::lexical_cast<std::string>(table_importer.goodupdatelines);
+								boost::format
+								msg("During refresh of variable group, although there were no read or write failures, nonetheless the number of successful lines read from input file (%1%) does not match the number of successful lines written to (%2%) and updated in (%3%) the database.");
+								msg % boost::lexical_cast<std::string>(table_importer.goodreadlines) % boost::lexical_cast<std::string>(table_importer.goodwritelines) % boost::lexical_cast<std::string>
+								(table_importer.goodupdatelines);
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
+
 							if (do_refresh_not_plain_insert)
 							{
 								// Handle incoming data row-by-row, distinguishing between inserts and updates
 								boost::format msg("Variable group '%1%' successfully read %3% rows from file (%4% updated and %5% inserted)%2%.");
 								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-									% cancelAddendum
-									% table_importer.goodreadlines
-									% table_importer.goodupdatelines
-									% table_importer.goodwritelines;
+								% cancelAddendum
+								% table_importer.goodreadlines
+								% table_importer.goodupdatelines
+								% table_importer.goodwritelines;
 								messager.ShowMessageBox(msg.str());
 							}
 							else
@@ -698,9 +739,9 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
 								boost::format msg("Variable group '%1%' successfully read %3% rows from file (%4% written to database)%2%.");
 								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
-									% cancelAddendum
-									% boost::lexical_cast<std::string>(table_importer.goodreadlines)
-									% boost::lexical_cast<std::string>(table_importer.goodupdatelines + table_importer.goodwritelines);
+								% cancelAddendum
+								% boost::lexical_cast<std::string>(table_importer.goodreadlines)
+								% boost::lexical_cast<std::string>(table_importer.goodupdatelines + table_importer.goodwritelines);
 								messager.ShowMessageBox(msg.str());
 							}
 						}

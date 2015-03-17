@@ -16,12 +16,12 @@ class NewGeneSelectVariables : public QWidget, public NewGeneWidget // do not re
 
 	public:
 
-		explicit NewGeneSelectVariables( QWidget * parent = 0 );
+		explicit NewGeneSelectVariables(QWidget * parent = 0);
 		~NewGeneSelectVariables();
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 
@@ -33,9 +33,9 @@ class NewGeneSelectVariables : public QWidget, public NewGeneWidget // do not re
 
 	public slots:
 
-    public:
+	public:
 
-        friend class NewGeneMainWindow;
+		friend class NewGeneMainWindow;
 
 };
 

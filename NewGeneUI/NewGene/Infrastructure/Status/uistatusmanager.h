@@ -7,7 +7,8 @@
 
 class NewGeneMainWindow;
 
-class UIStatusManager : public QObject, public UIManager<UIStatusManager, StatusManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS>
+class UIStatusManager : public QObject, public
+	UIManager<UIStatusManager, StatusManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS>
 {
 		Q_OBJECT
 
@@ -15,16 +16,16 @@ class UIStatusManager : public QObject, public UIManager<UIStatusManager, Status
 
 		enum IMPORTANCE
 		{
-			  IMPORTANCE_DEBUG
+			IMPORTANCE_DEBUG
 			, IMPORTANCE_STANDARD
 			, IMPORTANCE_HIGH
 			, IMPORTANCE_CRITICAL
 		};
 
-		explicit UIStatusManager( QObject * parent, UIMessager & messager );
+		explicit UIStatusManager(QObject * parent, UIMessager & messager);
 
-		void LogStatus( QString const & _status, IMPORTANCE const importance_level = IMPORTANCE_STANDARD );
-		void PostStatus( QString const & _status, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false );
+		void LogStatus(QString const & _status, IMPORTANCE const importance_level = IMPORTANCE_STANDARD);
+		void PostStatus(QString const & _status, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false);
 
 	signals:
 

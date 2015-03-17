@@ -16,34 +16,34 @@ class NewGeneCreateOutput : public QWidget, public NewGeneWidget // do not reord
 
 	public:
 
-		explicit NewGeneCreateOutput( QWidget * parent = 0 );
+		explicit NewGeneCreateOutput(QWidget * parent = 0);
 		~NewGeneCreateOutput();
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	public:
 
 	signals:
 
 	public slots:
-        void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
-        void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 
 	private:
 
 		Ui::NewGeneCreateOutput * ui;
 
-    protected:
+	protected:
 
-        static QString titleBarBaseText;
+		static QString titleBarBaseText;
 
-        friend class NewGeneMainWindow;
+		friend class NewGeneMainWindow;
 
-    private slots:
+	private slots:
 
-        void on_tabWidgetOutput_currentChanged(int index);
+		void on_tabWidgetOutput_currentChanged(int index);
 
 };
 

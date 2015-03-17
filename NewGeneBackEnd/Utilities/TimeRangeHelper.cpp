@@ -1,5 +1,5 @@
 #ifndef Q_MOC_RUN
-#	include <boost/format.hpp>
+	#include <boost/format.hpp>
 #endif
 #include "TimeRangeHelper.h"
 #include "./NewGeneException.h"
@@ -20,12 +20,18 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 	namespace bpt = boost::posix_time;
 
 	bool negfactor = (test_timestamp < 0 ? true : false);
+
 	std::int64_t new_test_timestamp = test_timestamp;
+
 	std::int64_t modulo = 0;
+
 	if (negfactor) { new_test_timestamp = -1 * test_timestamp; modulo = new_test_timestamp % 1000; }
 	else { modulo = test_timestamp % 1000; }
+
 	bpt::time_duration duration_test_timestamp = bpt::milliseconds(new_test_timestamp);
+
 	if (negfactor) { duration_test_timestamp *= -1; }
+
 	//bpt::ptime incoming_time_no_ms = bpt::from_time_t(test_timestamp / static_cast<std::int64_t>(1000));
 	bpt::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 	bpt::time_duration excess_ms_duration = bpt::milliseconds(modulo);
@@ -82,6 +88,7 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 				}
 
 				result = bpt::ptime(date_rounded.date(), seconds_into_day_duration);
+
 				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += bpt::seconds(1);
@@ -101,6 +108,7 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 				}
 
 				result = bpt::ptime(date_rounded.date(), minutes_into_day_duration);
+
 				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += bpt::minutes(1);
@@ -120,6 +128,7 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 				}
 
 				result = bpt::ptime(date_rounded.date(), hours_into_day_duration);
+
 				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += bpt::hours(1);
@@ -132,17 +141,19 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 			{
 
 				bool exact_match = false;
+
 				if (difference_between_incoming_and_day.total_milliseconds() == 0)
 				{
 					exact_match = true;
 				}
 
 				result = date_day;
+
 				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += boost::gregorian::days(1);
 				}
-		
+
 			}
 			break;
 
@@ -157,12 +168,14 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 			{
 
 				bool exact_match = false;
+
 				if (difference_between_incoming_and_month.total_milliseconds() == 0)
 				{
 					exact_match = true;
 				}
 
 				result = date_month;
+
 				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += boost::gregorian::months(1);
@@ -189,17 +202,19 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 				//}
 
 				bool exact_match = false;
+
 				if (difference_between_incoming_and_year.total_milliseconds() == 0)
 				{
 					exact_match = true;
 				}
 
 				result = date_year;
+
 				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += boost::gregorian::years(1);
 				}
-		
+
 			}
 			break;
 
@@ -223,21 +238,26 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 				if (year % 10 != 0)
 				{
 					int new_decade_year = year - (year % 10);
+
 					if (align_mode == ALIGN_MODE_UP)
 					{
 						new_decade_year += 10;
 					}
+
 					boost::posix_time::ptime date_decade(boost::gregorian::date(new_decade_year, 1, 1));
 					bpt::time_duration difference = incoming_time - date_decade;
+
 					if (difference.total_milliseconds() > 0)
 					{
 						date_decade += boost::gregorian::years(10);
 					}
+
 					result = date_decade;
 				}
 				else
 				{
 					result = date_year;
+
 					if (difference_between_incoming_and_year.total_milliseconds() > 0)
 					{
 						// round to next decade
@@ -254,21 +274,26 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 				if (year % 100 != 0)
 				{
 					int new_century_year = year - (year % 100);
+
 					if (align_mode == ALIGN_MODE_UP)
 					{
 						new_century_year += 100;
 					}
+
 					boost::posix_time::ptime date_century(boost::gregorian::date(new_century_year, 1, 1));
 					bpt::time_duration difference = incoming_time - date_century;
+
 					if (difference.total_milliseconds() > 0)
 					{
 						date_century += boost::gregorian::years(100);
 					}
+
 					result = date_century;
 				}
 				else
 				{
 					result = date_year;
+
 					if (difference_between_incoming_and_year.total_milliseconds() > 0)
 					{
 						// round to next century
@@ -285,28 +310,33 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 				if (year % 1000 != 0)
 				{
 					int new_millenium_year = year - (year % 1000);
+
 					if (align_mode == ALIGN_MODE_UP)
 					{
 						new_millenium_year += 1000;
 					}
+
 					boost::posix_time::ptime date_millenium(boost::gregorian::date(new_millenium_year, 1, 1));
 					bpt::time_duration difference = incoming_time - date_millenium;
+
 					if (difference.total_milliseconds() > 0)
 					{
 						date_millenium += boost::gregorian::years(1000);
 					}
+
 					result = date_millenium;
 				}
 				else
 				{
 					result = date_year;
+
 					if (difference_between_incoming_and_year.total_milliseconds() > 0)
 					{
 						// round to next millenium
 						result += boost::gregorian::years(1000);
 					}
 				}
-			
+
 			}
 			break;
 

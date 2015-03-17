@@ -31,7 +31,7 @@ class PrimaryKeySequence
 				VariableGroup_PrimaryKey_Info()
 					: sequence_number_within_dmu_category_for_this_variable_groups_uoa(-1) // will only be populated later if exists
 					, current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group(
-						-1) // will be populated later
+						  -1) // will be populated later
 					, total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group(0) // will only be populated later if exists
 					, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group(-1) // will be populated later
 					, total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group(0) // will only be populated later if exists
@@ -83,12 +83,12 @@ class PrimaryKeySequence
 
 				PrimaryKeySequenceEntry()
 					: sequence_number_within_dmu_category_spin_control { -1 }
-				, sequence_number_within_dmu_category_primary_uoa { -1 }
-				, sequence_number_in_all_primary_keys__of__global_primary_key_sequence_metadata__NOT__of_order_columns_appear_in_top_level_vg { -1 }
-				, sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg { -1 }
-				, total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category { -1 }
-				, total_kad_spin_count_for_this_dmu_category { -1 }
-				, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group { -1 }
+					, sequence_number_within_dmu_category_primary_uoa { -1 }
+					, sequence_number_in_all_primary_keys__of__global_primary_key_sequence_metadata__NOT__of_order_columns_appear_in_top_level_vg { -1 }
+					, sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg { -1 }
+					, total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category { -1 }
+					, total_kad_spin_count_for_this_dmu_category { -1 }
+					, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group { -1 }
 				{}
 
 				WidgetInstanceIdentifier dmu_category;
@@ -500,7 +500,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_columns;
 
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1; // There can be only 1 leaf loaded, even if this leaf corresponds to multiplicity > 1
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>>
+						indices_of_primary_key_columns_with_outer_multiplicity_greater_than_1; // There can be only 1 leaf loaded, even if this leaf corresponds to multiplicity > 1
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_outer_multiplicity_equal_to_1;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_secondary_key_columns;
 
@@ -562,7 +563,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				template <typename MEMORY_TAG_OUTPUT_ROW, typename MEMORY_TAG_SET_OF_ROWS>
 				void EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch,
-					BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>, MEMORY_TAG_SET_OF_ROWS> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count);
+						BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>, MEMORY_TAG_SET_OF_ROWS> & merging,
+						TimeSlice const & the_slice, std::int64_t & orig_row_count);
 
 				void KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings);
 
@@ -978,7 +980,7 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 				// because "other_top_level_indices_into_raw_data" is populated
 				// regardless of whether "primary_keys" is populated for the leaf.
 				std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(),
-					leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & top_level_vg_and_data_index)
+							  leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & top_level_vg_and_data_index)
 				{
 					int const vg_number = top_level_vg_and_data_index.first;
 
@@ -1073,7 +1075,7 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 		{
 			bool matched = false;
 			std::for_each(outputRow.child_indices_into_raw_data.cbegin(),
-				outputRow.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map__loaded<MEMORY_TAG>::value_type const & leaf_index_mappings)
+						  outputRow.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map__loaded<MEMORY_TAG>::value_type const & leaf_index_mappings)
 			{
 				int const vg_number = leaf_index_mappings.first;
 
@@ -1154,7 +1156,8 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 
 template <typename MEMORY_TAG_OUTPUT_ROW, typename MEMORY_TAG_SET_OF_ROWS>
 void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(KadSampler & allWeightings, Branch const & branch,
-	BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>, MEMORY_TAG_SET_OF_ROWS> & merging, TimeSlice const & the_slice, std::int64_t & orig_row_count)
+		BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>, MEMORY_TAG_SET_OF_ROWS> & merging,
+		TimeSlice const & the_slice, std::int64_t & orig_row_count)
 {
 	create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
 	allWeightings.create_output_row_visitor_global_data_cache.clear();
@@ -1171,7 +1174,7 @@ void OutputModel::OutputGenerator::EmplaceIncomingRowFromTimeSliceBranchDuringCo
 
 template <typename MEMORY_TAG>
 void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set<MEMORY_TAG> const & output_rows_for_this_full_time_slice,
-	std::fstream & output_file, Branch const & branch, KadSampler & allWeightings, std::int64_t & rows_written)
+		std::fstream & output_file, Branch const & branch, KadSampler & allWeightings, std::int64_t & rows_written)
 {
 
 	// current_time_slice to be used when the time-slice-start and time-slice-end rows are output
@@ -1198,6 +1201,7 @@ void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current
 			{
 				output_file << ",";
 			}
+
 			first = false;
 			output_file << current_time_slice.toStringStart().c_str();
 			output_file << ",";

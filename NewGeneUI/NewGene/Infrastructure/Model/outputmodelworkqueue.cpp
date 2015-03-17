@@ -12,7 +12,7 @@ OutputModelWorkQueue::OutputModelWorkQueue(bool isPool2_, QObject * parent)
 
 UIOutputModel * OutputModelWorkQueue::get()
 {
-	return reinterpret_cast<UIOutputModel*>(inp);
+	return reinterpret_cast<UIOutputModel *>(inp);
 }
 
 void OutputModelWorkQueue::TestSlot()
@@ -27,13 +27,15 @@ void OutputModelWorkQueue::SetConnections()
 	if (IsDatabasePool())
 	{
 		connect(&projectManagerUI(), SIGNAL(LoadFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *)), this, SLOT(LoadFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *)));
-		connect(this, SIGNAL(DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *)), static_cast<QObject *>(&projectManagerUI()), SLOT(DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *)));
+		connect(this, SIGNAL(DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *)), static_cast<QObject *>(&projectManagerUI()), SLOT(DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR,
+				QObject *)));
 	}
 }
 
 void OutputModelWorkQueue::LoadFromDatabase(UI_OUTPUT_MODEL_PTR model, QObject * mainWindowObject)
 {
 	UIMessagerSingleShot messager;
+
 	if (!get()->is_model_equivalent(messager.get(), model))
 	{
 		return;

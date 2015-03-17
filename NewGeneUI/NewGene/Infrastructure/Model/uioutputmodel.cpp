@@ -6,7 +6,7 @@
 void UIOutputModel::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg.c_str() );
+	msgBox.setText(msg.c_str());
 	msgBox.exec();
 }
 
@@ -29,10 +29,12 @@ bool UIOutputModel::is_model_equivalent(UIMessager & messager, UIOutputModel * m
 	{
 		boost::filesystem::path this_path = this_input_model.getPathToDatabaseFile();
 		boost::filesystem::path that_path = that_input_model.getPathToDatabaseFile();
+
 		try
 		{
 			bool this_exists = boost::filesystem::exists(this_path);
 			bool that_exists = boost::filesystem::exists(that_path);
+
 			if (this_exists != that_exists)
 			{
 				return false;
@@ -64,6 +66,7 @@ bool UIOutputModel::is_model_equivalent(UIMessager & messager, UIOutputModel * m
 	{
 		boost::filesystem::path this_path = backend().getPathToDatabaseFile();
 		boost::filesystem::path that_path = model_->backend().getPathToDatabaseFile();
+
 		try
 		{
 			if (this_path == boost::filesystem::path() || that_path == boost::filesystem::path())
@@ -73,6 +76,7 @@ bool UIOutputModel::is_model_equivalent(UIMessager & messager, UIOutputModel * m
 
 			bool this_exists = boost::filesystem::exists(this_path);
 			bool that_exists = boost::filesystem::exists(that_path);
+
 			if (this_exists != that_exists)
 			{
 				return false;

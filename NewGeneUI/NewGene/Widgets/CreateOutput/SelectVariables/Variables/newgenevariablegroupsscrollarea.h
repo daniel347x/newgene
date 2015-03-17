@@ -14,7 +14,7 @@ class NewGeneVariableGroupsScrollArea : public QWidget, public NewGeneWidget // 
 		Q_OBJECT
 
 	public:
-		explicit NewGeneVariableGroupsScrollArea( QWidget * parent = 0 );
+		explicit NewGeneVariableGroupsScrollArea(QWidget * parent = 0);
 		~NewGeneVariableGroupsScrollArea();
 
 	signals:
@@ -29,14 +29,14 @@ class NewGeneVariableGroupsScrollArea : public QWidget, public NewGeneWidget // 
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 
 	protected:
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 		Ui::NewGeneVariableGroupsScrollArea * ui;
 
-    public:
+	public:
 
-        friend class NewGeneMainWindow;
+		friend class NewGeneMainWindow;
 
 };
 

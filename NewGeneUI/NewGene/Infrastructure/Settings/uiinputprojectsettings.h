@@ -13,13 +13,14 @@ namespace INPUT_PROJECT_SETTINGS_UI_NAMESPACE
 
 	enum INPUT_PROJECT_SETTINGS_UI
 	{
-		  SETTING_FIRST = 0
+		SETTING_FIRST = 0
 		, SETTING_LAST
 	};
 
 }
 
-class UIInputProjectSettings : public QObject, public UIAllProjectSettings<InputProjectSettings, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI, BackendProjectInputSetting, UIProjectInputSetting, UI_INPUT_PROJECT_SETTINGS>
+class UIInputProjectSettings : public QObject, public
+	UIAllProjectSettings<InputProjectSettings, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI, BackendProjectInputSetting, UIProjectInputSetting, UI_INPUT_PROJECT_SETTINGS>
 {
 
 		Q_OBJECT
@@ -58,9 +59,9 @@ class UIInputProjectSettings : public QObject, public UIAllProjectSettings<Input
 
 		WorkQueueManager<UI_INPUT_PROJECT_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
-            Q_UNUSED(isPool2_);
+			Q_UNUSED(isPool2_);
 			InputProjectSettingsWorkQueue * work_queue = new InputProjectSettingsWorkQueue();
-			work_queue->SetUIObject(reinterpret_cast<UIInputProjectSettings*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIInputProjectSettings *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

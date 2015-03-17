@@ -15,9 +15,9 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 		UIOutputModelSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
 			: QObject(parent)
 			, UIModelSettings(messager, OutputModelSettings::number_worker_threads)
-			{
-				CreateImplementation(messager, path_to_settings);
-			}
+		{
+			CreateImplementation(messager, path_to_settings);
+		}
 
 		void UpdateConnections();
 
@@ -63,9 +63,10 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Model settings implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Model settings implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return *__impl;
 		}
 
@@ -82,9 +83,10 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Internal settings implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Internal settings implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return static_cast<OutputModelSettings &>(getBackendSettings_base<OutputModelSettings, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS, OutputModelSetting>(*__impl));
 		}
 
@@ -92,9 +94,10 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 		{
 			if (!__impl)
 			{
-				boost::format msg( "Internal settings implementation not yet constructed." );
-				throw NewGeneException() << newgene_error_description( msg.str() );
+				boost::format msg("Internal settings implementation not yet constructed.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			return getBackendSettingsSharedPtr_base<OutputModelSettings>(*__impl);
 		}
 
@@ -108,10 +111,10 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 
 	protected:
 
-        WorkQueueManager<UI_OUTPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
+		WorkQueueManager<UI_OUTPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			OutputModelSettingsWorkQueue * work_queue = new OutputModelSettingsWorkQueue();
-			work_queue->SetUIObject(reinterpret_cast<UIOutputModelSettings*>(ui_object));
+			work_queue->SetUIObject(reinterpret_cast<UIOutputModelSettings *>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;
 		}

@@ -19,20 +19,20 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 
 	public:
 
-		explicit DisplayDMUsRegion(QWidget *parent = 0);
+		explicit DisplayDMUsRegion(QWidget * parent = 0);
 		~DisplayDMUsRegion();
 
-		bool event ( QEvent * e );
+		bool event(QEvent * e);
 
 		void HandleChanges(DataChangeMessage const &);
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 
-		Ui::DisplayDMUsRegion *ui;
+		Ui::DisplayDMUsRegion * ui;
 
 	signals:
 		void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET);
@@ -53,7 +53,7 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 
 	private slots:
 		void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        void ReceiveBottomPaneSelectionCheckChanged(QStandardItem *);
+		void ReceiveBottomPaneSelectionCheckChanged(QStandardItem *);
 
 		// Buttons
 		void on_pushButton_add_dmu_clicked();
@@ -69,13 +69,13 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 	protected:
 		void Empty();
 
-        enum LOWER_PANE_BUTTON_ENABLED_STATE
-        {
-            NO_DMU_SELECTED
-            , DMU_IS_SELECTED
-            , NO_PROJECT_OPEN
-        };
-        void ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE const state);
+		enum LOWER_PANE_BUTTON_ENABLED_STATE
+		{
+			NO_DMU_SELECTED
+			, DMU_IS_SELECTED
+			, NO_PROJECT_OPEN
+		};
+		void ManageLowerPaneButtonEnabledStates(LOWER_PANE_BUTTON_ENABLED_STATE const state);
 
 	private:
 		bool GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_category, WidgetInstanceIdentifiers & dmu_members);

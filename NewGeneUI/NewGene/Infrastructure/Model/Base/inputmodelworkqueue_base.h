@@ -10,7 +10,7 @@ class WorkQueueManager<UI_INPUT_MODEL> : public WorkQueueManagerBase
 
 	public:
 
-		WorkQueueManager(bool isPool2_ = false, QObject *parent = 0)
+		WorkQueueManager(bool isPool2_ = false, QObject * parent = 0)
 			: WorkQueueManagerBase(isPool2_, parent)
 		{
 

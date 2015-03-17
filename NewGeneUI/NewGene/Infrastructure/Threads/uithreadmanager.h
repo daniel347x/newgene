@@ -4,13 +4,14 @@
 #include "Infrastructure/uimanager.h"
 #include "../../../NewGeneBackEnd/Threads/ThreadManager.h"
 
-class UIThreadManager : public QObject, public UIManager<UIThreadManager, ThreadManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS>
+class UIThreadManager : public QObject, public
+	UIManager<UIThreadManager, ThreadManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS>
 {
 		Q_OBJECT
 
 	public:
 
-		explicit UIThreadManager( QObject * parent, UIMessager & messager );
+		explicit UIThreadManager(QObject * parent, UIMessager & messager);
 
 	signals:
 

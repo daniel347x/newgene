@@ -2,10 +2,10 @@
 #define MODEL_H
 
 #ifndef Q_MOC_RUN
-#	include <boost/filesystem.hpp>
-#	include <boost/format.hpp>
-#	include <boost/property_tree/ptree.hpp>
-#	include <boost/property_tree/xml_parser.hpp>
+	#include <boost/filesystem.hpp>
+	#include <boost/format.hpp>
+	#include <boost/property_tree/ptree.hpp>
+	#include <boost/property_tree/xml_parser.hpp>
 #endif
 #include "../Messager/Messager.h"
 #include "../Threads/ThreadPool.h"
@@ -47,6 +47,7 @@ class Model_basemost
 			if (db == nullptr)
 			{
 				bool exists = true;
+
 				if (!boost::filesystem::exists(getPathToDatabaseFile()))
 				{
 					exists = false;
@@ -54,16 +55,19 @@ class Model_basemost
 
 				sqlite3 * db_ = nullptr;
 				int err = sqlite3_open(getPathToDatabaseFile().string().c_str(), &db_);
+
 				if (err)
 				{
 					// TODO: Parse the error codes from https://www.sqlite.org/c3ref/c_abort.html
 					boost::format msg("Error opening database file");
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
+
 				db = db_;
 
 				char * errmsg = nullptr;
 				sqlite3_exec(db, "PRAGMA foreign_keys = ON;", NULL, NULL, &errmsg);
+
 				if (errmsg != nullptr)
 				{
 					boost::format msg("Error preparing database file for foreign key enforcement: %1%");
@@ -78,6 +82,7 @@ class Model_basemost
 					std::string err;
 					std::string sql = this->GetCreationSQL();
 					bool success = this->RunSQL(sql, err);
+
 					if (!success)
 					{
 						boost::format msg("Error creating new database: %1%");
@@ -102,11 +107,14 @@ class Model_basemost
 		void SaveDatabaseAs(Messager & messager, boost::filesystem::path new_database_path)
 		{
 			boost::filesystem::path current_path = getPathToDatabaseFile();
+
 			if (current_path == new_database_path)
 			{
 				return;
 			}
+
 			UnloadDatabase();
+
 			try
 			{
 				boost::filesystem::copy_file(current_path, new_database_path, boost::filesystem::copy_option::overwrite_if_exists);
@@ -119,6 +127,7 @@ class Model_basemost
 				LoadDatabase();
 				return;
 			}
+
 			UnloadDatabase();
 			setPathToDatabaseFile(new_database_path);
 			LoadDatabase();
@@ -138,6 +147,7 @@ class Model_basemost
 		{
 			char * errmsg = nullptr;
 			sqlite3_exec(db, "VACUUM", NULL, NULL, &errmsg);
+
 			if (errmsg != nullptr)
 			{
 				// todo - handle very rare and mostly harmless error at some point in the future
@@ -150,12 +160,14 @@ class Model_basemost
 			char * errmsg = nullptr;
 			sqlite3_exec(db, sql.c_str(), NULL, NULL, &errmsg);
 			err.clear();
+
 			if (errmsg != nullptr)
 			{
 				err = errmsg;
 				sqlite3_free(errmsg);
 				return false;
 			}
+
 			return true;
 		}
 
@@ -164,10 +176,12 @@ class Model_basemost
 			sqlite3_stmt * stmt = NULL;
 			std::string sql("SELECT name FROM sqlite_master WHERE type='table'");
 			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+
 			if (stmt == NULL)
 			{
 				return;
 			}
+
 			int step_result = 0;
 
 			// must store table names in a vector,
@@ -182,6 +196,7 @@ class Model_basemost
 				char const * table_name_ = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 0));
 				std::string table_name(table_name_);
 				std::string prefix("NGTEMP_");
+
 				if (table_name.size() >= prefix.size())
 				{
 					if (boost::iequals(table_name.substr(0, prefix.size()), prefix))
@@ -203,6 +218,7 @@ class Model_basemost
 				drop_stmt % table_to_delete;
 				char * errmsg = nullptr;
 				sqlite3_exec(db, drop_stmt.str().c_str(), NULL, NULL, &errmsg);
+
 				if (errmsg != nullptr)
 				{
 					// todo - handle very rare and mostly harmless error at some point in the future
@@ -243,10 +259,10 @@ template<typename MODEL_CLASS>
 class ModelFactory
 {
 
-	// ****************************************************************************** //
-	// Empty non-specialized class.
-	// See InputModel.h and OutputModel.h for SPECIALIZATIONS of this class
-	// ****************************************************************************** //
+		// ****************************************************************************** //
+		// Empty non-specialized class.
+		// See InputModel.h and OutputModel.h for SPECIALIZATIONS of this class
+		// ****************************************************************************** //
 
 };
 

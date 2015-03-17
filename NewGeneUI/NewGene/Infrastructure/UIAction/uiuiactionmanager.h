@@ -7,11 +7,12 @@
 
 class NewGeneMainWindow;
 
-class UIUIActionManager : public QObject, public UIManager<UIUIActionManager, UIActionManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_ACTION_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_ACTION>
+class UIUIActionManager : public QObject, public
+	UIManager<UIUIActionManager, UIActionManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_ACTION_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_ACTION>
 {
 		Q_OBJECT
 	public:
-		explicit UIUIActionManager( QObject * parent, UIMessager & messager );
+		explicit UIUIActionManager(QObject * parent, UIMessager & messager);
 
 	signals:
 

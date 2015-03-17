@@ -9,7 +9,7 @@ class WorkQueueManager<UI_INPUT_PROJECT> : public WorkQueueManagerBase
 
 	public:
 
-		WorkQueueManager(QObject *parent = 0)
+		WorkQueueManager(QObject * parent = 0)
 			: WorkQueueManagerBase(parent)
 		{
 

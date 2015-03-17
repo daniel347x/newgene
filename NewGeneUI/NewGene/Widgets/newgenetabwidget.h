@@ -8,13 +8,13 @@ class NewGeneTabWidget : public QTabWidget, public NewGeneWidget // do not reord
 {
 		Q_OBJECT
 	public:
-		explicit NewGeneTabWidget( QWidget * parent = 0 );
+		explicit NewGeneTabWidget(QWidget * parent = 0);
 
 	signals:
 
 	public slots:
 
-        void ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const);
+		void ReceiveSignalSetRunStatus(int, RUN_STATUS_ENUM const);
 
 	public:
 		void NewGeneUIInitialize();

@@ -7,7 +7,7 @@ class ModelChangeIndicator : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit ModelChangeIndicator( QObject * parent = 0 );
+		explicit ModelChangeIndicator(QObject * parent = 0);
 
 	signals:
 

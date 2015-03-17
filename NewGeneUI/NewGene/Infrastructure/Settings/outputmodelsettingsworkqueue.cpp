@@ -9,7 +9,7 @@ OutputModelSettingsWorkQueue::OutputModelSettingsWorkQueue(QObject * parent)
 
 UIOutputModelSettings * OutputModelSettingsWorkQueue::get()
 {
-	return reinterpret_cast<UIOutputModelSettings*>(inp);
+	return reinterpret_cast<UIOutputModelSettings *>(inp);
 }
 
 void OutputModelSettingsWorkQueue::TestSlot()

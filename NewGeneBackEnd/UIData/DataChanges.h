@@ -9,14 +9,14 @@
 enum DATA_CHANGE_TYPE
 {
 
-	  DATA_CHANGE_TYPE__FIRST = 0
+	DATA_CHANGE_TYPE__FIRST = 0
 
 	, DATA_CHANGE_TYPE__UNKNOWN = DATA_CHANGE_TYPE__FIRST
 
 
 
 
-	// Input model
+								  // Input model
 	, DATA_CHANGE_TYPE__INPUT_MODEL__FIRST
 
 	, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE
@@ -57,7 +57,7 @@ enum DATA_CHANGE_TYPE
 enum DATA_CHANGE_INTENTION
 {
 
-	  DATA_CHANGE_INTENTION__ADD
+	DATA_CHANGE_INTENTION__ADD
 	, DATA_CHANGE_INTENTION__REMOVE
 	, DATA_CHANGE_INTENTION__UPDATE
 	, DATA_CHANGE_INTENTION__RESET_ALL
@@ -75,7 +75,7 @@ class DataChangePacket
 
 		}
 
-        DataChangePacket(DataChangePacket const &)
+		DataChangePacket(DataChangePacket const &)
 		{
 
 		}
@@ -85,33 +85,33 @@ class DataChangePacket
 class DataChangePacket_bool : public DataChangePacket
 {
 
-public:
+	public:
 
-	DataChangePacket_bool(bool const b_)
-		: DataChangePacket()
-		, b(b_)
-	{
+		DataChangePacket_bool(bool const b_)
+			: DataChangePacket()
+			, b(b_)
+		{
 
-	}
+		}
 
-	DataChangePacket_bool(DataChangePacket_bool const & rhs)
-		: DataChangePacket(rhs)
-		, b(rhs.b)
-	{
+		DataChangePacket_bool(DataChangePacket_bool const & rhs)
+			: DataChangePacket(rhs)
+			, b(rhs.b)
+		{
 
-	}
+		}
 
-	void setValue(bool const b_)
-	{
-		b = b_;
-	}
+		void setValue(bool const b_)
+		{
+			b = b_;
+		}
 
-	bool getValue() const
-	{
-		return b;
-	}
+		bool getValue() const
+		{
+			return b;
+		}
 
-	bool b;
+		bool b;
 
 };
 
@@ -184,19 +184,19 @@ class DataChangePacket_int64 : public DataChangePacket
 class DataChangePacket_GenerateOutput : public DataChangePacket
 {
 
-public:
+	public:
 
-	DataChangePacket_GenerateOutput()
-		: DataChangePacket()
-	{
+		DataChangePacket_GenerateOutput()
+			: DataChangePacket()
+		{
 
-	}
+		}
 
-	DataChangePacket_GenerateOutput(DataChangePacket_GenerateOutput const & rhs)
-		: DataChangePacket(rhs)
-	{
+		DataChangePacket_GenerateOutput(DataChangePacket_GenerateOutput const & rhs)
+			: DataChangePacket(rhs)
+		{
 
-	}
+		}
 
 };
 
@@ -210,12 +210,13 @@ class DataChange
 
 		}
 
-		DataChange(DATA_CHANGE_TYPE const & type, DATA_CHANGE_INTENTION const & intention, WidgetInstanceIdentifier const & parent_identifier_ = WidgetInstanceIdentifier(), WidgetInstanceIdentifiers const & child_identifiers_ = WidgetInstanceIdentifiers())
+		DataChange(DATA_CHANGE_TYPE const & type, DATA_CHANGE_INTENTION const & intention, WidgetInstanceIdentifier const & parent_identifier_ = WidgetInstanceIdentifier(),
+				   WidgetInstanceIdentifiers const & child_identifiers_ = WidgetInstanceIdentifiers())
 			: change_type(type)
 			, change_intention(intention)
 			, parent_identifier(parent_identifier_)
 			, child_identifiers(child_identifiers_)
-			// set_of_identifiers: No.  A hint that it's minor enough that it should be required to be set outside the constructor.
+			  // set_of_identifiers: No.  A hint that it's minor enough that it should be required to be set outside the constructor.
 		{
 
 		}
@@ -234,6 +235,7 @@ class DataChange
 			{
 				return change_packet.get();
 			}
+
 			return nullptr;
 		}
 

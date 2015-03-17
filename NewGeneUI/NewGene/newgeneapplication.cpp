@@ -6,8 +6,8 @@ QEvent::Type QEVENT_CLICK_VG_REFRESH = QEvent::None;
 QEvent::Type QEVENT_PROMPT_FOR_DMU_REFRESH = QEvent::None;
 QEvent::Type QEVENT_CLICK_DMU_REFRESH = QEvent::None;
 
-NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
-	QApplication( argc, argv )
+NewGeneApplication::NewGeneApplication(int argc, char * argv[]) :
+	QApplication(argc, argv)
 {
 
 	qRegisterMetaType<STD_STRING>("STD_STRING");
@@ -22,11 +22,11 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetInstanceIdentifier_Bool_Pair>("WidgetInstanceIdentifier_Bool_Pair");
 
 
-    // Enums
-    qRegisterMetaType<RUN_STATUS_ENUM>("RUN_STATUS_ENUM");
+	// Enums
+	qRegisterMetaType<RUN_STATUS_ENUM>("RUN_STATUS_ENUM");
 
 
-    // Widget refresh request data
+	// Widget refresh request data
 
 	// Output widgets
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>("WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA");
@@ -77,8 +77,8 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE>("WidgetActionItemRequest_ACTION_DISPLAY_ABSOLUTE_TIME_COLUMNS_CHANGE");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE>("WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_GENERATE_OUTPUT>("WidgetActionItemRequest_ACTION_GENERATE_OUTPUT");
-    qRegisterMetaType<WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE>("WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE");
-    qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_DMU>("WidgetActionItemRequest_ACTION_ADD_DMU");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE>("WidgetActionItemRequest_ACTION_LIMIT_DMU_MEMBERS_CHANGE");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_DMU>("WidgetActionItemRequest_ACTION_ADD_DMU");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_DMU>("WidgetActionItemRequest_ACTION_DELETE_DMU");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS>("WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS>("WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS");
@@ -100,22 +100,22 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 
 }
 
-bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
+bool NewGeneApplication::notify(QObject * receiver, QEvent * e)
 {
 
 	bool returnVal = false;
 
 	try
 	{
-		returnVal = QApplication::notify( receiver, e );
+		returnVal = QApplication::notify(receiver, e);
 	}
-	catch ( boost::exception & e )
+	catch (boost::exception & e)
 	{
-		if ( std::string const * error_desc = boost::get_error_info<newgene_error_description>( e ) )
+		if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
 		{
-			boost::format msg( error_desc->c_str() );
+			boost::format msg(error_desc->c_str());
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 		}
 		else
@@ -124,21 +124,21 @@ bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
 			boost::format msg("Error: %1%");
 			msg % the_error.c_str();
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
 		}
 
-		QApplication::exit( -1 );
+		QApplication::exit(-1);
 		return false;
 	}
-	catch ( std::exception & e )
+	catch (std::exception & e)
 	{
-		boost::format msg( "Exception thrown: %1%" );
+		boost::format msg("Exception thrown: %1%");
 		msg % e.what();
 		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
-		QApplication::exit( -1 );
+		QApplication::exit(-1);
 		return false;
 	}
 
@@ -148,8 +148,8 @@ bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
 
 void NewGeneApplication::showErrorBox(std::string const theMsg)
 {
-	boost::format msg( theMsg );
+	boost::format msg(theMsg);
 	QMessageBox msgBox;
-	msgBox.setText( msg.str().c_str() );
+	msgBox.setText(msg.str().c_str());
 	msgBox.exec();
 }

@@ -3,7 +3,7 @@
 
 class WorkItem
 {
-public:
+	public:
 
 };
 

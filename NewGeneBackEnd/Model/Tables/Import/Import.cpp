@@ -1,10 +1,10 @@
 #include "Import.h"
 
 #ifndef Q_MOC_RUN
-#	include <boost/algorithm/string.hpp>
-#	include <boost/tokenizer.hpp>
-#	include <boost/scope_exit.hpp>
-#	include <boost/locale/generator.hpp>
+	#include <boost/algorithm/string.hpp>
+	#include <boost/tokenizer.hpp>
+	#include <boost/scope_exit.hpp>
+	#include <boost/locale/generator.hpp>
 #endif
 #include <fstream>
 #include <cstdint>
@@ -178,6 +178,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = y_int_mappings[the_input_field->GetInt32Ref()];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_year_start->SetValueInt64(cached_times.first);
@@ -217,6 +218,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = y_y_int_mappings[std::make_pair(the_input_field_start->GetInt32Ref(), the_input_field_end->GetInt32Ref())];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_year_start->SetValueInt64(cached_times.first);
@@ -255,6 +257,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = y_string_mappings[the_input_field_datetime_year->GetStringRef()];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -308,7 +311,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = y_y_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = y_y_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
+						the_input_field_datetime_end->GetStringRef())];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -374,6 +379,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = ym_int_mappings[std::make_pair(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref())];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_month_start->SetValueInt64(cached_times.first);
@@ -439,7 +445,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_int_mappings[std::tuple<int, int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_int_mappings[std::tuple<int, int, int, int>(the_input_field_year_start->GetInt32Ref(),
+						the_input_field_month_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref())];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_day_start->SetValueInt64(cached_times.first);
@@ -460,6 +468,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					month_start = 1;
 				}
+
 				if (month_end > 12)
 				{
 					month_end = 1;
@@ -521,6 +530,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = ym_string_mappings[the_input_field_datetime_month->GetStringRef()];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -546,7 +556,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				// Round down to month
 				the_month_start = boost::posix_time::ptime(boost::gregorian::date(the_month_start.date().year(), the_month_start.date().month(), 1));
 
-				boost::posix_time::ptime the_month_end = boost::posix_time::ptime(boost::gregorian::date(the_month_start.date().year(), the_month_start.date().month(), 1) + boost::gregorian::months(1));
+				boost::posix_time::ptime the_month_end = boost::posix_time::ptime(boost::gregorian::date(the_month_start.date().year(), the_month_start.date().month(),
+						1) + boost::gregorian::months(1));
 
 				boost::posix_time::time_duration diff_start_from_1970 = the_month_start - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = the_month_end - time_t_epoch__1970;
@@ -574,7 +585,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
+						the_input_field_datetime_end->GetStringRef())];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -621,7 +634,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
-		
+
 			}
 			break;
 
@@ -640,7 +653,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_int_mappings[std::tuple<int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_int_mappings[std::tuple<int, int, int>(the_input_field_year_start->GetInt32Ref(),
+						the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref())];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_day_start->SetValueInt64(cached_times.first);
@@ -693,7 +708,10 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_int_mappings[std::tuple<int, int, int, int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref(), the_input_field_day_end->GetInt32Ref())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_int_mappings[std::tuple<int, int, int, int, int, int>(the_input_field_year_start->GetInt32Ref(),
+						the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref(),
+						the_input_field_day_end->GetInt32Ref())];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_day_start->SetValueInt64(cached_times.first);
@@ -800,6 +818,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_string_mappings[the_input_field_datetime_day->GetStringRef()];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -825,7 +844,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				// Round down to month
 				the_day_start = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(), the_day_start.date().day()));
 
-				boost::posix_time::ptime the_day_end = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(), the_day_start.date().day()) + boost::gregorian::days(1));
+				boost::posix_time::ptime the_day_end = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(),
+													   the_day_start.date().day()) + boost::gregorian::days(1));
 
 				boost::posix_time::time_duration diff_start_from_1970 = the_day_start - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = the_day_end - time_t_epoch__1970;
@@ -835,7 +855,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
-		
+
 			}
 			break;
 
@@ -853,7 +873,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
+						the_input_field_datetime_end->GetStringRef())];
+
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -994,8 +1016,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 }
 
 ImportDefinition::ImportDefinition()
-: stmt_insert(nullptr)
-, stmt_update(nullptr)
+	: stmt_insert(nullptr)
+	, stmt_update(nullptr)
 {
 }
 
@@ -1514,16 +1536,17 @@ void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line
 			{
 				quote_type_is_single = true;
 			}
+
 			++current_line_ptr;
 		}
 	}
 
 	if (*current_line_ptr == '\0')
 	{
-		
+
 		// Empty field
 		return;
-	
+
 	}
 
 	bool escapemode = false;
@@ -1727,7 +1750,7 @@ std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_e
 }
 
 void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_read, int const & current_column_index, char *& parsed_line_ptr, bool & stop,
-	SchemaEntry const & column, long const line, int const col, bool const is_final_col, std::string & errorMsg)
+								 SchemaEntry const & column, long const line, int const col, bool const is_final_col, std::string & errorMsg)
 {
 
 	// use sscanf to read in the type, based on switch on "column"'s type type-traits... read it into input_block[current_lines_read]
@@ -1755,7 +1778,7 @@ void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_
 	if (!is_final_col && *current_line_ptr == '\0')
 	{
 		boost::format msg("End of row was reached prematurely when attempting to read the column from the input file at row %1%, column %2%");
-		msg % boost::lexical_cast<std::string>(line+1) % boost::lexical_cast<std::string>(col+1);
+		msg % boost::lexical_cast<std::string>(line + 1) % boost::lexical_cast<std::string>(col + 1);
 		errorMsg = msg.str();
 		stop = true;
 		return;
@@ -1781,7 +1804,8 @@ void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_
 
 }
 
-void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, long line, int col, bool const is_final_col, std::string & errorMsg)
+void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, long line, int col,
+							   bool const is_final_col, std::string & errorMsg)
 {
 
 	EatWhitespace(current_line_ptr, import_definition);
@@ -1789,7 +1813,7 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 	if (!is_final_col && *current_line_ptr == '\0')
 	{
 		boost::format msg("End of row was reached prematurely when attempting to read the column from the input file at row %1%, column %2%");
-		msg % boost::lexical_cast<std::string>(line+1) % boost::lexical_cast<std::string>(col+1);
+		msg % boost::lexical_cast<std::string>(line + 1) % boost::lexical_cast<std::string>(col + 1);
 		errorMsg = msg.str();
 		stop = true;
 		return;
@@ -1820,7 +1844,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 {
 	int current_lines_read = 0;
 
-	while (data_file.getline(line, MAX_LINE_SIZE - 1) && !data_file.fail() && !data_file.bad() && (!data_file.eof() || boost::algorithm::trim_copy_if(std::string(line), boost::algorithm::is_any_of(" \t")).size() > 0))
+	while (data_file.getline(line, MAX_LINE_SIZE - 1) && !data_file.fail() && !data_file.bad() && (!data_file.eof()
+			|| boost::algorithm::trim_copy_if(std::string(line), boost::algorithm::is_any_of(" \t")).size() > 0))
 	{
 
 		if (CheckCancelled())
@@ -1841,20 +1866,22 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 			parsed_line_ptr = parsedline;
 			*parsed_line_ptr = '\0';
+
 			if (import_definition.input_schema.validcols[ncol])
 			{
-				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx], linenum, ncol, ncol == nCols-1, errorMsg);
+				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx], linenum, ncol, ncol == nCols - 1,
+								  errorMsg);
 				++nValColIdx;
 			}
 			else
 			{
-				SkipFieldInFile(current_line_ptr, parsed_line_ptr, stop, import_definition, linenum, ncol, ncol == nCols-1, errorMsg);
+				SkipFieldInFile(current_line_ptr, parsed_line_ptr, stop, import_definition, linenum, ncol, ncol == nCols - 1, errorMsg);
 			}
 
 			if (stop)
 			{
 				boost::format msg("Skipping row number %1% in the input file (\"%2%\"): %3%");
-				msg % boost::lexical_cast<std::string>(linenum+1) % line % errorMsg.c_str();
+				msg % boost::lexical_cast<std::string>(linenum + 1) % line % errorMsg.c_str();
 				errorMsg = msg.str();
 				break;
 			}
@@ -2055,6 +2082,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 	BOOST_SCOPE_EXIT(&is_performing_import, &is_performing_import_mutex, &messager, this_)
 	{
 		is_performing_import = false;
+
 		if (this_->which_import == IMPORT_DMU_SET_MEMBER)
 		{
 			messager.EmitSignalUpdateDMUImportProgressBar(PROGRESS_UPDATE_MODE__HIDE, 0, 0, 0);
@@ -2064,7 +2092,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__HIDE, 0, 0, 0);
 		}
 	} BOOST_SCOPE_EXIT_END
-	
+
 	// Count lines in file
 	std::fstream data_file_count_lines;
 	data_file_count_lines.open(import_definition.input_file.c_str(), std::ios::in);
@@ -2244,7 +2272,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 		while (true)
 		{
-				
+
 			long saved_linenum = linenum;
 
 			std::string blockErrorMsg;
@@ -2273,6 +2301,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			{
 				// Write rows to database here
 				table_write_callback(this, model, import_definition, table, output_block, currently_read_lines, saved_linenum, badwritelines, goodwritelines, goodupdatelines, errors);
+
 				if (CheckCancelled())
 				{
 					break;
@@ -2322,11 +2351,13 @@ void Importer::EatSeparator(char *& current_line_ptr, ImportDefinition const & i
 	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
 	{
 		while (*current_line_ptr != '\t' && *current_line_ptr != '\0') { ++current_line_ptr; }
+
 		if (*current_line_ptr == '\t') { ++current_line_ptr; }
 	}
 	else
 	{
 		while (*current_line_ptr != ',' && *current_line_ptr != '\0') { ++current_line_ptr; }
+
 		if (*current_line_ptr == ',') { ++current_line_ptr; }
 	}
 }
@@ -2387,9 +2418,11 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueInt32(0);
+
 		if (!empty_field)
 		{
 			sscanf(parsed_line_ptr, "%d%n", &theField.GetInt32Ref(), &number_chars_read);
+
 			if (number_chars_read < strlen(parsed_line_ptr))
 			{
 				boost::format msg("Invalid int32 data field from input file!  Line %1%, column %2%");
@@ -2406,9 +2439,11 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueInt64(0);
+
 		if (!empty_field)
 		{
 			sscanf(parsed_line_ptr, "%I64d%n", &theField.GetInt64Ref(), &number_chars_read);
+
 			if (number_chars_read < strlen(parsed_line_ptr))
 			{
 				boost::format msg("Invalid int64 data field from input file!  Line %1%, column %2%");
@@ -2425,11 +2460,13 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueDouble(0.0);
+
 		if (!empty_field)
 		{
 			double temp;
 			sscanf(parsed_line_ptr, "%lf%n", &temp, &number_chars_read);
 			theField.SetValueDouble(temp);
+
 			if (number_chars_read < strlen(parsed_line_ptr))
 			{
 				boost::format msg("Invalid floating-point data field from input file!  Line %1%, column %2%");

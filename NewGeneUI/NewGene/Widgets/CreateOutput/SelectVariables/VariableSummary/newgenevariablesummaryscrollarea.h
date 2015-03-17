@@ -16,14 +16,14 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 
 	public:
 
-		explicit NewGeneVariableSummaryScrollArea( QWidget * parent = 0 );
+		explicit NewGeneVariableSummaryScrollArea(QWidget * parent = 0);
 		~NewGeneVariableSummaryScrollArea();
 
 		void HandleChanges(DataChangeMessage const &);
 
 	protected:
 
-		void changeEvent( QEvent * e );
+		void changeEvent(QEvent * e);
 
 	private:
 
@@ -42,7 +42,7 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA); // us, parent
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE); // child
-        void DoTabChange(WidgetInstanceIdentifier);
+		void DoTabChange(WidgetInstanceIdentifier);
 
 	protected:
 
@@ -51,7 +51,7 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 	private:
 
 		NewGeneVariableSummaryGroup * groups;
-        WidgetInstanceIdentifier cached_active_vg;
+		WidgetInstanceIdentifier cached_active_vg;
 
 };
 

@@ -10,9 +10,9 @@ class NewGeneApplication : public QApplication
 {
 		Q_OBJECT
 	public:
-		explicit NewGeneApplication( int argc, char * argv[] );
+		explicit NewGeneApplication(int argc, char * argv[]);
 
-		bool notify( QObject * receiver, QEvent * e );
+		bool notify(QObject * receiver, QEvent * e);
 
 	signals:
 

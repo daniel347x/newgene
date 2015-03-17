@@ -9,7 +9,7 @@ class GlobalSettingChangeRequestItem : public QObject, public GlobalSettingChang
 {
 		Q_OBJECT
 	public:
-		explicit GlobalSettingChangeRequestItem( QObject * parent = 0 );
+		explicit GlobalSettingChangeRequestItem(QObject * parent = 0);
 
 	signals:
 

@@ -7,7 +7,7 @@ class ModelChangeRequest : public ModelChangeIndicator
 {
 		Q_OBJECT
 	public:
-		explicit ModelChangeRequest( QObject * parent = 0 );
+		explicit ModelChangeRequest(QObject * parent = 0);
 
 	signals:
 

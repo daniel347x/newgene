@@ -6,17 +6,18 @@
 
 QString NewGeneManageInput::titleBarBaseText { "Input Dataset" };
 
-NewGeneManageInput::NewGeneManageInput( QWidget * parent ) :
-	QWidget( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_INPUT_WIDGET) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneManageInput )
+NewGeneManageInput::NewGeneManageInput(QWidget * parent) :
+	QWidget(parent),
+	NewGeneWidget(WidgetCreationInfo(this,
+									 WIDGET_NATURE_INPUT_WIDGET)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	ui(new Ui::NewGeneManageInput)
 {
 
-	ui->setupUi( this );
+	ui->setupUi(this);
 
-	NewGeneTabWidgetManageInput * pTWinput = findChild<NewGeneTabWidgetManageInput *>( "tabWidgetInput" );
+	NewGeneTabWidgetManageInput * pTWinput = findChild<NewGeneTabWidgetManageInput *>("tabWidgetInput");
 
-	if ( pTWinput )
+	if (pTWinput)
 	{
 		pTWinput->NewGeneUIInitialize();
 	}
@@ -30,14 +31,14 @@ NewGeneManageInput::~NewGeneManageInput()
 	delete ui;
 }
 
-void NewGeneManageInput::changeEvent( QEvent * e )
+void NewGeneManageInput::changeEvent(QEvent * e)
 {
-	QWidget::changeEvent( e );
+	QWidget::changeEvent(e);
 
-	switch ( e->type() )
+	switch (e->type())
 	{
 		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
+			ui->retranslateUi(this);
 			break;
 
 		default:
@@ -59,10 +60,10 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 void NewGeneManageInput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
-    NewGeneWidget::UpdateOutputConnections(connection_type, project);
+	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
-    {
-    }
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
+	{
+	}
 
 }

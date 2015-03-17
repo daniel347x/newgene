@@ -85,14 +85,17 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 				// handle the case that either input or output project is not open
 				int number_projects_open = 0;
-				if (input_project_is_open )
+
+				if (input_project_is_open)
 				{
 					++number_projects_open;
 				}
+
 				if (output_project_is_open)
 				{
 					++number_projects_open;
 				}
+
 				if (number_projects_open < 2)
 				{
 					task.task_status = TASK_STATUS__ONLY_ONE_PROJECT_IS_OPEN;
@@ -483,14 +486,17 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 			// handle the case that either input or output project is not open
 			int number_projects_open = 0;
+
 			if (input_project_is_open)
 			{
 				++number_projects_open;
 			}
+
 			if (output_project_is_open)
 			{
 				++number_projects_open;
 			}
+
 			if (number_projects_open < 2)
 			{
 				task.task_status = TASK_STATUS__COMPLETED;
@@ -866,7 +872,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 		void InitializeTasks()
 		{
 
-                        static char const * task_names[]
+			static char const * task_names[]
 			{
 				"delete_dmu"
 				, "delete_uoa"
@@ -884,7 +890,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 			for (size_t task_number = 0; task_number < number_tasks; ++task_number)
 			{
-                                char const * task_name = task_names[task_number];
+				char const * task_name = task_names[task_number];
 				TASK_ORDER task_order = task_orders[task_number];
 				task_class_infos.emplace(std::piecewise_construct, std::forward_as_tuple(std::string(task_name)), std::forward_as_tuple(std::string(task_name), task_order,
 										 new semaphore));
