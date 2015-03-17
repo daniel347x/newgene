@@ -275,7 +275,7 @@ void OptionsBox::SelectAndSetKadOutputPath()
     QString selectedFilter {"Comma-separated values (*.csv)"};
     QString the_file = QFileDialog::getSaveFileName(this, "Choose output file", current_file, QString { selectedFilter }, &selectedFilter, QFileDialog::DontUseNativeDialog | QFileDialog::DontConfirmOverwrite);
 
-    if (the_file.size())
+    if (! the_file.isEmpty())
     {
         if (! the_file.endsWith(".csv", Qt::CaseInsensitive))
         {
@@ -322,7 +322,7 @@ void OptionsBox::EditingFinishedKadOutputPath()
     if (editControl)
     {
         QString the_path = editControl->text();
-        if (! the_path.endsWith(".csv", Qt::CaseInsensitive))
+        if (! the_path.isEmpty() && ! the_path.endsWith(".csv", Qt::CaseInsensitive))
         {
             the_path += ".csv";
         }
