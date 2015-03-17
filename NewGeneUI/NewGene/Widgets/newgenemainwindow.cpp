@@ -529,6 +529,7 @@ void NewGeneMainWindow::SetTitle()
     std::string input {input_path.string()};
 
     std::string title {"NewGene"};
+    std::string status {};
 
     if (!input.empty())
     {
@@ -544,7 +545,22 @@ void NewGeneMainWindow::SetTitle()
         title += "]";
     }
 
+    if (input.empty() && !output.empty())
+    {
+        status = "Please open or create an input dataset";
+    }
+    else if (!input.empty() && output.empty())
+    {
+        status = "Please open or create an output dataset";
+    }
+    else if (input.empty() && output.empty())
+    {
+        status = "Please open or create an input and output dataset";
+    }
+
     this->setWindowTitle(title.c_str());
+
+    ui->statusBar->showMessage(status.c_str());
 
 }
 
