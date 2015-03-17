@@ -26,24 +26,22 @@ int main( int argc, char * argv[] )
 		//boost::this_thread::sleep(boost::posix_time::seconds(10));
 #	endif
 
-	NewGeneApplication a( argc, argv );
+    int retVal {};
 
-    NewGeneMainWindow w;
-    theMainWindow = &w;
+    NewGeneApplication a( argc, argv );
 
-    std::unique_ptr<SplashWindow> view { new SplashWindow{} };
-    QQmlEngine * engine = view->engine();
-    engine->rootContext()->setContextProperty("view", view.get());
-    view->setSource(QUrl{"qrc:///splash.qml"});
-    Qt::WindowFlags flags = view->windowFlags();
-    flags |= Qt::WindowStaysOnTopHint;
-    flags |= Qt::SplashScreen;
-    flags &= ~Qt::WindowContextHelpButtonHint;
-    view->installEventFilter(view.get());
-    view->setWindowFlags(flags);
-    view->show();
-    view->activateWindow();
+    {
 
-	return a.exec();
+        NewGeneMainWindow w;
+        theMainWindow = &w;
+
+        QTimer::singleShot( 500, theMainWindow, SLOT( show() ) );
+        QTimer::singleShot( 1000, theMainWindow, SLOT( doInitialize() ) );
+
+        retVal = a.exec();
+
+    }
+
+    return retVal;
 
 }

@@ -39,6 +39,7 @@
 #include "ui_newgenevariablesummary.h"
 #include "newgenevariablesummaryscrollarea.h"
 #include "ui_newgenevariablesummaryscrollarea.h"
+#include "splashwindow.h"
 
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	QMainWindow( parent ),
@@ -153,7 +154,9 @@ void NewGeneMainWindow::changeEvent( QEvent * e )
 void NewGeneMainWindow::doInitialize()
 {
 
-	UIMessager messager;
+    QTimer::singleShot( 500, this, SLOT( displaySplashOpening() ) );
+
+    UIMessager messager;
 
 	// Load global settings in main thread
 	settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
@@ -550,4 +553,51 @@ void NewGeneMainWindow::PrepareGlobalConnections()
     connect(source, SIGNAL(DoTabChange(WidgetInstanceIdentifier)), target, SLOT(DoTabChange(WidgetInstanceIdentifier)));
 }
 
-//void NewGeneMainWindow::EnableAction(NEWGENE_ACTIONS const theAction, bool const enable = true);
+void NewGeneMainWindow::doDisable()
+{
+    // No - this also disables clicking on the splash screen to close it
+    //this->setEnabled(false);
+
+    ui->centralWidget->setEnabled(false);
+    ui->menuBar->setEnabled(false);
+    ui->statusBar->setEnabled(false);
+}
+
+void NewGeneMainWindow::doEnable()
+{
+    //this->setEnabled(true);
+    ui->centralWidget->setEnabled(true);
+    ui->menuBar->setEnabled(true);
+    ui->statusBar->setEnabled(true);
+}
+
+void NewGeneMainWindow::on_actionAbout_NewGene_triggered()
+{
+    QTimer::singleShot( 50, this, SLOT( displaySplashAbout() ) );
+}
+
+void NewGeneMainWindow::displaySplashOpening()
+{
+    displaySplash(false);
+}
+
+void NewGeneMainWindow::displaySplashAbout()
+{
+    displaySplash(true);
+}
+
+void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
+{
+    SplashWindow * view { new SplashWindow{this, opened_as_about_box} };
+    QQmlEngine * engine = view->engine();
+    engine->rootContext()->setContextProperty("view", view);
+    view->setSource(QUrl{"qrc:///splash.qml"});
+    Qt::WindowFlags flags = view->windowFlags();
+    flags |= Qt::WindowStaysOnTopHint;
+    flags |= Qt::SplashScreen;
+    flags &= ~Qt::WindowContextHelpButtonHint;
+    view->installEventFilter(view);
+    view->setWindowFlags(flags);
+    view->show();
+    view->activateWindow();
+}

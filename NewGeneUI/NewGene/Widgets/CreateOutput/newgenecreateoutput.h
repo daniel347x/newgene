@@ -28,7 +28,8 @@ class NewGeneCreateOutput : public QWidget, public NewGeneWidget // do not reord
 	signals:
 
 	public slots:
-		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+        void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+        void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 
 	private:
 
@@ -40,9 +41,10 @@ class NewGeneCreateOutput : public QWidget, public NewGeneWidget // do not reord
 
         friend class NewGeneMainWindow;
 
+    private slots:
 
-private slots:
         void on_tabWidgetOutput_currentChanged(int index);
+
 };
 
 #endif // NEWGENECREATEOUTPUT_H

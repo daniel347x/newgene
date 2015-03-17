@@ -15,12 +15,29 @@ class SplashWindow : public QQuickWidget
     Q_OBJECT
 
     public:
+
+        SplashWindow(QWidget * parent_, bool const opened_as_about_box_) : QQuickWidget{parent_}, closed_via_click{false}, opened_as_about_box{opened_as_about_box_}
+        {
+            QTimer::singleShot( 10, parent(), SLOT( doDisable() ) );
+            connect(this, SIGNAL(statusChanged(QQuickWidget::Status)), this, SLOT(receiveStatusChanged(QQuickWidget::Status)));
+        }
+
         Q_INVOKABLE void close_window()
         {
             closed_via_click = true;
-            QTimer::singleShot( 0, this, SLOT( close() ) );
-            QTimer::singleShot( 500, theMainWindow, SLOT( show() ) );
-            QTimer::singleShot( 1000, theMainWindow, SLOT( doInitialize() ) );
+            QTimer::singleShot( 10, this, SLOT( close() ) );
+            QTimer::singleShot( 100, parent(), SLOT( doEnable() ) );
+            QTimer::singleShot( 10, this, SLOT( deleteMe() ) );
+
+            if (opened_as_about_box)
+            {
+                //QTimer::singleShot( 1000, theMainWindow, SLOT( doEnable() ) );
+            }
+            else
+            {
+                //QTimer::singleShot( 500, theMainWindow, SLOT( show() ) );
+                //QTimer::singleShot( 1000, theMainWindow, SLOT( doInitialize() ) );
+            }
         }
 
         Q_INVOKABLE void setCursorNormal()
@@ -48,14 +65,31 @@ class SplashWindow : public QQuickWidget
 
         void closeEvent(QCloseEvent * event)
         {
-            if (!closed_via_click)
+            if (!closed_via_click && !opened_as_about_box)
             {
-                QApplication::quit();
+                //QApplication::quit();
             }
             event->accept();
         }
 
+    public:
+
         bool closed_via_click;
+        bool opened_as_about_box;
+
+    private slots:
+
+        void receiveStatusChanged(QQuickWidget::Status status)
+        {
+            if (status == QQuickWidget::Status::Error)
+            {
+            }
+        }
+
+        void deleteMe()
+        {
+            deleteLater();
+        }
 
 };
 

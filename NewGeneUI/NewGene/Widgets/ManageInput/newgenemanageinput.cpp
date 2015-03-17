@@ -55,3 +55,14 @@ void NewGeneManageInput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTION
 	}
 
 }
+
+void NewGeneManageInput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+{
+
+    NewGeneWidget::UpdateOutputConnections(connection_type, project);
+
+    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT && project != nullptr)
+    {
+    }
+
+}

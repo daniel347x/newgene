@@ -185,8 +185,15 @@
     <addaction name="actionClose_Current_Output_Dataset"/>
     <addaction name="actionDisplay_output_dataset_path"/>
    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionAbout_NewGene"/>
+   </widget>
    <addaction name="menuInput"/>
    <addaction name="menuOutput"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen_Input_Dataset">
@@ -237,6 +244,11 @@
   <action name="actionDisplay_output_dataset_path">
    <property name="text">
     <string>Display output dataset path</string>
+   </property>
+  </action>
+  <action name="actionAbout_NewGene">
+   <property name="text">
+    <string>About NewGene ...</string>
    </property>
   </action>
  </widget>

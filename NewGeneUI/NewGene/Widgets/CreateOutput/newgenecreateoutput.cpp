@@ -45,6 +45,17 @@ void NewGeneCreateOutput::changeEvent( QEvent * e )
 	}
 }
 
+void NewGeneCreateOutput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+
+    NewGeneWidget::UpdateInputConnections(connection_type, project);
+
+    if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT && project != nullptr)
+    {
+    }
+
+}
+
 void NewGeneCreateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
