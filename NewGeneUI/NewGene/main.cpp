@@ -8,7 +8,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QSplashScreen>
-#include <memory>
+#include <QWebSettings>
 
 #include "Infrastructure/Model/uimodelmanager.h"
 #include "Infrastructure/Settings/uisettingsmanager.h"
@@ -16,7 +16,6 @@
 #include "Infrastructure/Status/uistatusmanager.h"
 #include "Infrastructure/Logging/uiloggingmanager.h"
 #include "newgeneapplication.h"
-#include "splashwindow.h"
 
 int main( int argc, char * argv[] )
 {
@@ -41,6 +40,8 @@ int main( int argc, char * argv[] )
         retVal = a.exec();
 
     }
+
+    QWebSettings::clearMemoryCaches();
 
     return retVal;
 

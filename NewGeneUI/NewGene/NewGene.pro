@@ -156,7 +156,7 @@ SOURCES += main.cpp\
 	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.cpp \
     Infrastructure/UIAction/limitdmus.cpp \
     Widgets/Utilities/htmldelegate.cpp \
-    splashwindow.cpp
+    Widgets/splash.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -280,8 +280,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/Utilities/dialoghelper.h \
 	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.h \
     Infrastructure/UIAction/limitdmus.h \
-    splashwindow.h \
-    Widgets/Utilities/htmldelegate.h
+    Widgets/Utilities/htmldelegate.h \
+    Widgets/splash.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -300,7 +300,8 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/ManageInput/UOAs/newgenemanageuoas.ui \
 	Widgets/ManageInput/VGs/newgenemanagevgs.ui \
 	Widgets/ManageInput/DMUs/displaydmusregion.ui \
-	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.ui
+	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.ui \
+    Widgets/splash.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd

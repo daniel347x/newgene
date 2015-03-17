@@ -4,7 +4,6 @@
     </qresource>
     <qresource prefix="/">
         <file>earth.bits.png</file>
-        <file>splash.qml</file>
         <file>earth.tunnel.jpg</file>
     </qresource>
 </RCC>

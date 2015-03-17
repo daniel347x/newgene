@@ -41,7 +41,7 @@
 #include "ui_newgenevariablesummary.h"
 #include "newgenevariablesummaryscrollarea.h"
 #include "ui_newgenevariablesummaryscrollarea.h"
-#include "splashwindow.h"
+#include "splash.h"
 
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	QMainWindow( parent ),
@@ -590,12 +590,7 @@ void NewGeneMainWindow::displaySplashAbout()
 
 void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
 {
-    QWebView * view {new QWebView{this}};
-    //SplashWindow * view { new SplashWindow{this, opened_as_about_box} };
-    //QQmlEngine * engine = view->engine();
-    //engine->rootContext()->setContextProperty("view", view);
-    //view->setSource(QUrl{"qrc:///splash.qml"});
-    view->load(QUrl{"http://www.weather.com"});
+    Splash * view {new Splash{nullptr, this, opened_as_about_box}};
     Qt::WindowFlags flags = view->windowFlags();
     flags |= Qt::WindowStaysOnTopHint;
     flags |= Qt::SplashScreen;
