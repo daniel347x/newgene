@@ -3122,7 +3122,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 		{
 			// overlapping UOA's: not yet implemented
 			// Todo: Error message
-			boost::format msg("Overlapping top-level variable groups are not yet supported.");
+			boost::format msg("There are unrelated DMU's in the units of analysis for the variable groups you've selected!  There must be a full relationship between the variable groups you've selected.  This means that at least one variable group must contain the full set of all DMU's, taken as a whole, for all variable groups you've selected.");
 			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from labmda
