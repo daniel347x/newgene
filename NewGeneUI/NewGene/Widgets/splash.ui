@@ -57,7 +57,7 @@
       </property>
       <property name="url">
        <url>
-        <string>http://newgenesoftware.ezweb123.com/#/splash/4587529526</string>
+        <string>http://www.newgenesoftware.org/</string>
        </url>
       </property>
       <property name="zoomFactor">
@@ -78,19 +78,6 @@
       </property>
       <property name="text">
        <string>Continue to NewGene --&gt;</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>227</x>
-        <y>197</y>
-        <width>256</width>
-        <height>256</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
       </property>
      </widget>
     </widget>
