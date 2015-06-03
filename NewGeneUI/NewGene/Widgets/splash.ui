@@ -81,7 +81,7 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">QFrame#frameinner {border: 6px solid #040ead; background-color: #FFFFFF}</string>
+       <string notr="true">QFrame#frameinner {border: 6px solid #0466ff; background-color: #FFFFFF}</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -160,16 +160,16 @@
        <property name="geometry">
         <rect>
          <x>331</x>
-         <y>300</y>
-         <width>361</width>
+         <y>272</y>
+         <width>111</width>
          <height>31</height>
         </rect>
        </property>
        <property name="styleSheet">
-        <string notr="true">#label_creds {font-family: Verdana; font-size: 14px; color: #040ead; font-weight: bold;}</string>
+        <string notr="true">#label_creds {font-family: Verdana; font-size: 12px; color: #003300; font-weight: bold;}</string>
        </property>
        <property name="text">
-        <string>D. Scott Bennett     Paul Poast     Allan C. Stam</string>
+        <string>D. Scott Bennett</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_version">
@@ -224,6 +224,32 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayoutWeb">
         <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelLatest">
+          <property name="styleSheet">
+           <string notr="true">#labelLatest {color: blue;}</string>
+          </property>
+          <property name="text">
+           <string>Loading the latest news from the NewGene team...</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="labelSpinner">
           <property name="text">
            <string/>
@@ -233,7 +259,52 @@
           </property>
          </widget>
         </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
+      </widget>
+      <widget class="QLabel" name="label_creds2">
+       <property name="geometry">
+        <rect>
+         <x>603</x>
+         <y>289</y>
+         <width>91</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#label_creds2 {font-family: Verdana; font-size: 12px; color: #001f4c; font-weight: bold;}</string>
+       </property>
+       <property name="text">
+        <string>Allan C. Stam</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_creds3">
+       <property name="geometry">
+        <rect>
+         <x>481</x>
+         <y>280</y>
+         <width>71</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#label_creds3 {font-family: Verdana; font-size: 12px; color: #042ead; font-weight: bold;}</string>
+       </property>
+       <property name="text">
+        <string>Paul Poast</string>
+       </property>
       </widget>
       <zorder>label_newgene</zorder>
       <zorder>label_cs</zorder>
@@ -243,6 +314,8 @@
       <zorder>label</zorder>
       <zorder>label_newgenewebsite</zorder>
       <zorder>verticalLayoutWidget</zorder>
+      <zorder>label_creds2</zorder>
+      <zorder>label_creds3</zorder>
      </widget>
     </widget>
    </item>
