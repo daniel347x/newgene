@@ -58,10 +58,10 @@
      <widget class="QPushButton" name="pushButton">
       <property name="geometry">
        <rect>
-        <x>6</x>
-        <y>663</y>
-        <width>699</width>
-        <height>121</height>
+        <x>-1</x>
+        <y>659</y>
+        <width>714</width>
+        <height>131</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -112,9 +112,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>300</y>
+         <y>330</y>
          <width>311</width>
-         <height>351</height>
+         <height>321</height>
         </rect>
        </property>
        <property name="url">
@@ -123,9 +123,93 @@
         </url>
        </property>
       </widget>
-      <zorder>pushButton</zorder>
-      <zorder>label</zorder>
+      <widget class="QLabel" name="label_newgene">
+       <property name="geometry">
+        <rect>
+         <x>430</x>
+         <y>100</y>
+         <width>151</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#label_newgene {font-family: Verdana; font-size: 28px; color: #040ead; font-weight: bold;}</string>
+       </property>
+       <property name="text">
+        <string>NewGene</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_cs">
+       <property name="geometry">
+        <rect>
+         <x>325</x>
+         <y>167</y>
+         <width>371</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#label_cs {font-family: Verdana; font-size: 16px; color: #040ead; font-weight: bold;}</string>
+       </property>
+       <property name="text">
+        <string>Cross Sectional Time Series Data Manager</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_dm">
+       <property name="geometry">
+        <rect>
+         <x>350</x>
+         <y>200</y>
+         <width>321</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#label_dm {font-family: Verdana; font-size: 14px; color: #444eed; font-weight: bold; font-style: italic;}</string>
+       </property>
+       <property name="text">
+        <string>Data Management for the Social Sciences</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_creds">
+       <property name="geometry">
+        <rect>
+         <x>331</x>
+         <y>300</y>
+         <width>361</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#label_creds {font-family: Verdana; font-size: 14px; color: #040ead; font-weight: bold;}</string>
+       </property>
+       <property name="text">
+        <string>D. Scott Bennett     Paul Poast     Allan C. Stam</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_version">
+       <property name="geometry">
+        <rect>
+         <x>530</x>
+         <y>613</y>
+         <width>331</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#label_version {font-family: Verdana; font-size: 11px; color: #000000; font-weight: bold;}</string>
+       </property>
+       <property name="text">
+        <string>Version 1.0 - July 1, 2015</string>
+       </property>
+      </widget>
       <zorder>webView</zorder>
+      <zorder>label_newgene</zorder>
+      <zorder>label</zorder>
+      <zorder>label_cs</zorder>
+      <zorder>label_dm</zorder>
+      <zorder>label_creds</zorder>
+      <zorder>label_version</zorder>
      </widget>
     </widget>
    </item>
