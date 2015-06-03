@@ -15,9 +15,9 @@ Splash::Splash(QWidget * parent, NewGeneMainWindow * mainWindow_, bool const ope
 	QTimer::singleShot(10, mainWindow, SLOT(doDisable()));
 	ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
 	ui->webView->setVisible(false);
-	QMovie * movie = new QMovie(":/spinner.gif");
-	ui->label->setMovie(movie);
-	movie->start();
+	//QMovie * movie = new QMovie(":/spinner.gif");
+	//ui->label->setMovie(movie);
+	//movie->start();
 	connect(ui->webView, SIGNAL(linkClicked(const QUrl &)), this, SLOT(receiveLinkClicked(const QUrl &)));
 	connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(receiveLoadFinished(bool)));
 }
@@ -35,7 +35,7 @@ void Splash::receiveLinkClicked(const QUrl & url)
 
 void Splash::receiveLoadFinished(bool)
 {
-	ui->label->setVisible(false);
+	//ui->label->setVisible(false);
 	ui->webView->setVisible(true);
 }
 
@@ -61,6 +61,7 @@ void Splash::closeAndRefreshSequence()
 	// but repainting to remove artifacts after the splash screen has been removed
 	// only works after the splash screen has been deleted, and there is a safety delay
 	// prior to deleting it.
+	QTimer::singleShot(100, mainWindow, SLOT(show()));
 	QTimer::singleShot(0, this, SLOT(deleteMe()));
 	QTimer::singleShot(100, mainWindow, SLOT(doEnable()));
 	QTimer::singleShot(1000, mainWindow, SLOT(update()));

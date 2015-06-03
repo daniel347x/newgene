@@ -203,13 +203,30 @@
         <string>Version 1.0 - July 1, 2015</string>
        </property>
       </widget>
+      <widget class="QLabel" name="label_newgenewebsite">
+       <property name="geometry">
+        <rect>
+         <x>370</x>
+         <y>440</y>
+         <width>271</width>
+         <height>61</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>NewGene website - http://www.newgenesoftware.org/</string>
+       </property>
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+      </widget>
       <zorder>webView</zorder>
       <zorder>label_newgene</zorder>
-      <zorder>label</zorder>
       <zorder>label_cs</zorder>
       <zorder>label_dm</zorder>
       <zorder>label_creds</zorder>
       <zorder>label_version</zorder>
+      <zorder>label</zorder>
+      <zorder>label_newgenewebsite</zorder>
      </widget>
     </widget>
    </item>

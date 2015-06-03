@@ -34,7 +34,7 @@ int main(int argc, char * argv[])
 		NewGeneMainWindow w;
 		theMainWindow = &w;
 
-		QTimer::singleShot(500, theMainWindow, SLOT(show()));
+		//QTimer::singleShot(500, theMainWindow, SLOT(show()));
 		QTimer::singleShot(1000, theMainWindow, SLOT(doInitialize()));
 
 		retVal = a.exec();
