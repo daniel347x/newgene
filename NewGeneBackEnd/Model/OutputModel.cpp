@@ -348,9 +348,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	setting_path_to_kad_output = CheckOutputFileExists();
 
-	if (failed || CheckCancelled()) { return; }
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
 
-	if (setting_path_to_kad_output.empty()) { return; }
+	if (setting_path_to_kad_output.empty())
+	{
+		SetFailureErrorMessage(boost::format("No output file has been specified.").str().c_str());
+		failed = true;
+		return;
+	}
 
 	debug_sql_path = setting_path_to_kad_output;
 	debug_sql_path.replace_extension(".debugsql.txt");
