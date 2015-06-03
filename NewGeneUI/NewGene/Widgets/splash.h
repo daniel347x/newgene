@@ -27,7 +27,6 @@ class Splash : public QWidget
 		void closeAndRefreshSequence();
 		void deleteMe();
 		void on_pushButton_clicked();
-		void receiveLinkClicked(const QUrl &);
 		void receiveLoadFinished(bool);
 
 	private:
@@ -37,6 +36,7 @@ class Splash : public QWidget
 
 		Ui::Splash * ui;
 		NewGeneMainWindow * mainWindow;
+		QWebEngineView * webView;
 };
 
 #endif // SPLASH_H

@@ -222,7 +222,18 @@
          <height>331</height>
         </rect>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayoutWeb"/>
+       <layout class="QVBoxLayout" name="verticalLayoutWeb">
+        <item>
+         <widget class="QLabel" name="labelSpinner">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
       <zorder>label_newgene</zorder>
       <zorder>label_cs</zorder>

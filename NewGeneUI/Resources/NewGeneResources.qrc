@@ -6,5 +6,6 @@
         <file>earth.bits.png</file>
         <file>earth.tunnel.jpg</file>
         <file>spinner.gif</file>
+        <file>ajax-loader.gif</file>
     </qresource>
 </RCC>

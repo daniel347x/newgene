@@ -11,33 +11,29 @@ Splash::Splash(QWidget * parent, NewGeneMainWindow * mainWindow_, bool const ope
 	mainWindow{mainWindow_},
 	closed_via_click{false},
 	opened_as_about_box{opened_as_about_box_},
+	webView{nullptr},
 	ui{new Ui::Splash}
 {
 	ui->setupUi(this);
-	//QTimer::singleShot(10, mainWindow, SLOT(doDisable()));
-	//QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
-	//ui->webView->settings()->setAttribute(QWebSettings::PluginsEnabled, true);
-	//ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-	//ui->webView->setVisible(false);
-	//QMovie * movie = new QMovie(":/spinner.gif");
-	//ui->label->setMovie(movie);
-	//movie->start();
-	//connect(ui->webView, SIGNAL(linkClicked(const QUrl &)), this, SLOT(receiveLinkClicked(const QUrl &)));
-	//connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(receiveLoadFinished(bool)));
 
-	QWebEngineView * webView = new NewGeneWebEngineView(this);
+	// If it's showing, disable the background window
+	QTimer::singleShot(10, mainWindow, SLOT(doDisable()));
+
+	webView = new NewGeneWebEngineView(this);
 	ui->verticalLayoutWeb->addWidget(webView);
-	//webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-	//ui->webView->setVisible(false);
-	//QMovie * movie = new QMovie(":/spinner.gif");
-	//ui->label->setMovie(movie);
-	//movie->start();
+
+	webView->setVisible(false);
+
+	QMovie * movie = new QMovie(":/ajax-loader.gif");
+	ui->labelSpinner->setMovie(movie);
+	movie->start();
+
+	// So that links that open external pages trigger the 'CreateWindow' function in our derived NewGeneWebEngineView class
 	webView->page()->settings()->setAttribute(QWebEngineSettings::JavascriptEnabled, true);
 	webView->page()->settings()->setAttribute(QWebEngineSettings::JavascriptCanOpenWindows, true);
 	webView->page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
-	//connect(webView, SIGNAL(linkClicked(const QUrl &)), this, SLOT(receiveLinkClicked(const QUrl &)));
-	//connect(webView, SIGNAL(urlChanged(const QUrl &)), this, SLOT(receiveLinkClicked(const QUrl &)));
-	//connect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(receiveLoadFinished(bool)));
+
+	connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(receiveLoadFinished(bool)));
 	webView->setUrl(QUrl("https://d1ce36c5f50a052d14358de742b69156b6345b37-www.googledrive.com/host/0B0q-yvic3PFIfjBBUUxObVIwSmMtdE9EaDR5YS03cXRHem5KQXZHNTFncHdjNU4tdWVTd3c/splash.html"));
 	webView->show();
 }
@@ -47,18 +43,11 @@ Splash::~Splash()
 	delete ui;
 }
 
-void Splash::receiveLinkClicked(const QUrl & url)
-{
-	//QMessageBox::information(this, "Title", "Something");
-	QDesktopServices::openUrl(url);
-	//closeMyself();
-}
-
 void Splash::receiveLoadFinished(bool)
 {
-	//ui->label->setVisible(false);
-	//ui->webView->setVisible(true);
-	//ui->webView->setEnabled(true);
+	ui->labelSpinner->setVisible(false);
+	webView->setVisible(true);
+	webView->setEnabled(true);
 }
 
 bool Splash::eventFilter(QObject * obj, QEvent * event)
