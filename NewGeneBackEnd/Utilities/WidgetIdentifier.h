@@ -431,6 +431,34 @@ class WidgetInstanceIdentifier
 			return false;
 		}
 
+		std::string descriptiveName() const
+		{
+			std::string name {};
+			if (code && !code->empty())
+			{
+				if (longhand && !longhand->empty())
+				{
+					if (std::string { longhand->c_str() } == std::string { code->c_str() })
+					{
+						name = code->c_str();
+					}
+					else
+					{
+						name = std::string { code->c_str() } +" (" + longhand->c_str() + ")";
+					}
+				}
+				else
+				{
+					name = code->c_str();
+				}
+			}
+			else if (longhand && !longhand->empty())
+			{
+				name = longhand->c_str();
+			}
+			return name;
+		}
+
 		std::shared_ptr<NewGeneUUID> uuid; // In case of ambiguity, sometimes identifier_parent or foreign_key_identifiers are necessary to disambiguate this identifier
 
 		std::shared_ptr<WidgetInstanceIdentifier>

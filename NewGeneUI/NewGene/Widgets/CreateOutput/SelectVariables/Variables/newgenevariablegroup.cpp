@@ -351,7 +351,7 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
 			}
 
 			QStandardItem * item = new QStandardItem();
-			item->setText(QString(identifier.longhand->c_str()));
+			item->setText(identifier.descriptiveName().c_str());
 			item->setEditable(false);
 			item->setCheckable(true);
 			item->setCheckState(Qt::Unchecked);

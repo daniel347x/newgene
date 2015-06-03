@@ -229,7 +229,7 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 													if (child_identifier < identifier)
 													{
 														QStandardItem * item = new QStandardItem();
-														item->setText(QString(child_identifier.longhand->c_str()));
+														item->setText(child_identifier.descriptiveName().c_str());
 														item->setEditable(false);
 														QVariant v;
 														v.setValue(child_identifier);
@@ -246,7 +246,7 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 											if (!added)
 											{
 												QStandardItem * item = new QStandardItem();
-												item->setText(QString(child_identifier.longhand->c_str()));
+												item->setText(child_identifier.descriptiveName().c_str());
 												item->setEditable(false);
 												QVariant v;
 												v.setValue(child_identifier);
@@ -341,7 +341,7 @@ bool NewGeneVariableSummaryGroup::ResetAll(WidgetInstanceIdentifiers const & vg_
 		{
 
 			QStandardItem * item = new QStandardItem();
-			item->setText(QString(identifier.longhand->c_str()));
+			item->setText(identifier.descriptiveName().c_str());
 			item->setEditable(false);
 			QVariant v;
 			v.setValue(identifier);
