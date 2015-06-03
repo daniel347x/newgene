@@ -19,7 +19,10 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <layout class="QHBoxLayout">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -37,8 +40,14 @@
    </property>
    <item>
     <widget class="QFrame" name="frame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="styleSheet">
-      <string notr="true">QFrame#frame {border: 6px solid #040ead; background-color: #CDCDCD}</string>
+      <string notr="true">QFrame#frame {background-color: #FFFFFF}</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -46,31 +55,13 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QWebView" name="webView">
-      <property name="geometry">
-       <rect>
-        <x>6</x>
-        <y>6</y>
-        <width>699</width>
-        <height>651</height>
-       </rect>
-      </property>
-      <property name="url">
-       <url>
-        <string>http://www.newgenesoftware.org/</string>
-       </url>
-      </property>
-      <property name="zoomFactor">
-       <double>0.699999988079071</double>
-      </property>
-     </widget>
      <widget class="QPushButton" name="pushButton">
       <property name="geometry">
        <rect>
         <x>6</x>
-        <y>660</y>
+        <y>663</y>
         <width>699</width>
-        <height>120</height>
+        <height>121</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -79,6 +70,62 @@
       <property name="text">
        <string>Continue to NewGene --&gt;</string>
       </property>
+     </widget>
+     <widget class="QFrame" name="frameinner">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>711</width>
+        <height>661</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QFrame#frameinner {border: 6px solid #040ead; background-color: #FFFFFF}</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>311</width>
+         <height>301</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../../Resources/NewGeneResources.qrc">:/earth.tunnel.jpg</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QWebView" name="webView">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>300</y>
+         <width>311</width>
+         <height>351</height>
+        </rect>
+       </property>
+       <property name="url">
+        <url>
+         <string>https://d1ce36c5f50a052d14358de742b69156b6345b37-www.googledrive.com/host/0B0q-yvic3PFIfjBBUUxObVIwSmMtdE9EaDR5YS03cXRHem5KQXZHNTFncHdjNU4tdWVTd3c/splash.html</string>
+        </url>
+       </property>
+      </widget>
+      <zorder>pushButton</zorder>
+      <zorder>label</zorder>
+      <zorder>webView</zorder>
      </widget>
     </widget>
    </item>
@@ -91,6 +138,8 @@
    <header>QtWebKitWidgets/QWebView</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../Resources/NewGeneResources.qrc"/>
+ </resources>
  <connections/>
 </ui>
