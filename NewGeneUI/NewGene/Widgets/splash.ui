@@ -176,7 +176,7 @@
        <property name="geometry">
         <rect>
          <x>530</x>
-         <y>613</y>
+         <y>620</y>
          <width>331</width>
          <height>21</height>
         </rect>
@@ -224,28 +224,24 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayoutWeb">
         <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="QLabel" name="labelLatest">
           <property name="styleSheet">
            <string notr="true">#labelLatest {color: blue;}</string>
           </property>
           <property name="text">
-           <string>Loading the latest news from the NewGene team...</string>
+           <string>&lt;br&gt;Loading the latest news from the NewGene team...</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::RichText</enum>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+          <property name="openExternalLinks">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -258,19 +254,6 @@
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </widget>
@@ -306,6 +289,25 @@
         <string>Paul Poast</string>
        </property>
       </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>497</x>
+         <y>639</y>
+         <width>201</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Programmed in C++ by: &lt;a href=&quot;http://elance.com/s/daniel347x&quot;&gt;Dan Nissenbaum&lt;/a&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
+       </property>
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+      </widget>
       <zorder>label_newgene</zorder>
       <zorder>label_cs</zorder>
       <zorder>label_dm</zorder>
@@ -316,6 +318,7 @@
       <zorder>verticalLayoutWidget</zorder>
       <zorder>label_creds2</zorder>
       <zorder>label_creds3</zorder>
+      <zorder>label_2</zorder>
      </widget>
     </widget>
    </item>

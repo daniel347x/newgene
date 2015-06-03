@@ -7,17 +7,34 @@
 #include "newgenewebengineview.h"
 
 Splash::Splash(QWidget * parent, NewGeneMainWindow * mainWindow_, bool const opened_as_about_box_) :
-	QWidget{parent},
+	QDialog{parent},
 	mainWindow{mainWindow_},
 	closed_via_click{false},
 	opened_as_about_box{opened_as_about_box_},
 	webView{nullptr},
 	ui{new Ui::Splash}
 {
+	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	ui->setupUi(this);
+	QTimer::singleShot(0, mainWindow, SLOT(hide()));
+	QTimer::singleShot(10, this, SLOT(execMyself()));
+}
 
+Splash::~Splash()
+{
+	delete ui;
+}
+
+void Splash::execMyself()
+{
+	showMyself();
+	exec();
+}
+
+void Splash::showMyself()
+{
 	// If it's showing, disable the background window
-	QTimer::singleShot(10, mainWindow, SLOT(doDisable()));
+	//QTimer::singleShot(10, mainWindow, SLOT(doDisable()));
 
 	webView = new NewGeneWebEngineView(this);
 	ui->verticalLayoutWeb->addWidget(webView);
@@ -38,14 +55,10 @@ Splash::Splash(QWidget * parent, NewGeneMainWindow * mainWindow_, bool const ope
 	webView->show();
 }
 
-Splash::~Splash()
-{
-	delete ui;
-}
-
 void Splash::receiveLoadFinished(bool)
 {
 	ui->labelSpinner->setVisible(false);
+	ui->labelLatest->setVisible(false);
 	webView->setVisible(true);
 	webView->setEnabled(true);
 }
@@ -58,10 +71,10 @@ bool Splash::eventFilter(QObject * obj, QEvent * event)
 
 void Splash::closeEvent(QCloseEvent * event)
 {
-	if (!closed_via_click)
-	{
-		closeAndRefreshSequence();
-	}
+	//if (!closed_via_click)
+	//{
+		//closeAndRefreshSequence();
+	//}
 
 	event->accept();
 }
@@ -72,15 +85,22 @@ void Splash::closeAndRefreshSequence()
 	// but repainting to remove artifacts after the splash screen has been removed
 	// only works after the splash screen has been deleted, and there is a safety delay
 	// prior to deleting it.
+	//this->hide();
+	//this->close();
+	this->done(0);
+	//QTimer::singleShot(5000, this->parentWidget(), SLOT(update()));
+	//QTimer::singleShot(5000, this, SLOT(close()));
+	//QTimer::singleShot(10000, this, SLOT(deleteMe()));
 	QTimer::singleShot(100, mainWindow, SLOT(show()));
-	QTimer::singleShot(0, this, SLOT(deleteMe()));
-	QTimer::singleShot(100, mainWindow, SLOT(doEnable()));
-	QTimer::singleShot(1000, mainWindow, SLOT(update()));
+	//QTimer::singleShot(100, mainWindow, SLOT(doEnable()));
+	//QTimer::singleShot(1000, mainWindow, SLOT(update()));
+	//QTimer::singleShot(1000, mainWindow, SLOT(repaint()));
 }
 
 void Splash::deleteMe()
 {
-	deleteLater();
+	//delete this;
+	//deleteLater();
 }
 
 void Splash::on_pushButton_clicked()
@@ -90,6 +110,5 @@ void Splash::on_pushButton_clicked()
 
 void Splash::closeMyself()
 {
-	QTimer::singleShot(10, this, SLOT(close()));
-	QTimer::singleShot(1000, this, SLOT(closeAndRefreshSequence()));
+	QTimer::singleShot(0, this, SLOT(closeAndRefreshSequence()));
 }

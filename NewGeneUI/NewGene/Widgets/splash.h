@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QUrl>
 #include "Widgets/newgenemainwindow.h"
+#include <QDialog>
 #include <QWebEngineView>
 
 namespace Ui
@@ -11,7 +12,7 @@ namespace Ui
 	class Splash;
 }
 
-class Splash : public QWidget
+class Splash : public QDialog
 {
 		Q_OBJECT
 
@@ -28,6 +29,8 @@ class Splash : public QWidget
 		void deleteMe();
 		void on_pushButton_clicked();
 		void receiveLoadFinished(bool);
+		void showMyself();
+		void execMyself();
 
 	private:
 		bool eventFilter(QObject * obj, QEvent * event);
