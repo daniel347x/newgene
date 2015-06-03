@@ -20,14 +20,10 @@ public:
 protected:
 	QWebEngineView * createWindow(QWebEnginePage::WebWindowType type)
 	{
-		//if (type == QWebEnginePage::WebBrowserTab)
-		//{
-			QWebEngineView * webView = new QWebEngineView();
-			connect(webView, SIGNAL(urlChanged(const QUrl &)), this, SLOT(receiveLinkClicked(const QUrl &)));
-			webViews.push_back(webView);
-			return webView;
-		//}
-		//return nullptr;
+		QWebEngineView * webView = new QWebEngineView();
+		connect(webView, SIGNAL(urlChanged(const QUrl &)), this, SLOT(receiveLinkClicked(const QUrl &)));
+		webViews.push_back(webView);
+		return webView;
 	}
 	std::vector<QWebEngineView*> webViews;
 private slots:
