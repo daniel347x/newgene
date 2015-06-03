@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QUrl>
 #include "Widgets/newgenemainwindow.h"
+#include <QWebEngineView>
 
 namespace Ui
 {

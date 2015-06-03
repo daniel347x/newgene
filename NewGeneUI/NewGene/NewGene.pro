@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets quickwidgets webkit webkitwidgets qml quick
+QT       += core gui widgets quickwidgets webengine webenginewidgets qml quick
 
 TARGET = NewGene
 TEMPLATE = app
@@ -156,7 +156,8 @@ SOURCES += main.cpp\
 	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.cpp \
     Infrastructure/UIAction/limitdmus.cpp \
     Widgets/Utilities/htmldelegate.cpp \
-    Widgets/splash.cpp
+    Widgets/splash.cpp \
+    Widgets/newgenewebengineview.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -281,7 +282,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.h \
     Infrastructure/UIAction/limitdmus.h \
     Widgets/Utilities/htmldelegate.h \
-    Widgets/splash.h
+    Widgets/splash.h \
+    Widgets/newgenewebengineview.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

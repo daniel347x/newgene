@@ -9,8 +9,6 @@
 #include <QFormLayout>
 #include <QLineEdit>
 #include <QDialogButtonBox>
-#include <QtWebKit>
-#include <QWebView>
 #include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "uistatusmanager.h"
 #include "uidocumentmanager.h"

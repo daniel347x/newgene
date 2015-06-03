@@ -108,21 +108,6 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QWebView" name="webView">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>330</y>
-         <width>311</width>
-         <height>321</height>
-        </rect>
-       </property>
-       <property name="url">
-        <url>
-         <string>https://d1ce36c5f50a052d14358de742b69156b6345b37-www.googledrive.com/host/0B0q-yvic3PFIfjBBUUxObVIwSmMtdE9EaDR5YS03cXRHem5KQXZHNTFncHdjNU4tdWVTd3c/splash.html</string>
-        </url>
-       </property>
-      </widget>
       <widget class="QLabel" name="label_newgene">
        <property name="geometry">
         <rect>
@@ -206,20 +191,39 @@
       <widget class="QLabel" name="label_newgenewebsite">
        <property name="geometry">
         <rect>
-         <x>370</x>
-         <y>440</y>
-         <width>271</width>
-         <height>61</height>
+         <x>410</x>
+         <y>450</y>
+         <width>171</width>
+         <height>21</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">#label_newgenewebsite {font-size: 18px; font-weight: bold;}</string>
+       </property>
        <property name="text">
-        <string>NewGene website - http://www.newgenesoftware.org/</string>
+        <string>&lt;a href=&quot;http://www.newgenesoftware.org/&quot;&gt;NewGene website&lt;/a&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
+       </property>
+       <property name="scaledContents">
+        <bool>false</bool>
        </property>
        <property name="openExternalLinks">
         <bool>true</bool>
        </property>
       </widget>
-      <zorder>webView</zorder>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>320</y>
+         <width>311</width>
+         <height>331</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayoutWeb"/>
+      </widget>
       <zorder>label_newgene</zorder>
       <zorder>label_cs</zorder>
       <zorder>label_dm</zorder>
@@ -227,18 +231,12 @@
       <zorder>label_version</zorder>
       <zorder>label</zorder>
       <zorder>label_newgenewebsite</zorder>
+      <zorder>verticalLayoutWidget</zorder>
      </widget>
     </widget>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QWebView</class>
-   <extends>QWidget</extends>
-   <header>QtWebKitWidgets/QWebView</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="../../Resources/NewGeneResources.qrc"/>
  </resources>
