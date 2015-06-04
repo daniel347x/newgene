@@ -248,6 +248,18 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 }
 
+KadSampler * currentKadSampler = nullptr;
+
+void OutOfMemoryHandler()
+{
+	if (currentKadSampler)
+	{
+		currentKadSampler->Clear();
+		currentKadSampler = nullptr;
+	}
+	throw std::bad_alloc();
+}
+
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
 {
 
@@ -378,7 +390,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (!debug_sql_file.is_open())
 	{
-		boost::format msg("Unable to open logfile.");
+		boost::format msg("Unable to open logfile.  This usually means that you are attempting to save data directly in the 'Program Files (x86)\\NewGene\\' directory.  Please save to a different location.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
@@ -434,8 +446,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	KadSampler * allWeightings_ = new KadSampler(messager, cancelled); // SEE NOTE!  Do not delete this object!
 	KadSampler & allWeightings = *allWeightings_;
-	BOOST_SCOPE_EXIT(&allWeightings, &allWeightings_, &model, &input_model)
+	std::set_new_handler(OutOfMemoryHandler);
+	BOOST_SCOPE_EXIT(&allWeightings, &allWeightings_, &model, &input_model, &currentKadSampler)
 	{
+		currentKadSampler = nullptr;
+		std::set_new_handler(nullptr);
+
 		if (model)
 		{
 			if (model->getDb())
@@ -904,6 +920,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			SetFailureErrorMessage(msg.str());
 			failed = true;
 		}
+	}
+	catch (std::bad_alloc & e)
+	{
+		SetFailureErrorMessage("Exception thrown: OUT OF MEMORY!  Exiting run.  Please re-run with a smaller and/or less complex output dataset.");
+		failed = true;
 	}
 	catch (std::exception & e)
 	{
