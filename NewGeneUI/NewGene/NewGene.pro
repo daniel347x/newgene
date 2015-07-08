@@ -9,7 +9,7 @@ QT       += core gui widgets quickwidgets webengine webenginewidgets qml quick
 TARGET = NewGene
 TEMPLATE = app
 
-win32:CONFIG(debug, debug|release): DESTDIR = C:/Program Files (x86)/NewGene/
+win32:CONFIG(debug, debug|release): DESTDIR = "C:/Program Files (x86)/NewGene/"
 
 win32: QMAKE_CXXFLAGS_RELEASE += -Zi
 win32: QMAKE_LFLAGS_RELEASE   += /INCREMENTAL:NO /DEBUG
@@ -312,8 +312,8 @@ else:macx:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/O
 else:macx:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/OSX/NewGene/DerivedData/NewGene/Build/Products/Debug -lNewGene
 else:unix: LIBS += -L$$PWD/../../NewGeneBackEnd/ -lNewGeneBackEnd
 
-win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc120-mt-1_55
-else:win32:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc120-mt-gd-1_55
+win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc120-mt-1_56
+else:win32:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc120-mt-gd-1_56
 else:macx:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time
 else:macx:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time
 
