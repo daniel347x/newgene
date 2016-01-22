@@ -257,6 +257,7 @@ void OutOfMemoryHandler()
 		currentKadSampler->Clear();
 		currentKadSampler = nullptr;
 	}
+
 	throw std::bad_alloc();
 }
 
@@ -390,7 +391,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (!debug_sql_file.is_open())
 	{
-		boost::format msg("Unable to open logfile.  This usually means that you are attempting to save data directly in the 'Program Files (x86)\\NewGene\\' directory.  Please save to a different location.");
+		boost::format
+		msg("Unable to open logfile.  This usually means that you are attempting to save data directly in the 'Program Files (x86)\\NewGene\\' directory.  Please save to a different location.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
@@ -921,7 +923,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			failed = true;
 		}
 	}
-	catch (std::bad_alloc & e)
+	catch (std::bad_alloc &)
 	{
 		SetFailureErrorMessage("Exception thrown: OUT OF MEMORY!  Exiting run.  Please re-run with a smaller and/or less complex output dataset.");
 		failed = true;
@@ -3151,7 +3153,8 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 		{
 			// overlapping UOA's: not yet implemented
 			// Todo: Error message
-			boost::format msg("There are unrelated DMU's in the units of analysis for the variable groups you've selected!  There must be a full relationship between the variable groups you've selected.  This means that at least one variable group must contain the full set of all DMU's, taken as a whole, for all variable groups you've selected.");
+			boost::format
+			msg("There are unrelated DMU's in the units of analysis for the variable groups you've selected!  There must be a full relationship between the variable groups you've selected.  This means that at least one variable group must contain the full set of all DMU's, taken as a whole, for all variable groups you've selected.");
 			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from labmda
