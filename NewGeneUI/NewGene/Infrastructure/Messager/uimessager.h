@@ -96,6 +96,8 @@ class UIMessager : public QObject, public Messager
 
 		void ShowMessageBox(std::string, bool block = false);
 
+		virtual boost::filesystem::path GetSystemDependentPath(MESSAGER_PATH_ENUM const &);
+
 	signals:
 
 		void PostStatus(STD_STRING, int, bool);

@@ -593,7 +593,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							msgBoxErrors += "\n";
 
 							std::fstream importlog;
-							importlog.open("newgene.import.log", std::ios::out | std::ios::app);
+							importlog.open(messager.GetSystemDependentPath(MESSAGER_PATH_ENUM__IMPORT_LOG).string(), std::ios::out | std::ios::app);
 							std::for_each(table_importer.errors.crbegin(), table_importer.errors.crend(), [&](std::string const & the_error)
 							{
 								if (importlog.is_open())
@@ -631,7 +631,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								{
 									// Handle incoming data row-by-row, distinguishing between inserts and updates
 									boost::format
-									msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to, %7% updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+									msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to, %7% updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badreadlines)
 									% boost::lexical_cast<std::string>(table_importer.badwritelines)
@@ -645,7 +645,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								{
 									// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
 									boost::format
-									msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to and/or updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+									msg("Variable group '%1%' refreshed %5% rows from file%4% (%6% written to and/or updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badreadlines)
 									% boost::lexical_cast<std::string>(table_importer.badwritelines)
@@ -661,7 +661,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								{
 									// Handle incoming data row-by-row, distinguishing between inserts and updates
 									boost::format
-									msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to, %6% updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+									msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to, %6% updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badwritelines)
 									% cancelAddendum
@@ -674,7 +674,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								{
 									// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
 									boost::format
-									msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to and/or updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+									msg("Variable group '%1%' refreshed %4% rows from file%3% (%5% written to and/or updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badwritelines)
 									% cancelAddendum
@@ -689,7 +689,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								{
 									// Handle incoming data row-by-row, distinguishing between inserts and updates
 									boost::format
-									msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to, %6% updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+									msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to, %6% updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badreadlines)
 									% cancelAddendum
@@ -702,7 +702,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 								{
 									// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
 									boost::format
-									msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to and/or updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+									msg("Variable group '%1%' refreshed %4% rows from from file%3% (%5% written to and/or updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file for details.");
 									msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 									% boost::lexical_cast<std::string>(table_importer.badreadlines)
 									% cancelAddendum

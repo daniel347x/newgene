@@ -6,6 +6,7 @@
 struct NewGeneFileNames
 {
 	static QString logFileName;
+	static QString importLogFileName;
 	static QString settingsFileName;
 	static QString defaultInputProjectFileName;
 	static QString defaultOutputProjectFileName;

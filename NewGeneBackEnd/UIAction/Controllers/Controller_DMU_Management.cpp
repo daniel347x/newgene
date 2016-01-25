@@ -788,7 +788,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 							{
 								// Handle incoming data row-by-row, distinguishing between inserts and updates
 								boost::format
-								msg("DMU category '%1%' refreshed %5% lines from file%4% (%6% written to, %7% updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg("DMU category '%1%' refreshed %5% lines from file%4% (%6% written to, %7% updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file for details.");
 								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
 								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
@@ -802,7 +802,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 							{
 								// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
 								boost::format
-								msg("DMU category '%1%' refreshed %5% lines from file%4% (%6% written to and/or updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg("DMU category '%1%' refreshed %5% lines from file%4% (%6% written to and/or updated in database), but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file for details.");
 								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
 								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
@@ -818,7 +818,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 							{
 								// Handle incoming data row-by-row, distinguishing between inserts and updates
 								boost::format
-								msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to, %6% updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to, %6% updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file for details.");
 								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
 								% cancelAddendum
@@ -831,7 +831,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 							{
 								// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
 								boost::format
-								msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to and/or updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to and/or updated in database), but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file for details.");
 								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines)
 								% cancelAddendum
@@ -846,7 +846,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 							{
 								// Handle incoming data row-by-row, distinguishing between inserts and updates
 								boost::format
-								msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to, %6% updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to, %6% updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file for details.");
 								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
 								% cancelAddendum
@@ -859,7 +859,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager__, WidgetActionIte
 							{
 								// Bulk INSERT OR REPLACE mode - we do not currently distinguish between inserts and updates
 								boost::format
-								msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to and/or updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg("DMU category '%1%' refreshed %4% lines from file%3% (%5% written to and/or updated in database), but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file for details.");
 								msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category)
 								% boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines)
 								% cancelAddendum

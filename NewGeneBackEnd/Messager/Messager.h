@@ -6,6 +6,7 @@
 	#include <boost/multiprecision/cpp_int.hpp>
 	#include <boost/multiprecision/cpp_dec_float.hpp>
 	#include <boost/pool/pool_alloc.hpp>
+	#include <boost/filesystem.hpp>
 #endif
 #include <vector>
 #include <set>
@@ -69,6 +70,11 @@ enum MESSAGER_MESSAGE_CATEGORY_ENUM
 	, MESSAGER_MESSAGE_CATEGORY__WARNING = 0x00000004
 	, MESSAGER_MESSAGE_CATEGORY__ERROR = 0x00000008
 	, MESSAGER_MESSAGE_CATEGORY__ERROR_CATASTROPHIC = 0x00000010
+};
+
+enum MESSAGER_PATH_ENUM
+{
+	MESSAGER_PATH_ENUM__IMPORT_LOG
 };
 
 class MessagerMessage
@@ -181,6 +187,7 @@ class Messager
 		virtual void AppendKadStatusText(std::string const &, void *);
 		virtual void SetPerformanceLabel(std::string const &) {}
 		virtual void SetRunStatus(RUN_STATUS_ENUM const &) {}
+		virtual boost::filesystem::path GetSystemDependentPath(MESSAGER_PATH_ENUM const &) {return boost::filesystem::path {};}
 
 		// Output
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA &) {}

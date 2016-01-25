@@ -779,7 +779,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 		msgBoxErrors += "\n";
 
 		std::fstream importlog;
-		importlog.open("newgene.import.log", std::ios::out | std::ios::app);
+		importlog.open(messager.GetSystemDependentPath(MESSAGER_PATH_ENUM__IMPORT_LOG).string(), std::ios::out | std::ios::app);
 		std::for_each(table_importer.errors.crbegin(), table_importer.errors.crend(), [&](std::string const & the_error)
 		{
 			if (importlog.is_open())

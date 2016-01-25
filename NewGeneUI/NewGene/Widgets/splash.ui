@@ -159,8 +159,8 @@
       <widget class="QLabel" name="label_creds">
        <property name="geometry">
         <rect>
-         <x>331</x>
-         <y>324</y>
+         <x>330</x>
+         <y>310</y>
          <width>111</width>
          <height>31</height>
         </rect>
@@ -175,7 +175,7 @@
       <widget class="QLabel" name="label_version">
        <property name="geometry">
         <rect>
-         <x>530</x>
+         <x>540</x>
          <y>577</y>
          <width>331</width>
          <height>21</height>
@@ -185,7 +185,7 @@
         <string notr="true">#label_version {font-family: Verdana; font-size: 11px; color: #000000; font-weight: bold;}</string>
        </property>
        <property name="text">
-        <string>Version 1.0 - July 1, 2015</string>
+        <string>Version 1.0 - April 2016</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_newgenewebsite">
@@ -260,8 +260,8 @@
       <widget class="QLabel" name="label_creds2">
        <property name="geometry">
         <rect>
-         <x>603</x>
-         <y>412</y>
+         <x>330</x>
+         <y>350</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -276,8 +276,8 @@
       <widget class="QLabel" name="label_creds3">
        <property name="geometry">
         <rect>
-         <x>481</x>
-         <y>372</y>
+         <x>330</x>
+         <y>330</y>
          <width>71</width>
          <height>31</height>
         </rect>

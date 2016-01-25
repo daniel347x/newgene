@@ -3069,15 +3069,17 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 		bool current_is_smaller = false;
 		bool current_is_same = true;
 
+		std::vector<WidgetInstanceIdentifier> erroneousDmus; // for error reporting when UOA's overlap
+
 		int current = 0;
-		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [this, &current_is_bigger, &current_is_smaller, &current_is_same, &current](
+		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [this, &current_is_bigger, &current_is_smaller, &current_is_same, &current, &erroneousDmus](
 						  Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
 		{
 			bool matched_current_dmu = false;
 			// Looking at the first entry in biggest_counts is the same as looking at any other entry
 			// in terms of the DMU counts
 			std::for_each(biggest_counts[0].second.cbegin(),
-						  biggest_counts[0].second.cend(), [&matched_current_dmu, &current_dmu_plus_count, &current_is_bigger, &current_is_smaller, &current_is_same, &current](
+						  biggest_counts[0].second.cend(), [&matched_current_dmu, &current_dmu_plus_count, &current_is_bigger, &current_is_smaller, &current_is_same, &current, &erroneousDmus](
 							  Table_UOA_Identifier::DMU_Plus_Count const & k_count_for_primary_uoa_for_given_dmu_category__info)
 			{
 				if (current_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, k_count_for_primary_uoa_for_given_dmu_category__info.first))
@@ -3086,11 +3088,13 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 
 					if (current_dmu_plus_count.second > k_count_for_primary_uoa_for_given_dmu_category__info.second)
 					{
+						erroneousDmus.push_back(current_dmu_plus_count.first);
 						current_is_same = false;
 						current_is_bigger = true;
 					}
 					else if (current_dmu_plus_count.second < k_count_for_primary_uoa_for_given_dmu_category__info.second)
 					{
+						erroneousDmus.push_back(k_count_for_primary_uoa_for_given_dmu_category__info.first);
 						current_is_same = false;
 						current_is_smaller = true;
 					}
@@ -3100,6 +3104,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 			if (!matched_current_dmu)
 			{
 				// The DMU in the current UOA being tested does not exist in the "biggest" UOA previous to this
+				erroneousDmus.push_back(current_dmu_plus_count.first);
 				current_is_same = false;
 				current_is_bigger = true;
 			}
@@ -3109,12 +3114,12 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 
 		// Looking at the first entry in biggest_counts is the same as looking at any other entry
 		// in terms of the DMU counts
-		std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&current_dmu_counts, &current_is_bigger, &current_is_smaller, &current_is_same](
+		std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&current_dmu_counts, &current_is_bigger, &current_is_smaller, &current_is_same, &erroneousDmus](
 						  Table_UOA_Identifier::DMU_Plus_Count const & k_count_for_primary_uoa_for_given_dmu_category__info)
 		{
 			bool matched_biggest_dmu = false;
 			std::for_each(current_dmu_counts.cbegin(),
-						  current_dmu_counts.cend(), [&matched_biggest_dmu, &k_count_for_primary_uoa_for_given_dmu_category__info, &current_is_bigger, &current_is_smaller, &current_is_same](
+						  current_dmu_counts.cend(), [&matched_biggest_dmu, &k_count_for_primary_uoa_for_given_dmu_category__info, &current_is_bigger, &current_is_smaller, &current_is_same, &erroneousDmus](
 							  Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
 			{
 				if (current_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, k_count_for_primary_uoa_for_given_dmu_category__info.first))
@@ -3126,6 +3131,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 			if (!matched_biggest_dmu)
 			{
 				// The DMU in the "biggest" UOA does not exist in the current UOA being tested
+				erroneousDmus.push_back(k_count_for_primary_uoa_for_given_dmu_category__info.first);
 				current_is_same = false;
 				current_is_smaller = true;
 			}
@@ -3152,9 +3158,28 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 		else if (current_is_bigger && current_is_smaller)
 		{
 			// overlapping UOA's: not yet implemented
-			// Todo: Error message
+			std::string erroneousDmuList {"("};
+			int countErroneous = erroneousDmus.size();
+			int currentErroneous = 0;
+			std::for_each(erroneousDmus.cbegin(), erroneousDmus.cend(), [&](WidgetInstanceIdentifier const & erroneousDmu)
+			{
+				++currentErroneous;
+
+				if (currentErroneous > 1 && currentErroneous < countErroneous)
+				{
+					erroneousDmuList += ", ";
+				}
+				else if (currentErroneous == countErroneous && countErroneous > 1)
+				{
+					erroneousDmuList += " and ";
+				}
+
+				erroneousDmuList += *erroneousDmu.code;
+			});
+			erroneousDmuList += ")";
 			boost::format
-			msg("There are unrelated DMU's in the units of analysis for the variable groups you've selected!  There must be a full relationship between the variable groups you've selected.  This means that at least one variable group must contain the full set of all DMU's, taken as a whole, for all variable groups you've selected.");
+			msg("There are unrelated DMU's in the units of analysis for the variable groups you've selected %1%!  There must be a full relationship between the variable groups you've selected.  This means that at least one variable group must contain the full set of all DMU's, taken as a whole, for all variable groups you've selected.");
+			msg % erroneousDmuList;
 			SetFailureErrorMessage(msg.str());
 			failed = true;
 			return; // from labmda

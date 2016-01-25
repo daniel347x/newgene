@@ -40,6 +40,20 @@ UIMessager::~UIMessager()
 	}
 }
 
+boost::filesystem::path UIMessager::GetSystemDependentPath(MESSAGER_PATH_ENUM const & pathSpec)
+{
+	boost::filesystem::path thePath {};
+	switch (pathSpec)
+	{
+		case MESSAGER_PATH_ENUM__IMPORT_LOG:
+			thePath = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "", NewGeneFileNames::importLogFileName);
+			break;
+		default:
+			break;
+	}
+	return thePath;
+}
+
 void UIMessager::ShowMessageBox(std::string msg, bool block)
 {
 	if (!block)
