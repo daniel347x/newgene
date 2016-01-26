@@ -46,7 +46,7 @@ boost::filesystem::path UIMessager::GetSystemDependentPath(MESSAGER_PATH_ENUM co
 	switch (pathSpec)
 	{
 		case MESSAGER_PATH_ENUM__IMPORT_LOG:
-			thePath = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "", NewGeneFileNames::importLogFileName);
+			thePath = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "", NewGeneFileNames::importLogFileName, true);
 			break;
 		default:
 			break;
