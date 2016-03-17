@@ -340,6 +340,20 @@ void Table_VARIABLES_SELECTED::RemoveAllfromVG(sqlite3 * db, WidgetInstanceIdent
 
 }
 
+void Table_VARIABLES_SELECTED::RenameAllInVG(sqlite3 * db, WidgetInstanceIdentifier const & vg, std::string const vg_new_description)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+	{
+		return;
+	}
+
+	// Nothing to do!  But this is tied in anyways
+
+}
+
 Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSelectedVariablesByUOA(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
 {
 

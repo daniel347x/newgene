@@ -6,6 +6,7 @@
 #include <QDialogButtonBox>
 #include <QCheckBox>
 #include <QGroupBox>
+#include <QInputDialog>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -34,6 +35,7 @@ NewGeneManageVGs::NewGeneManageVGs(QWidget * parent) :
 	ui->pushButton_add_vg->setEnabled(false);
 	ui->pushButton_remove_vg->setEnabled(false);
 	ui->pushButton_refresh_vg->setEnabled(false);
+	ui->pushButton_rename_vg->setEnabled(false);
 
 	refresh_vg_called_after_create = false;
 }
@@ -69,6 +71,7 @@ void NewGeneManageVGs::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_MANAGE_VGS_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET)));
 		connect(this, SIGNAL(CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG)), inp->getConnector(), SLOT(CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG)));
 		connect(this, SIGNAL(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG)), inp->getConnector(), SLOT(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG)));
+		connect(this, SIGNAL(RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG)), inp->getConnector(), SLOT(RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG)));
 		connect(this, SIGNAL(RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG)), inp->getConnector(), SLOT(RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG)));
 		connect(project->getConnector(), SIGNAL(SignalUpdateVGImportProgressBar(int, int, int, int)), this, SLOT(UpdateVGImportProgressBar(int, int, int, int)));
 
@@ -80,6 +83,7 @@ void NewGeneManageVGs::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_
 		ui->pushButton_add_vg->setEnabled(true);
 		ui->pushButton_remove_vg->setEnabled(false);
 		ui->pushButton_refresh_vg->setEnabled(false);
+		ui->pushButton_rename_vg->setEnabled(false);
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
@@ -103,6 +107,7 @@ void NewGeneManageVGs::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		if (project)
 		{
 			connect(this, SIGNAL(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG)), project->getConnector(), SLOT(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG)));
+			connect(this, SIGNAL(RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG)), project->getConnector(), SLOT(RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG)));
 		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
@@ -195,6 +200,7 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 	ui->pushButton_add_vg->setEnabled(true);
 	ui->pushButton_remove_vg->setEnabled(false);
 	ui->pushButton_refresh_vg->setEnabled(false);
+	ui->pushButton_rename_vg->setEnabled(false);
 
 }
 
@@ -240,6 +246,7 @@ void NewGeneManageVGs::Empty()
 	ui->pushButton_add_vg->setEnabled(false);
 	ui->pushButton_remove_vg->setEnabled(false);
 	ui->pushButton_refresh_vg->setEnabled(false);
+	ui->pushButton_rename_vg->setEnabled(false);
 
 }
 
@@ -1386,12 +1393,69 @@ void NewGeneManageVGs::ReceiveVGSelectionChanged(const QItemSelection & selected
 		ui->pushButton_add_vg->setEnabled(true);
 		ui->pushButton_remove_vg->setEnabled(true);
 		ui->pushButton_refresh_vg->setEnabled(true);
+		ui->pushButton_rename_vg->setEnabled(true);
 	}
 	else
 	{
 		ui->pushButton_add_vg->setEnabled(true);
 		ui->pushButton_remove_vg->setEnabled(false);
 		ui->pushButton_refresh_vg->setEnabled(false);
+		ui->pushButton_rename_vg->setEnabled(false);
 	}
+
+}
+
+void NewGeneManageVGs::on_pushButton_rename_vg_clicked()
+{
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	if (!ui->listViewManageVGs)
+	{
+		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
+
+	WidgetInstanceIdentifier vg;
+	WidgetInstanceIdentifier uoa;
+	bool is_selected = GetSelectedVG(vg, uoa);
+
+	if (!is_selected)
+	{
+		return;
+	}
+
+	if (!vg.code || vg.code->empty())
+	{
+		boost::format msg("Invalid variable group being deleted.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
+
+	bool ok;
+	boost::format msg("Rename variable group \"%1%\" to:");
+	msg % *vg.code;
+	QString text = QInputDialog::getText(this, "Rename variable group", QString(msg.str().c_str()), QLineEdit::Normal, QString(msg.str().c_str()), &ok);
+	if (!ok)
+	{
+		return;
+	}
+
+	InstanceActionItems actionItems;
+	actionItems.push_back(std::make_pair(vg, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__String(text.toStdString())))));
+	WidgetActionItemRequest_ACTION_RENAME_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
+	emit RenameVG(action_request);
 
 }

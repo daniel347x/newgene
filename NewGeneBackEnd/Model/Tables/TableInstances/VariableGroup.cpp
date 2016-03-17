@@ -206,6 +206,116 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 
 }
 
+bool Table_VG_CATEGORY::RenameVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string const vg_new_description,
+								 DataChangeMessage & change_message)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	//Executor theExecutor(db);
+
+	if (!db)
+	{
+		return false;
+	}
+
+	if (!input_model_)
+	{
+		return false;
+	}
+
+	if (!vg.code || vg.code->empty() || !vg.uuid || vg.uuid->empty())
+	{
+		return false;
+	}
+
+	bool already_exists = ExistsByCode(db, *input_model_, *vg.code);
+
+	if (!already_exists)
+	{
+		boost::format msg("The variable group %1% does not exist.");
+		msg % *vg.code;
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	already_exists = ExistsByUuid(db, *input_model_, *vg.uuid);
+
+	if (!already_exists)
+	{
+		boost::format msg("The variable group %1% does not exist.");
+		msg % *vg.code;
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	already_exists = Exists(db, *input_model_, vg);
+
+	if (!already_exists)
+	{
+		boost::format msg("The variable group %1% does not exist.");
+		msg % *vg.code;
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("UPDATE VG_CATEGORY SET VG_CATEGORY_STRING_LONGHAND = \"");
+	sql += vg_new_description;
+	sql += "\" WHERE VG_CATEGORY_UUID = '";
+	sql += *vg.uuid;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare UPDATE statement to rename the VG.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	int step_result = 0;
+	step_result = sqlite3_step(stmt);
+
+	if (step_result != SQLITE_DONE)
+	{
+		boost::format msg("Unable to execute UPDATE statement to rename the VG: %1%");
+		msg % sqlite3_errstr(step_result);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	// Rename in our cache
+	for (auto & identifier : identifiers)
+	{
+		if (identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, vg))
+		{
+			if (identifier.longhand)
+			{
+				*identifier.longhand = vg_new_description;
+			}
+		}
+	}
+
+	// Set the new text in the variable 'vg' about to be passed back to the GUI
+	*vg.longhand = vg_new_description;
+
+	// ***************************************** //
+	// Prepare data to send back to user interface
+	// ***************************************** //
+	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE;
+	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
+	DataChange change(type, intention, vg, WidgetInstanceIdentifiers());
+	change_message.changes.push_back(change);
+
+	//theExecutor.success();
+
+	//return theExecutor.succeeded();
+	return true;
+
+}
+
 WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, NewGeneUUID const & uuid)
 {
 

@@ -122,6 +122,11 @@ void InputProjectWorkQueue::DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG ac
 	get()->getWorkService().post(DeleteVG_(action_request, this));
 }
 
+void InputProjectWorkQueue::RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG action_request)
+{
+	get()->getWorkService().post(RenameVG_(action_request, this));
+}
+
 void InputProjectWorkQueue::RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG action_request)
 {
 	get()->getWorkService().post(RefreshVG_(action_request, this));

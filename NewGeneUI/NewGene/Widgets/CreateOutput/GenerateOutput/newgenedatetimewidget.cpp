@@ -210,6 +210,8 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 								std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&change, this](WidgetInstanceIdentifier const & child_identifier)
 								{
 
+									// There is a start and an end datetime widget - child_identifier specifies which widget is being targeted.
+									// Test here to see if it is the current widget being targeted.
 									if (data_instance.code && child_identifier.code && *data_instance.code == *child_identifier.code && data_instance.flags == child_identifier.flags)
 									{
 

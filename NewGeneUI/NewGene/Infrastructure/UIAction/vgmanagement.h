@@ -49,6 +49,25 @@ class DeleteVG_ : public DoInputAction<ACTION_DELETE_VG>
 
 };
 
+class RenameVG_ : public DoInputAction<ACTION_RENAME_VG>
+{
+
+	public:
+
+		RenameVG_(WidgetActionItemRequest_ACTION_RENAME_VG & action_request_, InputProjectWorkQueue * queue_)
+			: DoInputAction<ACTION_RENAME_VG>(static_cast<WidgetActionItemRequest_ACTION_RENAME_VG>(action_request_), queue_)
+		{
+
+		}
+
+		void operator()()
+		{
+			UIMessagerSingleShot messager(queue->get()->messager);
+			uiactionManagerUI().getBackendManager().RenameVG(messager.get(), action_request, queue->get()->backend());
+		}
+
+};
+
 class RefreshVG_ : public DoInputAction<ACTION_REFRESH_VG>
 {
 
@@ -83,6 +102,25 @@ class DeleteVG_Output : public DoOutputAction<ACTION_DELETE_VG>
 		{
 			UIMessagerSingleShot messager(queue->get()->messager);
 			uiactionManagerUI().getBackendManager().DeleteVGOutput(messager.get(), action_request, queue->get()->backend());
+		}
+
+};
+
+class RenameVG_Output : public DoOutputAction<ACTION_RENAME_VG>
+{
+
+	public:
+
+		RenameVG_Output(WidgetActionItemRequest_ACTION_RENAME_VG & action_request_, OutputProjectWorkQueue * queue_)
+			: DoOutputAction<ACTION_RENAME_VG>(static_cast<WidgetActionItemRequest_ACTION_RENAME_VG>(action_request_), queue_)
+		{
+
+		}
+
+		void operator()()
+		{
+			UIMessagerSingleShot messager(queue->get()->messager);
+			uiactionManagerUI().getBackendManager().RenameVGOutput(messager.get(), action_request, queue->get()->backend());
 		}
 
 };

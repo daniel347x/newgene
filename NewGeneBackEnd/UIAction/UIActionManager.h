@@ -40,9 +40,11 @@ class UIActionManager : public Manager<UIActionManager, MANAGER_DESCRIPTION_NAME
 		void DeleteUOA(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_UOA const & action_request, InputProject & project);
 		void DeleteUOAOutput(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_UOA const & action_request, OutputProject & project);
 		void CreateVG(Messager & messager, WidgetActionItemRequest_ACTION_CREATE_VG const & action_request, InputProject & project);
+		void RenameVG(Messager & messager, WidgetActionItemRequest_ACTION_RENAME_VG const & action_request, InputProject & project);
 		void DeleteVG(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_VG const & action_request, InputProject & project);
 		void RefreshVG(Messager & messager, WidgetActionItemRequest_ACTION_REFRESH_VG const & action_request, InputProject & project);
 		void DeleteVGOutput(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_VG const & action_request, OutputProject & project);
+		void RenameVGOutput(Messager & messager, WidgetActionItemRequest_ACTION_RENAME_VG const & action_request, OutputProject & project);
 
 	protected:
 

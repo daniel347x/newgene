@@ -13,6 +13,7 @@
 /************************************************************************/
 // ACTION_CREATE_VG
 // ACTION_DELETE_VG
+// ACTION_RENAME_VG
 // ACTION_REFRESH_VG
 /************************************************************************/
 
@@ -230,10 +231,111 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					// User request: do not display the following confirmation dialog.  It is redundant.
-					//boost::format msg("VG '%1%' successfully deleted.");
-					//msg % Table_VG_CATEGORY::GetVgDisplayText(vg);
-					//messager.ShowMessageBox(msg.str());
+					executor.success();
+
+				});
+
+				messager.EmitChangeMessage(change_response);
+
+			}
+			break;
+
+		default:
+			break;
+
+	}
+
+}
+
+void UIActionManager::RenameVG(Messager & messager, WidgetActionItemRequest_ACTION_RENAME_VG const & action_request, InputProject & project)
+{
+
+	if (!action_request.items)
+	{
+		return;
+	}
+
+	InputModel & input_model = project.model();
+
+	switch (action_request.reason)
+	{
+
+		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
+			{
+
+				DataChangeMessage change_response(&project);
+
+				std::for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				{
+
+					ProjectManager & project_manager = projectManager();
+					std::string errorMsg;
+					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("rename_vg"), errorMsg);
+
+					if (!proceed)
+					{
+						boost::format msg("Error renaming variable group: %1%");
+						msg % errorMsg.c_str();
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
+					BOOST_SCOPE_EXIT_ALL(&)
+					{
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("rename_vg"), errorMsg);
+
+						if (!success)
+						{
+							boost::format msg("Error renaming variable group: %1%. Please restart NewGene.");
+							msg % errorMsg.c_str();
+							messager.ShowMessageBox(msg.str());
+						}
+					};
+
+					if (this->FailIfBusy(messager))
+					{
+						return;
+					}
+
+					BOOST_SCOPE_EXIT_ALL(&, this)
+					{
+						this->EndFailIfBusy();
+					};
+
+					Executor executor(input_model.getDb());
+
+					WidgetInstanceIdentifier vg = instanceActionItem.first;
+
+					if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+					{
+						boost::format msg("Missing the VG to rename.");
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
+					// ************************************* //
+					// Retrieve data sent by user interface
+					// ************************************* //
+					std::string vg_to_rename_display_text = Table_VG_CATEGORY::GetVgDisplayText(vg);
+					std::string vg_new_description = (static_cast<WidgetActionItem__String const &>(*instanceActionItem.second)).getValue();
+
+					bool vg_already_exists = input_model.t_vgp_identifiers.Exists(input_model.getDb(), input_model, vg);
+
+					if (!vg_already_exists)
+					{
+						boost::format msg("The VG '%1%' does not exist.");
+						msg % boost::to_upper_copy(vg_to_rename_display_text);
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
+					bool vg_successfully_renamed = input_model.t_vgp_identifiers.RenameVG(input_model.getDb(), &input_model, vg, vg_new_description, change_response);
+
+					if (!vg_successfully_renamed)
+					{
+						boost::format msg("Unable to rename the VG.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
 
 					executor.success();
 
@@ -334,6 +436,92 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 					// ***************************************** //
 					std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
 					change_response.changes.back().set_of_identifiers = active_dmus;
+
+					executor.success();
+
+				});
+
+				messager.EmitChangeMessage(change_response);
+
+			}
+			break;
+
+		default:
+			break;
+
+	}
+
+}
+
+void UIActionManager::RenameVGOutput(Messager & messager, WidgetActionItemRequest_ACTION_RENAME_VG const & action_request, OutputProject & project)
+{
+
+	if (!action_request.items)
+	{
+		return;
+	}
+
+	OutputModel & output_model = project.model();
+	InputModel & input_model = output_model.getInputModel();
+
+	switch (action_request.reason)
+	{
+
+		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
+			{
+
+				DataChangeMessage change_response(&project);
+
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager,
+						 &change_response](InstanceActionItem const & instanceActionItem)
+				{
+
+					ProjectManager & project_manager = projectManager();
+					std::string errorMsg;
+					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("rename_vg"), errorMsg);
+
+					if (!proceed)
+					{
+						boost::format msg("Error renaming variable group: %1%");
+						msg % errorMsg.c_str();
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
+					BOOST_SCOPE_EXIT_ALL(&)
+					{
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("rename_vg"), errorMsg);
+
+						if (!success)
+						{
+							boost::format msg("Error renaming variable group: %1%. Please restart NewGene.");
+							msg % errorMsg.c_str();
+							messager.ShowMessageBox(msg.str());
+						}
+					};
+
+					if (this->FailIfBusy(messager))
+					{
+						return;
+					}
+
+					BOOST_SCOPE_EXIT_ALL(&, this)
+					{
+						this->EndFailIfBusy();
+					};
+
+					Executor executor(input_model.getDb());
+
+					WidgetInstanceIdentifier vg = instanceActionItem.first;
+					std::string vg_new_description = (static_cast<WidgetActionItem__String const &>(*instanceActionItem.second)).getValue();
+
+					if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+					{
+						// Error should already be handled in input model function
+						return;
+					}
+
+					output_model.t_variables_selected_identifiers.RenameAllInVG(output_model.getDb(), vg, vg_new_description);
 
 					executor.success();
 

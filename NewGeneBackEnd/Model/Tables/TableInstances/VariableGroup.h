@@ -50,6 +50,7 @@ class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY, TABLE_INSTANCE_IDENTI
 
 		bool CreateNewVG(sqlite3 * db, InputModel & input_model, std::string const & vg_code, std::string const & vg_description, WidgetInstanceIdentifier const & uoa_to_use);
 		bool DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, DataChangeMessage & change_message);
+		bool RenameVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string const vg_new_description, DataChangeMessage & change_message);
 
 		static std::string GetVgDisplayText(WidgetInstanceIdentifier const & vg, bool const = false);
 		static std::string GetVgDisplayTextShort(WidgetInstanceIdentifier const & vg);

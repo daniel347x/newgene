@@ -35,6 +35,8 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			semaphore * the_semaphore = nullptr;
 			bool wait_on_semaphore = false;
 
+			std::string track;
+
 			{
 
 				std::lock_guard<std::recursive_mutex> data_lock(task_retrieval_mutex);
@@ -115,6 +117,8 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 								case TASK_STATUS__PENDING_FIRST_REQUEST:
 									{
+										track += "B";
+
 										if (task_order == TASK_ORDER__INPUT_THEN_OUTPUT)
 										{
 											task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__OUTPUT_REQUEST;
@@ -123,6 +127,9 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
 											task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__OUTPUT_REQUEST;
+
+											track += "B2";
+
 											wait_on_semaphore = true;
 										}
 									}
@@ -174,6 +181,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
+											track += "c";
 											task.task_status = TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED;
 											wait_on_semaphore = true;
 										}
@@ -437,8 +445,8 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 			if (!wait_on_semaphore)
 			{
-				boost::format msg("Logic error when receiving request to process task %1%");
-				msg % task_name;
+				boost::format msg("Logic error when receiving request to process task %1% (%2%)");
+				msg % task_name % track.c_str();
 				errorMsg = msg.str();
 				return false;
 			}
@@ -877,6 +885,8 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				"delete_dmu"
 				, "delete_uoa"
 				, "delete_vg"
+				, "rename_vg"
+				// WARNING! Must be same number of entries in task_orders[], all the same
 			};
 
 			static TASK_ORDER task_orders[]
@@ -884,9 +894,17 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				TASK_ORDER__OUTPUT_THEN_INPUT
 				, TASK_ORDER__OUTPUT_THEN_INPUT
 				, TASK_ORDER__OUTPUT_THEN_INPUT
+				, TASK_ORDER__OUTPUT_THEN_INPUT
 			};
 
 			static size_t number_tasks = sizeof(task_names) / sizeof(char *);
+			static size_t number_task_orders = sizeof(task_orders) / sizeof(task_orders[0]);
+
+			if (number_tasks != number_task_orders)
+			{
+				boost::format msg("Logic error: number of elements in task_names array must match number of elements in task_orders array.");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
 
 			for (size_t task_number = 0; task_number < number_tasks; ++task_number)
 			{

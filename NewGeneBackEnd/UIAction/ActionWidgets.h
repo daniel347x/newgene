@@ -31,6 +31,7 @@ enum WIDGET_ACTIONS
 	, ACTION_DELETE_UOA
 	, ACTION_CREATE_VG
 	, ACTION_DELETE_VG
+	, ACTION_RENAME_VG
 	, ACTION_REFRESH_VG
 
 	, WIDGET_ACTIONS_LAST
@@ -1055,6 +1056,25 @@ class WidgetActionItemRequest<ACTION_DELETE_VG> : public WidgetActionItemRequest
 		}
 };
 typedef WidgetActionItemRequest<ACTION_DELETE_VG> WidgetActionItemRequest_ACTION_DELETE_VG;
+
+/************************************************************************/
+// ACTION_RENAME_VG
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_RENAME_VG> : public WidgetActionItemRequest_base
+{
+	public:
+		WidgetActionItemRequest<ACTION_RENAME_VG>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION,
+				InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_RENAME_VG>(WidgetActionItemRequest<ACTION_RENAME_VG> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
+};
+typedef WidgetActionItemRequest<ACTION_RENAME_VG> WidgetActionItemRequest_ACTION_RENAME_VG;
 
 /************************************************************************/
 // ACTION_REFRESH_VG

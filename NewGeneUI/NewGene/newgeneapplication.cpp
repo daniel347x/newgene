@@ -86,7 +86,8 @@ NewGeneApplication::NewGeneApplication(int argc, char * argv[]) :
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_UOA>("WidgetActionItemRequest_ACTION_ADD_UOA");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_UOA>("WidgetActionItemRequest_ACTION_DELETE_UOA");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_CREATE_VG>("WidgetActionItemRequest_ACTION_CREATE_VG");
-	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_VG>("WidgetActionItemRequest_ACTION_DELETE_VG");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_RENAME_VG>("WidgetActionItemRequest_ACTION_CREATE_VG");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_VG>("WidgetActionItemRequest_ACTION_RENAME_VG");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_REFRESH_VG>("WidgetActionItemRequest_ACTION_REFRESH_VG");
 
 

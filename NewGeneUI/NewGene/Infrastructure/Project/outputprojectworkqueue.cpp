@@ -251,3 +251,11 @@ void OutputProjectWorkQueue::DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG a
 {
 	get()->getWorkService().post(DeleteVG_Output(action_request, this));
 }
+
+/************************************************************************/
+// ACTION_RENAME_VG
+/************************************************************************/
+void OutputProjectWorkQueue::RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG action_request)
+{
+	get()->getWorkService().post(RenameVG_Output(action_request, this));
+}

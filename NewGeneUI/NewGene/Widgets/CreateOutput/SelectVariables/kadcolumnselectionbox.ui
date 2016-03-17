@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>427</width>
-    <height>35</height>
+    <height>82</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -73,7 +73,7 @@
         <x>0</x>
         <y>0</y>
         <width>425</width>
-        <height>33</height>
+        <height>80</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -91,14 +91,14 @@
          <x>0</x>
          <y>10</y>
          <width>425</width>
-         <height>13</height>
+         <height>61</height>
         </rect>
        </property>
        <property name="styleSheet">
         <string notr="true">#emptyKadsLabel {font-weight: bold; color: #454545;}</string>
        </property>
        <property name="text">
-        <string>Select some variables to see K-ad options here</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select some variables to see &lt;span style=&quot; font-style:italic;&quot;&gt;k&lt;/span&gt;-ad options here&lt;/p&gt;&lt;p&gt;(i.e. where &lt;span style=&quot; font-style:italic;&quot;&gt;k&lt;/span&gt; can be set to 2 (for dyads), 3 (for triads), or higher).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

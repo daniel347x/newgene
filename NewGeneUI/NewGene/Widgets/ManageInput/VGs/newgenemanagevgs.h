@@ -41,6 +41,7 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 		// Actions
 		void CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG);
 		void DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG);
+		void RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG);
 		void RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG);
 
 	public slots:
@@ -62,7 +63,9 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 
 		void on_pushButton_cancel_clicked();
 
-	private:
+		void on_pushButton_rename_vg_clicked();
+
+private:
 		bool refresh_vg_called_after_create;
 
 };
