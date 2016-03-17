@@ -253,6 +253,7 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 								// Ditto above.
+								RefreshAllWidgets();
 							}
 							break;
 

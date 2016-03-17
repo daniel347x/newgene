@@ -181,6 +181,11 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 							}
 							break;
 
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+							}
+							break;
+
 						default:
 							{
 

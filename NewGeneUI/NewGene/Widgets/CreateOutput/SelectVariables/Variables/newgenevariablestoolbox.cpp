@@ -213,7 +213,7 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
-								// Ditto above.
+								RefreshAllWidgets();
 							}
 							break;
 

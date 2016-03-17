@@ -286,6 +286,9 @@ bool Table_VG_CATEGORY::RenameVG(sqlite3 * db, InputModel * input_model_, Widget
 		stmt = nullptr;
 	}
 
+	// Update the variable group description in the 'vg' variable that will now be used as a return value
+	*vg.longhand = vg_new_description;
+
 	// Rename in our cache
 	for (auto & identifier : identifiers)
 	{
@@ -298,14 +301,11 @@ bool Table_VG_CATEGORY::RenameVG(sqlite3 * db, InputModel * input_model_, Widget
 		}
 	}
 
-	// Set the new text in the variable 'vg' about to be passed back to the GUI
-	*vg.longhand = vg_new_description;
-
 	// ***************************************** //
 	// Prepare data to send back to user interface
 	// ***************************************** //
 	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE;
-	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
+	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__RESET_ALL;
 	DataChange change(type, intention, vg, WidgetInstanceIdentifiers());
 	change_message.changes.push_back(change);
 

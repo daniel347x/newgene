@@ -403,13 +403,13 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
-								// Should never receive this.
+								// No-op
 							}
 							break;
 
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
-								// Ditto above.
+								RefreshAllWidgets();
 							}
 							break;
 
