@@ -56,8 +56,20 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContents</enum>
+           </property>
            <property name="alternatingRowColors">
             <bool>true</bool>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="resizeMode">
+            <enum>QListView::Adjust</enum>
+           </property>
+           <property name="spacing">
+            <number>5</number>
            </property>
           </widget>
          </item>
