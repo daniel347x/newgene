@@ -111,12 +111,6 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 		}
 	});
 
-	if (index > 0)
-	{
-		// Either this widget populates before the summary widget, or the other way around.
-		// Both scenarios are properly handled because the summary widget caches the value.
-		//tabChange(currentIndex);
-	}
 	setCurrentIndex(currentIndex);
 
 }
