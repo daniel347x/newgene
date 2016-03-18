@@ -1449,9 +1449,14 @@ void NewGeneManageVGs::on_pushButton_rename_vg_clicked()
 	bool ok {false};
 	while (!ok)
 	{
-		boost::format msg("Rename variable group \"%1%\" to:");
+		boost::format msg("Set a new description for variable group \"%1%\":");
 		msg % *vg.code;
-		QString vg_description_ = QInputDialog::getText(this, "Rename variable group", QString(msg.str().c_str()), QLineEdit::Normal, QString(msg.str().c_str()), &ok);
+		std::string longhand;
+		if (vg.longhand)
+		{
+			longhand = *vg.longhand;
+		}
+		QString vg_description_ = QInputDialog::getText(this, "Variable group description", QString(msg.str().c_str()), QLineEdit::Normal, QString(longhand.c_str()), &ok);
 		if (!ok)
 		{
 			return;

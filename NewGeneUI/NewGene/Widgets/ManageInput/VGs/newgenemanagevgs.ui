@@ -103,7 +103,7 @@
             <item>
              <widget class="QPushButton" name="pushButton_rename_vg">
               <property name="text">
-               <string> Change selected Variable Group's description  </string>
+               <string> Set description for selected Variable Group </string>
               </property>
              </widget>
             </item>
