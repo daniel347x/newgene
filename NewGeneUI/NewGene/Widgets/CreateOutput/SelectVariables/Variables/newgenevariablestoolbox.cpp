@@ -77,8 +77,17 @@ void NewGeneVariablesToolbox::RefreshAllWidgets()
 void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX widget_data)
 {
 
+	WidgetInstanceIdentifier currentVG;
+	NewGeneVariableGroup * vg { dynamic_cast<NewGeneVariableGroup *>(currentWidget()) };
+	if (vg)
+	{
+		currentVG = vg->data_instance;
+	}
+
 	Empty();
 
+	int currentIndex = 0;
+	int index = 0;
 	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & identifier_)
 	{
 		WidgetInstanceIdentifier const & identifier {identifier_.first};
@@ -92,12 +101,23 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 			displayText += uoa_text;
 			displayText += ")";
 			addItem(tmpGrp, displayText.c_str());
+
+			if (!currentVG.IsEmpty() && new_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, currentVG))
+			{
+				currentIndex = index;
+			}
+
+			++index;
 		}
 	});
 
-	// Either this widget populates before the summary widget, or the other way around.
-	// Both scenarios are properly handled because the summary widget caches the value.
-	tabChange(0);
+	if (index > 0)
+	{
+		// Either this widget populates before the summary widget, or the other way around.
+		// Both scenarios are properly handled because the summary widget caches the value.
+		//tabChange(currentIndex);
+	}
+	setCurrentIndex(currentIndex);
 
 }
 
@@ -156,12 +176,14 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 					{
 						case DATA_CHANGE_INTENTION__ADD:
 							{
-								if (change.parent_identifier.code && change.parent_identifier.uuid && change.parent_identifier.longhand)
-								{
-									WidgetInstanceIdentifier new_identifier = change.parent_identifier;
-									NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup(this, this, new_identifier, outp);
-									addItem(tmpGrp, new_identifier.longhand->c_str());
-								}
+								//if (change.parent_identifier.code && change.parent_identifier.uuid && change.parent_identifier.longhand)
+								//{
+								//	WidgetInstanceIdentifier new_identifier = change.parent_identifier;
+								//	NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup(this, this, new_identifier, outp);
+								//	addItem(tmpGrp, new_identifier.longhand->c_str());
+								//}
+
+								RefreshAllWidgets(); // this triggers a resort by loading everything in the pane again
 							}
 							break;
 

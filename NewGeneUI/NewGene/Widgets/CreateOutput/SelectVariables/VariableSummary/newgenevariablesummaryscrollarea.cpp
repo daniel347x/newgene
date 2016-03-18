@@ -168,20 +168,22 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 						case DATA_CHANGE_INTENTION__ADD:
 							{
 
-								if (change.parent_identifier.uuid && change.parent_identifier.code && change.parent_identifier.longhand)
-								{
-									WidgetInstanceIdentifier new_identifier(change.parent_identifier);
-									NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup(this, new_identifier, outp);
-									tmpGrp->setTitle(new_identifier.longhand->c_str());
-									layout()->addWidget(tmpGrp);
+								//if (change.parent_identifier.uuid && change.parent_identifier.code && change.parent_identifier.longhand)
+								//{
+								//	WidgetInstanceIdentifier new_identifier(change.parent_identifier);
+								//	NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup(this, new_identifier, outp);
+								//	tmpGrp->setTitle(new_identifier.longhand->c_str());
+								//	layout()->addWidget(tmpGrp);
 
-									// Upon first project load, the variable selection widget may have loaded before we did.
-									// We cache the proper VG and then set its text to bold here.
-									if (new_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
-									{
-										DoTabChange(new_identifier);
-									}
-								}
+								//	// Upon first project load, the variable selection widget may have loaded before we did.
+								//	// We cache the proper VG and then set its text to bold here.
+								//	if (new_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+								//	{
+								//		DoTabChange(new_identifier);
+								//	}
+								//}
+
+								RefreshAllWidgets(); // this triggers a resort by loading everything in the pane again
 
 							}
 							break;

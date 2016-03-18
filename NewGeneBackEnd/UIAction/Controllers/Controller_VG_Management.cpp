@@ -102,10 +102,7 @@ void UIActionManager::CreateVG(Messager & messager__, WidgetActionItemRequest_AC
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					// UI will provide dialog confirmation
-					//boost::format msg("Variable group '%1%' successfully created.\n\nTo import data into this variable group, click \"Refresh selected Variable Group from file\".");
-					//msg % boost::to_upper_copy(new_vg_code);
-					//messager.ShowMessageBox(msg.str(), true);
+					input_model.t_vgp_identifiers.Load(input_model.getDb(), &input_model); // re-sorts
 
 					// ***************************************** //
 					// Prepare data to send back to user interface
@@ -336,6 +333,8 @@ void UIActionManager::RenameVG(Messager & messager, WidgetActionItemRequest_ACTI
 						boost::format msg("Unable to rename the VG.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
+
+					input_model.t_vgp_identifiers.Load(input_model.getDb(), &input_model); // re-sorts
 
 					executor.success();
 

@@ -1444,17 +1444,40 @@ void NewGeneManageVGs::on_pushButton_rename_vg_clicked()
 		return;
 	}
 
-	bool ok;
-	boost::format msg("Rename variable group \"%1%\" to:");
-	msg % *vg.code;
-	QString text = QInputDialog::getText(this, "Rename variable group", QString(msg.str().c_str()), QLineEdit::Normal, QString(msg.str().c_str()), &ok);
-	if (!ok)
+	std::string vg_description;
+
+	bool ok {false};
+	while (!ok)
 	{
-		return;
+		boost::format msg("Rename variable group \"%1%\" to:");
+		msg % *vg.code;
+		QString vg_description_ = QInputDialog::getText(this, "Rename variable group", QString(msg.str().c_str()), QLineEdit::Normal, QString(msg.str().c_str()), &ok);
+		if (!ok)
+		{
+			return;
+		}
+
+		vg_description = vg_description_.toStdString();
+		boost::trim(vg_description);
+		bool valid = true;
+		std::string errorMsg;
+		if (valid)
+		{
+			valid = Validation::ValidateVgDescription(vg_description, errorMsg);
+		}
+		if (!valid)
+		{
+			boost::format msg("%1%");
+			msg % errorMsg;
+			QMessageBox msgBox;
+			msgBox.setText(msg.str().c_str());
+			msgBox.exec();
+			ok = false;
+		}
 	}
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(vg, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__String(text.toStdString())))));
+	actionItems.push_back(std::make_pair(vg, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__String(vg_description)))));
 	WidgetActionItemRequest_ACTION_RENAME_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 	emit RenameVG(action_request);
 
