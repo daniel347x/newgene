@@ -289,7 +289,7 @@ void NewGeneVariablesToolbox::SetBarColor(bool active, std::string const & name)
 
 					if (active)
 					{
-						p.setColor(QPalette::Button, "#E0EBFF");
+						p.setColor(QPalette::Button, "#AFD4F6");
 					}
 					else
 					{
