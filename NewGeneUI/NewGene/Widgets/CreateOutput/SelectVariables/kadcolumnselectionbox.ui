@@ -93,7 +93,7 @@
        </property>
        <property name="text">
         <string>&lt;b&gt;&lt;big&gt;Select some variables to see &lt;i&gt;k&lt;/i&gt;-ad options here&lt;br&gt;
-(i.e. where &lt;i&gt;k&lt;/i&gt; can be set to 2 (for dyads), 3 (for triads), or higher).&lt;/big&gt;&lt;/b&gt;</string>
+(i.e. where &lt;i&gt;k&lt;/i&gt;&amp;nbsp;&amp;nbsp;can be set to 2 (for dyads), 3 (for triads), or higher).&lt;/big&gt;&lt;/b&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
