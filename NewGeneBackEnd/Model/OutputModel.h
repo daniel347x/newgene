@@ -53,7 +53,7 @@ class PrimaryKeySequence
 				// Primary UOA (i.e., the "largest" unit of analysis corresponding to the variable groups with variables selected by the user):
 				// A B B B B C C
 				//
-				// Selected K-ad (i.e., the spin control values chosen by the user):
+				// Selected k-ad (i.e., the spin control values chosen by the user):
 				// A B B B B B B B B C C
 				//
 				// Variable group's UOA (were the particular choice given in this example allowed, as it could be in the future) (i.e., a given variable group, which might not be the "largest"):
@@ -622,7 +622,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// but unformatted (i.e., with extra columns that have internally-generated column names).
 				//
 				// "final_result":
-				// This is the final result of the K-ad generator, in a form presentable as-is
+				// This is the final result of the k-ad generator, in a form presentable as-is
 				// to the end user.
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
 				SqlAndColumnSets merging_of_children_column_sets;
@@ -745,7 +745,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// Information about *all* primary key columns, in the sequence they appear in the output
 				// ... including "duplicate" primary keys resulting from multiplicity greater than 1.
 				// In other words, a class (wrapping a vector) that tracks all primary keys that
-				// will appear in the K-adic *output*, in the default order it will appear
+				// will appear in the k-adic *output*, in the default order it will appear
 				// (not counting any column order modifications set by the user).
 				PrimaryKeySequence sequence;
 
@@ -843,7 +843,7 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 	});
 
 	// Then, the leaf primary keys - for multiple leaves
-	// (this is the K-ad)
+	// (this is the k-ad)
 	int numberLeavesHandled = 0;
 	std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 	{

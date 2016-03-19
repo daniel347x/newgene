@@ -272,7 +272,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		if (is_generating_output)
 		{
-			messager.ShowMessageBox("Another K-ad output generation operation is in progress.  Please wait for that operation to complete first.");
+			messager.ShowMessageBox("Another k-ad output generation operation is in progress.  Please wait for that operation to complete first.");
 			return;
 		}
 
@@ -290,7 +290,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText("", nullptr); // This will clear the pane
 	boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
 	std::string time_start_formatted = boost::posix_time::to_simple_string(now);
-	boost::format msg_start("NewGene K-ad generation");
+	boost::format msg_start("NewGene k-ad generation");
 	messager.AppendKadStatusText(msg_start.str(), nullptr);
 	boost::format msg_starttime("Starting run at %1%");
 	msg_starttime % time_start_formatted;
@@ -410,13 +410,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// via the Boost Memory pool.
 	//
 	// This way, all of the objects and sub-objects created by the AllWeightings instance
-	// will be deleted at the end of the K-ad run in one fell swoop
+	// will be deleted at the end of the k-ad run in one fell swoop
 	// by a call to Boost Pool's "purge_memory()", without calling (or needing to call)
 	// any destructors.
 	//
 	// The reason is that the data structures are so intricately nested,
 	// and the heap so fragmented, that it literally requires 20 full minutes on one of the world's most
-	// powerful CPU's to clean up the memory and exit the K-ad routine after NewGene completes writing
+	// powerful CPU's to clean up the memory and exit the k-ad routine after NewGene completes writing
 	// the output to file (during which time NewGene can't be used) for a reasonably complex run.
 	//
 	// We don't need to call any of those destructors, because they have no desired side effects,
@@ -427,7 +427,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// Therefore, we never delete the following object.
 	//
 	// Note that a few bytes of data from the "POD-style" AllWeightings instance data members *do* leak
-	// (not any nested data, however) - but this is trivial.  NewGene could run thousands of K-ad
+	// (not any nested data, however) - but this is trivial.  NewGene could run thousands of k-ad
 	// routines of *any* complexity without being shut down and the leak would barely even be a tick on the scale.
 	//
 	// ******************************************************************************************* //
@@ -437,7 +437,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// Memory management!
 	// The following class is defined to use a Boost memory pool.
 	// This single data structure is responsible for holding the "leaf-most" nodes
-	// during the K-ad generation process, and there can easily be millions, scattered through the heap.
+	// during the k-ad generation process, and there can easily be millions, scattered through the heap.
 	// The memory pool requires that these all lie in a single block, at odds with the scattered nature of creation of these nodes.
 	// We therefore CREATE an instance of this class once, before creating the KadSampler instance,
 	// at a time when memory is available, and then request it to store something,
@@ -473,7 +473,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	} BOOST_SCOPE_EXIT_END
 
 	// ********************************************************************************************************************************************************* //
-	// The main body of the K-ad generation routine follows
+	// The main body of the k-ad generation routine follows
 	// ********************************************************************************************************************************************************* //
 	try
 	{
@@ -482,7 +482,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Initialize all metadata about the selected variables and variable groups,
 		// multiplicities, units of analysis, primary keys, output column names, etc.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Populating K-ad metadata...")).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Populating k-ad metadata...")).str().c_str(), this);
 		create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
 		Prepare(allWeightings);
 
@@ -526,7 +526,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		// ********************************************************************************************************************************************************* //
 		// Build a schema object, one per variable group with selected data,
-		// intended for internal use by the K-ad algorithm (i.e., converted from the raw format used in the database
+		// intended for internal use by the k-ad algorithm (i.e., converted from the raw format used in the database
 		// into a handy set of schema instances)
 		// ********************************************************************************************************************************************************* //
 		// Also, determine, and set, the value of K for this run
@@ -570,10 +570,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		// ********************************************************************************************************************************************************* //
 		// Create TIME SLICES.
-		// This is the first stage of K-ad generation.
+		// This is the first stage of k-ad generation.
 		// It loads the raw data (as stored in the temporary table, above)
 		// for the PRIMARY variable group
-		// into the K-ad sampler, broken into time slices, to be made ready for following processing by the sampler.
+		// into the k-ad sampler, broken into time slices, to be made ready for following processing by the sampler.
 		//
 		// Later steps will load the other top-level, and the child, variable groups.
 		// ********************************************************************************************************************************************************* //
@@ -630,20 +630,20 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
-		// Calculate the number of possible K-ad combinations for each branch, given the leaves available.
+		// Calculate the number of possible k-ad combinations for each branch, given the leaves available.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Calculate the total number of K-adic combinations for the given DMU selection/s...")).str().c_str(), this);
+		messager.AppendKadStatusText((boost::format("Calculate the total number of k-adic combinations for the given DMU selection/s...")).str().c_str(), this);
 		allWeightings.CalculateWeightings(K);
 
 		if (failed || CheckCancelled()) { return; }
 
 		// ********************************************************************************************************************************************************* //
-		// The user will be interested to know how many K-ad combinations there are for their selection, so display that number now
+		// The user will be interested to know how many k-ad combinations there are for their selection, so display that number now
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Total number of granulated K-adic combinations available for this run: %1%") %
+		messager.AppendKadStatusText((boost::format("Total number of granulated k-adic combinations available for this run: %1%") %
 									  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
 		messager.AppendKadStatusText((
-										 boost::format("Guaranteed upper limit for total number of *consolidated* K-adic combinations: %1% (a quick estimate, but guaranteed to be an upper limit)") %
+										 boost::format("Guaranteed upper limit for total number of *consolidated* k-adic combinations: %1% (a quick estimate, but guaranteed to be an upper limit)") %
 										 allWeightings.weighting_consolidated.getWeightingString().c_str()).str().c_str(), this);
 
 		if (random_sampling)
@@ -658,7 +658,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 										  (random_sampling_number_rows).c_str()).str().c_str(), this);
 
 			// ********************************************************************************************************************************************************* //
-			// If the user selects more random rows than there are K-ad combinations, then set the number of rows to be equal to the number of K-ad combinations.
+			// If the user selects more random rows than there are k-ad combinations, then set the number of rows to be equal to the number of k-ad combinations.
 			// Note: We remain nonetheless in random sampling mode, mostly for testing purposes.  One of the best ways to confirm that the random sampling and full
 			// sampling modes are both working is to see that they give identical results when the number of random samples is set to be equal to the number of full samples.
 			// Also, it is possible that the end user wishes to test the scaling properties of the code for their given data when randomly sampled, in which case
@@ -668,7 +668,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 			if (newgene_cpp_int(random_sampling_number_rows) > allWeightings.weighting.getWeighting())
 			{
-				messager.AppendKadStatusText((boost::format("Decreasing the number of random samples to match the number of total K-adic combinations.")).str().c_str(), this);
+				messager.AppendKadStatusText((boost::format("Decreasing the number of random samples to match the number of total k-adic combinations.")).str().c_str(), this);
 				samples = allWeightings.weighting.getWeighting().convert_to<int>();
 			}
 
@@ -684,7 +684,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Select the random rows now and stash in memory
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("Selecting %1% random K-adic combinations from %2% available granulated combinations...") % boost::lexical_cast<std::string>
+			messager.AppendKadStatusText((boost::format("Selecting %1% random k-adic combinations from %2% available granulated combinations...") % boost::lexical_cast<std::string>
 										  (samples).c_str() % allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
 			allWeightings.PrepareRandomSamples(K);
 
@@ -721,18 +721,18 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			if (consolidate_rows)
 			{
 				messager.AppendKadStatusText((boost::format("Entering full sampling mode, consolidating contiguous identical data.")).str().c_str(), this);
-				messager.AppendKadStatusText((boost::format("Generating all K-adic combinations (no more than %1% consolidated combinations, and probably less)...") %
+				messager.AppendKadStatusText((boost::format("Generating all k-adic combinations (no more than %1% consolidated combinations, and probably less)...") %
 											  allWeightings.weighting_consolidated.getWeightingString().c_str()).str(), this);
 			}
 			else
 			{
-				messager.AppendKadStatusText((boost::format("Entering full sampling mode, with time granulation.  All %1% K-adic combinations will be generated.") %
+				messager.AppendKadStatusText((boost::format("Entering full sampling mode, with time granulation.  All %1% k-adic combinations will be generated.") %
 											  allWeightings.weighting.getWeightingString().c_str()).str().c_str(), this);
-				messager.AppendKadStatusText((boost::format("Generating all %1% K-adic combinations from the raw data ...") % allWeightings.weighting.getWeightingString().c_str()).str(), this);
+				messager.AppendKadStatusText((boost::format("Generating all %1% k-adic combinations from the raw data ...") % allWeightings.weighting.getWeightingString().c_str()).str(), this);
 			}
 
 			// ********************************************************************************************************************************************************* //
-			// Generate all K-ad combinations now
+			// Generate all k-ad combinations now
 			// ********************************************************************************************************************************************************* //
 			allWeightings.PrepareFullSamples(K);
 
@@ -754,7 +754,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			//
 			// We aren't doing any post-processing of the data that requires it be stored in a table, rather than in memory,
 			// but leave this code here as a starting point for when larger data sets are supported that require
-			// disk-based management during K-ad generation
+			// disk-based management during k-ad generation
 			// ********************************************************************************************************************************************************* //
 			KadSamplerCreateOutputTable();
 
@@ -2492,7 +2492,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 	// with ALL of the fields in the table, not just those selected by the user.
 	// ************************************************************************************************ //
 
-	// Convert column metadata into a far more useful form for construction of K-adic output
+	// Convert column metadata into a far more useful form for construction of k-adic output
 
 	if (failed || CheckCancelled())
 	{
@@ -3176,7 +3176,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 		if (multiplicity == 0)
 		{
-			// User's K-ad selection is too small in this DMU category to support the variables they have selected
+			// User's k-ad selection is too small in this DMU category to support the variables they have selected
 			if (the_dmu_category.longhand)
 			{
 				if (biggest_counts[0].first.longhand)
@@ -3632,7 +3632,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 
 			if (multiplicity == 0)
 			{
-				// User's K-ad selection is too small in this DMU category to support the variables they have selected
+				// User's k-ad selection is too small in this DMU category to support the variables they have selected
 				// Todo: Error message
 				if (the_dmu_category_identifier.longhand)
 				{
@@ -4090,7 +4090,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 
 				// *************************************************************************************************************** //
 				// We currently have a specific primary key, of a given DMU category,
-				// out of the full set of primary keys, including the full K-ad spin counts
+				// out of the full set of primary keys, including the full k-ad spin counts
 				// (represented by the variable:
 				// "current_primary_key_sequence",
 				//  ... and the variable we are here populating, called:
@@ -4141,7 +4141,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 						{
 
 							// *************************************************************************************************************** //
-							// Now see if the TOTAL sequence number of this primary key within the TOTAL K-ad spin control count
+							// Now see if the TOTAL sequence number of this primary key within the TOTAL k-ad spin control count
 							// matches the incoming "current_primary_key_sequence" primary key
 							// *************************************************************************************************************** //
 
@@ -5327,7 +5327,7 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 		if (insert_random_sample_stmt == NULL)
 		{
 			std::string sql_error = sqlite3_errmsg(db);
-			boost::format msg("Unable to prepare SQL query to insert a random K-ad row: %1% (%2%)");
+			boost::format msg("Unable to prepare SQL query to insert a random k-ad row: %1% (%2%)");
 			msg % sql_error.c_str() % insert_random_sample_string.c_str();
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
@@ -5764,7 +5764,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					if (failed || CheckCancelled()) { return; }
 
 					// One primary variable group for the current time slice (for now, this is all that is supported).
-					// Iterate through all of its branches (fixed values of raw data for the primary keys that are not part of the K-ad; i.e., have multiplicity 1)
+					// Iterate through all of its branches (fixed values of raw data for the primary keys that are not part of the k-ad; i.e., have multiplicity 1)
 					std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 					{
 

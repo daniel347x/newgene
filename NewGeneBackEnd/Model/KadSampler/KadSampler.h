@@ -2218,7 +2218,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ...  It will still contain other leaf-related data that is independent of the number of
 		// ...  DMU's in the leaf - specifically, an index into *secondary* data.
 		// ...  This is equivalent to identifying a single arbitrary DMU as the DMU involved
-		// ...  in the K-ad, but with K=1.)
+		// ...  in the k-ad, but with K=1.)
 		// Each row of output data has one branch, and multiple leaves (one leaf per multiplicity)
 		//     (but see exception above for the K=1 case).
 		// The set of leaves per row is stored across individual time unit entries within this branch
@@ -2226,7 +2226,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ...  appears in multiple time unit entries in the same time slice,
 		// ...  that row will appear only once in the output for the time slice).
 		// Each leaf represents a single set of secondary column data.
-		// Example: UOA "MID, CTY, CTY", with K-ad "MID, CTY, CTY, CTY, CTY":
+		// Example: UOA "MID, CTY, CTY", with k-ad "MID, CTY, CTY, CTY, CTY":
 		// ... has branch DMU "MID", and leave DMU "CTY, CTY".
 		// ... Each branch has a single value of a MID, such as "MID = 257" or "MID = 258".
 		// ... Each leaf has a single value for the "CTY, CTY" pair corresponding to the UOA,
@@ -2244,7 +2244,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// The child variable group also has 0, 1, or more leaves.
 		// ... Each child leaf corresponds to a separate set of secondary child variable group
 		// ... column data that appears in every row of output.
-		// Example: For the above UOA "MID, CTY, CTY" and K-ad "MID, CTY, CTY, CTY, CTY",
+		// Example: For the above UOA "MID, CTY, CTY" and k-ad "MID, CTY, CTY, CTY, CTY",
 		// ... a child group could have UOA "MID, CTY".
 		// For every row of output, this child group has four leaves, one for each country.
 		// ... (Multiple *sets* of leaves per row, as opposed to *one* **set** of leaves per row,
@@ -2364,9 +2364,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		//  so it must be stored branch-by-branch.
 		//  Example: For UOA with DMU's "MID-CTY", and with K=2 on CTY:
 		//      Branch #1 (MID = 257): Leaves are CTY=2, CTY=20, CTY=220, ...
-		//      ... resulting in a set of many K-ads for this branch (each a single output row).
+		//      ... resulting in a set of many k-ads for this branch (each a single output row).
 		//      Branch #2 (MID = 37): Leaves are CTY=2, CTY=20, CTY=21 (this is just made up data)
-		//      ... resulting in a set of 3 K-ads for this branch (each a single output row).
+		//      ... resulting in a set of 3 k-ads for this branch (each a single output row).
 		//  The example makes clear that each branch contains a unique set of leaves.
 		// Therefore, we are "only" doubling the memory required
 		// by using the following cache, which is stored within each branch
@@ -2953,7 +2953,7 @@ class KadSampler
 		// The main time slice data
 		TimeSlices<hits_tag> timeSlices;
 		Weighting weighting; // sum over all time slices
-		Weighting weighting_consolidated; // weighting of consolidated output (not separated into time units that correspond to the time granularity of the primary variable group; i.e., if a COW MID lasts over 6 years for a given set of 3 countries for dyadic output, the contribution to weighting_consolidateed will be just 3 (the number of K-ads), rather than 3 * the number of days or years of the MID.  This is useful for full sampling mode where the data is consolidated.
+		Weighting weighting_consolidated; // weighting of consolidated output (not separated into time units that correspond to the time granularity of the primary variable group; i.e., if a COW MID lasts over 6 years for a given set of 3 countries for dyadic output, the contribution to weighting_consolidateed will be just 3 (the number of k-ads), rather than 3 * the number of days or years of the MID.  This is useful for full sampling mode where the data is consolidated.
 
 	public:
 

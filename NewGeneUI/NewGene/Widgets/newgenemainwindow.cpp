@@ -372,7 +372,7 @@ void NewGeneMainWindow::closeEvent(QCloseEvent * event)
 		if (OutputModel::OutputGenerator::is_generating_output)
 		{
 			QMessageBox::StandardButton reply;
-			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("A K-ad output set is being generated.  Are you sure you wish to exit?"),
+			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("A k-ad output set is being generated.  Are you sure you wish to exit?"),
 			                              QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
 			if (reply == QMessageBox::Yes)

@@ -927,12 +927,12 @@ void KadSampler::CalculateWeightings(int const K)
 	// Therefore, multiple contiguous TIME SLICES could have the same branch + leaf combinations,
 	// and these will be MERGED during consolidation.
 	// So, the current approach is simply to store all branch + leaves combinations in a set, which guarantees uniqueness,
-	// and then iterate through the set to calculate the total number of consolidated K-ad combinations.
+	// and then iterate through the set to calculate the total number of consolidated k-ad combinations.
 	// The issue of whether time slices are adjacent or not is also handled
 	// (if not, rows should not be consolidated).
 	//
 	// In terms of memory allocation, because we are just storing a single entry in the set for ALL leaves for a given branch,
-	// i.e., for each MID we store only the total leaves for a given branch (not broken down into K-ad combinations),
+	// i.e., for each MID we store only the total leaves for a given branch (not broken down into k-ad combinations),
 	// we expect this to be light on memory in almost all use cases.
 	//
 	// Also use this custom sort to ensure holes and subsets are handled properly, as noted previously.
@@ -940,7 +940,7 @@ void KadSampler::CalculateWeightings(int const K)
 	// Place the following vector into the 'hits_tag' memory pool, NOT the 'calculate_consolidated_total_number_rows_tag' memory pool.
 	// That way, when this block exits, even though the 'calculate_consolidated_total_number_rows_tag' memory pool has been purged,
 	// the following vector will still be valid.
-	// (It will be purged when the 'hits_tag' memory pool is purged, which only happens once - at the end of the entire K-ad run.)
+	// (It will be purged when the 'hits_tag' memory pool is purged, which only happens once - at the end of the entire k-ad run.)
 	auto calculateTotalConsolidatedRowsSortFunction =
 		boost::function<bool(InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs)>([&](
 					InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & lhs, InstanceDataVector<calculate_consolidated_total_number_rows_tag> const & rhs) -> bool
@@ -1024,12 +1024,12 @@ void KadSampler::CalculateWeightings(int const K)
 		// The time slices overlap.
 		// For this scenario, do a "simple" test - just see if the entire vector matches.
 		// If not, consider them not to match, even though
-		// in reality, some K-ad combinations here WILL be contiguous with previous time slices.
+		// in reality, some k-ad combinations here WILL be contiguous with previous time slices.
 		// This will result in overcounting, which we indicate to the user in the status text.
 		// The overcounting is necessary: The only way to count accurately, so far as I can see,
 		// is to perform the entire consolidation algorithm (which is both time-consuming and heavily memory-demanding).
 		// But, the current "overcounting" count will still, in most cases, result is a HUGELY smaller number
-		// than the "total K-adic combinations" count,
+		// than the "total k-adic combinations" count,
 		// and so will give a 'reasonable' upper limit count in many cases for the end user.
 
 		if (lhs.size() < rhs.size())
@@ -1191,7 +1191,7 @@ void KadSampler::CalculateWeightings(int const K)
 				// Count the leaves
 				int numberLeaves = static_cast<int>(branch.numberLeaves());
 
-				// The number of K-ad combinations for this branch is easily calculated.
+				// The number of k-ad combinations for this branch is easily calculated.
 				// It is just the binomial coefficient (assuming K <= N)
 
 				branch.number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
@@ -1235,7 +1235,7 @@ void KadSampler::CalculateWeightings(int const K)
 
 	});
 
-	// Now count a good upper limit for the total umber of *consolidated* K-ad combinations.
+	// Now count a good upper limit for the total umber of *consolidated* k-ad combinations.
 	// See comments above.
 	for (auto const & branch_and_leaves_combo : branches_and_leaves_set)
 	{
@@ -1508,7 +1508,7 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 
 			if (true)
 			{
-				boost::format msg("Random K-ad being requested from a branch which should have 0 weight!");
+				boost::format msg("Random k-ad being requested from a branch which should have 0 weight!");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
@@ -2421,7 +2421,7 @@ void KadSampler::PrepareRandomSamples(int const K)
 
 	std::int32_t random_rows_generated = 0;
 
-	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% randomly selected K-adic combinations..."), static_cast<std::int32_t>(random_numbers.size()));
+	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% randomly selected k-adic combinations..."), static_cast<std::int32_t>(random_numbers.size()));
 
 	while (true)
 	{
@@ -2562,7 +2562,7 @@ void KadSampler::PrepareFullSamples(int const K)
 {
 
 	number_rows_generated = 0;
-	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% K-adic combinations"), weighting.getWeighting());
+	ProgressBarMeter meter(messager, std::string("Generated %1% out of %2% k-adic combinations"), weighting.getWeighting());
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
 
@@ -3161,7 +3161,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(KadSampler & allWeightings, Time
 	// that in this scenario, no matter how small the time slice is being pruned to, there
 	// will be at least 1 entry (set of rows) in "hits".  This will correspond to having
 	// the data output file contain *multiple* sets of rows of data that lie in the same
-	// "day" time slice - but with sub-day granularity.  This is desired so that all K-ads
+	// "day" time slice - but with sub-day granularity.  This is desired so that all k-ads
 	// are successfully output, with the weighting taken care of by the width of the slice.
 	//
 	// Finally, note that this function is always exited if full sampling is being performed
