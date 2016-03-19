@@ -1114,6 +1114,11 @@ void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWid
 	listpane->setMinimumWidth(400);
 	listpane->setMinimumHeight(400);
 	listpane->setAlternatingRowColors(true);
+	listpane->setSelectionBehavior(QAbstractItemView::SelectRows);
+	listpane->setResizeMode(QListView::Adjust);
+	listpane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+	listpane->setSpacing(5);
+	listpane->setStyleSheet("QListView {selection-color: black;}");
 
 	formConstructionPane.addWidget(listpane);
 
@@ -1172,7 +1177,14 @@ void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormL
 
 	// The parent of the list view is a widget, not a layout
 	listpane = new QListView(&VgConstructionPanes);
+	listpane->setMinimumWidth(400);
+	listpane->setMinimumHeight(400);
 	listpane->setAlternatingRowColors(true);
+	listpane->setSelectionBehavior(QAbstractItemView::SelectRows);
+	listpane->setResizeMode(QListView::Adjust);
+	listpane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+	listpane->setSpacing(5);
+	listpane->setStyleSheet("QListView {selection-color: black;}");
 
 	// But the list view gets added to the layout, not to its parent widget
 	formConstructionPane.addWidget(listpane);
