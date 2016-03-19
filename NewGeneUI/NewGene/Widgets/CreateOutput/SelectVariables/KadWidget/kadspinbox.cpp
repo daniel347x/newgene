@@ -17,11 +17,14 @@ KadSpinBox::KadSpinBox(QWidget * parent, WidgetInstanceIdentifier data_instance_
 					  false,
 					  data_instance_
 				  )
-				 )
+				 ),
+	visible (false)
 
 {
 
 	PrepareOutputWidget();
+
+	this->doSetVisible(false);
 
 	connect(this, SIGNAL(valueChanged(int)), this, SLOT(ReceiveVariableItemChanged(int)));
 
@@ -250,11 +253,11 @@ void KadSpinBox::ShowHideFromActiveDMUs(DataChange const & change)
 
 	if (not_me)
 	{
-		this->setVisible(false);
+		this->doSetVisible(false);
 	}
 	else
 	{
-		this->setVisible(true);
+		this->doSetVisible(true);
 	}
 
 	QWidget * parent_ = this->parentWidget();
@@ -274,7 +277,12 @@ void KadSpinBox::ShowHideFromActiveDMUs(DataChange const & change)
 		}
 		catch (std::bad_cast &)
 		{
-
 		}
 	}
+}
+
+void KadSpinBox::doSetVisible(bool const visible_)
+{
+	visible = visible_;
+	this->setVisible(visible);
 }

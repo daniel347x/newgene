@@ -26,7 +26,6 @@ KadWidgetsScrollArea::KadWidgetsScrollArea(QWidget * parent) :
 	setLayout(layout);
 
 	PrepareOutputWidget();
-
 }
 
 void KadWidgetsScrollArea::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
@@ -99,6 +98,8 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 			AddKadSpinWidget(identifier, active_dmus);
 		}
 	});
+
+	EmptyTextCheck();
 
 }
 
@@ -278,7 +279,7 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 	}
 
 	WidgetInstanceIdentifier new_identifier(identifier);
-	QSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
+	KadSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
 	newSpinBox->setFixedHeight(20);
 	newSpinBox->setFixedWidth(200);
 	QFont currFont = newSpinBox->font();
@@ -301,11 +302,11 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 
 	if (not_me)
 	{
-		newSpinBox->setVisible(false);
+		newSpinBox->doSetVisible(false);
 	}
 	else
 	{
-		newSpinBox->setVisible(true);
+		newSpinBox->doSetVisible(true);
 	}
 
 	layout()->addWidget(newSpinBox);
@@ -343,7 +344,7 @@ void KadWidgetsScrollArea::EmptyTextCheck()
 		{
 			KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox *>(testWidget);
 
-			if (testSpinBox && testSpinBox->isVisible())
+			if (testSpinBox && testSpinBox->visible)
 			{
 				any_spincontrols_visible = true;
 				break;
