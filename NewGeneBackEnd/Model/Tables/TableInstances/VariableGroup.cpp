@@ -1,5 +1,6 @@
 #ifndef Q_MOC_RUN
 	#include <boost/algorithm/string.hpp>
+	#include <boost/algorithm/string/replace.hpp>
 #endif
 #include "VariableGroup.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
@@ -794,6 +795,10 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 				  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & table_schema_entry)
 	{
 
+		// Support single-ticks in variable descriptions
+		std::string variableDescription { table_schema_entry.field_description };
+		boost::replace_all(variableDescription, "'", "''");
+
 		std::string sql;
 		std::string new_uuid(boost::to_upper_copy(newUUID(false)));
 		sql += "INSERT INTO VG_SET_MEMBER (VG_SET_MEMBER_UUID, VG_SET_MEMBER_STRING_CODE, VG_SET_MEMBER_STRING_LONGHAND, VG_SET_MEMBER_SEQUENCE_NUMBER, VG_SET_MEMBER_NOTES1, VG_SET_MEMBER_NOTES2, VG_SET_MEMBER_NOTES3, VG_SET_MEMBER_FK_VG_CATEGORY_UUID, VG_SET_MEMBER_FLAGS, VG_SET_MEMBER_DATA_TYPE)";
@@ -802,7 +807,7 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 		sql += "', '";
 		sql += table_schema_entry.field_name;
 		sql += "', '";
-		sql += table_schema_entry.field_description;
+		sql += variableDescription;
 		sql += "', ";
 		sql += boost::lexical_cast<std::string>(sequence_number);
 		sql += ", '', '', '', '";
