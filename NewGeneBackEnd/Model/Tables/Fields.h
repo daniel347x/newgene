@@ -43,6 +43,7 @@ class BaseField
 			: field_type(the_field_type)
 			, field_name(the_field_name)
 			, date_format_index(-1)
+			, empty(false)
 		{
 		}
 
@@ -65,6 +66,8 @@ class BaseField
 
 		int  GetDateFormatIndex() const { return date_format_index; }
 		void SetDateFormatIndex(int const date_format_index_) { date_format_index = date_format_index_; }
+
+		bool empty;
 
 	protected:
 

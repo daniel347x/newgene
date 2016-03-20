@@ -161,6 +161,8 @@ int TimeRangeFieldMapping::ConvertStringToDateFancy(boost::posix_time::ptime & t
 
 void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields, DataFields const & output_data_fields)
 {
+	validTimeFields = true;
+
 	switch (time_range_type)
 	{
 
@@ -171,9 +173,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field || !the_output_field_year_start || !the_output_field_year_end)
+				if (!the_input_field || !the_output_field_year_start || !the_output_field_year_end || the_input_field->empty)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -206,15 +208,25 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__FROM__START_YEAR__TO__END_YEAR:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_end = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_start || !the_input_field_end || !the_output_field_year_start || !the_output_field_year_end)
+				if (!the_input_field_start || !the_input_field_end || !the_output_field_year_start || !the_output_field_year_end || (the_input_field_start->empty && the_input_field_end->empty))
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
+				}
+
+				if (the_input_field_start->empty)
+				{
+					the_input_field_start->SetValueInt32(the_input_field_end->GetInt32Ref());
+				}
+
+				if (the_input_field_end->empty)
+				{
+					the_input_field_end->SetValueInt32(the_input_field_start->GetInt32Ref());
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = y_y_int_mappings[std::make_pair(the_input_field_start->GetInt32Ref(), the_input_field_end->GetInt32Ref())];
@@ -250,9 +262,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_datetime_year || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				if (!the_input_field_datetime_year || !the_output_field_datetime_start || !the_output_field_datetime_end || the_input_field_datetime_year->empty)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -276,7 +288,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				if (conversion_index < 0)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -300,15 +312,26 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__FROM__START_YEAR__TO__END_YEAR:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
+					|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
+				}
+
+				if (the_input_field_datetime_start->empty)
+				{
+					the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
+				}
+
+				if (the_input_field_datetime_end->empty)
+				{
+					the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = y_y_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
@@ -332,7 +355,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				if (conversion_index < 0)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -344,7 +367,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				if (conversion_index < 0)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -372,9 +395,10 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				std::shared_ptr<BaseField> the_output_field_month_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_month_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_month_start || !the_input_field_year_start || !the_output_field_month_start || !the_output_field_month_end)
+				if (!the_input_field_month_start || !the_input_field_year_start || !the_output_field_month_start || !the_output_field_month_end || (the_input_field_year_start->empty
+						|| the_input_field_month_start->empty))
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -431,18 +455,33 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_end = RetrieveDataField(input_file_fields[3], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_year_end = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_month_end = RetrieveDataField(input_file_fields[3], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
+				bool emptyStart = (the_input_field_year_start->empty || the_input_field_month_start->empty);
+				bool emptyEnd = (the_input_field_year_end->empty || the_input_field_month_end->empty);
+
 				if (!the_input_field_month_start || !the_input_field_year_start || !the_input_field_month_end
-					|| !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end)
+					|| !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end || (emptyStart && emptyEnd))
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
+				}
+
+				if (emptyStart)
+				{
+					the_input_field_year_start->SetValueInt32(the_input_field_year_end->GetInt32Ref());
+					the_input_field_month_start->SetValueInt32(the_input_field_month_end->GetInt32Ref());
+				}
+
+				if (emptyEnd)
+				{
+					the_input_field_year_end->SetValueInt32(the_input_field_year_start->GetInt32Ref());
+					the_input_field_month_end->SetValueInt32(the_input_field_month_start->GetInt32Ref());
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_int_mappings[std::tuple<int, int, int, int>(the_input_field_year_start->GetInt32Ref(),
@@ -523,9 +562,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_datetime_month || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				if (!the_input_field_datetime_month || !the_output_field_datetime_start || !the_output_field_datetime_end || the_input_field_datetime_month->empty)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -549,7 +588,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				if (conversion_index < 0)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -574,15 +613,26 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__FROM__START_MONTH__TO__END_MONTH:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
+					|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
+				}
+
+				if (the_input_field_datetime_start->empty)
+				{
+					the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
+				}
+
+				if (the_input_field_datetime_end->empty)
+				{
+					the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
@@ -606,7 +656,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				if (conversion_index < 0)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -618,7 +668,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				if (conversion_index < 0)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -647,9 +697,10 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start  || !the_output_field_day_start || !the_output_field_day_end)
+				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start  || !the_output_field_day_start || !the_output_field_day_end
+					|| (the_input_field_year_start->empty || the_input_field_month_start->empty || the_input_field_day_start->empty))
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -692,20 +743,37 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__FROM__START_DAY__TO__END_DAY:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[3], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_end = RetrieveDataField(input_file_fields[4], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_day_end = RetrieveDataField(input_file_fields[5], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_day_start = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_year_end = RetrieveDataField(input_file_fields[3], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_month_end = RetrieveDataField(input_file_fields[4], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_day_end = RetrieveDataField(input_file_fields[5], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
+				bool emptyStart = (the_input_field_year_start->empty || the_input_field_month_start->empty || the_input_field_day_start->empty);
+				bool emptyEnd = (the_input_field_year_end->empty || the_input_field_month_end->empty || the_input_field_day_end->empty);
+
 				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_input_field_day_end || !the_input_field_month_end
-					|| !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end)
+					|| !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end || (emptyStart && emptyEnd))
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
+				}
+
+				if (emptyStart)
+				{
+					the_input_field_year_start->SetValueInt32(the_input_field_year_end->GetInt32Ref());
+					the_input_field_month_start->SetValueInt32(the_input_field_month_end->GetInt32Ref());
+					the_input_field_day_start->SetValueInt32(the_input_field_day_end->GetInt32Ref());
+				}
+
+				if (emptyEnd)
+				{
+					the_input_field_year_end->SetValueInt32(the_input_field_year_start->GetInt32Ref());
+					the_input_field_month_end->SetValueInt32(the_input_field_month_start->GetInt32Ref());
+					the_input_field_day_end->SetValueInt32(the_input_field_day_start->GetInt32Ref());
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_int_mappings[std::tuple<int, int, int, int, int, int>(the_input_field_year_start->GetInt32Ref(),
@@ -811,9 +879,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_datetime_day || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				if (!the_input_field_datetime_day || !the_output_field_datetime_start || !the_output_field_datetime_end || the_input_field_datetime_day->empty)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -837,7 +905,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				if (conversion_index < 0)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -862,15 +930,26 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__FROM__START_DAY__TO__END_DAY:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
+					|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
+				}
+
+				if (the_input_field_datetime_start->empty)
+				{
+					the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
+				}
+
+				if (the_input_field_datetime_end->empty)
+				{
+					the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
 				}
 
 				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
@@ -894,7 +973,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				if (conversion_index < 0)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -906,7 +985,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				if (conversion_index < 0)
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
 				}
 
@@ -926,51 +1005,6 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-
-		// **************************************************************************************************************** //
-		// The following is deprecated and unused
-		// **************************************************************************************************************** //
-
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__RANGE__FROM__YR_MNTH_DAY:
-			{
-
-				// **************************************************************************************************************** //
-				// Deprecated and unused
-				// **************************************************************************************************************** //
-
-				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_day_end = RetrieveDataField(input_file_fields[3], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_end = RetrieveDataField(input_file_fields[4], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[5], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
-
-				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_input_field_day_end || !the_input_field_month_end
-					|| !the_input_field_year_end || !the_output_field_year_start || !the_output_field_year_end)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-				boost::gregorian::date row_start_date(the_input_field_year_start->GetInt32Ref(), 1, 1);
-				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
-				boost::gregorian::date row_end_date(the_input_field_year_end->GetInt32Ref() + 1, 1, 1);
-				boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
-
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
-
-				the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
-
-			}
-			break;
-
-
 		// **************************************************************************************************************** //
 		// The following is deprecated and unused
 		// **************************************************************************************************************** //
@@ -982,15 +1016,26 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				// Deprecated and unused
 				// **************************************************************************************************************** //
 
-				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
+					|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
 				{
-					// Todo: log warning
+					validTimeFields = false;
 					return;
+				}
+
+				if (the_input_field_datetime_start->empty)
+				{
+					the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
+				}
+
+				if (the_input_field_datetime_end->empty)
+				{
+					the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
 				}
 
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
@@ -1905,7 +1950,9 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 		DataFields & input_data_fields = input_block[current_lines_read];
 		DataFields & output_data_fields = output_block[current_lines_read];
 		stop = false;
-		std::for_each(import_definition.mappings.begin(), import_definition.mappings.end(), [this, &input_data_fields, &output_data_fields, &stop, &linenum, &errorMsg](
+		bool continueNextLine = false;
+		std::for_each(import_definition.mappings.begin(), import_definition.mappings.end(), [this, &input_data_fields, &output_data_fields, &stop, &continueNextLine, &linenum, &line,
+					  &errorMsg](
 						  std::shared_ptr<FieldMapping> & field_mapping)
 		{
 			if (!field_mapping)
@@ -2035,11 +2082,30 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 						TimeRangeFieldMapping & the_mapping = dynamic_cast<TimeRangeFieldMapping &>(*field_mapping);
 						the_mapping.PerformMapping(input_data_fields, output_data_fields);
 
+						if (!the_mapping.validTimeFields)
+						{
+							errorMsg = "Invalid time range fields";
+							boost::format msg("Skipping row number %1% in the input file (\"%2%\"): %3%");
+							msg % boost::lexical_cast<std::string>(linenum + 1) % line % errorMsg.c_str();
+							errors.push_back(msg.str());
+							errorMsg.clear();
+							++linenum;
+							--goodreadlines; // undo the increment from above
+							++badreadlines;
+							continueNextLine = true;
+							return; // from lambda
+						}
+
 					}
 					break;
 
 			}
 		});
+
+		if (continueNextLine)
+		{
+			continue;
+		}
 
 		++current_lines_read;
 		++linenum;
@@ -2368,6 +2434,8 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 
 	size_t number_chars_read = 0;
 
+	theField.empty = false;
+
 	// For all data types, retrieve the full field as a string, to start
 	std::string stringFieldErrorMsg;
 	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition, stringFieldErrorMsg);
@@ -2385,6 +2453,8 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 	if (empty_field)
 	{
 
+		theField.empty = true;
+
 		// Check if this is a required field -
 		// either a primary key field,
 		// or a time field
@@ -2393,10 +2463,10 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 
 		if (IsFieldTypeTimeRange(theField.GetType()))
 		{
-			field_is_required = true;
+			field_is_required = false;
 		}
 
-		if (column.IsPrimaryKey())
+		if (column.IsPrimaryKey() && !IsFieldTypeTimeRange(theField.GetType()))
 		{
 			field_is_required = true;
 		}

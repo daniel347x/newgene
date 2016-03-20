@@ -374,11 +374,6 @@ class TimeRangeFieldMapping : public RowFieldMapping
 			// Special-case: Not used for NewGene application,
 			// but only for internal special-coded loading of Maoz, etc. data
 			// ... and not even used for that any more
-			, TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__RANGE__FROM__YR_MNTH_DAY
-
-			// Special-case: Not used for NewGene application,
-			// but only for internal special-coded loading of Maoz, etc. data
-			// ... and not even used for that any more
 			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE // accepts only one format
 
 
@@ -430,6 +425,8 @@ class TimeRangeFieldMapping : public RowFieldMapping
 		static int ConvertStringToDateFancy(boost::posix_time::ptime & the_time, std::string const & the_string, int const index_to_use);
 
 		TIME_RANGE_FIELD_MAPPING_TYPE time_range_type;
+
+		bool validTimeFields;
 
 };
 
