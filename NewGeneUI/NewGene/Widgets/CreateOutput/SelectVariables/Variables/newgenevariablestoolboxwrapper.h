@@ -19,6 +19,9 @@ class NewGeneVariablesToolboxWrapper : public QWidget, public NewGeneWidget // d
 		explicit NewGeneVariablesToolboxWrapper(QWidget * parent = 0);
 		~NewGeneVariablesToolboxWrapper();
 
+	public:
+		void showInactiveVariableGroups(bool const visible);
+
 	protected:
 
 	private:

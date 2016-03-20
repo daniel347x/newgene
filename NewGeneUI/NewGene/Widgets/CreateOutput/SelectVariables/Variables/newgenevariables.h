@@ -27,6 +27,8 @@ class NewGeneVariables : public QWidget, public NewGeneWidget // do not reorder 
 
 		friend class NewGeneMainWindow;
 
+private slots:
+		void on_checkBoxHideBars_stateChanged(int arg1);
 };
 
 #endif // NEWGENEVARIABLES_H

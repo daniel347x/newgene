@@ -15,3 +15,11 @@ NewGeneVariablesToolboxWrapper::NewGeneVariablesToolboxWrapper(QWidget * parent)
 NewGeneVariablesToolboxWrapper::~NewGeneVariablesToolboxWrapper()
 {
 }
+
+void NewGeneVariablesToolboxWrapper::showInactiveVariableGroups(bool const visible)
+{
+	if (newgeneToolBox)
+	{
+		newgeneToolBox->showInactiveVariableGroups(visible);
+	}
+}

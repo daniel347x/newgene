@@ -8,6 +8,10 @@
 #include "../Project/uioutputproject.h"
 #include "./newgenevariablestoolbox.h"
 
+int const NewGeneVariableGroup::bottomMargin = 20;
+std::string const NewGeneVariableGroup::activeTabColor = "#AFD4F6";
+std::string const NewGeneVariableGroup::inactiveTabColor = "#ECECEC";
+
 NewGeneVariableGroup::NewGeneVariableGroup(NewGeneVariablesToolbox * toolbox_, QWidget * parent_, WidgetInstanceIdentifier data_instance_, UIOutputProject * project) :
 
 	QWidget(parent_),
@@ -23,9 +27,7 @@ NewGeneVariableGroup::NewGeneVariableGroup(NewGeneVariablesToolbox * toolbox_, Q
 				 ),
 
 	toolbox(toolbox_),
-
 	ui(new Ui::NewGeneVariableGroup)
-
 {
 
 	this->setObjectName(data_instance_.code->c_str());
@@ -472,4 +474,31 @@ void NewGeneVariableGroup::SetEnabledStateSelectAllButtons(QStandardItemModel * 
 
 	ui->toolButtonDeselectAll->setEnabled(anyChecked);
 	ui->toolButtonSelectAll->setEnabled(anyUnchecked);
+}
+
+bool NewGeneVariableGroup::hasChecked()
+{
+	QStandardItemModel * model = static_cast<QStandardItemModel *>(ui->listView->model());
+
+	if (model == nullptr)
+	{
+		return false;
+	}
+
+	int number_variables = model->rowCount();
+
+	for (int n = 0; n < number_variables; ++n)
+	{
+		QStandardItem * currentItem = model->item(n);
+
+		if (currentItem)
+		{
+			if (currentItem->checkState() == Qt::Checked)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }

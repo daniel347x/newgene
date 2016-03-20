@@ -1,5 +1,6 @@
 #include "newgenevariables.h"
 #include "ui_newgenevariables.h"
+#include "newgenevariablestoolboxwrapper.h"
 
 NewGeneVariables::NewGeneVariables(QWidget * parent) :
 	QWidget(parent),
@@ -27,5 +28,16 @@ void NewGeneVariables::changeEvent(QEvent * e)
 
 		default:
 			break;
+	}
+}
+
+void NewGeneVariables::on_checkBoxHideBars_stateChanged(int checkedState)
+{
+	NewGeneVariablesToolboxWrapper * toolbox = this->findChild<NewGeneVariablesToolboxWrapper *>("toolbox");
+
+	if (toolbox)
+	{
+		bool checked {static_cast<Qt::CheckState>(checkedState) == Qt::Checked};
+		toolbox->showInactiveVariableGroups(!checked);
 	}
 }

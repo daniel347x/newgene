@@ -16,6 +16,7 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 
 		void HandleChanges(DataChangeMessage const &);
 		void SetBarColor(bool active, std::string const & name);
+		void showInactiveVariableGroups(bool const visible);
 
 	signals:
 
@@ -41,6 +42,10 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 	protected:
 
 		void Empty();
+
+	private:
+
+		int const spacing;
 
 };
 

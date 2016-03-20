@@ -1,6 +1,8 @@
 #include "newgenevariablestoolbox.h"
 #include "../../../newgenemainwindow.h"
 #include "../../../../Infrastructure/Project/uiprojectmanager.h"
+#include "newgenevariablegroup.h"
+#include <boost/algorithm/string/replace.hpp>
 
 #include <QLayout>
 #include <QPalette>
@@ -10,9 +12,10 @@
 NewGeneVariablesToolbox::NewGeneVariablesToolbox(QWidget * parent) :
 	QToolBox(parent),
 	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_TOOLBOX,
-									 true))   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+									 true)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	spacing(4)
 {
-	layout()->setSpacing(4);
+	layout()->setSpacing(spacing);
 	setStyleSheet("QToolBox::Tab:selected {font-weight: bold;}");
 
 	PrepareOutputWidget();
@@ -289,11 +292,11 @@ void NewGeneVariablesToolbox::SetBarColor(bool active, std::string const & name)
 
 					if (active)
 					{
-						p.setColor(QPalette::Button, "#AFD4F6");
+						p.setColor(QPalette::Button, NewGeneVariableGroup::activeTabColor.c_str());
 					}
 					else
 					{
-						p.setColor(QPalette::Button, "#ECECEC");
+						p.setColor(QPalette::Button, NewGeneVariableGroup::inactiveTabColor.c_str());
 					}
 
 					button->setPalette(p);
@@ -317,4 +320,69 @@ void NewGeneVariablesToolbox::tabChange(int index)
 			emit DoTabChange(vg->data_instance);
 		}
 	}
+}
+
+void NewGeneVariablesToolbox::showInactiveVariableGroups(bool const visible)
+{
+
+	// Deal with spacing, color, and height of tabs
+	{
+		std::string heightStyle {" QToolBoxButton {min-height: 0px; max-height: 0px; height: 0px;}"};
+
+		if (visible)
+		{
+			layout()->setSpacing(spacing);
+			int i {};
+			foreach (QAbstractButton * button, findChildren<QAbstractButton *>())
+			{
+				if (button->metaObject()->className() == QString("QToolBoxButton"))
+				{
+					NewGeneVariableGroup * testVG = static_cast<NewGeneVariableGroup *> (this->widget(i));
+					if (testVG->hasChecked())
+					{
+						button->setStyleSheet((std::string("QToolBoxButton {background-color: ") + NewGeneVariableGroup::activeTabColor + ";}").c_str());
+					}
+					else
+					{
+						button->setStyleSheet((std::string("QToolBoxButton {background-color: ") + NewGeneVariableGroup::inactiveTabColor + ";}").c_str());
+					}
+					++i;
+				}
+			}
+		}
+		else
+		{
+			layout()->setSpacing(0);
+			NewGeneVariableGroup * currentVG = static_cast<NewGeneVariableGroup *> (this->currentWidget());
+			int i {};
+			foreach (QAbstractButton * button, findChildren<QAbstractButton *>())
+			{
+				if (button->metaObject()->className() == QString("QToolBoxButton"))
+				{
+					if (widget(i)->objectName() != currentVG->objectName())
+					{
+						button->setStyleSheet(heightStyle.c_str());
+					}
+					++i;
+				}
+			}
+		}
+	}
+
+	// Deal with the margin at the bottom of the pane
+	{
+		int nItems = count();
+		int bottomMargin(0), topMargin(0), leftMargin(0), rightMargin(0);
+		for (int n = 0; n < nItems; ++n)
+		{
+			NewGeneVariableGroup * child = static_cast<NewGeneVariableGroup*>(widget(n));
+			if (child)
+			{
+				child->layout()->getContentsMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
+				int newBottomMargin = (visible ? NewGeneVariableGroup::bottomMargin : 0);
+				child->layout()->setContentsMargins(leftMargin, topMargin, rightMargin, newBottomMargin);
+			}
+		}
+	}
+
 }

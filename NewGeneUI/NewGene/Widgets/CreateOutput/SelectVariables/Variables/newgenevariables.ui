@@ -30,28 +30,45 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QLabel
+    <layout class="QHBoxLayout" name="horizontalLayoutHeader">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel
 {
 	background-color : #F4F2F0;
 	font-weight: bold;
 	font-size: 14px; padding-top: 2px;  padding-bottom: 2px;
 }</string>
-     </property>
-     <property name="text">
-      <string>Variables</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::NoTextInteraction</set>
-     </property>
-    </widget>
+       </property>
+       <property name="text">
+        <string>Variables</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxHideBars">
+       <property name="text">
+        <string>Hide titles</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QScrollArea" name="scrollArea">
@@ -67,9 +84,10 @@
         <x>0</x>
         <y>0</y>
         <width>400</width>
-        <height>279</height>
+        <height>277</height>
        </rect>
       </property>
+      <zorder>label</zorder>
      </widget>
     </widget>
    </item>

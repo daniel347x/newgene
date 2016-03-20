@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "../../../newgenewidget.h"
+#include <string>
 
 class QStandardItem;
 class QListView;
@@ -51,6 +52,15 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 	private:
 		NewGeneVariablesToolbox * toolbox;
 		Ui::NewGeneVariableGroup * ui;
+
+	public:
+		bool hasChecked();
+
+	public:
+		static int const bottomMargin;
+		static std::string const activeTabColor;
+		static std::string const inactiveTabColor;
+
 };
 
 #endif // NEWGENEVARIABLEGROUP_H
