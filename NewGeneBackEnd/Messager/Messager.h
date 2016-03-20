@@ -188,6 +188,7 @@ class Messager
 		virtual void SetPerformanceLabel(std::string const &) {}
 		virtual void SetRunStatus(RUN_STATUS_ENUM const &) {}
 		virtual boost::filesystem::path GetSystemDependentPath(MESSAGER_PATH_ENUM const &) {return boost::filesystem::path {};}
+		virtual void pauseLists() {};
 
 		// Output
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA &) {}

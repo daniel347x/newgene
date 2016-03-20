@@ -13,6 +13,7 @@
 class NewGeneGenerateOutput;
 class NewGeneTabWidget;
 class UIInputProject;
+class QListView;
 
 class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>
 {
@@ -40,6 +41,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		void SignalMessageBox(STD_STRING);
 		bool QuestionMessageBox(STD_STRING, STD_STRING); // title, question text
 		int OptionMessageBox(STD_STRING msg_title, STD_STRING msg_question, STD_VECTOR_WIDGETINSTANCEIDENTIFIER option_list);
+		void PauseLists();
+		void UnpauseList(QListView*);
 
 	public:
 

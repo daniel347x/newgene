@@ -150,6 +150,7 @@ class UIMessagerInputProject : public UIMessager
 		virtual void EndProgressBar();
 		virtual void UpdateProgressBarValue(std::int64_t const);
 		virtual void UpdateStatusBarText(std::string const & status_bar_text, void *);
+		virtual void pauseLists();
 
 		void EmitInputProjectChangeMessage(DataChangeMessage & changes);
 
@@ -184,6 +185,7 @@ class UIMessagerOutputProject : public UIMessager
 		int  ShowOptionMessageBox(std::string, std::string, std::vector<WidgetInstanceIdentifier>); // title, question, option list
 
 		void SetRunStatus(RUN_STATUS_ENUM const &);
+		virtual void pauseLists();
 
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();

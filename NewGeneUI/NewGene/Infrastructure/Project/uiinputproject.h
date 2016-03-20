@@ -8,6 +8,8 @@
 #include "../Settings/uiinputmodelsettings.h"
 #include "inputprojectworkqueue.h"
 
+class QListView;
+
 class UIInputProject : public QObject, public UIProject<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>
 {
 
@@ -40,6 +42,8 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 		void DataChangeMessageSlot(WidgetChangeMessages);
 		void SignalMessageBox(STD_STRING);
 		bool QuestionMessageBox(STD_STRING, STD_STRING); // title, question text
+		void PauseLists();
+		void UnpauseList(QListView*);
 
 	public:
 

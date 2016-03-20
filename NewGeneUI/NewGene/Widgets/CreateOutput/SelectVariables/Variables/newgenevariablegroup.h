@@ -36,6 +36,7 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 		void ReceiveVariableItemChanged(QStandardItem *);
+		void enableUpdates();
 
 		// For Squish only: exception to rule regarding slots; return something here
 		QListView * GetListView();

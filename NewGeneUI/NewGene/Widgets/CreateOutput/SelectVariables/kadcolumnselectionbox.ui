@@ -71,7 +71,7 @@
        </sizepolicy>
       </property>
       <property name="styleSheet">
-       <string notr="true">#scrollAreaWidgetContents {background-color: #E5F0FF;}</string>
+       <string notr="true">#scrollAreaWidgetContents {background-color: #AFD4F6;}</string>
       </property>
       <widget class="QLabel" name="emptyKadsLabel">
        <property name="geometry">

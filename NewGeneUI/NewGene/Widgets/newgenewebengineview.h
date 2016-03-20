@@ -14,7 +14,6 @@ public:
 	{
 		for (auto webView : webViews)
 		{
-			//webView->deleteLater();
 		}
 	}
 protected:
@@ -44,7 +43,6 @@ private slots:
 				{
 					tmpViews.push_back(webViewCreated);
 				}
-				//webView->deleteLater();
 			}
 			if (found)
 			{

@@ -71,11 +71,6 @@ bool Splash::eventFilter(QObject * obj, QEvent * event)
 
 void Splash::closeEvent(QCloseEvent * event)
 {
-	//if (!closed_via_click)
-	//{
-		//closeAndRefreshSequence();
-	//}
-
 	event->accept();
 }
 
@@ -85,22 +80,12 @@ void Splash::closeAndRefreshSequence()
 	// but repainting to remove artifacts after the splash screen has been removed
 	// only works after the splash screen has been deleted, and there is a safety delay
 	// prior to deleting it.
-	//this->hide();
-	//this->close();
 	this->done(0);
-	//QTimer::singleShot(5000, this->parentWidget(), SLOT(update()));
-	//QTimer::singleShot(5000, this, SLOT(close()));
-	//QTimer::singleShot(10000, this, SLOT(deleteMe()));
 	QTimer::singleShot(100, mainWindow, SLOT(show()));
-	//QTimer::singleShot(100, mainWindow, SLOT(doEnable()));
-	//QTimer::singleShot(1000, mainWindow, SLOT(update()));
-	//QTimer::singleShot(1000, mainWindow, SLOT(repaint()));
 }
 
 void Splash::deleteMe()
 {
-	//delete this;
-	//deleteLater();
 }
 
 void Splash::on_pushButton_clicked()

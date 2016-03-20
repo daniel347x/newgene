@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QStandardItemModel>
+#include <QListView>
 
 UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const & project_settings,
 								 std::shared_ptr<UIOutputModelSettings> const & model_settings,
@@ -274,4 +275,32 @@ void UIOutputProject::DataChangeMessageSlot(WidgetChangeMessages widget_change_m
 void UIOutputProject::PassChangeMessageToWidget(NewGeneWidget * widget, DataChangeMessage const & change_message)
 {
 	widget->HandleChanges(change_message);
+}
+
+void UIOutputProject::PauseLists()
+{
+	NewGeneMainWindow * mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+	if (mainWindow)
+	{
+		foreach (QListView * listPane, mainWindow->findChildren<QListView *>())
+		{
+			if (listPane->metaObject()->className() == QString("QListView"))
+			{
+				listPane->setUpdatesEnabled(false);
+				QTimer::singleShot(2000, this, SLOT(UnpauseList(listPane)));
+			}
+		}
+	}
+}
+
+void UIOutputProject::UnpauseList(QListView * listPane)
+{
+	// In the worst case - a race condition in which the user clicks on a heavy-hitting activity
+	// a few seconds AFTER a previous heavy-hitting activity paused the lists -
+	// the "disable list updates" triggered on the second heavy-hitting activity
+	// will be undone by the "enable list updates" single-shot that expires from the first heavy-hitting activity.
+	// This isn't great because the list view might hang things refreshing itself over and over,
+	// but it's not a crash and it's pretty rare that will happen, so stick with this approach for now.
+	listPane->setUpdatesEnabled(true);
+	listPane->update();
 }

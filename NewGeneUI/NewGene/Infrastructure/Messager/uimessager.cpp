@@ -268,6 +268,11 @@ void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & c
 	get()->getQueueManager()->HandleChanges(changes);
 }
 
+void UIMessagerInputProject::pauseLists()
+{
+	QMetaObject::invokeMethod(get(), "PauseLists", Qt::BlockingQueuedConnection);
+}
+
 void UIMessagerOutputProject::ShowMessageBox(std::string msg, bool block)
 {
 	if (block)
@@ -298,6 +303,11 @@ int UIMessagerOutputProject::ShowOptionMessageBox(std::string msg_title, std::st
 void UIMessagerOutputProject::SetRunStatus(RUN_STATUS_ENUM const & runStatus)
 {
 	emit SignalSetRunStatus(current_messager_id, runStatus);
+}
+
+void UIMessagerOutputProject::pauseLists()
+{
+	QMetaObject::invokeMethod(get(), "PauseLists", Qt::BlockingQueuedConnection);
 }
 
 void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)

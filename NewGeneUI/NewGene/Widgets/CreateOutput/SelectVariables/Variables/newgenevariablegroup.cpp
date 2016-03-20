@@ -449,8 +449,14 @@ void NewGeneVariableGroup::on_toolButtonDeselectAll_clicked()
 		item->setCheckState(Qt::Unchecked);
 	}
 
+	//QTimer::singleShot(10000, this, SLOT(enableUpdates()));
 	ui->listView->setUpdatesEnabled(true);
 
+}
+
+void NewGeneVariableGroup::enableUpdates()
+{
+	ui->listView->setUpdatesEnabled(true);
 }
 
 void NewGeneVariableGroup::SetEnabledStateSelectAllButtons(QStandardItemModel * model)
