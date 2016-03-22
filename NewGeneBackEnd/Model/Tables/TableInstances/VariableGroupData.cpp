@@ -777,7 +777,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 							{
 								if (timeRangeCols.size() != 2 && timeRangeCols.size() != 1)
 								{
-									boost::format msg("There must be 1 or 2 string time range columns.");
+									boost::format
+									msg("There must be 1 or 2 string time range columns when any of the time range columns are defined as 'string' in the input file.  Also, the corresponding option must be selected when you perform the data import (in case you did not do so).");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 
@@ -793,7 +794,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 								if (timeRangeCols.size() != 6 && timeRangeCols.size() != 3)
 								{
-									boost::format msg("There must be 3 or 6 time range columns.");
+									boost::format
+									msg("There must be 3 or 6 time range columns when any of the time range columns are defined as 'integer' in the raw data file.  If you chose the option for 'string' columns for the time range column/s, please ensure that there is a row in the raw data file that contains column data types, select the corresponding option when you import the data, and make sure to label the time columns as 'string' in the data file.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 							}
@@ -841,7 +843,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 							{
 								if (timeRangeCols.size() != 2 && timeRangeCols.size() != 1)
 								{
-									boost::format msg("There must be 1 or 2 string time range columns.");
+									boost::format
+									msg("There must be 1 or 2 string time range columns when any of the time range columns are defined as 'string' in the input file.  Also, the corresponding option must be selected when you perform the data import (in case you did not do so).");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 
@@ -857,7 +860,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 								if (timeRangeCols.size() != 4 && timeRangeCols.size() != 2)
 								{
-									boost::format msg("There must be 2 or 4 time range columns.");
+									boost::format
+									msg("There must be 2 or 4 time range columns when any of the time range columns are defined as 'integer' in the raw data file.  If you chose the option for 'string' columns for the time range column/s, please ensure that there is a row in the raw data file that contains column data types, select the corresponding option when you import the data, and make sure to label the time columns as 'string' in the data file.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 							}
