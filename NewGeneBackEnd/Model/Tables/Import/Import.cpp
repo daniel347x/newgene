@@ -163,900 +163,908 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 {
 	validTimeFields = true;
 
-	switch (time_range_type)
+	try
 	{
+		switch (time_range_type)
+		{
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__START_YEAR_ONLY:
-			{
-
-				std::shared_ptr<BaseField> const the_input_field = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
-
-				if (!the_input_field || !the_output_field_year_start || !the_output_field_year_end || the_input_field->empty)
+			case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__START_YEAR_ONLY:
 				{
-					validTimeFields = false;
-					return;
-				}
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = y_int_mappings[the_input_field->GetInt32Ref()];
+					std::shared_ptr<BaseField> const the_input_field = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (cached_times.first != 0 && cached_times.second != 0)
-				{
-					the_output_field_year_start->SetValueInt64(cached_times.first);
-					the_output_field_year_end->SetValueInt64(cached_times.second);
-					break;
-				}
+					if (!the_input_field || !the_output_field_year_start || !the_output_field_year_end || the_input_field->empty)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field->GetInt32Ref(), 1, 1));
-				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field->GetInt32Ref() + 1, 1, 1));
+					std::pair<std::int64_t, std::int64_t> & cached_times = y_int_mappings[the_input_field->GetInt32Ref()];
 
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_year_start->SetValueInt64(cached_times.first);
+						the_output_field_year_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					// convert year to ms since jan 1, 1970 00:00:00.000
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field->GetInt32Ref(), 1, 1));
+					boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field->GetInt32Ref() + 1, 1, 1));
 
-				the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-			}
-			break;
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__FROM__START_YEAR__TO__END_YEAR:
-			{
+					the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				std::shared_ptr<BaseField> the_input_field_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_end = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
-
-				if (!the_input_field_start || !the_input_field_end || !the_output_field_year_start || !the_output_field_year_end || (the_input_field_start->empty && the_input_field_end->empty))
-				{
-					validTimeFields = false;
-					return;
 				}
+				break;
 
-				if (the_input_field_start->empty)
+			case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__FROM__START_YEAR__TO__END_YEAR:
 				{
-					the_input_field_start->SetValueInt32(the_input_field_end->GetInt32Ref());
-				}
 
-				if (the_input_field_end->empty)
-				{
-					the_input_field_end->SetValueInt32(the_input_field_start->GetInt32Ref());
-				}
+					std::shared_ptr<BaseField> the_input_field_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = y_y_int_mappings[std::make_pair(the_input_field_start->GetInt32Ref(), the_input_field_end->GetInt32Ref())];
+					if (!the_input_field_start || !the_input_field_end || !the_output_field_year_start || !the_output_field_year_end || (the_input_field_start->empty && the_input_field_end->empty))
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				if (cached_times.first != 0 && cached_times.second != 0)
-				{
-					the_output_field_year_start->SetValueInt64(cached_times.first);
-					the_output_field_year_end->SetValueInt64(cached_times.second);
-					break;
-				}
+					if (the_input_field_start->empty)
+					{
+						the_input_field_start->SetValueInt32(the_input_field_end->GetInt32Ref());
+					}
 
-				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field_start->GetInt32Ref(), 1, 1));
-				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field_end->GetInt32Ref() + 1, 1, 1));
+					if (the_input_field_end->empty)
+					{
+						the_input_field_end->SetValueInt32(the_input_field_start->GetInt32Ref());
+					}
 
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+					std::pair<std::int64_t, std::int64_t> & cached_times = y_y_int_mappings[std::make_pair(the_input_field_start->GetInt32Ref(), the_input_field_end->GetInt32Ref())];
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_year_start->SetValueInt64(cached_times.first);
+						the_output_field_year_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					// convert year to ms since jan 1, 1970 00:00:00.000
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field_start->GetInt32Ref(), 1, 1));
+					boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field_end->GetInt32Ref() + 1, 1, 1));
 
-			}
-			break;
+					boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__START_YEAR_ONLY:
-			{
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				std::shared_ptr<BaseField> const the_input_field_datetime_year = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				if (!the_input_field_datetime_year || !the_output_field_datetime_start || !the_output_field_datetime_end || the_input_field_datetime_year->empty)
-				{
-					validTimeFields = false;
-					return;
 				}
+				break;
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = y_string_mappings[the_input_field_datetime_year->GetStringRef()];
-
-				if (cached_times.first != 0 && cached_times.second != 0)
+			case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__START_YEAR_ONLY:
 				{
-					the_output_field_datetime_start->SetValueInt64(cached_times.first);
-					the_output_field_datetime_end->SetValueInt64(cached_times.second);
-					break;
-				}
 
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					std::shared_ptr<BaseField> const the_input_field_datetime_year = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				int conversion_index = the_input_field_datetime_year->GetDateFormatIndex();
+					if (!the_input_field_datetime_year || !the_output_field_datetime_start || !the_output_field_datetime_end || the_input_field_datetime_year->empty)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				boost::posix_time::ptime the_year_start;
-				conversion_index = ConvertStringToDateFancy(the_year_start, the_input_field_datetime_year->GetStringRef(), conversion_index);
+					std::pair<std::int64_t, std::int64_t> & cached_times = y_string_mappings[the_input_field_datetime_year->GetStringRef()];
 
-				the_input_field_datetime_year->SetDateFormatIndex(conversion_index);
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_datetime_start->SetValueInt64(cached_times.first);
+						the_output_field_datetime_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				if (conversion_index < 0)
-				{
-					validTimeFields = false;
-					return;
-				}
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				// Round down to year
-				the_year_start = boost::posix_time::ptime(boost::gregorian::date(the_year_start.date().year(), boost::gregorian::Jan, 1));
+					int conversion_index = the_input_field_datetime_year->GetDateFormatIndex();
 
-				boost::posix_time::ptime the_year_end = boost::posix_time::ptime(boost::gregorian::date(the_year_start.date().year(), boost::gregorian::Jan, 1) + boost::gregorian::years(1));
+					boost::posix_time::ptime the_year_start;
+					conversion_index = ConvertStringToDateFancy(the_year_start, the_input_field_datetime_year->GetStringRef(), conversion_index);
 
-				boost::posix_time::time_duration diff_start_from_1970 = the_year_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_year_end - time_t_epoch__1970;
+					the_input_field_datetime_year->SetDateFormatIndex(conversion_index);
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					if (conversion_index < 0)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					// Round down to year
+					the_year_start = boost::posix_time::ptime(boost::gregorian::date(the_year_start.date().year(), boost::gregorian::Jan, 1));
 
-			}
-			break;
+					boost::posix_time::ptime the_year_end = boost::posix_time::ptime(boost::gregorian::date(the_year_start.date().year(), boost::gregorian::Jan, 1) + boost::gregorian::years(1));
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__FROM__START_YEAR__TO__END_YEAR:
-			{
+					boost::posix_time::time_duration diff_start_from_1970 = the_year_start - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = the_year_end - time_t_epoch__1970;
 
-				std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
-					|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
-				{
-					validTimeFields = false;
-					return;
-				}
+					the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				if (the_input_field_datetime_start->empty)
-				{
-					the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
 				}
+				break;
 
-				if (the_input_field_datetime_end->empty)
+			case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__FROM__START_YEAR__TO__END_YEAR:
 				{
-					the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
-				}
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = y_y_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
-						the_input_field_datetime_end->GetStringRef())];
+					std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (cached_times.first != 0 && cached_times.second != 0)
-				{
-					the_output_field_datetime_start->SetValueInt64(cached_times.first);
-					the_output_field_datetime_end->SetValueInt64(cached_times.second);
-					break;
-				}
+					if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
+						|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					if (the_input_field_datetime_start->empty)
+					{
+						the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
+					}
 
-				int conversion_index = the_input_field_datetime_start->GetDateFormatIndex();
+					if (the_input_field_datetime_end->empty)
+					{
+						the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
+					}
 
-				boost::posix_time::ptime the_time_start;
-				conversion_index = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef(), conversion_index);
+					std::pair<std::int64_t, std::int64_t> & cached_times = y_y_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
+							the_input_field_datetime_end->GetStringRef())];
 
-				the_input_field_datetime_start->SetDateFormatIndex(conversion_index);
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_datetime_start->SetValueInt64(cached_times.first);
+						the_output_field_datetime_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				if (conversion_index < 0)
-				{
-					validTimeFields = false;
-					return;
-				}
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				// Round down to year
-				the_time_start = boost::posix_time::ptime(boost::gregorian::date(the_time_start.date().year(), boost::gregorian::Jan, 1));
+					int conversion_index = the_input_field_datetime_start->GetDateFormatIndex();
 
-				boost::posix_time::ptime the_time_end;
-				conversion_index = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef(), conversion_index);
+					boost::posix_time::ptime the_time_start;
+					conversion_index = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef(), conversion_index);
 
-				if (conversion_index < 0)
-				{
-					validTimeFields = false;
-					return;
-				}
+					the_input_field_datetime_start->SetDateFormatIndex(conversion_index);
 
-				// Round down to year
-				// Then add 1 year so that the full year is included (days start at midnight, so no seconds of the next year are included)
-				the_time_end = boost::posix_time::ptime(boost::gregorian::date(the_time_end.date().year(), boost::gregorian::Jan, 1) + boost::gregorian::years(1));
+					if (conversion_index < 0)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
+					// Round down to year
+					the_time_start = boost::posix_time::ptime(boost::gregorian::date(the_time_start.date().year(), boost::gregorian::Jan, 1));
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					boost::posix_time::ptime the_time_end;
+					conversion_index = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef(), conversion_index);
 
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					if (conversion_index < 0)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-			}
-			break;
+					// Round down to year
+					// Then add 1 year so that the full year is included (days start at midnight, so no seconds of the next year are included)
+					the_time_end = boost::posix_time::ptime(boost::gregorian::date(the_time_end.date().year(), boost::gregorian::Jan, 1) + boost::gregorian::years(1));
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__START_MONTH_ONLY:
-			{
+					boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
 
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_month_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_month_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				if (!the_input_field_month_start || !the_input_field_year_start || !the_output_field_month_start || !the_output_field_month_end || (the_input_field_year_start->empty
-						|| the_input_field_month_start->empty))
-				{
-					validTimeFields = false;
-					return;
-				}
+					the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ym_int_mappings[std::make_pair(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref())];
+				}
+				break;
 
-				if (cached_times.first != 0 && cached_times.second != 0)
+			case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__START_MONTH_ONLY:
 				{
-					the_output_field_month_start->SetValueInt64(cached_times.first);
-					the_output_field_month_end->SetValueInt64(cached_times.second);
-					break;
-				}
 
-				int year_start = the_input_field_year_start->GetInt32Ref();
-				int month_start = the_input_field_month_start->GetInt32Ref();
+					std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_month_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_month_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (month_start > 12)
-				{
-					month_start = 1;
-				}
+					if (!the_input_field_month_start || !the_input_field_year_start || !the_output_field_month_start || !the_output_field_month_end || (the_input_field_year_start->empty
+							|| the_input_field_month_start->empty))
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				bool start_month_valid = month_start > 0;
+					std::pair<std::int64_t, std::int64_t> & cached_times = ym_int_mappings[std::make_pair(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref())];
 
-				if (!start_month_valid)
-				{
-					month_start = 1;
-				}
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_month_start->SetValueInt64(cached_times.first);
+						the_output_field_month_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				int year_end = year_start;
-				int month_end = month_start + 1;
+					int year_start = the_input_field_year_start->GetInt32Ref();
+					int month_start = the_input_field_month_start->GetInt32Ref();
 
-				if (month_end > 12)
-				{
-					month_end = 1;
-					++year_end;
-				}
+					if (month_start > 12)
+					{
+						month_start = 1;
+					}
 
-				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year_start, month_start, 1));
-				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year_end, month_end, 1));
+					bool start_month_valid = month_start > 0;
 
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+					if (!start_month_valid)
+					{
+						month_start = 1;
+					}
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					int year_end = year_start;
+					int month_end = month_start + 1;
 
-				the_output_field_month_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_month_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					if (month_end > 12)
+					{
+						month_end = 1;
+						++year_end;
+					}
 
-			}
-			break;
+					// convert year to ms since jan 1, 1970 00:00:00.000
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year_start, month_start, 1));
+					boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year_end, month_end, 1));
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH:
-			{
+					boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				std::shared_ptr<BaseField> the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_year_end = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_month_end = RetrieveDataField(input_file_fields[3], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				bool emptyStart = (the_input_field_year_start->empty || the_input_field_month_start->empty);
-				bool emptyEnd = (the_input_field_year_end->empty || the_input_field_month_end->empty);
+					the_output_field_month_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_month_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				if (!the_input_field_month_start || !the_input_field_year_start || !the_input_field_month_end
-					|| !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end || (emptyStart && emptyEnd))
-				{
-					validTimeFields = false;
-					return;
 				}
+				break;
 
-				if (emptyStart)
+			case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH:
 				{
-					the_input_field_year_start->SetValueInt32(the_input_field_year_end->GetInt32Ref());
-					the_input_field_month_start->SetValueInt32(the_input_field_month_end->GetInt32Ref());
-				}
 
-				if (emptyEnd)
-				{
-					the_input_field_year_end->SetValueInt32(the_input_field_year_start->GetInt32Ref());
-					the_input_field_month_end->SetValueInt32(the_input_field_month_start->GetInt32Ref());
-				}
+					std::shared_ptr<BaseField> the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_year_end = RetrieveDataField(input_file_fields[2], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_month_end = RetrieveDataField(input_file_fields[3], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_int_mappings[std::tuple<int, int, int, int>(the_input_field_year_start->GetInt32Ref(),
-						the_input_field_month_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref())];
+					bool emptyStart = (the_input_field_year_start->empty || the_input_field_month_start->empty);
+					bool emptyEnd = (the_input_field_year_end->empty || the_input_field_month_end->empty);
 
-				if (cached_times.first != 0 && cached_times.second != 0)
-				{
-					the_output_field_day_start->SetValueInt64(cached_times.first);
-					the_output_field_day_end->SetValueInt64(cached_times.second);
-					break;
-				}
+					if (!the_input_field_month_start || !the_input_field_year_start || !the_input_field_month_end
+						|| !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end || (emptyStart && emptyEnd))
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					if (emptyStart)
+					{
+						the_input_field_year_start->SetValueInt32(the_input_field_year_end->GetInt32Ref());
+						the_input_field_month_start->SetValueInt32(the_input_field_month_end->GetInt32Ref());
+					}
 
+					if (emptyEnd)
+					{
+						the_input_field_year_end->SetValueInt32(the_input_field_year_start->GetInt32Ref());
+						the_input_field_month_end->SetValueInt32(the_input_field_month_start->GetInt32Ref());
+					}
 
-				int year_start = the_input_field_year_start->GetInt32Ref();
-				int year_end = the_input_field_year_end->GetInt32Ref();
-				int month_start = the_input_field_month_start->GetInt32Ref();
-				int month_end = the_input_field_month_end->GetInt32Ref();
+					std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_int_mappings[std::tuple<int, int, int, int>(the_input_field_year_start->GetInt32Ref(),
+							the_input_field_month_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref())];
 
-				if (month_start > 12)
-				{
-					month_start = 1;
-				}
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_day_start->SetValueInt64(cached_times.first);
+						the_output_field_day_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				if (month_end > 12)
-				{
-					month_end = 1;
-				}
+					// convert year to ms since jan 1, 1970 00:00:00.000
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				bool start_month_valid = month_start > 0;
-				bool end_month_valid = month_end > 0;
 
-				if (!start_month_valid)
-				{
-					month_start = 1;
-				}
+					int year_start = the_input_field_year_start->GetInt32Ref();
+					int year_end = the_input_field_year_end->GetInt32Ref();
+					int month_start = the_input_field_month_start->GetInt32Ref();
+					int month_end = the_input_field_month_end->GetInt32Ref();
 
-				if (!end_month_valid)
-				{
-					month_end = month_start + 1;
-				}
-				else
-				{
-					month_end += 1; // Really, go to 1st of month AFTER the end month (so the whole month is covered)
-				}
+					if (month_start > 12)
+					{
+						month_start = 1;
+					}
 
-				if (month_end > 12)
-				{
-					month_end = 1;
-					year_end += 1;
-				}
+					if (month_end > 12)
+					{
+						month_end = 1;
+					}
 
-				boost::gregorian::date row_start_date(year_start, month_start, 1);
-				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
+					bool start_month_valid = month_start > 0;
+					bool end_month_valid = month_end > 0;
 
-				boost::gregorian::date row_end_date(year_end, month_end, 1);
+					if (!start_month_valid)
+					{
+						month_start = 1;
+					}
 
-				boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
+					if (!end_month_valid)
+					{
+						month_end = month_start + 1;
+					}
+					else
+					{
+						month_end += 1; // Really, go to 1st of month AFTER the end month (so the whole month is covered)
+					}
 
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+					if (month_end > 12)
+					{
+						month_end = 1;
+						year_end += 1;
+					}
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					boost::gregorian::date row_start_date(year_start, month_start, 1);
+					boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
 
-				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					boost::gregorian::date row_end_date(year_end, month_end, 1);
 
-			}
-			break;
+					boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__START_MONTH_ONLY:
-			{
+					boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				std::shared_ptr<BaseField> const the_input_field_datetime_month = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				if (!the_input_field_datetime_month || !the_output_field_datetime_start || !the_output_field_datetime_end || the_input_field_datetime_month->empty)
-				{
-					validTimeFields = false;
-					return;
-				}
+					the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ym_string_mappings[the_input_field_datetime_month->GetStringRef()];
+				}
+				break;
 
-				if (cached_times.first != 0 && cached_times.second != 0)
+			case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__START_MONTH_ONLY:
 				{
-					the_output_field_datetime_start->SetValueInt64(cached_times.first);
-					the_output_field_datetime_end->SetValueInt64(cached_times.second);
-					break;
-				}
 
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					std::shared_ptr<BaseField> const the_input_field_datetime_month = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				int conversion_index = the_input_field_datetime_month->GetDateFormatIndex();
+					if (!the_input_field_datetime_month || !the_output_field_datetime_start || !the_output_field_datetime_end || the_input_field_datetime_month->empty)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				boost::posix_time::ptime the_month_start;
-				conversion_index = ConvertStringToDateFancy(the_month_start, the_input_field_datetime_month->GetStringRef(), conversion_index);
+					std::pair<std::int64_t, std::int64_t> & cached_times = ym_string_mappings[the_input_field_datetime_month->GetStringRef()];
 
-				the_input_field_datetime_month->SetDateFormatIndex(conversion_index);
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_datetime_start->SetValueInt64(cached_times.first);
+						the_output_field_datetime_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				if (conversion_index < 0)
-				{
-					validTimeFields = false;
-					return;
-				}
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				// Round down to month
-				the_month_start = boost::posix_time::ptime(boost::gregorian::date(the_month_start.date().year(), the_month_start.date().month(), 1));
+					int conversion_index = the_input_field_datetime_month->GetDateFormatIndex();
 
-				boost::posix_time::ptime the_month_end = boost::posix_time::ptime(boost::gregorian::date(the_month_start.date().year(), the_month_start.date().month(),
-						1) + boost::gregorian::months(1));
+					boost::posix_time::ptime the_month_start;
+					conversion_index = ConvertStringToDateFancy(the_month_start, the_input_field_datetime_month->GetStringRef(), conversion_index);
 
-				boost::posix_time::time_duration diff_start_from_1970 = the_month_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_month_end - time_t_epoch__1970;
+					the_input_field_datetime_month->SetDateFormatIndex(conversion_index);
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					if (conversion_index < 0)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					// Round down to month
+					the_month_start = boost::posix_time::ptime(boost::gregorian::date(the_month_start.date().year(), the_month_start.date().month(), 1));
 
-			}
-			break;
+					boost::posix_time::ptime the_month_end = boost::posix_time::ptime(boost::gregorian::date(the_month_start.date().year(), the_month_start.date().month(),
+							1) + boost::gregorian::months(1));
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__FROM__START_MONTH__TO__END_MONTH:
-			{
+					boost::posix_time::time_duration diff_start_from_1970 = the_month_start - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = the_month_end - time_t_epoch__1970;
 
-				std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
-					|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
-				{
-					validTimeFields = false;
-					return;
-				}
+					the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				if (the_input_field_datetime_start->empty)
-				{
-					the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
 				}
+				break;
 
-				if (the_input_field_datetime_end->empty)
+			case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__FROM__START_MONTH__TO__END_MONTH:
 				{
-					the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
-				}
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
-						the_input_field_datetime_end->GetStringRef())];
+					std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (cached_times.first != 0 && cached_times.second != 0)
-				{
-					the_output_field_datetime_start->SetValueInt64(cached_times.first);
-					the_output_field_datetime_end->SetValueInt64(cached_times.second);
-					break;
-				}
+					if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
+						|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					if (the_input_field_datetime_start->empty)
+					{
+						the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
+					}
 
-				int conversion_index = the_input_field_datetime_start->GetDateFormatIndex();
+					if (the_input_field_datetime_end->empty)
+					{
+						the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
+					}
 
-				boost::posix_time::ptime the_time_start;
-				conversion_index = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef(), conversion_index);
+					std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
+							the_input_field_datetime_end->GetStringRef())];
 
-				the_input_field_datetime_start->SetDateFormatIndex(conversion_index);
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_datetime_start->SetValueInt64(cached_times.first);
+						the_output_field_datetime_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				if (conversion_index < 0)
-				{
-					validTimeFields = false;
-					return;
-				}
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				// Round down to month
-				the_time_start = boost::posix_time::ptime(boost::gregorian::date(the_time_start.date().year(), the_time_start.date().month(), 1));
+					int conversion_index = the_input_field_datetime_start->GetDateFormatIndex();
 
-				boost::posix_time::ptime the_time_end;
-				conversion_index = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef(), conversion_index);
+					boost::posix_time::ptime the_time_start;
+					conversion_index = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef(), conversion_index);
 
-				if (conversion_index < 0)
-				{
-					validTimeFields = false;
-					return;
-				}
+					the_input_field_datetime_start->SetDateFormatIndex(conversion_index);
 
-				// Round down to month
-				// Then add 1 month so that the full year is included (days start at midnight, so no seconds of the next year are included)
-				the_time_end = boost::posix_time::ptime(boost::gregorian::date(the_time_end.date().year(), the_time_end.date().month(), 1) + boost::gregorian::months(1));
+					if (conversion_index < 0)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
+					// Round down to month
+					the_time_start = boost::posix_time::ptime(boost::gregorian::date(the_time_start.date().year(), the_time_start.date().month(), 1));
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					boost::posix_time::ptime the_time_end;
+					conversion_index = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef(), conversion_index);
 
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					if (conversion_index < 0)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-			}
-			break;
+					// Round down to month
+					// Then add 1 month so that the full year is included (days start at midnight, so no seconds of the next year are included)
+					the_time_end = boost::posix_time::ptime(boost::gregorian::date(the_time_end.date().year(), the_time_end.date().month(), 1) + boost::gregorian::months(1));
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__START_DAY_ONLY:
-			{
+					boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
 
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start  || !the_output_field_day_start || !the_output_field_day_end
-					|| (the_input_field_year_start->empty || the_input_field_month_start->empty || the_input_field_day_start->empty))
-				{
-					validTimeFields = false;
-					return;
-				}
+					the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_int_mappings[std::tuple<int, int, int>(the_input_field_year_start->GetInt32Ref(),
-						the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref())];
+				}
+				break;
 
-				if (cached_times.first != 0 && cached_times.second != 0)
+			case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__START_DAY_ONLY:
 				{
-					the_output_field_day_start->SetValueInt64(cached_times.first);
-					the_output_field_day_end->SetValueInt64(cached_times.second);
-					break;
-				}
 
-				int year_start = the_input_field_year_start->GetInt32Ref();
-				int month_start = the_input_field_month_start->GetInt32Ref();
-				int day_start = the_input_field_day_start->GetInt32Ref();
+					std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+					std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[2], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (month_start > 12 || month_start < 1)
-				{
-					month_start = 1;
-				}
+					if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_output_field_day_start || !the_output_field_day_end
+						|| (the_input_field_year_start->empty || the_input_field_month_start->empty || the_input_field_day_start->empty))
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year_start, month_start, day_start));
-				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year_start, month_start, day_start) + boost::gregorian::days(1));
+					std::pair<std::int64_t, std::int64_t> & cached_times = ymd_int_mappings[std::tuple<int, int, int>(the_input_field_year_start->GetInt32Ref(),
+							the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref())];
 
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_day_start->SetValueInt64(cached_times.first);
+						the_output_field_day_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					int year_start = the_input_field_year_start->GetInt32Ref();
+					int month_start = the_input_field_month_start->GetInt32Ref();
+					int day_start = the_input_field_day_start->GetInt32Ref();
 
-				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					if (month_start > 12 || month_start < 1)
+					{
+						month_start = 1;
+					}
 
-			}
-			break;
+					// convert year to ms since jan 1, 1970 00:00:00.000
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year_start, month_start, day_start));
+					boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year_start, month_start, day_start) + boost::gregorian::days(1));
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__FROM__START_DAY__TO__END_DAY:
-			{
+					boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				std::shared_ptr<BaseField> the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_day_start = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_year_end = RetrieveDataField(input_file_fields[3], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_month_end = RetrieveDataField(input_file_fields[4], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_day_end = RetrieveDataField(input_file_fields[5], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				bool emptyStart = (the_input_field_year_start->empty || the_input_field_month_start->empty || the_input_field_day_start->empty);
-				bool emptyEnd = (the_input_field_year_end->empty || the_input_field_month_end->empty || the_input_field_day_end->empty);
+					the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_input_field_day_end || !the_input_field_month_end
-					|| !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end || (emptyStart && emptyEnd))
-				{
-					validTimeFields = false;
-					return;
 				}
+				break;
 
-				if (emptyStart)
+			case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__FROM__START_DAY__TO__END_DAY:
 				{
-					the_input_field_year_start->SetValueInt32(the_input_field_year_end->GetInt32Ref());
-					the_input_field_month_start->SetValueInt32(the_input_field_month_end->GetInt32Ref());
-					the_input_field_day_start->SetValueInt32(the_input_field_day_end->GetInt32Ref());
-				}
 
-				if (emptyEnd)
-				{
-					the_input_field_year_end->SetValueInt32(the_input_field_year_start->GetInt32Ref());
-					the_input_field_month_end->SetValueInt32(the_input_field_month_start->GetInt32Ref());
-					the_input_field_day_end->SetValueInt32(the_input_field_day_start->GetInt32Ref());
-				}
+					std::shared_ptr<BaseField> the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_day_start = RetrieveDataField(input_file_fields[2], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_year_end = RetrieveDataField(input_file_fields[3], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_month_end = RetrieveDataField(input_file_fields[4], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_day_end = RetrieveDataField(input_file_fields[5], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_int_mappings[std::tuple<int, int, int, int, int, int>(the_input_field_year_start->GetInt32Ref(),
-						the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref(),
-						the_input_field_day_end->GetInt32Ref())];
+					bool emptyStart = (the_input_field_year_start->empty || the_input_field_month_start->empty || the_input_field_day_start->empty);
+					bool emptyEnd = (the_input_field_year_end->empty || the_input_field_month_end->empty || the_input_field_day_end->empty);
 
-				if (cached_times.first != 0 && cached_times.second != 0)
-				{
-					the_output_field_day_start->SetValueInt64(cached_times.first);
-					the_output_field_day_end->SetValueInt64(cached_times.second);
-					break;
-				}
+					if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_input_field_day_end || !the_input_field_month_end
+						|| !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end || (emptyStart && emptyEnd))
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					if (emptyStart)
+					{
+						the_input_field_year_start->SetValueInt32(the_input_field_year_end->GetInt32Ref());
+						the_input_field_month_start->SetValueInt32(the_input_field_month_end->GetInt32Ref());
+						the_input_field_day_start->SetValueInt32(the_input_field_day_end->GetInt32Ref());
+					}
 
+					if (emptyEnd)
+					{
+						the_input_field_year_end->SetValueInt32(the_input_field_year_start->GetInt32Ref());
+						the_input_field_month_end->SetValueInt32(the_input_field_month_start->GetInt32Ref());
+						the_input_field_day_end->SetValueInt32(the_input_field_day_start->GetInt32Ref());
+					}
 
-				int year_start = the_input_field_year_start->GetInt32Ref();
-				int year_end = the_input_field_year_end->GetInt32Ref();
-				int month_start = the_input_field_month_start->GetInt32Ref();
-				int month_end = the_input_field_month_end->GetInt32Ref();
-				int day_start = the_input_field_day_start->GetInt32Ref();
-				int day_end = the_input_field_day_end->GetInt32Ref();
+					std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_int_mappings[std::tuple<int, int, int, int, int, int>(the_input_field_year_start->GetInt32Ref(),
+							the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref(),
+							the_input_field_day_end->GetInt32Ref())];
 
-				bool start_month_valid = (month_start > 0 && month_start <= 12);
-				bool end_month_valid = (month_end > 0 && month_end <= 12);
-				bool start_day_valid = (day_start > 0 && day_start <= 31);
-				bool end_day_valid = (day_end > 0 && day_end <= 31);
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_day_start->SetValueInt64(cached_times.first);
+						the_output_field_day_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				if (!start_day_valid && !start_month_valid)
-				{
-					month_start = 1;
-					day_start = 1;
-				}
-				else if (start_day_valid && !start_month_valid)
-				{
-					month_start = 1;
-				}
-				else if (!start_day_valid && start_month_valid)
-				{
-					day_start = 1;
-				}
+					// convert year to ms since jan 1, 1970 00:00:00.000
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				// add a day to the end? (since days start at the very end of the previous day - to give the specified day a full 24 hours)
-				bool end_handled = false;
 
-				bool add_month = false; // See comment below
+					int year_start = the_input_field_year_start->GetInt32Ref();
+					int year_end = the_input_field_year_end->GetInt32Ref();
+					int month_start = the_input_field_month_start->GetInt32Ref();
+					int month_end = the_input_field_month_end->GetInt32Ref();
+					int day_start = the_input_field_day_start->GetInt32Ref();
+					int day_end = the_input_field_day_end->GetInt32Ref();
 
-				if (!end_day_valid && !end_month_valid)
-				{
-					year_end += 1;
-					month_end = 1;
-					day_end = 1;
-
-					// do not add a day to the end; we've already handled it
-					end_handled = true;
-				}
-				else if (end_day_valid && !end_month_valid)
-				{
-					month_end = 12;
-				}
-				else if (!end_day_valid && end_month_valid)
-				{
-					// trick: start at beginning of the known month, and then add a month
-					day_end = 1;
-					add_month = true;
-					end_handled = true; // The end is handled by setting add_month
-				}
+					bool start_month_valid = (month_start > 0 && month_start <= 12);
+					bool end_month_valid = (month_end > 0 && month_end <= 12);
+					bool start_day_valid = (day_start > 0 && day_start <= 31);
+					bool end_day_valid = (day_end > 0 && day_end <= 31);
 
-				boost::gregorian::date row_start_date(year_start, month_start, day_start);
-				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
+					if (!start_day_valid && !start_month_valid)
+					{
+						month_start = 1;
+						day_start = 1;
+					}
+					else if (start_day_valid && !start_month_valid)
+					{
+						month_start = 1;
+					}
+					else if (!start_day_valid && start_month_valid)
+					{
+						day_start = 1;
+					}
 
-				boost::gregorian::date row_end_date(year_end, month_end, day_end);
+					// add a day to the end? (since days start at the very end of the previous day - to give the specified day a full 24 hours)
+					bool end_handled = false;
 
-				if (add_month)
-				{
-					row_end_date += boost::gregorian::months(1);
-				}
+					bool add_month = false; // See comment below
 
-				if (!end_handled)
-				{
-					row_end_date += boost::gregorian::days(1);
-				}
+					if (!end_day_valid && !end_month_valid)
+					{
+						year_end += 1;
+						month_end = 1;
+						day_end = 1;
 
-				boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
+						// do not add a day to the end; we've already handled it
+						end_handled = true;
+					}
+					else if (end_day_valid && !end_month_valid)
+					{
+						month_end = 12;
+					}
+					else if (!end_day_valid && end_month_valid)
+					{
+						// trick: start at beginning of the known month, and then add a month
+						day_end = 1;
+						add_month = true;
+						end_handled = true; // The end is handled by setting add_month
+					}
 
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+					boost::gregorian::date row_start_date(year_start, month_start, day_start);
+					boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					boost::gregorian::date row_end_date(year_end, month_end, day_end);
 
-				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					if (add_month)
+					{
+						row_end_date += boost::gregorian::months(1);
+					}
 
-			}
-			break;
+					if (!end_handled)
+					{
+						row_end_date += boost::gregorian::days(1);
+					}
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__START_DAY_ONLY:
-			{
+					boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
 
-				std::shared_ptr<BaseField> const the_input_field_datetime_day = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				if (!the_input_field_datetime_day || !the_output_field_datetime_start || !the_output_field_datetime_end || the_input_field_datetime_day->empty)
-				{
-					validTimeFields = false;
-					return;
-				}
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_string_mappings[the_input_field_datetime_day->GetStringRef()];
+					the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				if (cached_times.first != 0 && cached_times.second != 0)
-				{
-					the_output_field_datetime_start->SetValueInt64(cached_times.first);
-					the_output_field_datetime_end->SetValueInt64(cached_times.second);
-					break;
 				}
+				break;
 
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+			case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__START_DAY_ONLY:
+				{
 
-				int conversion_index = the_input_field_datetime_day->GetDateFormatIndex();
+					std::shared_ptr<BaseField> const the_input_field_datetime_day = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				boost::posix_time::ptime the_day_start;
-				conversion_index = ConvertStringToDateFancy(the_day_start, the_input_field_datetime_day->GetStringRef(), conversion_index);
+					if (!the_input_field_datetime_day || !the_output_field_datetime_start || !the_output_field_datetime_end || the_input_field_datetime_day->empty)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				the_input_field_datetime_day->SetDateFormatIndex(conversion_index);
+					std::pair<std::int64_t, std::int64_t> & cached_times = ymd_string_mappings[the_input_field_datetime_day->GetStringRef()];
 
-				if (conversion_index < 0)
-				{
-					validTimeFields = false;
-					return;
-				}
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_datetime_start->SetValueInt64(cached_times.first);
+						the_output_field_datetime_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				// Round down to month
-				the_day_start = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(), the_day_start.date().day()));
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				boost::posix_time::ptime the_day_end = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(),
-													   the_day_start.date().day()) + boost::gregorian::days(1));
+					int conversion_index = the_input_field_datetime_day->GetDateFormatIndex();
 
-				boost::posix_time::time_duration diff_start_from_1970 = the_day_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_day_end - time_t_epoch__1970;
+					boost::posix_time::ptime the_day_start;
+					conversion_index = ConvertStringToDateFancy(the_day_start, the_input_field_datetime_day->GetStringRef(), conversion_index);
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					the_input_field_datetime_day->SetDateFormatIndex(conversion_index);
 
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					if (conversion_index < 0)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-			}
-			break;
+					// Round down to month
+					the_day_start = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(), the_day_start.date().day()));
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__FROM__START_DAY__TO__END_DAY:
-			{
+					boost::posix_time::ptime the_day_end = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(),
+														   the_day_start.date().day()) + boost::gregorian::days(1));
 
-				std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					boost::posix_time::time_duration diff_start_from_1970 = the_day_start - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = the_day_end - time_t_epoch__1970;
 
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
-					|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
-				{
-					validTimeFields = false;
-					return;
-				}
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				if (the_input_field_datetime_start->empty)
-				{
-					the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
-				}
+					the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				if (the_input_field_datetime_end->empty)
-				{
-					the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
 				}
-
-				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
-						the_input_field_datetime_end->GetStringRef())];
+				break;
 
-				if (cached_times.first != 0 && cached_times.second != 0)
+			case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__FROM__START_DAY__TO__END_DAY:
 				{
-					the_output_field_datetime_start->SetValueInt64(cached_times.first);
-					the_output_field_datetime_end->SetValueInt64(cached_times.second);
-					break;
-				}
 
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				int conversion_index = the_input_field_datetime_start->GetDateFormatIndex();
+					if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
+						|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				boost::posix_time::ptime the_time_start;
-				conversion_index = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef(), conversion_index);
+					if (the_input_field_datetime_start->empty)
+					{
+						the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
+					}
 
-				the_input_field_datetime_start->SetDateFormatIndex(conversion_index);
+					if (the_input_field_datetime_end->empty)
+					{
+						the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
+					}
 
-				if (conversion_index < 0)
-				{
-					validTimeFields = false;
-					return;
-				}
+					std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(),
+							the_input_field_datetime_end->GetStringRef())];
 
-				// Round down to day
-				the_time_start = boost::posix_time::ptime(the_time_start.date());
+					if (cached_times.first != 0 && cached_times.second != 0)
+					{
+						the_output_field_datetime_start->SetValueInt64(cached_times.first);
+						the_output_field_datetime_end->SetValueInt64(cached_times.second);
+						break;
+					}
 
-				boost::posix_time::ptime the_time_end;
-				conversion_index = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef(), conversion_index);
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				if (conversion_index < 0)
-				{
-					validTimeFields = false;
-					return;
-				}
+					int conversion_index = the_input_field_datetime_start->GetDateFormatIndex();
 
-				// Round down to day
-				// Then add 1 day so that the full day is included (days start at midnight, so no seconds of the next day are included)
-				the_time_end = boost::posix_time::ptime(the_time_end.date() + boost::gregorian::days(1));
+					boost::posix_time::ptime the_time_start;
+					conversion_index = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef(), conversion_index);
 
-				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
+					the_input_field_datetime_start->SetDateFormatIndex(conversion_index);
 
-				cached_times.first = diff_start_from_1970.total_milliseconds();
-				cached_times.second = diff_end_from_1970.total_milliseconds();
+					if (conversion_index < 0)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					// Round down to day
+					the_time_start = boost::posix_time::ptime(the_time_start.date());
 
-			}
-			break;
+					boost::posix_time::ptime the_time_end;
+					conversion_index = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef(), conversion_index);
 
-		// **************************************************************************************************************** //
-		// The following is deprecated and unused
-		// **************************************************************************************************************** //
+					if (conversion_index < 0)
+					{
+						validTimeFields = false;
+						return;
+					}
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE:
-			{
+					// Round down to day
+					// Then add 1 day so that the full day is included (days start at midnight, so no seconds of the next day are included)
+					the_time_end = boost::posix_time::ptime(the_time_end.date() + boost::gregorian::days(1));
 
-				// **************************************************************************************************************** //
-				// Deprecated and unused
-				// **************************************************************************************************************** //
+					boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
 
-				std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+					cached_times.first = diff_start_from_1970.total_milliseconds();
+					cached_times.second = diff_end_from_1970.total_milliseconds();
 
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
-					|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
-				{
-					validTimeFields = false;
-					return;
-				}
+					the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-				if (the_input_field_datetime_start->empty)
-				{
-					the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
 				}
+				break;
 
-				if (the_input_field_datetime_end->empty)
+			// **************************************************************************************************************** //
+			// The following is deprecated and unused
+			// **************************************************************************************************************** //
+
+			case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE:
 				{
-					the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
-				}
+
+					// **************************************************************************************************************** //
+					// Deprecated and unused
+					// **************************************************************************************************************** //
+
+					std::shared_ptr<BaseField> the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+					std::shared_ptr<BaseField> the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+					std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+					if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end
+						|| (the_input_field_datetime_start->empty && the_input_field_datetime_end->empty))
+					{
+						validTimeFields = false;
+						return;
+					}
 
-				int year = 0, month = 0, day = 0;
-				ConvertStringToDate(year, month, day, the_input_field_datetime_start->GetStringRef());
-				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year, month, day));
+					if (the_input_field_datetime_start->empty)
+					{
+						the_input_field_datetime_start->SetValueString(the_input_field_datetime_end->GetStringRef());
+					}
 
-				year = 0; month = 0; day = 0;
-				ConvertStringToDate(year, month, day, the_input_field_datetime_end->GetStringRef());
-				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year, month, day));
+					if (the_input_field_datetime_end->empty)
+					{
+						the_input_field_datetime_end->SetValueString(the_input_field_datetime_start->GetStringRef());
+					}
 
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+					int year = 0, month = 0, day = 0;
+					ConvertStringToDate(year, month, day, the_input_field_datetime_start->GetStringRef());
+					boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year, month, day));
 
-			}
-			break;
+					year = 0; month = 0; day = 0;
+					ConvertStringToDate(year, month, day, the_input_field_datetime_end->GetStringRef());
+					boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year, month, day));
+
+					boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+					boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+
+					the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+					the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+
+				}
+				break;
 
+		}
+	}
+	catch (std::exception const &)
+	{
+		validTimeFields = false;
+		return;
 	}
 }
 
