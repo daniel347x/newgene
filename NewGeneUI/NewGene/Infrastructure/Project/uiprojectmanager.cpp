@@ -139,7 +139,13 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject 
 		}
 
 		boost::filesystem::path input_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Input",
-				NewGeneFileNames::defaultInputProjectFileName);
+				NewGeneFileNames::preLoadedInputProjectFileName);
+
+		if (!boost::filesystem::is_regular_file(input_project_path))
+		{
+			input_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Input",
+					NewGeneFileNames::defaultInputProjectFileName);
+		}
 
 		if (input_project_path != boost::filesystem::path())
 		{
@@ -293,7 +299,13 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 			}
 
 			boost::filesystem::path output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Output",
-					NewGeneFileNames::defaultOutputProjectFileName);
+					NewGeneFileNames::preLoadedOutputProjectFileName);
+
+			if (!boost::filesystem::is_regular_file(output_project_path))
+			{
+				output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Output",
+						NewGeneFileNames::defaultOutputProjectFileName);
+			}
 
 			if (output_project_path != boost::filesystem::path())
 			{

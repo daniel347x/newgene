@@ -10,6 +10,8 @@ struct NewGeneFileNames
 	static QString settingsFileName;
 	static QString defaultInputProjectFileName;
 	static QString defaultOutputProjectFileName;
+	static QString preLoadedInputProjectFileName;
+	static QString preLoadedOutputProjectFileName;
 };
 
 #endif // NEWGENEFILENAMES_H
