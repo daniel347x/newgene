@@ -119,6 +119,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject 
 
 	bool success = false;
 
+	bool isDefaultProject {false};
+
 	if (input_project_list->files.size() == 0)
 	{
 
@@ -145,6 +147,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject 
 		{
 			input_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Input",
 					NewGeneFileNames::defaultInputProjectFileName);
+
+			isDefaultProject = true;
 		}
 
 		if (input_project_path != boost::filesystem::path())
@@ -167,6 +171,23 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject 
 		if (input_tabs.find(mainWindow) == input_tabs.cend())
 		{
 			create_new_instance = true;
+		}
+
+		if (create_new_instance)
+		{
+			if (!boost::filesystem::is_regular_file(input_project_settings_path))
+			{
+				if (!isDefaultProject)
+				{
+					QMessageBox::StandardButton reply;
+					reply = QMessageBox::question(nullptr, QString("Missing project file"), QString((std::string{"The project file \""} + input_project_settings_path.string() + "\" is missing.  Would you like to create an empty input project with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
+					if (reply == QMessageBox::No)
+					{
+						create_new_instance = false;
+					}
+				}
+			}
 		}
 
 		if (create_new_instance)
@@ -279,6 +300,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 
 		OutputProjectFilesList::instance output_project_list = OutputProjectFilesList::get(messager.get());
 
+		bool isDefaultProject {false};
+
 		if (output_project_list->files.size() == 0)
 		{
 
@@ -305,6 +328,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 			{
 				output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Output",
 						NewGeneFileNames::defaultOutputProjectFileName);
+
+				isDefaultProject = true;
 			}
 
 			if (output_project_path != boost::filesystem::path())
@@ -343,6 +368,23 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 			if (output_tabs.find(mainWindow) == output_tabs.cend())
 			{
 				create_new_instance = true;
+			}
+
+			if (create_new_instance)
+			{
+				if (!boost::filesystem::is_regular_file(output_project_settings_path))
+				{
+					if (!isDefaultProject)
+					{
+						QMessageBox::StandardButton reply;
+						reply = QMessageBox::question(nullptr, QString("Missing project file"), QString((std::string{"The project file \""} + output_project_settings_path.string() + "\" is missing.  Would you like to create an empty output project with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
+						if (reply == QMessageBox::No)
+						{
+							create_new_instance = false;
+						}
+					}
+				}
 			}
 
 			if (create_new_instance)
@@ -589,6 +631,19 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		path_to_model_settings /= (input_project_settings_path.stem().string() + ".model.xml");
 	}
 
+	if (!boost::filesystem::is_regular_file(path_to_model_settings))
+	{
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(nullptr, QString("Missing model settings"), QString((std::string{"The input model settings file \""} + path_to_model_settings.string() + "\" is missing.  Would you like to create an empty input model settings file with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
+		if (reply == QMessageBox::No)
+		{
+			boost::format msg("Unable to open input model settings file.");
+			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_SETTINGS_NOT_CREATED, msg.str()));
+			return;
+		}
+	}
+
 	std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
@@ -606,6 +661,19 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	if (boost::filesystem::is_directory(path_to_model_database))
 	{
 		path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
+	}
+
+	if (!boost::filesystem::is_regular_file(path_to_model_database))
+	{
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(nullptr, QString("Missing input database"), QString((std::string{"The input database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty input model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
+		if (reply == QMessageBox::No)
+		{
+			boost::format msg("Unable to open input model database.");
+			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_DATABASE_NOT_CREATED, msg.str()));
+			return;
+		}
 	}
 
 	std::shared_ptr<InputModel> backend_model;
@@ -733,6 +801,19 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		path_to_model_settings /= (output_project_settings_path.stem().string() + ".model.xml");
 	}
 
+	if (!boost::filesystem::is_regular_file(path_to_model_settings))
+	{
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(nullptr, QString("Missing model settings"), QString((std::string{"The output model settings file \""} + path_to_model_settings.string() + "\" is missing.  Would you like to create an empty output model settings file with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
+		if (reply == QMessageBox::No)
+		{
+			boost::format msg("Unable to open output model settings file.");
+			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_SETTINGS_NOT_CREATED, msg.str()));
+			return;
+		}
+	}
+
 	std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
@@ -761,6 +842,19 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	if (boost::filesystem::is_directory(path_to_model_database))
 	{
 		path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
+	}
+
+	if (!boost::filesystem::is_regular_file(path_to_model_database))
+	{
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(nullptr, QString("Missing output database"), QString((std::string{"The output database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty output model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+
+		if (reply == QMessageBox::No)
+		{
+			boost::format msg("Unable to open output model database.");
+			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_DATABASE_NOT_CREATED, msg.str()));
+			return;
+		}
 	}
 
 	std::shared_ptr<OutputModel> backend_model;
