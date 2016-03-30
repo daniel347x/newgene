@@ -304,3 +304,8 @@ void UIOutputProject::UnpauseList(QListView * listPane)
 	listPane->setUpdatesEnabled(true);
 	listPane->update();
 }
+
+void UIOutputProject::DoDeselectAllVariables()
+{
+	emit deselectAllVariables();
+}

@@ -32,9 +32,11 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		void UpdateConnections();
 		void DoRefreshAllWidgets();
 		void PassChangeMessageToWidget(NewGeneWidget * widget, DataChangeMessage const & change_message);
+		void DoDeselectAllVariables();
 
 	signals:
 		void RefreshAllWidgets();
+		void deselectAllVariables();
 
 	public slots:
 		void DataChangeMessageSlot(WidgetChangeMessages);

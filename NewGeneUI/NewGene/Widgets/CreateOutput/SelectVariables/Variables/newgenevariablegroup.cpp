@@ -78,6 +78,7 @@ void NewGeneVariableGroup::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECT
 				SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)), outp->getConnector(),
 				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)));
+		connect(outp, SIGNAL(deselectAllVariables), this, SLOT(deselectAllVariables));
 	}
 }
 
@@ -427,9 +428,8 @@ void NewGeneVariableGroup::on_toolButtonSelectAll_clicked()
 
 }
 
-void NewGeneVariableGroup::on_toolButtonDeselectAll_clicked()
+void NewGeneVariableGroup::deselectAll()
 {
-
 	if (!ui->listView)
 	{
 		boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
@@ -449,8 +449,13 @@ void NewGeneVariableGroup::on_toolButtonDeselectAll_clicked()
 		item->setCheckState(Qt::Unchecked);
 	}
 
-	//QTimer::singleShot(10000, this, SLOT(enableUpdates()));
 	ui->listView->setUpdatesEnabled(true);
+}
+
+void NewGeneVariableGroup::on_toolButtonDeselectAll_clicked()
+{
+
+	deselectAll();
 
 }
 

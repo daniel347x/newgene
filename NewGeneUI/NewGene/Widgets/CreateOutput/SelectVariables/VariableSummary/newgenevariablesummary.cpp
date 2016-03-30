@@ -51,3 +51,11 @@ void NewGeneVariableSummary::UpdateInputConnections(NewGeneWidget::UPDATE_CONNEC
 {
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 }
+
+void NewGeneVariableSummary::on_pushButtonDeselectAllVariables_clicked()
+{
+	if (outp)
+	{
+		outp->DoDeselectAllVariables();
+	}
+}

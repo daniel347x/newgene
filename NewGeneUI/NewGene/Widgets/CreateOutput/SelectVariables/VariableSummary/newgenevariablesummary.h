@@ -39,6 +39,8 @@ class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not re
 
 		friend class NewGeneMainWindow;
 
+	private slots:
+		void on_pushButtonDeselectAllVariables_clicked();
 };
 
 #endif // NEWGENEVARIABLESUMMARY_H
