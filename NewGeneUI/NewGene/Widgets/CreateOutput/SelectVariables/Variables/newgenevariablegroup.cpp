@@ -78,7 +78,7 @@ void NewGeneVariableGroup::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECT
 				SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)), outp->getConnector(),
 				SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)));
-		connect(outp, SIGNAL(deselectAllVariables), this, SLOT(deselectAllVariables));
+		connect(outp, SIGNAL(deselectAllVariables()), this, SLOT(deselectAll()));
 	}
 }
 

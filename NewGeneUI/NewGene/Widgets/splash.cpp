@@ -31,11 +31,14 @@ void Splash::execMyself()
 	exec();
 }
 
+void Splash::showEvent(QShowEvent* event)
+{
+	QDialog::showEvent(event);
+	this->setFocus();
+}
+
 void Splash::showMyself()
 {
-	// If it's showing, disable the background window
-	//QTimer::singleShot(10, mainWindow, SLOT(doDisable()));
-
 	webView = new NewGeneWebEngineView(this);
 	ui->verticalLayoutWeb->addWidget(webView);
 
@@ -81,7 +84,7 @@ void Splash::closeAndRefreshSequence()
 	// only works after the splash screen has been deleted, and there is a safety delay
 	// prior to deleting it.
 	this->done(0);
-	QTimer::singleShot(100, mainWindow, SLOT(show()));
+	QTimer::singleShot(100, mainWindow, SLOT(Run()));
 }
 
 void Splash::deleteMe()

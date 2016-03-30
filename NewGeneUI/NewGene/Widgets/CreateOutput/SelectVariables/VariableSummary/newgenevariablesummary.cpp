@@ -1,5 +1,6 @@
 #include "newgenevariablesummary.h"
 #include "ui_newgenevariablesummary.h"
+#include "uioutputproject.h"
 
 #include <QListView>
 #include <QStringList>

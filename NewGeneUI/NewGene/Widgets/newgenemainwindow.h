@@ -53,6 +53,8 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 
+		void Run();
+
 	protected:
 		void changeEvent(QEvent * e);
 		void closeEvent(QCloseEvent * event);

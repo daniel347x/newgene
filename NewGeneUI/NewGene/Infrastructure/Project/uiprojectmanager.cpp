@@ -631,137 +631,139 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		path_to_model_settings /= (input_project_settings_path.stem().string() + ".model.xml");
 	}
 
+	bool continueLoading = true;
+
 	if (!boost::filesystem::is_regular_file(path_to_model_settings))
 	{
 		QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(nullptr, QString("Missing model settings"), QString((std::string{"The input model settings file \""} + path_to_model_settings.string() + "\" is missing.  Would you like to create an empty input model settings file with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-
 		if (reply == QMessageBox::No)
 		{
-			boost::format msg("Unable to open input model settings file.");
-			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_SETTINGS_NOT_CREATED, msg.str()));
-			return;
+			continueLoading = false;
 		}
 	}
 
-	std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings));
-	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
-
-	// Backend model does not know about the current project's settings, because multiple settings might point to the same model.
-	auto path_to_model_database_ = InputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
-	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
-
-	if (path_to_model_database.is_relative())
+	if (continueLoading)
 	{
-		boost::filesystem::path new_path = path_to_model_settings.parent_path();
-		new_path /= path_to_model_database;
-		path_to_model_database = new_path;
-	}
+		std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings));
+		model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
-	if (boost::filesystem::is_directory(path_to_model_database))
-	{
-		path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
-	}
+		// Backend model does not know about the current project's settings, because multiple settings might point to the same model.
+		auto path_to_model_database_ = InputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
+		boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
 
-	if (!boost::filesystem::is_regular_file(path_to_model_database))
-	{
-		QMessageBox::StandardButton reply;
-		reply = QMessageBox::question(nullptr, QString("Missing input database"), QString((std::string{"The input database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty input model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-
-		if (reply == QMessageBox::No)
+		if (path_to_model_database.is_relative())
 		{
-			boost::format msg("Unable to open input model database.");
-			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_DATABASE_NOT_CREATED, msg.str()));
-			return;
+			boost::filesystem::path new_path = path_to_model_settings.parent_path();
+			new_path /= path_to_model_database;
+			path_to_model_database = new_path;
 		}
-	}
 
-	std::shared_ptr<InputModel> backend_model;
-
-	try
-	{
-		backend_model.reset(ModelFactory<InputModel>()(messager, path_to_model_database));
-	}
-	catch (boost::exception & e)
-	{
-		loading = false;
-
-		if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
+		if (boost::filesystem::is_directory(path_to_model_database))
 		{
-			boost::format msg(error_desc->c_str());
-			QMessageBox msgBox;
-			msgBox.setText(msg.str().c_str());
-			msgBox.exec();
+			path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
 		}
-		else
+
+		if (!boost::filesystem::is_regular_file(path_to_model_database))
 		{
-			std::string the_error = boost::diagnostic_information(e);
-			boost::format msg("Error: %1%");
-			msg % the_error.c_str();
-			QMessageBox msgBox;
-			msgBox.setText(msg.str().c_str());
-			msgBox.exec();
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(nullptr, QString("Missing input database"), QString((std::string{"The input database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty input model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				continueLoading = false;
+			}
 		}
 
-		boost::format msg("Unable to create input project database.");
-		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
-		return;
+		if (continueLoading)
+		{
+			std::shared_ptr<InputModel> backend_model;
+
+			try
+			{
+				backend_model.reset(ModelFactory<InputModel>()(messager, path_to_model_database));
+			}
+			catch (boost::exception & e)
+			{
+				loading = false;
+
+				if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
+				{
+					boost::format msg(error_desc->c_str());
+					QMessageBox msgBox;
+					msgBox.setText(msg.str().c_str());
+					msgBox.exec();
+				}
+				else
+				{
+					std::string the_error = boost::diagnostic_information(e);
+					boost::format msg("Error: %1%");
+					msg % the_error.c_str();
+					QMessageBox msgBox;
+					msgBox.setText(msg.str().c_str());
+					msgBox.exec();
+				}
+
+				boost::format msg("Unable to create input project database.");
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
+				return;
+			}
+
+			std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
+
+			NewGeneMainWindow * mainWindow = nullptr;
+
+			try
+			{
+				mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+			}
+			catch (std::bad_cast &)
+			{
+				loading = false;
+				return;
+			}
+
+			if (mainWindow == nullptr)
+			{
+				loading = false;
+				return;
+			}
+
+			// ************************************************************************************************************************************* //
+			// Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
+			// ... cannot pass const filesystem::path, so must create temp from the const that can act as rvalue
+			// ************************************************************************************************************************************* //
+			std::unique_ptr<UIMessagerInputProject> messager_ptr(new UIMessagerInputProject(nullptr));
+			std::unique_ptr<UIInputProject> project_ptr(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr));
+			input_tabs[mainWindow].emplace_back(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
+												project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
+												messager_ptr.release());
+
+			UIInputProject * project = getActiveUIInputProject();
+
+			if (!project)
+			{
+				boost::format msg("No input dataset is open.");
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+				loading = false;
+				return;
+			}
+
+			project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
+			project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
+			project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
+			project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
+
+			project_settings->UpdateConnections();
+			model_settings->UpdateConnections();
+			project_model->UpdateConnections();
+			project->UpdateConnections();
+
+			// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+			emit UpdateInputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
+
+			emit LoadFromDatabase(&project->model(), mainWindowObject);
+		}
 	}
-
-	std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
-
-	NewGeneMainWindow * mainWindow = nullptr;
-
-	try
-	{
-		mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
-	}
-	catch (std::bad_cast &)
-	{
-		loading = false;
-		return;
-	}
-
-	if (mainWindow == nullptr)
-	{
-		loading = false;
-		return;
-	}
-
-	// ************************************************************************************************************************************* //
-	// Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
-	// ... cannot pass const filesystem::path, so must create temp from the const that can act as rvalue
-	// ************************************************************************************************************************************* //
-	std::unique_ptr<UIMessagerInputProject> messager_ptr(new UIMessagerInputProject(nullptr));
-	std::unique_ptr<UIInputProject> project_ptr(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr));
-	input_tabs[mainWindow].emplace_back(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
-										project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
-										messager_ptr.release());
-
-	UIInputProject * project = getActiveUIInputProject();
-
-	if (!project)
-	{
-		boost::format msg("No input dataset is open.");
-		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
-		loading = false;
-		return;
-	}
-
-	project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
-	project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
-	project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
-	project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
-
-	project_settings->UpdateConnections();
-	model_settings->UpdateConnections();
-	project_model->UpdateConnections();
-	project->UpdateConnections();
-
-	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-	emit UpdateInputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
-
-	emit LoadFromDatabase(&project->model(), mainWindowObject);
 
 }
 
@@ -801,145 +803,147 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		path_to_model_settings /= (output_project_settings_path.stem().string() + ".model.xml");
 	}
 
+	bool continueLoading = true;
+
 	if (!boost::filesystem::is_regular_file(path_to_model_settings))
 	{
 		QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(nullptr, QString("Missing model settings"), QString((std::string{"The output model settings file \""} + path_to_model_settings.string() + "\" is missing.  Would you like to create an empty output model settings file with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-
 		if (reply == QMessageBox::No)
 		{
-			boost::format msg("Unable to open output model settings file.");
-			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_SETTINGS_NOT_CREATED, msg.str()));
+			continueLoading = false;
+		}
+	}
+
+	if (continueLoading)
+	{
+		std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings));
+		model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
+
+		// The input model and settings are necessary in order to instantiate the output model
+		UIInputProject * input_project = getActiveUIInputProject();
+
+		if (!input_project)
+		{
+			boost::format msg("NULL input project during attempt to instantiate output project.");
+			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+			loading = false;
 			return;
 		}
-	}
 
-	std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings));
-	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
+		// Backend model does not know about the current project's settings, because multiple settings might point to the same model.
+		auto path_to_model_database_ = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
+		boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
 
-	// The input model and settings are necessary in order to instantiate the output model
-	UIInputProject * input_project = getActiveUIInputProject();
-
-	if (!input_project)
-	{
-		boost::format msg("NULL input project during attempt to instantiate output project.");
-		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
-		loading = false;
-		return;
-	}
-
-	// Backend model does not know about the current project's settings, because multiple settings might point to the same model.
-	auto path_to_model_database_ = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
-	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
-
-	if (path_to_model_database.is_relative())
-	{
-		boost::filesystem::path new_path = path_to_model_settings.parent_path();
-		new_path /= path_to_model_database;
-		path_to_model_database = new_path;
-	}
-
-	if (boost::filesystem::is_directory(path_to_model_database))
-	{
-		path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
-	}
-
-	if (!boost::filesystem::is_regular_file(path_to_model_database))
-	{
-		QMessageBox::StandardButton reply;
-		reply = QMessageBox::question(nullptr, QString("Missing output database"), QString((std::string{"The output database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty output model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-
-		if (reply == QMessageBox::No)
+		if (path_to_model_database.is_relative())
 		{
-			boost::format msg("Unable to open output model database.");
-			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_DATABASE_NOT_CREATED, msg.str()));
-			return;
-		}
-	}
-
-	std::shared_ptr<OutputModel> backend_model;
-
-	try
-	{
-		backend_model.reset(ModelFactory<OutputModel>()(messager, path_to_model_database, std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()),
-							input_project->backend().modelSharedPtr()));
-	}
-	catch (boost::exception & e)
-	{
-		if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
-		{
-			boost::format msg(error_desc->c_str());
-			QMessageBox msgBox;
-			msgBox.setText(msg.str().c_str());
-			msgBox.exec();
-		}
-		else
-		{
-			std::string the_error = boost::diagnostic_information(e);
-			boost::format msg("Error: %1%");
-			msg % the_error.c_str();
-			QMessageBox msgBox;
-			msgBox.setText(msg.str().c_str());
-			msgBox.exec();
+			boost::filesystem::path new_path = path_to_model_settings.parent_path();
+			new_path /= path_to_model_database;
+			path_to_model_database = new_path;
 		}
 
-		boost::format msg("Unable to create output project database.");
-		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
-		loading = false;
-		return;
+		if (boost::filesystem::is_directory(path_to_model_database))
+		{
+			path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
+		}
+
+		if (!boost::filesystem::is_regular_file(path_to_model_database))
+		{
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(nullptr, QString("Missing output database"), QString((std::string{"The output database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty output model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				continueLoading = false;
+			}
+		}
+
+		if (continueLoading)
+		{
+			std::shared_ptr<OutputModel> backend_model;
+
+			try
+			{
+				backend_model.reset(ModelFactory<OutputModel>()(messager, path_to_model_database, std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()),
+									input_project->backend().modelSharedPtr()));
+			}
+			catch (boost::exception & e)
+			{
+				if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
+				{
+					boost::format msg(error_desc->c_str());
+					QMessageBox msgBox;
+					msgBox.setText(msg.str().c_str());
+					msgBox.exec();
+				}
+				else
+				{
+					std::string the_error = boost::diagnostic_information(e);
+					boost::format msg("Error: %1%");
+					msg % the_error.c_str();
+					QMessageBox msgBox;
+					msgBox.setText(msg.str().c_str());
+					msgBox.exec();
+				}
+
+				boost::format msg("Unable to create output project database.");
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
+				loading = false;
+				return;
+			}
+
+			std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
+
+			NewGeneMainWindow * mainWindow = nullptr;
+
+			try
+			{
+				mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+			}
+			catch (std::bad_cast &)
+			{
+				loading = false;
+				return;
+			}
+
+			if (mainWindow == nullptr)
+			{
+				loading = false;
+				return;
+			}
+
+			std::unique_ptr<UIMessagerOutputProject> messager_ptr(new UIMessagerOutputProject(nullptr));
+			std::unique_ptr<UIOutputProject> project_ptr(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr, input_project));
+			output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
+												 project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
+												 messager_ptr.release());
+
+			UIOutputProject * project = getActiveUIOutputProject();
+
+			if (!project)
+			{
+				boost::format msg("NULL output project during attempt to instantiate project.");
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+				loading = false;
+				return;
+			}
+
+			project->InitializeEventLoop(project, 15000000); // cannot use 'this' in base class with multiple inheritance
+			project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
+			project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
+			project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
+
+			project_settings->UpdateConnections();
+			model_settings->UpdateConnections();
+			project_model->UpdateConnections();
+			project->UpdateConnections();
+
+			// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+			emit UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+
+			emit LoadFromDatabase(&getActiveUIOutputProject()->model(), mainWindowObject);
+		}
+
 	}
-
-	std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
-
-	NewGeneMainWindow * mainWindow = nullptr;
-
-	try
-	{
-		mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
-	}
-	catch (std::bad_cast &)
-	{
-		loading = false;
-		return;
-	}
-
-	if (mainWindow == nullptr)
-	{
-		loading = false;
-		return;
-	}
-
-	std::unique_ptr<UIMessagerOutputProject> messager_ptr(new UIMessagerOutputProject(nullptr));
-	std::unique_ptr<UIOutputProject> project_ptr(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr, input_project));
-	output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
-										 project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
-										 messager_ptr.release());
-
-	UIOutputProject * project = getActiveUIOutputProject();
-
-	if (!project)
-	{
-		boost::format msg("NULL output project during attempt to instantiate project.");
-		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
-		loading = false;
-		return;
-	}
-
-	project->InitializeEventLoop(project, 15000000); // cannot use 'this' in base class with multiple inheritance
-	project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
-	project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
-	project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
-
-	project_settings->UpdateConnections();
-	model_settings->UpdateConnections();
-	project_model->UpdateConnections();
-	project->UpdateConnections();
-
-	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-	emit UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
-
-	emit LoadFromDatabase(&getActiveUIOutputProject()->model(), mainWindowObject);
-
 }
 
 void UIProjectManager::RawCloseInputProject(UIInputProject * input_project)

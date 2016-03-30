@@ -153,11 +153,8 @@ void NewGeneMainWindow::changeEvent(QEvent * e)
 	}
 }
 
-void NewGeneMainWindow::doInitialize()
+void NewGeneMainWindow::Run()
 {
-
-	QTimer::singleShot(500, this, SLOT(displaySplashOpening()));
-
 	UIMessager messager;
 
 	// Load global settings in main thread
@@ -170,6 +167,14 @@ void NewGeneMainWindow::doInitialize()
 	PrepareGlobalConnections();
 
 	projectManagerUI().LoadOpenProjects(this, this);
+
+	show();
+}
+
+void NewGeneMainWindow::doInitialize()
+{
+
+	QTimer::singleShot(500, this, SLOT(displaySplashOpening()));
 
 }
 
@@ -635,9 +640,6 @@ void NewGeneMainWindow::PrepareGlobalConnections()
 
 void NewGeneMainWindow::doDisable()
 {
-	// No - this also disables clicking on the splash screen to close it
-	//this->setEnabled(false);
-
 	ui->centralWidget->setEnabled(false);
 	ui->menuBar->setEnabled(false);
 	ui->statusBar->setEnabled(false);
@@ -645,7 +647,6 @@ void NewGeneMainWindow::doDisable()
 
 void NewGeneMainWindow::doEnable()
 {
-	//this->setEnabled(true);
 	ui->centralWidget->setEnabled(true);
 	ui->menuBar->setEnabled(true);
 	ui->statusBar->setEnabled(true);
@@ -671,7 +672,7 @@ void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
 {
 	Splash * view {new Splash{nullptr, this, opened_as_about_box}};
 	Qt::WindowFlags flags = view->windowFlags();
-	flags |= Qt::WindowStaysOnTopHint;
+	//flags |= Qt::WindowStaysOnTopHint;
 	flags |= Qt::SplashScreen;
 	flags &= ~Qt::WindowContextHelpButtonHint;
 	view->installEventFilter(view);
