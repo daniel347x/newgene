@@ -72,12 +72,23 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 						{
 							if (!boost::filesystem::exists(settings))
 							{
-								std::ofstream _touch;
-								_touch.open(settings.string());
-
-								if (_touch.is_open())
+								// NO!  Do not auto-generate non-existent files... this will be handled elsewhere
+								if (false)
 								{
-									_touch.close();
+									std::ofstream _touch;
+									_touch.open(settings.string());
+
+									if (_touch.is_open())
+									{
+										_touch.close();
+									}
+								}
+								else
+								{
+									if (false)
+									{
+										messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__MAIN_PROJECT_NOT_AVAILABLE, std::string("Project \"") + settings.string() + "\" is missing.  NewGene will create a default project."));
+									}
 								}
 							}
 						}
@@ -85,6 +96,11 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 						if (boost::filesystem::is_regular_file(settings))
 						{
 							this->files.push_back(settings.string());
+						}
+						else
+						{
+							// Kluge!  Indicate that a file was saved, but is not present, by passing an empty path here
+							this->files.push_back(boost::filesystem::path());
 						}
 					}
 				}

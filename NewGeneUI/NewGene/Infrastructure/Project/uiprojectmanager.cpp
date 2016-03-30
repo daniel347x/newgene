@@ -73,8 +73,6 @@ void UIProjectManager::EndAllLoops()
 		InputProjectTabs & tabs = windows.second;
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
-
-			//ProjectPaths & paths = tab.first;
 			UIInputProject * project_ptr = static_cast<UIInputProject *>(tab.project.release());
 			RawCloseInputProject(project_ptr);
 
@@ -88,8 +86,6 @@ void UIProjectManager::EndAllLoops()
 		OutputProjectTabs & tabs = windows.second;
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
-
-			//ProjectPaths & paths = tab.first;
 			UIOutputProject * project_ptr = static_cast<UIOutputProject *>(tab.project.release());
 			RawCloseOutputProject(project_ptr);
 
@@ -117,15 +113,22 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject 
 	connect(mainWindowObject, SIGNAL(SignalSaveCurrentInputDatasetAs(STD_STRING, QObject *)), this, SLOT(SaveCurrentInputDatasetAs(STD_STRING, QObject *)));
 	connect(mainWindowObject, SIGNAL(SignalSaveCurrentOutputDatasetAs(STD_STRING, QObject *)), this, SLOT(SaveCurrentOutputDatasetAs(STD_STRING, QObject *)));
 
-	bool success = false;
+	bool isDefaultProject = false;
+	bool previousMissing = false;
 
-	bool isDefaultProject {false};
+	if (input_project_list->files.size() == 1 && input_project_list->files[0] == boost::filesystem::path())
+	{
+		// Kluge!  This is the only way we know that a previously-opened .newgene.in.xml project file is missing
+		// See "uiallglobalsettings_list.h"
+		input_project_list->files.clear();
+		previousMissing = true;
+	}
 
 	if (input_project_list->files.size() == 0)
 	{
 
 		// Disable the following block:
-		// For now, do not prompt to open input dataset if none is found.
+		// For now, do not prompt to open input dataset if none is found.s
 		if (false)
 		{
 			boost::format msg_title("Open input project at default location?");
@@ -175,12 +178,12 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject 
 
 		if (create_new_instance)
 		{
-			if (!boost::filesystem::is_regular_file(input_project_settings_path))
+			if (previousMissing || input_project_settings_path == boost::filesystem::path() || boost::filesystem::is_regular_file(input_project_settings_path))
 			{
 				if (!isDefaultProject)
 				{
 					QMessageBox::StandardButton reply;
-					reply = QMessageBox::question(nullptr, QString("Missing project file"), QString((std::string{"The project file \""} + input_project_settings_path.string() + "\" is missing.  Would you like to create an empty input project with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+					reply = QMessageBox::question(nullptr, QString("Missing project file"), QString((std::string{"The most recently opened input project file is missing.  Would you like to create a default input project?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
 					if (reply == QMessageBox::No)
 					{
@@ -300,7 +303,16 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 
 		OutputProjectFilesList::instance output_project_list = OutputProjectFilesList::get(messager.get());
 
-		bool isDefaultProject {false};
+		bool isDefaultProject = false;
+		bool previousMissing = false;
+
+		if (output_project_list->files.size() == 1 && output_project_list->files[0] == boost::filesystem::path())
+		{
+			// Kluge!  This is the only way we know that a previously-opened .newgene.out.xml project file is missing
+			// See "uiallglobalsettings_list.h"
+			output_project_list->files.clear();
+			previousMissing = true;
+		}
 
 		if (output_project_list->files.size() == 0)
 		{
@@ -372,12 +384,12 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 
 			if (create_new_instance)
 			{
-				if (!boost::filesystem::is_regular_file(output_project_settings_path))
+				if (previousMissing || output_project_settings_path == boost::filesystem::path() || !boost::filesystem::is_regular_file(output_project_settings_path))
 				{
 					if (!isDefaultProject)
 					{
 						QMessageBox::StandardButton reply;
-						reply = QMessageBox::question(nullptr, QString("Missing project file"), QString((std::string{"The project file \""} + output_project_settings_path.string() + "\" is missing.  Would you like to create an empty output project with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+						reply = QMessageBox::question(nullptr, QString("Missing project file"), QString((std::string{"The most recently opened output project file is missing.  Would you like to create a default output project?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
 						if (reply == QMessageBox::No)
 						{

@@ -21,7 +21,7 @@ UISettingsManager::UISettingsManager(QObject * parent, UIMessager & messager)
 	// All Managers are instantiated AFTER the application event loop is running
 	// *************************************************************************
 
-	boost::filesystem::path the_path = ObtainGlobalPath(QStandardPaths::DataLocation, "", NewGeneFileNames::settingsFileName, true);
+	boost::filesystem::path the_path = ObtainGlobalPath(QStandardPaths::AppLocalDataLocation, "", NewGeneFileNames::settingsFileName, true);
 
 	{
 		UIMessager messager;

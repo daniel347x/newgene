@@ -672,7 +672,7 @@ void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
 {
 	Splash * view {new Splash{nullptr, this, opened_as_about_box}};
 	Qt::WindowFlags flags = view->windowFlags();
-	//flags |= Qt::WindowStaysOnTopHint;
+	flags |= Qt::WindowStaysOnTopHint;
 	flags |= Qt::SplashScreen;
 	flags &= ~Qt::WindowContextHelpButtonHint;
 	view->installEventFilter(view);
