@@ -651,12 +651,13 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	}
 	catch (std::bad_cast &)
 	{
+		project_settings->EndLoopAndBackgroundPool(); // blocks
 		loading = false;
 		return;
 	}
-
 	if (mainWindow == nullptr)
 	{
+		project_settings->EndLoopAndBackgroundPool(); // blocks
 		loading = false;
 		return;
 	}
@@ -669,6 +670,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		reply = QMessageBox::question(nullptr, QString("Missing model settings"), QString((std::string{"The input model settings file \""} + path_to_model_settings.string() + "\" is missing.  Would you like to create an empty input model settings file with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 		if (reply == QMessageBox::No)
 		{
+			project_settings->EndLoopAndBackgroundPool(); // blocks
+			loading = false;
 			continueLoading = false;
 		}
 	}
@@ -700,6 +703,9 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 			reply = QMessageBox::question(nullptr, QString("Missing input database"), QString((std::string{"The input database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty input model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 			if (reply == QMessageBox::No)
 			{
+				project_settings->EndLoopAndBackgroundPool(); // blocks
+				model_settings->EndLoopAndBackgroundPool(); // blocks
+				loading = false;
 				continueLoading = false;
 			}
 		}
@@ -714,6 +720,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 			}
 			catch (boost::exception & e)
 			{
+				project_settings->EndLoopAndBackgroundPool(); // blocks
+				model_settings->EndLoopAndBackgroundPool(); // blocks
 				loading = false;
 
 				if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
@@ -754,6 +762,9 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 
 			if (!project)
 			{
+				project_settings->EndLoopAndBackgroundPool(); // blocks
+				model_settings->EndLoopAndBackgroundPool(); // blocks
+				project_model->EndLoopAndBackgroundPool(); // blocks
 				boost::format msg("No input dataset is open.");
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 				loading = false;
@@ -825,12 +836,13 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	}
 	catch (std::bad_cast &)
 	{
+		project_settings->EndLoopAndBackgroundPool(); // blocks
 		loading = false;
 		return;
 	}
-
 	if (mainWindow == nullptr)
 	{
+		project_settings->EndLoopAndBackgroundPool(); // blocks
 		loading = false;
 		return;
 	}
@@ -843,6 +855,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		reply = QMessageBox::question(nullptr, QString("Missing model settings"), QString((std::string{"The output model settings file \""} + path_to_model_settings.string() + "\" is missing.  Would you like to create an empty output model settings file with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 		if (reply == QMessageBox::No)
 		{
+			project_settings->EndLoopAndBackgroundPool(); // blocks
+			loading = false;
 			continueLoading = false;
 		}
 	}
@@ -857,6 +871,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 
 		if (!input_project)
 		{
+			project_settings->EndLoopAndBackgroundPool(); // blocks
+			model_settings->EndLoopAndBackgroundPool(); // blocks
 			boost::format msg("NULL input project during attempt to instantiate output project.");
 			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 			loading = false;
@@ -885,6 +901,9 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 			reply = QMessageBox::question(nullptr, QString("Missing output database"), QString((std::string{"The output database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty output model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 			if (reply == QMessageBox::No)
 			{
+				project_settings->EndLoopAndBackgroundPool(); // blocks
+				model_settings->EndLoopAndBackgroundPool(); // blocks
+				loading = false;
 				continueLoading = false;
 			}
 		}
@@ -900,6 +919,10 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 			}
 			catch (boost::exception & e)
 			{
+				project_settings->EndLoopAndBackgroundPool(); // blocks
+				model_settings->EndLoopAndBackgroundPool(); // blocks
+				loading = false;
+
 				if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
 				{
 					boost::format msg(error_desc->c_str());
@@ -919,7 +942,6 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 
 				boost::format msg("Unable to create output project database.");
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
-				loading = false;
 				return;
 			}
 
@@ -935,6 +957,9 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 
 			if (!project)
 			{
+				project_settings->EndLoopAndBackgroundPool(); // blocks
+				model_settings->EndLoopAndBackgroundPool(); // blocks
+				project_model->EndLoopAndBackgroundPool(); // blocks
 				boost::format msg("NULL output project during attempt to instantiate project.");
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 				loading = false;
