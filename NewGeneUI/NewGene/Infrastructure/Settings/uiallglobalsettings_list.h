@@ -63,6 +63,8 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 					{
 						settings = files_[0];
 
+						bool missing {false};
+
 						#						ifdef Q_OS_WIN32
 
 						if (boost::filesystem::is_directory(settings.parent_path()) && boost::filesystem::windows_name(settings.filename().string()))
@@ -72,6 +74,8 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 						{
 							if (!boost::filesystem::exists(settings))
 							{
+								missing = true;
+
 								// NO!  Do not auto-generate non-existent files... this will be handled elsewhere
 								if (false)
 								{
@@ -99,8 +103,12 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 						}
 						else
 						{
-							// Kluge!  Indicate that a file was saved, but is not present, by passing an empty path here
-							this->files.push_back(boost::filesystem::path());
+							if (missing)
+							{
+								// Kluge!  Indicate that a file was saved, but is not present, by passing an empty path here
+								this->files.push_back(boost::filesystem::path());
+								this->files.push_back(boost::filesystem::path());
+							}
 						}
 					}
 				}

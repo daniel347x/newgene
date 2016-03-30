@@ -116,7 +116,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject 
 	bool isDefaultProject = false;
 	bool previousMissing = false;
 
-	if (input_project_list->files.size() == 1 && input_project_list->files[0] == boost::filesystem::path())
+	if (input_project_list->files.size() == 2 && input_project_list->files[0] == boost::filesystem::path() && input_project_list->files[1] == boost::filesystem::path())
 	{
 		// Kluge!  This is the only way we know that a previously-opened .newgene.in.xml project file is missing
 		// See "uiallglobalsettings_list.h"
@@ -306,7 +306,7 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 		bool isDefaultProject = false;
 		bool previousMissing = false;
 
-		if (output_project_list->files.size() == 1 && output_project_list->files[0] == boost::filesystem::path())
+		if (output_project_list->files.size() == 2 && output_project_list->files[0] == boost::filesystem::path() && output_project_list->files[1] == boost::filesystem::path())
 		{
 			// Kluge!  This is the only way we know that a previously-opened .newgene.out.xml project file is missing
 			// See "uiallglobalsettings_list.h"
