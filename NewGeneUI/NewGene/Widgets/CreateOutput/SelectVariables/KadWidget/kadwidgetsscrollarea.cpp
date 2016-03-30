@@ -358,16 +358,37 @@ void KadWidgetsScrollArea::EmptyTextCheck()
 	}
 
 	QLabel * emptySpinsLabel { findChild<QLabel *>("emptyKadsLabel") };
+	QLabel * noOutputProjectLabel { findChild<QLabel *>("noOutputProjectLabel") };
 
-	if (emptySpinsLabel)
+	bool noOutputProjectOpen = (outp == nullptr ? true : false);
+
+	if (!noOutputProjectOpen)
 	{
-		if (!any_spincontrols_visible)
+		if (emptySpinsLabel)
 		{
-			emptySpinsLabel->setVisible(true);
+			if (!any_spincontrols_visible)
+			{
+				emptySpinsLabel->setVisible(true);
+			}
+			else
+			{
+				emptySpinsLabel->setVisible(false);
+			}
 		}
-		else
+		if (noOutputProjectLabel)
+		{
+			noOutputProjectLabel->setVisible(false);
+		}
+	}
+	else
+	{
+		if (emptySpinsLabel)
 		{
 			emptySpinsLabel->setVisible(false);
+		}
+		if (noOutputProjectLabel)
+		{
+			noOutputProjectLabel->setVisible(true);
 		}
 	}
 
@@ -383,6 +404,17 @@ void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
 		QSize labelSize { emptySpinsLabel->size() };
 		emptySpinsLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 2 - labelSize.height() / 2);
 	}
+
+	QLabel * noOutputProjectLabel { findChild<QLabel *>("noOutputProjectLabel") };
+
+	if (noOutputProjectLabel)
+	{
+		QSize mySize { size() };
+		QSize labelSize { noOutputProjectLabel->size() };
+		noOutputProjectLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 2 - labelSize.height() / 2);
+	}
+
+	EmptyTextCheck();
 }
 
 void KadWidgetsScrollArea::paintEvent(QPaintEvent *)

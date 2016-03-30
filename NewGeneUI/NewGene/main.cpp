@@ -22,7 +22,7 @@ int main(int argc, char * argv[])
 
 	#	ifdef QT_DEBUG
 	// For debugging startup issues
-	boost::this_thread::sleep(boost::posix_time::seconds(20));
+	//boost::this_thread::sleep(boost::posix_time::seconds(8));
 	#	endif
 
 	int retVal {};

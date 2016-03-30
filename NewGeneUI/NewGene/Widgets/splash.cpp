@@ -31,12 +31,6 @@ void Splash::execMyself()
 	exec();
 }
 
-void Splash::showEvent(QShowEvent* event)
-{
-	QDialog::showEvent(event);
-	this->setFocus();
-}
-
 void Splash::showMyself()
 {
 	webView = new NewGeneWebEngineView(this);
@@ -83,7 +77,6 @@ void Splash::closeAndRefreshSequence()
 	// but repainting to remove artifacts after the splash screen has been removed
 	// only works after the splash screen has been deleted, and there is a safety delay
 	// prior to deleting it.
-	this->done(0);
 	QTimer::singleShot(100, mainWindow, SLOT(Run()));
 }
 

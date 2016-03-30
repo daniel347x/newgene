@@ -16,6 +16,8 @@ namespace Ui
 	class NewGeneMainWindow;
 }
 
+class Splash;
+
 class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
 		Q_OBJECT
@@ -81,6 +83,13 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 
 		std::map<int, std::unique_ptr<QProgressBar>> status_bar_progress_bars;
 		std::map<int, std::unique_ptr<QProgressBar>> main_pane_progress_bars;
+
+	private:
+		Splash * theSplash;
+
+	public:
+		bool newInputDataset; // kluge to indicate whether the "missing model settings" or "missing db file" message prompt should appear
+		bool newOutputDataset; // kluge to indicate whether the "missing model settings" or "missing db file" message prompt should appear
 
 };
 

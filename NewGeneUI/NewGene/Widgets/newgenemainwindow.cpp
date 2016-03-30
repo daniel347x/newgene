@@ -46,7 +46,10 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget * parent) :
 	NewGeneWidget(WidgetCreationInfo(this,
 	                                 WIDGET_NATURE_GENERAL)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui(new Ui::NewGeneMainWindow),
-	messager(parent)
+	messager(parent),
+	theSplash(nullptr),
+	newInputDataset(false),
+	newOutputDataset(false)
 {
 
 	NewGeneWidget::theMainWindow = this;
@@ -155,20 +158,31 @@ void NewGeneMainWindow::changeEvent(QEvent * e)
 
 void NewGeneMainWindow::Run()
 {
-	UIMessager messager;
 
-	// Load global settings in main thread
-	settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
-	settingsManagerUI().globalSettings().WriteSettingsToFile(messager); // Write any defaults back to disk, along with values just read from disk
+	if (theSplash)
+	{
+		bool opened_as_about_box = theSplash->opened_as_about_box;
 
-	PrepareInputWidget();
-	PrepareOutputWidget();
+		show();
+		theSplash->done(0);
+		theSplash = nullptr; // It deletes itself due to the WA_DeleteOnClose window attribute
 
-	PrepareGlobalConnections();
+		if (!opened_as_about_box)
+		{
+			UIMessager messager;
 
-	projectManagerUI().LoadOpenProjects(this, this);
+			// Load global settings in main thread
+			settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
+			settingsManagerUI().globalSettings().WriteSettingsToFile(messager); // Write any defaults back to disk, along with values just read from disk
 
-	show();
+			PrepareInputWidget();
+			PrepareOutputWidget();
+
+			PrepareGlobalConnections();
+
+			projectManagerUI().LoadOpenProjects(this, this);
+		}
+	}
 }
 
 void NewGeneMainWindow::doInitialize()
@@ -435,6 +449,7 @@ void NewGeneMainWindow::on_actionNew_Input_Dataset_triggered()
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
 			        file_path.parent_path()));
 
+			newInputDataset = true; // kluge; see header
 			emit SignalOpenInputDataset(the_file.toStdString(), this);
 		}
 	}
@@ -457,6 +472,7 @@ void NewGeneMainWindow::on_actionNew_Output_Dataset_triggered()
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
 			        file_path.parent_path()));
 
+			newOutputDataset = true; // kluge; see header
 			emit SignalOpenOutputDataset(the_file.toStdString(), this);
 		}
 	}
@@ -670,7 +686,10 @@ void NewGeneMainWindow::displaySplashAbout()
 
 void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
 {
-	Splash * view {new Splash{nullptr, this, opened_as_about_box}};
+	theSplash = new Splash{this, this, opened_as_about_box};
+
+	Splash * view = theSplash;
+
 	Qt::WindowFlags flags = view->windowFlags();
 	flags |= Qt::WindowStaysOnTopHint;
 	flags |= Qt::SplashScreen;
@@ -678,5 +697,5 @@ void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
 	view->installEventFilter(view);
 	view->setWindowFlags(flags);
 	view->show();
-	view->activateWindow();
+	//view->activateWindow();
 }

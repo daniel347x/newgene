@@ -178,12 +178,12 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject 
 
 		if (create_new_instance)
 		{
-			if (previousMissing || input_project_settings_path == boost::filesystem::path() || boost::filesystem::is_regular_file(input_project_settings_path))
+			if (previousMissing || input_project_settings_path == boost::filesystem::path() || !boost::filesystem::is_regular_file(input_project_settings_path))
 			{
-				if (!isDefaultProject)
+				if (previousMissing || !isDefaultProject)
 				{
 					QMessageBox::StandardButton reply;
-					reply = QMessageBox::question(nullptr, QString("Missing project file"), QString((std::string{"The most recently opened input project file is missing.  Would you like to create a default input project?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+					reply = QMessageBox::question(nullptr, QString("Missing project file"), QString(std::string("The most recently opened input project file is missing.  Would you like to create a default input project?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
 					if (reply == QMessageBox::No)
 					{
@@ -386,10 +386,10 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 			{
 				if (previousMissing || output_project_settings_path == boost::filesystem::path() || !boost::filesystem::is_regular_file(output_project_settings_path))
 				{
-					if (!isDefaultProject)
+					if (previousMissing || !isDefaultProject)
 					{
 						QMessageBox::StandardButton reply;
-						reply = QMessageBox::question(nullptr, QString("Missing project file"), QString((std::string{"The most recently opened output project file is missing.  Would you like to create a default output project?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+						reply = QMessageBox::question(nullptr, QString("Missing project file"), QString(std::string("The most recently opened output project file is missing.  Would you like to create a default output project?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
 						if (reply == QMessageBox::No)
 						{
@@ -643,9 +643,27 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		path_to_model_settings /= (input_project_settings_path.stem().string() + ".model.xml");
 	}
 
+	NewGeneMainWindow * mainWindow = nullptr;
+
+	try
+	{
+		mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+	}
+	catch (std::bad_cast &)
+	{
+		loading = false;
+		return;
+	}
+
+	if (mainWindow == nullptr)
+	{
+		loading = false;
+		return;
+	}
+
 	bool continueLoading = true;
 
-	if (!boost::filesystem::is_regular_file(path_to_model_settings))
+	if (!mainWindow->newInputDataset && !boost::filesystem::is_regular_file(path_to_model_settings))
 	{
 		QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(nullptr, QString("Missing model settings"), QString((std::string{"The input model settings file \""} + path_to_model_settings.string() + "\" is missing.  Would you like to create an empty input model settings file with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
@@ -676,7 +694,7 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 			path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
 		}
 
-		if (!boost::filesystem::is_regular_file(path_to_model_database))
+		if (!mainWindow->newInputDataset && !boost::filesystem::is_regular_file(path_to_model_database))
 		{
 			QMessageBox::StandardButton reply;
 			reply = QMessageBox::question(nullptr, QString("Missing input database"), QString((std::string{"The input database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty input model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
@@ -722,24 +740,6 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 
 			std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
 
-			NewGeneMainWindow * mainWindow = nullptr;
-
-			try
-			{
-				mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
-			}
-			catch (std::bad_cast &)
-			{
-				loading = false;
-				return;
-			}
-
-			if (mainWindow == nullptr)
-			{
-				loading = false;
-				return;
-			}
-
 			// ************************************************************************************************************************************* //
 			// Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
 			// ... cannot pass const filesystem::path, so must create temp from the const that can act as rvalue
@@ -769,6 +769,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 			model_settings->UpdateConnections();
 			project_model->UpdateConnections();
 			project->UpdateConnections();
+
+			mainWindow->newInputDataset = false;
 
 			// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 			emit UpdateInputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
@@ -815,9 +817,27 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		path_to_model_settings /= (output_project_settings_path.stem().string() + ".model.xml");
 	}
 
+	NewGeneMainWindow * mainWindow = nullptr;
+
+	try
+	{
+		mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+	}
+	catch (std::bad_cast &)
+	{
+		loading = false;
+		return;
+	}
+
+	if (mainWindow == nullptr)
+	{
+		loading = false;
+		return;
+	}
+
 	bool continueLoading = true;
 
-	if (!boost::filesystem::is_regular_file(path_to_model_settings))
+	if (!mainWindow->newOutputDataset && !boost::filesystem::is_regular_file(path_to_model_settings))
 	{
 		QMessageBox::StandardButton reply;
 		reply = QMessageBox::question(nullptr, QString("Missing model settings"), QString((std::string{"The output model settings file \""} + path_to_model_settings.string() + "\" is missing.  Would you like to create an empty output model settings file with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
@@ -859,7 +879,7 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 			path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
 		}
 
-		if (!boost::filesystem::is_regular_file(path_to_model_database))
+		if (!mainWindow->newOutputDataset && !boost::filesystem::is_regular_file(path_to_model_database))
 		{
 			QMessageBox::StandardButton reply;
 			reply = QMessageBox::question(nullptr, QString("Missing output database"), QString((std::string{"The output database \""} + path_to_model_database.string() + "\" is missing.  Would you like to create an empty output model database with that name?").c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
@@ -905,24 +925,6 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 
 			std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
 
-			NewGeneMainWindow * mainWindow = nullptr;
-
-			try
-			{
-				mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
-			}
-			catch (std::bad_cast &)
-			{
-				loading = false;
-				return;
-			}
-
-			if (mainWindow == nullptr)
-			{
-				loading = false;
-				return;
-			}
-
 			std::unique_ptr<UIMessagerOutputProject> messager_ptr(new UIMessagerOutputProject(nullptr));
 			std::unique_ptr<UIOutputProject> project_ptr(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr, input_project));
 			output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
@@ -948,6 +950,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 			model_settings->UpdateConnections();
 			project_model->UpdateConnections();
 			project->UpdateConnections();
+
+			mainWindow->newOutputDataset = false;
 
 			// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 			emit UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);

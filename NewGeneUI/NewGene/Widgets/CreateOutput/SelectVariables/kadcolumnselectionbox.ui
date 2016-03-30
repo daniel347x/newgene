@@ -99,6 +99,31 @@
         <set>Qt::AlignCenter</set>
        </property>
       </widget>
+      <widget class="QLabel" name="noOutputProjectLabel">
+       <property name="geometry">
+        <rect>
+         <x>9</x>
+         <y>9</y>
+         <width>449</width>
+         <height>42</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>440</width>
+         <height>42</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">#emptyKadsLabel {font-weight: bold; color: #454545;}</string>
+       </property>
+       <property name="text">
+        <string>&lt;b&gt;&lt;big&gt;Please select an output dataset&lt;/big&gt;&lt;/b&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>
