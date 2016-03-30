@@ -32,7 +32,8 @@
    <item>
     <widget class="QFrame" name="frameVariableListHeader">
      <property name="styleSheet">
-      <string notr="true">QFrame {border-bottom: 2px solid #333333;}</string>
+      <string notr="true">QLabel {border-bottom: 2px solid #333333;}
+QCheckBox {padding-bottom: 3px; border-bottom: 2px solid #BCBCBC;}</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -89,7 +90,7 @@
         <x>0</x>
         <y>0</y>
         <width>400</width>
-        <height>236</height>
+        <height>235</height>
        </rect>
       </property>
      </widget>
