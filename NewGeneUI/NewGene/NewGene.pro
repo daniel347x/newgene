@@ -157,7 +157,8 @@ SOURCES += main.cpp\
     Infrastructure/UIAction/limitdmus.cpp \
     Widgets/Utilities/htmldelegate.cpp \
     Widgets/splash.cpp \
-    Widgets/newgenewebengineview.cpp
+    Widgets/newgenewebengineview.cpp \
+    Widgets/vacuumdialog.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -283,7 +284,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Infrastructure/UIAction/limitdmus.h \
     Widgets/Utilities/htmldelegate.h \
     Widgets/splash.h \
-    Widgets/newgenewebengineview.h
+    Widgets/newgenewebengineview.h \
+    Widgets/vacuumdialog.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -303,7 +305,8 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/ManageInput/VGs/newgenemanagevgs.ui \
 	Widgets/ManageInput/DMUs/displaydmusregion.ui \
 	Widgets/CreateOutput/LimitDMUs/limit_dmus_region.ui \
-    Widgets/splash.ui
+    Widgets/splash.ui \
+    Widgets/vacuumdialog.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd

@@ -143,7 +143,7 @@ class Model_basemost
 			return db;
 		}
 
-		void VacuumDatabase()
+		void VacuumDatabase(bool const override = false)
 		{
 
 			// Vacuuming large databases by default is the "nuclear option" and generally not desired.
@@ -153,7 +153,7 @@ class Model_basemost
 			// note that the size of the db will increase with use, but not in unlimited fashion.
 			// See https://blogs.gnome.org/jnelson/2015/01/06/sqlite-vacuum-and-auto_vacuum/
 
-			if (false)
+			if (override)
 			{
 				char * errmsg = nullptr;
 				sqlite3_exec(db, "VACUUM", NULL, NULL, &errmsg);

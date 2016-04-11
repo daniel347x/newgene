@@ -73,10 +73,11 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void on_actionSave_Output_Dataset_As_triggered();
 		void on_actionDisplay_input_dataset_path_triggered();
 		void on_actionDisplay_output_dataset_path_triggered();
-
 		void on_actionAbout_NewGene_triggered();
+		void on_actionVacuum_input_database_triggered();
+		void on_actionVacuum_output_database_triggered();
 
-	private:
+private:
 		Ui::NewGeneMainWindow * ui;
 
 		friend class NewGeneWidget;

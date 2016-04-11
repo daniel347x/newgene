@@ -884,8 +884,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// for example, 20 MB to nearly a GB.
 		// The database will be left at this size on the end-user's machine if we do not vacuum it here.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
-		messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
+		// DISABLED for now
+		//messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
+		//messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
 
 		if (delete_tables)
 		{
@@ -3305,7 +3306,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				// A second DMU category's multiplicity is greater than 1 - for now, not allowed.  This can be implemented in the future.
 				// ********************************************************************************************************************** //
 				failed = true;
-				boost::format msg("Only a single DMU category may have its K value in the spin control set to larger than the minimum.");
+				boost::format msg("Only a single DMU category may have its K value in the spin control set to larger than DMU category's minimum.");
 				SetFailureErrorMessage(msg.str());
 				return; // from lambda
 			}

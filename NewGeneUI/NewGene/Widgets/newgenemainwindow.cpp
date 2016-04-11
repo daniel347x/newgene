@@ -40,6 +40,9 @@
 #include "newgenevariablesummaryscrollarea.h"
 #include "ui_newgenevariablesummaryscrollarea.h"
 #include "splash.h"
+#include "uiinputmodel.h"
+#include "uioutputmodel.h"
+#include "vacuumdialog.h"
 
 NewGeneMainWindow::NewGeneMainWindow(QWidget * parent) :
 	QMainWindow(parent),
@@ -203,6 +206,7 @@ void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 		ui->actionClose_Current_Output_Dataset->setEnabled(true);
 		ui->actionDisplay_output_dataset_path->setEnabled(true);
 		ui->actionSave_Output_Dataset_As->setEnabled(true);
+		ui->actionVacuum_output_database->setEnabled(true);
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
@@ -211,6 +215,7 @@ void NewGeneMainWindow::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 		ui->actionClose_Current_Output_Dataset->setEnabled(false);
 		ui->actionDisplay_output_dataset_path->setEnabled(false);
 		ui->actionSave_Output_Dataset_As->setEnabled(false);
+		ui->actionVacuum_output_database->setEnabled(false);
 	}
 
 }
@@ -226,6 +231,7 @@ void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		ui->actionClose_Current_Input_Dataset->setEnabled(true);
 		ui->actionDisplay_input_dataset_path->setEnabled(true);
 		ui->actionSave_Input_Dataset_As->setEnabled(true);
+		ui->actionVacuum_input_database->setEnabled(true);
 	}
 
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
@@ -234,6 +240,7 @@ void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		ui->actionClose_Current_Input_Dataset->setEnabled(false);
 		ui->actionDisplay_input_dataset_path->setEnabled(false);
 		ui->actionSave_Input_Dataset_As->setEnabled(false);
+		ui->actionVacuum_input_database->setEnabled(false);
 	}
 
 }
@@ -698,4 +705,16 @@ void NewGeneMainWindow::displaySplash(bool const opened_as_about_box)
 	view->setWindowFlags(flags);
 	view->show();
 	//view->activateWindow();
+}
+
+void NewGeneMainWindow::on_actionVacuum_input_database_triggered()
+{
+	VacuumDialog dlg(this, true);
+	dlg.exec();
+}
+
+void NewGeneMainWindow::on_actionVacuum_output_database_triggered()
+{
+	VacuumDialog dlg(this, false);
+	dlg.exec();
 }

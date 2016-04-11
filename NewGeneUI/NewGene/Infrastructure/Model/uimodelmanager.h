@@ -19,8 +19,6 @@ class UIModelManager : public QObject, public UIManager<UIModelManager, ModelMan
 	public:
 		explicit UIModelManager(QObject * parent, UIMessager & messager);
 
-		//UIInputModel * loadDefaultModel();
-
 	signals:
 
 	public slots:

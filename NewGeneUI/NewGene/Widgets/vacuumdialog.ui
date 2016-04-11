@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VacuumDialog</class>
+ <widget class="QDialog" name="VacuumDialog">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>516</width>
+    <height>335</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Vacuum database</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>300</y>
+     <width>501</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Close</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>491</width>
+     <height>221</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;h1&gt;&lt;b&gt;&lt;font color=&quot;red&quot;&gt;Warning: Advanced Usage Only&lt;/font&gt;&lt;/b&gt;&lt;/h1&gt;Do &lt;b&gt;not&lt;/b&gt; vacuum the database unless you have good reason to suspect that NewGene's performance may improve due to very heavy prior usage potentially fragmenting the database, and do so only once in a while.&lt;br&gt;&lt;br&gt;Vacuuming the database can take a long time - for a few GB (such as the input database installed by default with NewGene), the operation can take an hour or more, and it &lt;b&gt;cannot be cancelled; no progress bar is provided&lt;/b&gt;.&lt;br&gt;&lt;br&gt;(Small databases may vacuum more quickly.)&lt;br&gt;&lt;br&gt;In general, you do not need to peform this operation - try it only once in a while in case it might improve performance, when you have time to go do something else.&lt;br&gt;&lt;br&gt;Proceed?</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelVacuumSpinner">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>240</y>
+     <width>49</width>
+     <height>49</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>49</width>
+     <height>49</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>49</width>
+     <height>49</height>
+    </size>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="../../Resources/NewGeneResources.qrc">:/bluespinner.gif</pixmap>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelVacuuming">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>240</y>
+     <width>161</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;h1&gt;Vacuuming...&lt;/h1&gt;</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButtonVacuum">
+   <property name="geometry">
+    <rect>
+     <x>62</x>
+     <y>214</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>Vacuum</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelDoneVacuuming">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>256</y>
+     <width>161</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;h2&gt;&lt;font color=&quot;blue&quot;&gt;&lt;b&gt;Done vacuuming.&lt;/b&gt;&lt;/font&gt;&lt;/h2&gt;</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>118</x>
+     <y>216</y>
+     <width>161</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>...and go enjoy a cup of coffee.</string>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../../Resources/NewGeneResources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>VacuumDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>VacuumDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
