@@ -145,13 +145,24 @@ class Model_basemost
 
 		void VacuumDatabase()
 		{
-			char * errmsg = nullptr;
-			sqlite3_exec(db, "VACUUM", NULL, NULL, &errmsg);
 
-			if (errmsg != nullptr)
+			// Vacuuming large databases by default is the "nuclear option" and generally not desired.
+			// It takes 15 minutes or more for the default dataset released with NewGene
+			// (which is close to 2 GB).
+			// For most users, the database should not need to be vacuumed;
+			// note that the size of the db will increase with use, but not in unlimited fashion.
+			// See https://blogs.gnome.org/jnelson/2015/01/06/sqlite-vacuum-and-auto_vacuum/
+
+			if (false)
 			{
-				// todo - handle very rare and mostly harmless error at some point in the future
-				sqlite3_free(errmsg);
+				char * errmsg = nullptr;
+				sqlite3_exec(db, "VACUUM", NULL, NULL, &errmsg);
+
+				if (errmsg != nullptr)
+				{
+					// todo - handle very rare and mostly harmless error at some point in the future
+					sqlite3_free(errmsg);
+				}
 			}
 		}
 

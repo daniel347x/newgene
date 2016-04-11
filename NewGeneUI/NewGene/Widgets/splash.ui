@@ -185,15 +185,15 @@
         <string notr="true">#label_version {font-family: Verdana; font-size: 11px; color: #000000; font-weight: bold;}</string>
        </property>
        <property name="text">
-        <string>Version 1.0 - April 2016</string>
+        <string>Version 1.0 - May 2016</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_newgenewebsite">
        <property name="geometry">
         <rect>
-         <x>548</x>
+         <x>357</x>
          <y>556</y>
-         <width>150</width>
+         <width>341</width>
          <height>21</height>
         </rect>
        </property>
@@ -201,7 +201,7 @@
         <string notr="true">#label_newgenewebsite {font-size: 16px; font-weight: bold;}</string>
        </property>
        <property name="text">
-        <string>&lt;a href=&quot;http://www.newgenesoftware.org/&quot;&gt;NewGene website&lt;/a&gt;</string>
+        <string>&lt;a href=&quot;http://www.newgenesoftware.org/&quot;&gt;Click here to go to the NewGene website&lt;/a&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::RichText</enum>
@@ -299,7 +299,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>NewGene is programmed in C++ by &lt;a href=&quot;http://elance.com/s/daniel347x&quot;&gt;Dan Nissenbaum&lt;/a&gt;</string>
+        <string>NewGene is programmed in C++ by &lt;a href=&quot;https://www.upwork.com/fl/dannissenbaum&quot;&gt;Dan Nissenbaum&lt;/a&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::RichText</enum>

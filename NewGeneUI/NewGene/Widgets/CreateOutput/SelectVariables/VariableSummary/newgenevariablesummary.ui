@@ -79,6 +79,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="styleSheet">
+         <string notr="true">QFrame {border-right: 0px solid #BCBCBC; border-left: 0px solid #BCBCBC; border-top: 0px solid #BCBCBC; border-bottom: 2px solid #BCBCBC;}</string>
+        </property>
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -116,6 +119,12 @@
          </item>
          <item>
           <widget class="QPushButton" name="pushButtonDeselectAllVariables">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>20</height>
+            </size>
+           </property>
            <property name="text">
             <string>Deselect all variables</string>
            </property>
@@ -138,10 +147,9 @@
         <x>0</x>
         <y>0</y>
         <width>541</width>
-        <height>351</height>
+        <height>354</height>
        </rect>
       </property>
-      <zorder>label</zorder>
      </widget>
     </widget>
    </item>
