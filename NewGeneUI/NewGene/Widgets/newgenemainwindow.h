@@ -40,6 +40,7 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 
 		void SetTitle();
 		void displaySplash(bool const);
+		void showLoading(bool const);
 
 	public slots:
 		void displaySplashOpening();

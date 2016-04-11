@@ -15,6 +15,7 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 
 		void HandleChanges(DataChangeMessage const &);
 		void EmptyTextCheck();
+		void ShowLoading(bool const loading_ = true);
 
 	signals:
 
@@ -34,6 +35,9 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 		void Empty();
 		void resizeEvent(QResizeEvent *);
 		void paintEvent(QPaintEvent *);
+
+	private:
+		bool loading;
 
 };
 

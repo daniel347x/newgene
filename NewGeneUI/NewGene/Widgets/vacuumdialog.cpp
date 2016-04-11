@@ -52,6 +52,18 @@ void VacuumDialog::setVacuuming(bool const vacuuming)
 	}
 }
 
+void VacuumDialog::noDatabase()
+{
+	if (inputModel)
+	{
+		QMessageBox::information(this, QString("No database"), QString("No input database is open."));
+	}
+	else
+	{
+		QMessageBox::information(this, QString("No database"), QString("No output database is open."));
+	}
+}
+
 void VacuumDialog::on_pushButtonVacuum_clicked()
 {
 
@@ -72,7 +84,7 @@ void VacuumDialog::on_pushButtonVacuum_clicked()
 				}
 				else
 				{
-					QMessageBox::information(this, QString("No database"), QString("No input database is open."));
+					QMetaObject::invokeMethod(this, "noDatabase", Qt::QueuedConnection);
 				}
 			}
 			else
@@ -86,10 +98,9 @@ void VacuumDialog::on_pushButtonVacuum_clicked()
 				}
 				else
 				{
-					QMessageBox::information(this, QString("No database"), QString("No output database is open."));
+					QMetaObject::invokeMethod(this, "noDatabase", Qt::QueuedConnection);
 				}
 			}
-
 			QMetaObject::invokeMethod(this, "setVacuuming", Qt::QueuedConnection, Q_ARG(bool, false));
 		});
 	}

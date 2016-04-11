@@ -43,6 +43,12 @@
 #include "uiinputmodel.h"
 #include "uioutputmodel.h"
 #include "vacuumdialog.h"
+#include "kadwidgetsscrollarea.h"
+#include <QLabel>
+#include <QPixmap>
+#include <QMovie>
+#include <Qbitmap>
+#include <QMessageBox>
 
 NewGeneMainWindow::NewGeneMainWindow(QWidget * parent) :
 	QMainWindow(parent),
@@ -78,6 +84,17 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget * parent) :
 		UIMessager::ManagersInitialized = true;
 
 		ui->setupUi(this);
+
+		QLabel * labelLoadingSpinner { findChild<QLabel *>("labelLoadingSpinner") };
+
+		if (labelLoadingSpinner)
+		{
+			QMovie * movieLoadingSpinner = new QMovie(":/bluespinner.gif");
+			labelLoadingSpinner->setMask((new QPixmap(":/bluespinner.gif"))->mask());
+			labelLoadingSpinner->setAttribute(Qt::WA_TranslucentBackground);
+			labelLoadingSpinner->setMovie(movieLoadingSpinner);
+			movieLoadingSpinner->start();
+		}
 
 		NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget *>("tabWidgetMain");
 
@@ -243,6 +260,22 @@ void NewGeneMainWindow::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		ui->actionVacuum_input_database->setEnabled(false);
 	}
 
+}
+
+void NewGeneMainWindow::showLoading(bool const loading)
+{
+	try
+	{
+		KadWidgetsScrollArea * scrollArea { findChild<KadWidgetsScrollArea *>("scrollAreaWidgetContents") };
+		if (scrollArea == nullptr)
+		{
+			return;
+		}
+		scrollArea->ShowLoading(loading);
+	}
+	catch (std::bad_cast &)
+	{
+	}
 }
 
 void NewGeneMainWindow::SignalMessageBox(STD_STRING msg)

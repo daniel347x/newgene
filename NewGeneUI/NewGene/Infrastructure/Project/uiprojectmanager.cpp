@@ -22,6 +22,8 @@
 UIProjectManager::UIProjectManager(QObject * parent, UIMessager & messager)
 	: QObject(parent)
 	, loading(false)
+	, loadingInput(false)
+	, loadingOutput(false)
 	, UIManager(messager)
 	, EventLoopThreadManager<UI_PROJECT_MANAGER>(messager, number_worker_threads)
 {
@@ -62,6 +64,16 @@ UIProjectManager::~UIProjectManager()
 
 	});
 
+}
+
+void UIProjectManager::showLoading()
+{
+	NewGeneMainWindow * mainWindow = theMainWindow;
+	if (mainWindow == nullptr)
+	{
+		return;
+	}
+	mainWindow->showLoading(loadingInput || loadingOutput);
 }
 
 void UIProjectManager::EndAllLoops()
@@ -128,7 +140,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow * mainWindow, QObject 
 	{
 
 		// Disable the following block:
-		// For now, do not prompt to open input dataset if none is found.s
+		// For now, do not prompt to open input dataset if none is found.
 		if (false)
 		{
 			boost::format msg_title("Open input project at default location?");
@@ -266,6 +278,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 
 	bool was_loading = loading; // Initial (automatic) load when NewGene runs?  If so, 'loading' is true.  If user chose to open the input dataset by hand, 'loading' is false.
 	loading = false;
+	loadingInput = false;
+	showLoading();
 
 	UIMessagerSingleShot messager;
 
@@ -456,6 +470,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObje
 {
 
 	loading = false;
+	loadingOutput = false;
+	showLoading();
 	UIMessagerSingleShot messager;
 
 	if (!getActiveUIOutputProject()->is_model_equivalent(messager.get(), model_))
@@ -610,6 +626,9 @@ void UIProjectManager::CloseCurrentInputDataset()
 void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject)
 {
 
+	loadingInput = true;
+	showLoading();
+
 	if (boost::filesystem::is_directory(input_project_settings_path))
 	{
 		QMessageBox msgBox;
@@ -618,6 +637,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		loading = false;
+		loadingInput = false;
+		showLoading();
 		return;
 	}
 
@@ -653,12 +674,16 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	{
 		project_settings->EndLoopAndBackgroundPool(); // blocks
 		loading = false;
+		loadingInput = false;
+		showLoading();
 		return;
 	}
 	if (mainWindow == nullptr)
 	{
 		project_settings->EndLoopAndBackgroundPool(); // blocks
 		loading = false;
+		loadingInput = false;
+		showLoading();
 		return;
 	}
 
@@ -672,6 +697,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		{
 			project_settings->EndLoopAndBackgroundPool(); // blocks
 			loading = false;
+			loadingInput = false;
+			showLoading();
 			continueLoading = false;
 		}
 	}
@@ -706,6 +733,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 				project_settings->EndLoopAndBackgroundPool(); // blocks
 				model_settings->EndLoopAndBackgroundPool(); // blocks
 				loading = false;
+				loadingInput = false;
+				showLoading();
 				continueLoading = false;
 			}
 		}
@@ -723,6 +752,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 				project_settings->EndLoopAndBackgroundPool(); // blocks
 				model_settings->EndLoopAndBackgroundPool(); // blocks
 				loading = false;
+				loadingInput = false;
+				showLoading();
 
 				if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
 				{
@@ -768,6 +799,8 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 				boost::format msg("No input dataset is open.");
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 				loading = false;
+				loadingInput = false;
+				showLoading();
 				return;
 			}
 
@@ -795,6 +828,9 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject)
 {
 
+	loadingOutput = true;
+	showLoading();
+
 	if (boost::filesystem::is_directory(output_project_settings_path))
 	{
 		QMessageBox msgBox;
@@ -803,6 +839,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		loading = false;
+		loadingOutput = false;
+		showLoading();
 		return;
 	}
 
@@ -838,12 +876,16 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	{
 		project_settings->EndLoopAndBackgroundPool(); // blocks
 		loading = false;
+		loadingOutput = false;
+		showLoading();
 		return;
 	}
 	if (mainWindow == nullptr)
 	{
 		project_settings->EndLoopAndBackgroundPool(); // blocks
 		loading = false;
+		loadingOutput = false;
+		showLoading();
 		return;
 	}
 
@@ -857,6 +899,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		{
 			project_settings->EndLoopAndBackgroundPool(); // blocks
 			loading = false;
+			loadingOutput = false;
+			showLoading();
 			continueLoading = false;
 		}
 	}
@@ -876,6 +920,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 			boost::format msg("NULL input project during attempt to instantiate output project.");
 			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 			loading = false;
+			loadingOutput = false;
+			showLoading();
 			return;
 		}
 
@@ -904,6 +950,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 				project_settings->EndLoopAndBackgroundPool(); // blocks
 				model_settings->EndLoopAndBackgroundPool(); // blocks
 				loading = false;
+				loadingOutput = false;
+				showLoading();
 				continueLoading = false;
 			}
 		}
@@ -922,6 +970,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 				project_settings->EndLoopAndBackgroundPool(); // blocks
 				model_settings->EndLoopAndBackgroundPool(); // blocks
 				loading = false;
+				loadingOutput = false;
+				showLoading();
 
 				if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
 				{
@@ -963,6 +1013,8 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 				boost::format msg("NULL output project during attempt to instantiate project.");
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 				loading = false;
+				loadingOutput = false;
+				showLoading();
 				return;
 			}
 

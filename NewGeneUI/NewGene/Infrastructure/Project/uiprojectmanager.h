@@ -30,6 +30,10 @@ class UIProjectManager : public QObject,
 		static int const number_worker_threads = 1;
 
 		bool loading;
+		bool loadingInput;
+		bool loadingOutput;
+	public:
+		void showLoading();
 
 	public:
 

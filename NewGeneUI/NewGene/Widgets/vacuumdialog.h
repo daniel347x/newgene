@@ -19,6 +19,7 @@ class VacuumDialog : public QDialog
 	private slots:
 		void on_pushButtonVacuum_clicked();
 		void setVacuuming(bool const vacuuming = true);
+		void noDatabase();
 
 	private:
 		void reject();

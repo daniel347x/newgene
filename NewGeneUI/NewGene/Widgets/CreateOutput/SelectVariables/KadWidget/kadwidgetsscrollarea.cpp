@@ -25,6 +25,8 @@ KadWidgetsScrollArea::KadWidgetsScrollArea(QWidget * parent) :
 	layout->addStretch();
 	setLayout(layout);
 
+	loading = false;
+
 	PrepareOutputWidget();
 }
 
@@ -328,8 +330,40 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 
 }
 
+void KadWidgetsScrollArea::ShowLoading(bool const loading_)
+{
+	loading = loading_;
+	EmptyTextCheck();
+}
+
 void KadWidgetsScrollArea::EmptyTextCheck()
 {
+
+	QLabel * emptySpinsLabel { findChild<QLabel *>("emptyKadsLabel") };
+	QLabel * noOutputProjectLabel { findChild<QLabel *>("noOutputProjectLabel") };
+	QFrame * frameLoadingDataset { findChild<QFrame *>("frameLoadingDataset") };
+
+	if (loading)
+	{
+		if (emptySpinsLabel)
+		{
+			emptySpinsLabel->setVisible(false);
+		}
+		if (noOutputProjectLabel)
+		{
+			noOutputProjectLabel->setVisible(false);
+		}
+		if (frameLoadingDataset)
+		{
+			frameLoadingDataset->setVisible(true);
+		}
+		return;
+	}
+
+	if (frameLoadingDataset)
+	{
+		frameLoadingDataset->setVisible(false);
+	}
 
 	int current_number = layout()->count();
 	bool any_spincontrols_visible = false;
@@ -356,9 +390,6 @@ void KadWidgetsScrollArea::EmptyTextCheck()
 		}
 
 	}
-
-	QLabel * emptySpinsLabel { findChild<QLabel *>("emptyKadsLabel") };
-	QLabel * noOutputProjectLabel { findChild<QLabel *>("noOutputProjectLabel") };
 
 	bool noOutputProjectOpen = (outp == nullptr ? true : false);
 
@@ -412,6 +443,15 @@ void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
 		QSize mySize { size() };
 		QSize labelSize { noOutputProjectLabel->size() };
 		noOutputProjectLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 2 - labelSize.height() / 2);
+	}
+
+	QFrame * frameLoadingDataset { findChild<QFrame *>("frameLoadingDataset") };
+
+	if (frameLoadingDataset)
+	{
+		QSize mySize { size() };
+		QSize frameSize { frameLoadingDataset->size() };
+		frameLoadingDataset->move(mySize.width() / 2 - frameSize.width() / 2, mySize.height() / 2 - frameSize.height() / 2);
 	}
 
 	EmptyTextCheck();
