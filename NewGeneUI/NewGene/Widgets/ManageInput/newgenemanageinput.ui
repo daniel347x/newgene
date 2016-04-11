@@ -54,10 +54,10 @@
        <string notr="true"/>
       </property>
       <attribute name="title">
-       <string> Manage DMU's </string>
+       <string> Manage DMUs </string>
       </attribute>
       <attribute name="toolTip">
-       <string>Manage Decision Making Units (DMU's).  A DMU represents a column of data.</string>
+       <string>Manage Decision Making Units (DMUs).  A DMU represents a column of data.</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
@@ -94,7 +94,7 @@ border-bottom: 0px;;
        <string> Manage Units of Analysis </string>
       </attribute>
       <attribute name="toolTip">
-       <string>Manage Units of Analysis.  Each UOA consists of a set of DMU's, and a time range granularity</string>
+       <string>Manage Units of Analysis.  Each UOA consists of a set of DMUs, and a time range granularity</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">

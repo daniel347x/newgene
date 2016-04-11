@@ -85,7 +85,7 @@ border-bottom: 0px;;
        <string notr="true"/>
       </property>
       <attribute name="title">
-       <string> Limit DMU's </string>
+       <string> Limit DMUs </string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <property name="spacing">

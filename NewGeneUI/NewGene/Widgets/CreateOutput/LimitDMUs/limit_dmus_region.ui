@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>&lt;b&gt;Limit DMU's&lt;/b&gt;</string>
+      <string>&lt;b&gt;Limit DMUs&lt;/b&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>

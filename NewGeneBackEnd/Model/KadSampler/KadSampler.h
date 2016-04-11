@@ -1226,7 +1226,7 @@ class PrimaryKeysGrouping
 
 			if (primary_keys.size() != rhs.primary_keys.size())
 			{
-				boost::format msg("Number of DMU's is different in PrimaryKeysGrouping::operator<()!");
+				boost::format msg("Number of DMUs is different in PrimaryKeysGrouping::operator<()!");
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
@@ -1270,7 +1270,7 @@ class PrimaryKeysGrouping
 				template <typename T, typename U>
 				bool operator()(const T &, const U &) const
 				{
-					boost::format msg("DMU's are of different types in PrimaryKeysGrouping::less_than_visitor()!");
+					boost::format msg("DMUs are of different types in PrimaryKeysGrouping::less_than_visitor()!");
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 

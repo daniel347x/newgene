@@ -227,7 +227,7 @@ void limit_dmus_region::Empty()
 
 	if (!ui->listView_limit_dmus_top_pane || !ui->listView_limit_dmus_bottom_left_pane || !ui->listView_limit_dmus_bottom_right_pane)
 	{
-		boost::format msg("Invalid list view in Limit DMU's tab.");
+		boost::format msg("Invalid list view in Limit DMUs tab.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -358,7 +358,7 @@ void limit_dmus_region::ReceiveDMUSelectionChanged(const QItemSelection & select
 
 	if (!ui->listView_limit_dmus_top_pane || !ui->listView_limit_dmus_bottom_left_pane || !ui->listView_limit_dmus_bottom_right_pane)
 	{
-		boost::format msg("Invalid list view in Limit DMU's tab.");
+		boost::format msg("Invalid list view in Limit DMUs tab.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -648,7 +648,7 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									catch (std::bad_cast &)
 									{
 										// guess not
-										boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+										boost::format msg("Invalid model in Limit DMUs bottom-left pane.");
 										QMessageBox msgBox;
 										msgBox.setText(msg.str().c_str());
 										msgBox.exec();
@@ -683,7 +683,7 @@ void limit_dmus_region::HandleChanges(DataChangeMessage const & change_message)
 									catch (std::bad_cast &)
 									{
 										// guess not
-										boost::format msg("Invalid model in Limit DMU's bottom-right pane.");
+										boost::format msg("Invalid model in Limit DMUs bottom-right pane.");
 										QMessageBox msgBox;
 										msgBox.setText(msg.str().c_str());
 										msgBox.exec();
@@ -859,7 +859,7 @@ bool limit_dmus_region::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 
 	if (selectedIndexes.size() > 1)
 	{
-		boost::format msg("Two items cannot be simultaneously selected in the top pane of the Limit DMU's tab.");
+		boost::format msg("Two items cannot be simultaneously selected in the top pane of the Limit DMUs tab.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -908,7 +908,7 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 
 	if (dmus_selectionModel == nullptr)
 	{
-		boost::format msg("Invalid selection in Limit DMU's bottom-left pane.");
+		boost::format msg("Invalid selection in Limit DMUs bottom-left pane.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -943,7 +943,7 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 	catch (std::bad_cast &)
 	{
 		// guess not
-		boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+		boost::format msg("Invalid model in Limit DMUs bottom-left pane.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -966,8 +966,8 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_right_clicked()
 	if (dmuCategoriesToMoveToLimitingList.size() + countRight > 100)
 	{
 		QMessageBox::StandardButton reply;
-		reply = QMessageBox::question(nullptr, QString("Excessive number of DMU's"),
-									  QString("You have selected a large number of DMU's to limit by.  NewGene is not intended to support a large number of limiting DMU's.  If you proceed, this operation may take a long time after you click 'Yes'.  Proceed?"),
+		reply = QMessageBox::question(nullptr, QString("Excessive number of DMUs"),
+									  QString("You have selected a large number of DMUs to limit by.  NewGene is not intended to support a large number of limiting DMUs.  If you proceed, this operation may take a long time after you click 'Yes'.  Proceed?"),
 									  QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
 		if (reply != QMessageBox::Yes)
@@ -1008,7 +1008,7 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_left_clicked()
 
 	if (dmus_selectionModel == nullptr)
 	{
-		boost::format msg("Invalid selection in Limit DMU's bottom-right pane.");
+		boost::format msg("Invalid selection in Limit DMUs bottom-right pane.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -1043,7 +1043,7 @@ void limit_dmus_region::on_pushButton_limit_dmus_move_left_clicked()
 	catch (std::bad_cast &)
 	{
 		// guess not
-		boost::format msg("Invalid model in Limit DMU's bottom-right pane.");
+		boost::format msg("Invalid model in Limit DMUs bottom-right pane.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -1158,7 +1158,7 @@ void limit_dmus_region::on_toolButtonSelectAllBottomLeft_clicked()
 	catch (std::bad_cast &)
 	{
 		// guess not
-		boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+		boost::format msg("Invalid model in Limit DMUs bottom-left pane.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -1227,7 +1227,7 @@ void limit_dmus_region::on_toolButtonSelectAllBottomRight_clicked()
 	catch (std::bad_cast &)
 	{
 		// guess not
-		boost::format msg("Invalid model in Limit DMU's bottom-right pane.");
+		boost::format msg("Invalid model in Limit DMUs bottom-right pane.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -1273,7 +1273,7 @@ void limit_dmus_region::SetEnabledStateMoveButtons()
 
 		if (dmus_selectionModel == nullptr)
 		{
-			boost::format msg("Invalid selection in Limit DMU's bottom-right pane.");
+			boost::format msg("Invalid selection in Limit DMUs bottom-right pane.");
 			QMessageBox msgBox;
 			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
@@ -1312,7 +1312,7 @@ void limit_dmus_region::SetEnabledStateMoveButtons()
 		catch (std::bad_cast &)
 		{
 			// guess not
-			boost::format msg("Invalid model in Limit DMU's bottom-right pane.");
+			boost::format msg("Invalid model in Limit DMUs bottom-right pane.");
 			QMessageBox msgBox;
 			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
@@ -1328,7 +1328,7 @@ void limit_dmus_region::SetEnabledStateMoveButtons()
 
 		if (dmus_selectionModel == nullptr)
 		{
-			boost::format msg("Invalid selection in Limit DMU's bottom-left pane.");
+			boost::format msg("Invalid selection in Limit DMUs bottom-left pane.");
 			QMessageBox msgBox;
 			msgBox.setText(msg.str().c_str());
 			msgBox.exec();
@@ -1367,7 +1367,7 @@ void limit_dmus_region::SetEnabledStateMoveButtons()
 		catch (std::bad_cast &)
 		{
 			// guess not
-			boost::format msg("Invalid model in Limit DMU's bottom-left pane.");
+			boost::format msg("Invalid model in Limit DMUs bottom-left pane.");
 			QMessageBox msgBox;
 			msgBox.setText(msg.str().c_str());
 			msgBox.exec();

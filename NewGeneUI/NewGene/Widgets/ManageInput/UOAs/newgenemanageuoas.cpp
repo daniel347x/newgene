@@ -765,7 +765,7 @@ void NewGeneManageUOAs::ReceiveUOASelectionChanged(const QItemSelection & select
 
 	if (!ui->listViewManageUOAs)
 	{
-		boost::format msg("Invalid list view in Manage UOA's tab.");
+		boost::format msg("Invalid list view in Manage UOAs tab.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();

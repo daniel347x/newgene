@@ -805,7 +805,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	if (!uoa.foreign_key_identifiers || uoa.foreign_key_identifiers->size() == 0)
 	{
-		boost::format msg("DMU's cannot be found for the UOA associated with the selected variable group.");
+		boost::format msg("DMUs cannot be found for the UOA associated with the selected variable group.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -1381,7 +1381,7 @@ void NewGeneManageVGs::ReceiveVGSelectionChanged(const QItemSelection & selected
 
 	if (!ui->listViewManageVGs)
 	{
-		boost::format msg("Invalid list view in Manage VG's tab.");
+		boost::format msg("Invalid list view in Manage VGs tab.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();

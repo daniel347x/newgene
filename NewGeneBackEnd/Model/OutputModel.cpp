@@ -3101,7 +3101,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 			});
 			erroneousDmuList += ")";
 			boost::format
-			msg("There are unrelated DMU's in the units of analysis for the variable groups you've selected %1%!  There must be a full relationship between the variable groups you've selected.  This means that at least one variable group must contain the full set of all DMU's, taken as a whole, for all variable groups you've selected.");
+			msg("There are unrelated DMUs in the units of analysis for the variable groups you've selected %1%!  There must be a full relationship between the variable groups you've selected.  This means that at least one variable group must contain the full set of all DMUs, taken as a whole, for all variable groups you've selected.");
 			msg % erroneousDmuList;
 			SetFailureErrorMessage(msg.str());
 			failed = true;
@@ -3306,7 +3306,30 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				// A second DMU category's multiplicity is greater than 1 - for now, not allowed.  This can be implemented in the future.
 				// ********************************************************************************************************************** //
 				failed = true;
-				boost::format msg("Only a single DMU category may have its K value in the spin control set to larger than DMU category's minimum.");
+				std::string theMsg("Only a single DMU category may have its K value in the spin control set to larger than that DMU category's minimum (e.g. ");
+				Table_UOA_Identifier::DMU_Counts const & counts = biggest_counts[0].second;
+
+				bool first = true;
+
+				for (auto const & count : counts)
+				{
+					if (!first)
+					{
+						theMsg += "; ";
+					}
+
+					WidgetInstanceIdentifier const & id = count.first;
+					int const thisCount = count.second;
+					std::string idText = Table_DMU_Identifier::GetDmuCategoryDisplayText(id);
+					theMsg += idText;
+					theMsg += " has a minimum K of ";
+					theMsg += std::to_string(thisCount);
+					first = false;
+				}
+
+				theMsg += ").";
+
+				boost::format msg(theMsg);
 				SetFailureErrorMessage(msg.str());
 				return; // from lambda
 			}
