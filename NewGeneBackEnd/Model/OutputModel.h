@@ -18,6 +18,14 @@
 #include <list>
 #include "./KadSampler/KadSampler.h"
 
+enum OutputGeneratorMode
+{
+	GATHER_TIME_RANGE = 0x01, // gather metadata only related to the time range for the run
+	HEADER_RUN = 0x02, // First run of a sequence of runs split along the time granularity
+	MIDDLE_RUN = 0x04, // middle run in sequence
+	TAIL_RUN = 0x08 // tail run in sequence
+};
+
 class PrimaryKeySequence
 {
 
@@ -360,7 +368,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 			public:
 
-				OutputGenerator(Messager & messager_, OutputModel & model_, OutputProject & project_);
+				OutputGenerator(Messager & messager_, OutputModel & model_, OutputProject & project_, int const);
 				~OutputGenerator();
 
 				void GenerateOutput(DataChangeMessage & change_response);
@@ -515,6 +523,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						bool failed;
 
 				};
+
+				int const mode;
 
 				typedef std::pair<std::vector<SQLExecutor>, NewGeneSchema> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
@@ -764,7 +774,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				OutputModel * model;
 				InputModel * input_model;
 				OutputProject & project;
+			public:
+				// public so that optimized once-per-time-unit loop run has access to this
 				Messager & messager;
+			private:
 				sqlite3 * db;
 				sqlite3_stmt * stmt_result; // An overall statement handle that is used only to iterate through the final result of various temporary tables
 				std::string sql_error;

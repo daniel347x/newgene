@@ -8,6 +8,55 @@
 #include "../../UIData/DataChanges.h"
 #include "../../UIAction/ActionChanges.h"
 
+bool SingleGeneratorRun(OutputModel::OutputGenerator & generator)
+{
+	bool retVal = true;
+
+	try
+	{
+		DataChangeMessage dummy;
+		generator.GenerateOutput(dummy);
+	}
+	catch (boost::exception & e)
+	{
+		if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
+		{
+			boost::format msg(error_desc->c_str());
+			generator.messager.AppendKadStatusText(msg.str().c_str(), &generator);
+		}
+		else
+		{
+			std::string the_error = boost::diagnostic_information(e);
+			boost::format msg("Error: %1%");
+			msg % the_error.c_str();
+			generator.messager.AppendKadStatusText(msg.str().c_str(), &generator);
+		}
+
+		retVal = false;
+	}
+	catch (std::exception & e)
+	{
+		boost::format msg("Exception thrown: %1%");
+		msg % e.what();
+		generator.messager.AppendKadStatusText(msg.str().c_str(), &generator);
+		retVal = false;
+	}
+
+	if (!generator.done)
+	{
+		generator.messager.UpdateStatusBarText("", &generator);
+
+		if (OutputModel::OutputGenerator::cancelled)
+		{
+			generator.messager.AppendKadStatusText("Operation cancelled.", &generator);
+		}
+
+		retVal = false;
+	}
+
+	return retVal;
+}
+
 /************************************************************************/
 // ACTION_GENERATE_OUTPUT
 /************************************************************************/
@@ -72,42 +121,38 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 					// ***************************************** //
 					// Generate output
 					// ***************************************** //
-					OutputModel::OutputGenerator output_generator(messager__, output_model, project);
 
-					try
-					{
-						output_generator.GenerateOutput(change_response);
-					}
-					catch (boost::exception & e)
-					{
-						if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
-						{
-							boost::format msg(error_desc->c_str());
-							messager__.AppendKadStatusText(msg.str().c_str(), &output_generator);
-						}
-						else
-						{
-							std::string the_error = boost::diagnostic_information(e);
-							boost::format msg("Error: %1%");
-							msg % the_error.c_str();
-							messager__.AppendKadStatusText(msg.str().c_str(), &output_generator);
-						}
-					}
-					catch (std::exception & e)
-					{
-						boost::format msg("Exception thrown: %1%");
-						msg % e.what();
-						messager__.AppendKadStatusText(msg.str().c_str(), &output_generator);
-					}
+					bool granular_mode { true };
 
-					if (!output_generator.done)
+					if (granular_mode)
 					{
-						messager__.UpdateStatusBarText("", &output_generator);
+						// Perform multiple runs, once per time unit, closing the file and clearing all memory between runs
+						// ... to optimize, so that memory does not run out for long stretches of time (i.e., many days, months, years, etc.)
 
-						if (OutputModel::OutputGenerator::cancelled)
-						{
-							messager__.AppendKadStatusText("Operation cancelled.", &output_generator);
-						}
+						// First - a run in 'gather time range mode
+
+						// You must modify the generator code to support this.  Return both the time range, the time granularity,
+						// AND whether random sampling or consolidate rows is selected..  If so, cancel the run.
+
+						// Second - split the time range into units
+
+						// Third - run a loop over the time range units
+
+						// No need to modify the generator code for this
+
+						// In this loop the first received 'head', the last receives 'tail', and any that are not first and not last receive 'middle';
+						// set the time range values temporarily to those in the single time range, and then call the generator
+
+						// Fourth, go through the generator code and modify text spit out to file/screen to match the mode being run
+
+						OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN);
+						bool doContinue = SingleGeneratorRun(output_generator);
+					}
+					else
+					{
+						// All data (i.e., over all days, months, years, etc.) is processed in a single run - all data, intermediate internal data, and results
+						// must fit in RAM
+						SingleGeneratorRun(OutputModel::OutputGenerator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN));
 					}
 
 					#				if 0

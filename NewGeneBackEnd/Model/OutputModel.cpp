@@ -162,8 +162,9 @@ std::string OutputModel::StripUUIDFromVariableName(std::string const & variable_
 	return stripped_variable_name;
 }
 
-OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel & model_, OutputProject & project_)
+OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel & model_, OutputProject & project_, int const mode_)
 	: model(&model_)
+	, mode(mode_)
 	, stmt_result(nullptr)
 	, executor(nullptr, false)
 	, initialized(false)
@@ -280,9 +281,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	}
 
 	messager.SetRunStatus(RUN_STATUS__RUNNING);
-	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager)
+	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager, &mode)
 	{
-		is_generating_output = false;
+		if (mode & OutputGeneratorMode::TAIL_RUN)
+		{
+			is_generating_output = false;
+		}
+
 		messager.SetPerformanceLabel("");
 		messager.SetRunStatus(RUN_STATUS__NOT_RUNNING);
 	} BOOST_SCOPE_EXIT_END
@@ -843,7 +848,16 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// The output is stored in "consolidated_rows" of the AllWeightings object.
 			// ********************************************************************************************************************************************************* //
 			messager.AppendKadStatusText((boost::format("Consolidating adjacent rows...")).str(), this);
-			ConsolidateData(random_sampling, allWeightings);
+
+			try
+			{
+				ConsolidateData(random_sampling, allWeightings);
+			}
+			catch (std::bad_alloc &)
+			{
+				SetFailureErrorMessage("Exception thrown: OUT OF MEMORY!  Exiting run.  This memory error occurred during the CONSOLIDATE ROWS phase - the final phase of output generation.  Although generally a desired option for the most concise output, in this case please remove the checkmark from the \"Consolidate Rows\" option and perform the run again, which is likely to prevent this memory error.");
+				failed = true;
+			}
 
 			if (failed || CheckCancelled()) { return; }
 

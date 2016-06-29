@@ -225,16 +225,14 @@
         <item>
          <widget class="QCheckBox" name="mergeIdenticalRows">
           <property name="text">
-           <string>Consolidate identical adjacent output rows
-(recommended except for exact statistical analysis)</string>
+           <string>Consolidate identical adjacent output rows</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="displayAbsoluteTimeColumns">
           <property name="text">
-           <string>Show absolute time columns for every row
-(useful for exact statistical analysis)</string>
+           <string>Show absolute time columns for every row</string>
           </property>
          </widget>
         </item>
