@@ -132,7 +132,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 						// First - a run in 'gather time range mode
 
 						// You must modify the generator code to support this.  Return both the time range, the time granularity,
-						// AND whether random sampling or consolidate rows is selected..  If so, cancel the run.
+						// AND whether random sampling or consolidate rows is selected..  If so, switch to full mode.
 
 						// Second - split the time range into units
 
@@ -144,6 +144,8 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 						// set the time range values temporarily to those in the single time range, and then call the generator
 
 						// Fourth, go through the generator code and modify text spit out to file/screen to match the mode being run
+
+						// Also add new log/screen comments identifying whether 'time granular optimized' mode is being run, or regular mode
 
 						OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN);
 						bool doContinue = SingleGeneratorRun(output_generator);
