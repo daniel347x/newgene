@@ -150,7 +150,8 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 						OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN);
 						bool doContinue = SingleGeneratorRun(output_generator);
 					}
-					else
+
+					if (!granular_mode)
 					{
 						// All data (i.e., over all days, months, years, etc.) is processed in a single run - all data, intermediate internal data, and results
 						// must fit in RAM
