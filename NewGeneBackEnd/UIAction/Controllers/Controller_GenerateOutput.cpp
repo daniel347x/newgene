@@ -8,14 +8,14 @@
 #include "../../UIData/DataChanges.h"
 #include "../../UIAction/ActionChanges.h"
 
-bool SingleGeneratorRun(OutputModel::OutputGenerator & generator)
+bool SingleGeneratorRun(OutputModel::OutputGenerator & generator, RunMetadata * pMetadata = nullptr)
 {
 	bool retVal = true;
 
 	try
 	{
 		DataChangeMessage dummy;
-		generator.GenerateOutput(dummy);
+		generator.GenerateOutput(dummy, pMetadata);
 	}
 	catch (boost::exception & e)
 	{
@@ -44,14 +44,17 @@ bool SingleGeneratorRun(OutputModel::OutputGenerator & generator)
 
 	if (!generator.done)
 	{
-		generator.messager.UpdateStatusBarText("", &generator);
-
-		if (OutputModel::OutputGenerator::cancelled)
+		if (generator.mode & OutputGeneratorMode::TAIL_RUN)
 		{
-			generator.messager.AppendKadStatusText("Operation cancelled.", &generator);
-		}
+			generator.messager.UpdateStatusBarText("", &generator);
 
-		retVal = false;
+			if (OutputModel::OutputGenerator::cancelled)
+			{
+				generator.messager.AppendKadStatusText("Operation cancelled.", &generator);
+			}
+
+			retVal = false;
+		}
 	}
 
 	return retVal;
@@ -129,7 +132,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 						// Perform multiple runs, once per time unit, closing the file and clearing all memory between runs
 						// ... to optimize, so that memory does not run out for long stretches of time (i.e., many days, months, years, etc.)
 
-						// First - a run in 'gather time range mode
+						// First - a run in 'gather time range' mode
 
 						// You must modify the generator code to support this.  Return both the time range, the time granularity,
 						// AND whether random sampling or consolidate rows is selected..  If so, switch to full mode.
@@ -147,15 +150,83 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 
 						// Also add new log/screen comments identifying whether 'time granular optimized' mode is being run, or regular mode
 
-						OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN);
-						bool doContinue = SingleGeneratorRun(output_generator);
+						bool doContinue = false;
+						RunMetadata metadata;
+						metadata.runIndex = 0;
+						{
+							OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::GATHER_TIME_RANGE);
+							doContinue = SingleGeneratorRun(output_generator, &metadata);
+						}
+
+						if (doContinue)
+						{
+							if (metadata.isConsolidateRows || metadata.isRandomSampling || metadata.time_granularity == TIME_GRANULARITY::TIME_GRANULARITY__NONE)
+							{
+								// time-unit by time-unit runs are disabled for random sampling and consolidate rows mode
+								granular_mode = false;
+							}
+							else
+							{
+								// Loop through time units, performing one full run for that given time unit for each time unit
+								RunMetadata origMetadata = metadata;
+								TimeSlice fullTimeRange(metadata.timerange_start, metadata.timerange_end);
+								int loopCount = 0;
+								int highestLoopCount = 0;
+								fullTimeRange.loop_through_time_units(metadata.time_granularity, boost::function<void(int64_t, int64_t)>([&highestLoopCount](std::int64_t, std::int64_t)
+								{
+									++highestLoopCount;
+								}));
+
+								fullTimeRange.loop_through_time_units(metadata.time_granularity, boost::function<void(int64_t, int64_t)>([&doContinue, &messager__, &output_model, &project, &metadata, &loopCount,
+																	  &highestLoopCount](std::int64_t start, std::int64_t end)
+								{
+									++loopCount;
+									++metadata.runIndex;
+
+									if (doContinue)
+									{
+										metadata.timerange_start = start;
+										metadata.timerange_end = end;
+
+										OutputModel::OutputGenerator output_generator(messager__, output_model, project, 0);
+										output_generator.mode = 0;
+
+										if (loopCount == 1)
+										{
+											output_generator.mode |= OutputGeneratorMode::HEADER_RUN;
+										}
+
+										if (loopCount == highestLoopCount)
+										{
+											output_generator.mode |= OutputGeneratorMode::TAIL_RUN;
+										}
+
+										if (output_generator.mode == 0)
+										{
+											output_generator.mode = OutputGeneratorMode::MIDDLE_RUN;
+										}
+
+										doContinue = SingleGeneratorRun(output_generator, &metadata);
+									}
+								}));
+							}
+						}
 					}
 
 					if (!granular_mode)
 					{
-						// All data (i.e., over all days, months, years, etc.) is processed in a single run - all data, intermediate internal data, and results
-						// must fit in RAM
-						SingleGeneratorRun(OutputModel::OutputGenerator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN));
+
+						// Ignore metadata!  This is just a test run to make certain is_generating_output is not set!
+						RunMetadata metadata;
+						OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::GATHER_TIME_RANGE);
+						bool doContinue = SingleGeneratorRun(output_generator, &metadata);
+
+						if (doContinue)
+						{
+							// All data (i.e., over all days, months, years, etc.) is processed in a single run - all data, intermediate internal data, and results
+							// must fit in RAM
+							SingleGeneratorRun(OutputModel::OutputGenerator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN));
+						}
 					}
 
 					#				if 0
@@ -179,6 +250,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 				messager__.EmitChangeMessage(change_response);
 
 			}
+
 			break;
 
 		default:

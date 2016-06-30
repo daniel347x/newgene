@@ -30,7 +30,11 @@ bool Messager::RequiresLogging()
 	{
 		if (static_cast<std::int32_t>(m_->get()->_message_category) & MESSAGER_MESSAGE_CATEGORY__LOG_MESSAGE)
 		{
-			requiresLogging = true;
+			if (!disableOutput)
+			{
+				requiresLogging = true;
+			}
+
 			break;
 		}
 	}
@@ -100,7 +104,7 @@ void Messager::UpdateStatusBarText(std::string const & the_text, void * generato
 		// Very ugly, but it's the only way to avoid major circular #include hassles
 		OutputModel::OutputGenerator * the_generator = reinterpret_cast<OutputModel::OutputGenerator *>(generator);
 
-		if (the_generator)
+		if (the_generator && !disableOutput)
 		{
 			if (the_generator->debug_sql_file.is_open())
 			{
@@ -117,7 +121,7 @@ void Messager::AppendKadStatusText(std::string const & kad_status_text, void * g
 		// Very ugly, but it's the only way to avoid major circular #include hassles
 		OutputModel::OutputGenerator * the_generator = reinterpret_cast<OutputModel::OutputGenerator *>(generator);
 
-		if (the_generator)
+		if (the_generator && !disableOutput)
 		{
 			if (the_generator->debug_sql_file.is_open())
 			{

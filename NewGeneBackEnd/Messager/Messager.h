@@ -215,13 +215,15 @@ class Messager
 		virtual void EmitSignalUpdateVGImportProgressBar(int, int, int, int) {}
 		virtual void EmitSignalUpdateDMUImportProgressBar(int, int, int, int) {}
 
+		bool disableOutput;
+
 	protected:
 
 		MessagesVector _messages;
 
 	protected:
 
-		Messager()
+		Messager() : disableOutput(false)
 		{
 		}
 

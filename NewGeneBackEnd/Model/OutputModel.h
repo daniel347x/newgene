@@ -26,6 +26,17 @@ enum OutputGeneratorMode
 	TAIL_RUN = 0x08 // tail run in sequence
 };
 
+struct RunMetadata
+{
+	int runIndex;
+	TIME_GRANULARITY time_granularity;
+	std::int64_t timerange_start;
+	std::int64_t timerange_end;
+	bool isRandomSampling;
+	bool isConsolidateRows;
+	int primaryGroupIndex;
+};
+
 class PrimaryKeySequence
 {
 
@@ -371,7 +382,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				OutputGenerator(Messager & messager_, OutputModel & model_, OutputProject & project_, int const);
 				~OutputGenerator();
 
-				void GenerateOutput(DataChangeMessage & change_response);
+				void GenerateOutput(DataChangeMessage & change_response, RunMetadata *);
 
 			public:
 
@@ -524,7 +535,11 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				};
 
-				int const mode;
+			public:
+				// Public so that the controller has access to set the mode during looping through time units
+				int mode;
+
+			private:
 
 				typedef std::pair<std::vector<SQLExecutor>, NewGeneSchema> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
@@ -532,7 +547,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void SetFailureErrorMessage(std::string const & failure_message_);
 
 				// Initialize generator
-				void Prepare(KadSampler & allWeightings);
+				void Prepare(KadSampler & allWeightings, RunMetadata * pMetadata);
 				void PopulateDMUCounts();
 				void PopulateUOAs();
 				void ValidateUOAs();
@@ -576,7 +591,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						BranchOutputRow<MEMORY_TAG_OUTPUT_ROW> const & incoming_row, FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG_SET_OF_ROWS>, MEMORY_TAG_SET_OF_ROWS> & merging,
 						TimeSlice const & the_slice, std::int64_t & orig_row_count);
 
-				void KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings);
+				void KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings, RunMetadata *);
 
 				template <typename MEMORY_TAG>
 				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set<MEMORY_TAG> const & output_rows_for_this_full_time_slice, std::fstream & output_file,
@@ -603,7 +618,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool StepData();
 				void ClearTables(SqlAndColumnSets const & tables_to_clear);
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
-				std::string CheckOutputFileExists();
+				std::string CheckOutputFileExists(RunMetadata *);
 
 				inline static bool CheckCancelled()
 				{
@@ -796,7 +811,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool delete_tables;
 
 				bool initialized;
-				bool overwrite_if_output_file_already_exists;
+				bool append_if_output_file_already_exists;
 
 			public:
 

@@ -174,7 +174,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, project(project_)
 	, messager(messager_)
 	, failed(false)
-	, overwrite_if_output_file_already_exists(false)
+	, append_if_output_file_already_exists(false)
 	, delete_tables(true)
 	, debug_ordering(false)
 	, consolidate_rows(true)
@@ -262,7 +262,7 @@ void OutOfMemoryHandler()
 	throw std::bad_alloc();
 }
 
-void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
+void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response, RunMetadata * pMetadata)
 {
 
 	cancelled = false;
@@ -271,19 +271,23 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	{
 		std::lock_guard<std::recursive_mutex> guard(is_generating_output_mutex);
 
-		if (is_generating_output)
+		// Only test if we're already generating output when in GATHER_TIME_RANGE mode - to support multiple calls, one per time unit, for a single run
+		if (is_generating_output && ((mode & OutputGeneratorMode::GATHER_TIME_RANGE) != 0))
 		{
 			messager.ShowMessageBox("Another k-ad output generation operation is in progress.  Please wait for that operation to complete first.");
 			return;
 		}
 
 		is_generating_output = true;
+
+		// 'done' is NOT set, so this works EVEN for the mode in which this function is called once per time unit - no race conditions with other operations are possible, I think,
+		// even though is_generating_output flips back and forth over the course of these calls
 	}
 
 	messager.SetRunStatus(RUN_STATUS__RUNNING);
-	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager, &mode)
+	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager, &mode, &failed)
 	{
-		if (mode & OutputGeneratorMode::TAIL_RUN)
+		if ((mode & OutputGeneratorMode::TAIL_RUN) || failed)
 		{
 			is_generating_output = false;
 		}
@@ -291,6 +295,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.SetPerformanceLabel("");
 		messager.SetRunStatus(RUN_STATUS__NOT_RUNNING);
 	} BOOST_SCOPE_EXIT_END
+
+	bool timeRangeOnly = ((mode & OutputGeneratorMode::GATHER_TIME_RANGE) > 0);
+
+	if (timeRangeOnly)
+	{
+		messager.disableOutput = true;
+	}
+	else
+	{
+		messager.disableOutput = false;
+	}
 
 	messager.AppendKadStatusText("", nullptr); // This will clear the pane
 	boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
@@ -316,7 +331,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			input_model->ClearRemnantTemporaryTables();
 		}
 
-		input_model->VacuumDatabase();
+		input_model->VacuumDatabase(); // disabled inside this function, but the function call remains as a placeholder
 
 	} BOOST_SCOPE_EXIT_END
 
@@ -331,30 +346,46 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	}
 
 	bool found = false;
-	WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
-	found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "s", timerange_start_identifier);
+
+	if ((mode & OutputGeneratorMode::GATHER_TIME_RANGE) == 0)
+	{
+		if (pMetadata)
+		{
+			// override time range with the passed metadata - we are looping through time units from start to end
+			timerange_start = pMetadata->timerange_start;
+			timerange_end = pMetadata->timerange_end;
+			found = true;
+		}
+	}
 
 	if (!found)
 	{
-		SetFailureErrorMessage(boost::format("Cannot determine time range from database.").str().c_str());
-		failed = true;
-		return;
+		found = false;
+		WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
+		found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "s", timerange_start_identifier);
+
+		if (!found)
+		{
+			SetFailureErrorMessage(boost::format("Cannot determine time range from database.").str().c_str());
+			failed = true;
+			return;
+		}
+
+		timerange_start = timerange_start_identifier.second;
+
+		found = false;
+		WidgetInstanceIdentifier_Int64_Pair timerange_end_identifier;
+		found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "e", timerange_end_identifier);
+
+		if (!found)
+		{
+			SetFailureErrorMessage(boost::format("Cannot determine time range end value from database.").str().c_str());
+			failed = true;
+			return;
+		}
+
+		timerange_end = timerange_end_identifier.second;
 	}
-
-	timerange_start = timerange_start_identifier.second;
-	found = false;
-
-	WidgetInstanceIdentifier_Int64_Pair timerange_end_identifier;
-	found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "e", timerange_end_identifier);
-
-	if (!found)
-	{
-		SetFailureErrorMessage(boost::format("Cannot determine time range end value from database.").str().c_str());
-		failed = true;
-		return;
-	}
-
-	timerange_end = timerange_end_identifier.second;
 
 	// The time range controls are only accurate to 1 second
 	if (timerange_end <= (timerange_start + 999))
@@ -364,7 +395,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	setting_path_to_kad_output = CheckOutputFileExists();
+	setting_path_to_kad_output = CheckOutputFileExists(pMetadata);
 
 	if (failed || CheckCancelled())
 	{
@@ -392,7 +423,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 	} BOOST_SCOPE_EXIT_END
 
-	debug_sql_file.open(debug_sql_path.string(), std::ios::out | std::ios::trunc);
+	debug_sql_file.open(debug_sql_path.string(), std::ios::out | std::ios::app);
 
 	if (!debug_sql_file.is_open())
 	{
@@ -489,7 +520,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText((boost::format("Populating k-ad metadata...")).str().c_str(), this);
 		create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
-		Prepare(allWeightings);
+		Prepare(allWeightings, pMetadata);
 
 		if (failed || CheckCancelled()) { return; }
 
@@ -527,6 +558,23 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 					timerange_end = timerange_end_test_down;
 				}
 			}
+		}
+
+		if (timeRangeOnly)
+		{
+			// We have all data we need!
+			if (pMetadata)
+			{
+				RunMetadata & metadata = *pMetadata;
+				metadata.time_granularity = allWeightings.time_granularity;
+				metadata.timerange_start = timerange_start;
+				metadata.timerange_end = timerange_end;
+				metadata.isRandomSampling = random_sampling;
+				metadata.isConsolidateRows = consolidate_rows;
+				metadata.primaryGroupIndex = primary_vg_index__in__top_level_vg_vector;
+			}
+
+			return;
 		}
 
 		// ********************************************************************************************************************************************************* //
@@ -888,7 +936,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// ********************************************************************************************************************************************************* //
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
-		KadSamplerWriteResultsToFileOrScreen(allWeightings);
+		KadSamplerWriteResultsToFileOrScreen(allWeightings, pMetadata);
 		messager.AppendKadStatusText((boost::format("Wrote %1% rows to output file \"%2%\"") % allWeightings.rowsWritten % setting_path_to_kad_output.c_str()).str(), this);
 
 		if (failed || CheckCancelled()) { return; }
@@ -2298,7 +2346,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
+void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings, RunMetadata * pMetadata)
 {
 
 	// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
@@ -2361,29 +2409,36 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings)
 		return;
 	}
 
-	primary_vg_index__in__top_level_vg_vector = 0;
-
-	if (top_level_variable_groups_vector.size() > 1)
+	if (pMetadata == nullptr || ((mode & OutputGeneratorMode::GATHER_TIME_RANGE) != 0))
 	{
-		std::vector<WidgetInstanceIdentifier> variableGroupOptions;
-		std::for_each(top_level_variable_groups_vector.cbegin(),
-					  top_level_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
-		{
-			variableGroupOptions.push_back(vg_to_selected.first);
-		});
-		boost::format msgTitle("Select top-level variable group");
-		boost::format
-		msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.\nPlease select one to use as the primary variable group for this run:");
+		primary_vg_index__in__top_level_vg_vector = 0;
 
-		// 0-based
-		primary_vg_index__in__top_level_vg_vector = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
-
-		if (primary_vg_index__in__top_level_vg_vector == -1)
+		if (top_level_variable_groups_vector.size() > 1)
 		{
-			// user cancelled
-			failed = true;
-			return;
+			std::vector<WidgetInstanceIdentifier> variableGroupOptions;
+			std::for_each(top_level_variable_groups_vector.cbegin(),
+						  top_level_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
+			{
+				variableGroupOptions.push_back(vg_to_selected.first);
+			});
+			boost::format msgTitle("Select top-level variable group");
+			boost::format
+			msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.\nPlease select one to use as the primary variable group for this run:");
+
+			// 0-based
+			primary_vg_index__in__top_level_vg_vector = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
+
+			if (primary_vg_index__in__top_level_vg_vector == -1)
+			{
+				// user cancelled
+				failed = true;
+				return;
+			}
 		}
+	}
+	else
+	{
+		pMetadata->primaryGroupIndex = primary_vg_index__in__top_level_vg_vector;
 	}
 
 	top_level_vg = top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first;
@@ -4314,7 +4369,7 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 	}
 }
 
-std::string OutputModel::OutputGenerator::CheckOutputFileExists()
+std::string OutputModel::OutputGenerator::CheckOutputFileExists(RunMetadata * pMetadata)
 {
 
 	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
@@ -4343,18 +4398,24 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 
 		if (output_file_exists)
 		{
-			if (!overwrite_if_output_file_already_exists)
+			if (!append_if_output_file_already_exists)
 			{
-				boost::format overwrite_msg("The file %1% already exists.  Overwrite this file?");
-				overwrite_msg % setting_path_to_kad_output->ToString();
-				bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
+				bool firstRun = (pMetadata->runIndex == 0 && (mode & OutputGeneratorMode::GATHER_TIME_RANGE) != 0);
 
-				if (!overwrite_file)
+				if (pMetadata == nullptr || firstRun)
 				{
-					return std::string();
+					boost::format overwrite_msg("The file %1% already exists.  Overwrite this file?");
+					overwrite_msg % setting_path_to_kad_output->ToString();
+					bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
+
+					if (!overwrite_file)
+					{
+						return std::string();
+					}
+
 				}
 
-				overwrite_if_output_file_already_exists = true;
+				append_if_output_file_already_exists = true;
 			}
 		}
 
@@ -4369,8 +4430,11 @@ void OutputModel::OutputGenerator::SetFailureErrorMessage(std::string const & fa
 	failure_message = failure_message_;
 	std::string report_failure_message = "Failed: ";
 	report_failure_message += failure_message;
+	bool wasOutputDisabled = messager.disableOutput;
+	messager.disableOutput = false; // Always report failure messages - because they kill the run, even in "time range only" mode
 	messager.AppendKadStatusText(report_failure_message, this);
 	messager.UpdateStatusBarText(report_failure_message, nullptr);
+	messager.disableOutput = wasOutputDisabled;
 }
 
 void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSchema const & variable_group_selected_columns_schema, int const variable_group_number,
@@ -6095,10 +6159,10 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 }
 
-void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings)
+void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampler & allWeightings, RunMetadata * pMetadata)
 {
 
-	std::string setting_path_to_kad_output = CheckOutputFileExists();
+	std::string setting_path_to_kad_output = CheckOutputFileExists(pMetadata);
 
 	if (failed || CheckCancelled())
 	{
@@ -6111,7 +6175,7 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 	}
 
 	std::fstream output_file;
-	output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::trunc);
+	output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::app);
 
 	if (!output_file.good())
 	{
@@ -6130,59 +6194,61 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 
 	// Write columns headers
-	int column_index = 0;
-	bool first = true;
-	std::for_each(final_result.second.column_definitions.begin(),
-				  final_result.second.column_definitions.end(), [this, &output_file, &first, &column_index](NewGeneSchema::NewGeneColumnDefinition & unformatted_column)
+	if (mode & OutputGeneratorMode::HEADER_RUN)
 	{
-
-		if (failed || CheckCancelled())
+		int column_index = 0;
+		bool first = true;
+		std::for_each(final_result.second.column_definitions.begin(),
+					  final_result.second.column_definitions.end(), [this, &output_file, &first, &column_index](NewGeneSchema::NewGeneColumnDefinition & unformatted_column)
 		{
-			return;
-		}
 
-		++column_index;
-
-		if (column_index >= static_cast<int>(final_result.second.column_definitions.size()) - 1)
-		{
-			if (!display_absolute_time_columns)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
-		}
 
-		if (!first)
-		{
-			output_file << ",";
-		}
+			++column_index;
 
-		first = false;
-
-		if (column_index == static_cast<int>(final_result.second.column_definitions.size()) - 1)
-		{
-			// starting date / time of time slice
-			output_file << "row_starts_at";
-		}
-		else if (column_index == static_cast<int>(final_result.second.column_definitions.size()))
-		{
-			// ending date / time of time slice
-			output_file << "row_ends_at";
-		}
-		else
-		{
-			output_file << unformatted_column.column_name_in_original_data_table;
-
-			if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+			if (column_index >= static_cast<int>(final_result.second.column_definitions.size()) - 1)
 			{
-				output_file << "_";
-				output_file << boost::lexical_cast<std::string>
-							(unformatted_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group);
+				if (!display_absolute_time_columns)
+				{
+					return;
+				}
 			}
-		}
 
-	});
-	output_file << std::endl;
+			if (!first)
+			{
+				output_file << ",";
+			}
 
+			first = false;
+
+			if (column_index == static_cast<int>(final_result.second.column_definitions.size()) - 1)
+			{
+				// starting date / time of time slice
+				output_file << "row_starts_at";
+			}
+			else if (column_index == static_cast<int>(final_result.second.column_definitions.size()))
+			{
+				// ending date / time of time slice
+				output_file << "row_ends_at";
+			}
+			else
+			{
+				output_file << unformatted_column.column_name_in_original_data_table;
+
+				if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+				{
+					output_file << "_";
+					output_file << boost::lexical_cast<std::string>
+								(unformatted_column.current_multiplicity__of__this_column__in__output__same_as__current_multiplicity__of___this_column__in_its_own_variable_group);
+				}
+			}
+
+		});
+		output_file << std::endl;
+	}
 
 	std::int64_t rows_written = 0;
 
