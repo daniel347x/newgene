@@ -4542,9 +4542,9 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists(RunMetadata * pM
 			{
 				if (pMetadata == nullptr || pMetadata->runIndex == 0)
 				{
-					boost::format overwrite_msg("The file %1% already exists.  Overwrite this file?");
+					boost::format overwrite_msg("The file %1% already exists.  Append to this file?");
 					overwrite_msg % setting_path_to_kad_output->ToString();
-					bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
+					bool overwrite_file = messager.ShowQuestionMessageBox("Append to file?", overwrite_msg.str());
 
 					if (!overwrite_file)
 					{
