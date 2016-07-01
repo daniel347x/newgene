@@ -8,7 +8,7 @@
 #include "../../UIData/DataChanges.h"
 #include "../../UIAction/ActionChanges.h"
 
-bool SingleGeneratorRun(OutputModel::OutputGenerator & generator, RunMetadata * pMetadata = nullptr)
+bool SingleGeneratorRun(OutputModel::OutputGenerator & generator, RunMetadata * pMetadata, bool & failed, bool & cancelled, bool & markedAsDone, bool & doContinue)
 {
 	bool retVal = true;
 
@@ -40,6 +40,23 @@ bool SingleGeneratorRun(OutputModel::OutputGenerator & generator, RunMetadata * 
 		msg % e.what();
 		generator.messager.AppendKadStatusText(msg.str().c_str(), &generator);
 		retVal = false;
+	}
+
+	if (generator.failed)
+	{
+		failed = true;
+		doContinue = false;
+	}
+
+	if (generator.CheckCancelled())
+	{
+		cancelled = true;
+		doContinue = false;
+	}
+
+	if (generator.done && (generator.mode & OutputGeneratorMode::TAIL_RUN))
+	{
+		markedAsDone = true;
 	}
 
 	return retVal;
@@ -135,7 +152,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 					bool doContinue { false };
 					{
 						OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::GATHER_TIME_RANGE);
-						doContinue = SingleGeneratorRun(output_generator, &metadata);
+						doContinue = SingleGeneratorRun(output_generator, &metadata, failed, cancelled, markedAsDone, doContinue);
 					}
 
 					if (metadata.isConsolidateRows || metadata.isRandomSampling || metadata.time_granularity == TIME_GRANULARITY::TIME_GRANULARITY__NONE)
@@ -189,25 +206,8 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 										output_generator.mode = OutputGeneratorMode::MIDDLE_RUN;
 									}
 
-									doContinue = SingleGeneratorRun(output_generator, &metadata);
+									doContinue = SingleGeneratorRun(output_generator, &metadata, failed, cancelled, markedAsDone, doContinue);
 									rows += metadata.rows;
-
-									if (output_generator.failed)
-									{
-										failed = true;
-										doContinue = false;
-									}
-
-									if (output_generator.CheckCancelled())
-									{
-										cancelled = true;
-										doContinue = false;
-									}
-
-									if (output_generator.done && (output_generator.mode & OutputGeneratorMode::TAIL_RUN))
-									{
-										markedAsDone = true;
-									}
 								}
 							}));
 
@@ -224,23 +224,8 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 							metadata.rows = 0;
 
 							OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN);
-							SingleGeneratorRun(output_generator, &metadata);
+							SingleGeneratorRun(output_generator, &metadata, failed, cancelled, markedAsDone, doContinue);
 							rows += metadata.rows;
-
-							if (output_generator.failed)
-							{
-								failed = true;
-							}
-
-							if (output_generator.CheckCancelled())
-							{
-								cancelled = true;
-							}
-
-							if (output_generator.done && (output_generator.mode & OutputGeneratorMode::TAIL_RUN))
-							{
-								markedAsDone = true;
-							}
 						}
 					}
 
