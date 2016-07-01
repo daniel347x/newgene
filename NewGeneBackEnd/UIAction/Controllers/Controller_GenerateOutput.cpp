@@ -244,7 +244,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 						}
 					}
 
-					messager__.AppendKadStatusText((boost::format("Wrote %1% total rows") % rows, nullptr));
+					messager__.AppendKadStatusText((boost::format("Wrote %1% total rows") % rows).str().c_str(), nullptr);
 
 					if (failed)
 					{
