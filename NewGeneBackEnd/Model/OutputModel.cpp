@@ -6309,6 +6309,8 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 
 	if (setting_path_to_kad_output.empty())
 	{
+		SetFailureErrorMessage(boost::format("No output file has been specified.").str().c_str());
+		failed = true;
 		return;
 	}
 
