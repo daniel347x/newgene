@@ -160,7 +160,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 							}));
 
 							fullTimeRange.loop_through_time_units(metadata.time_granularity, boost::function<void(int64_t, int64_t)>([&doContinue, &messager__, &output_model, &project, &metadata, &loopCount,
-																  &highestLoopCount, &markedAsDone, &cancelled, &failed](std::int64_t start, std::int64_t end)
+																  &highestLoopCount, &markedAsDone, &cancelled, &failed, &rows](std::int64_t start, std::int64_t end)
 							{
 								++loopCount;
 								++metadata.runIndex;
@@ -224,7 +224,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 							metadata.rows = 0;
 
 							OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN);
-							SingleGeneratorRun(output_generator);
+							SingleGeneratorRun(output_generator, &metadata);
 							rows += metadata.rows;
 
 							if (output_generator.failed)

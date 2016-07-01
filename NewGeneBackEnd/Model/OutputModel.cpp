@@ -288,7 +288,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
 	std::string time_start_formatted = boost::posix_time::to_simple_string(now);
 
-	if (pMetadata == nullptr || !pMetadata->isGranular || pMetadata->runIndex == 0)
+	if (pMetadata == nullptr || pMetadata->runIndex == 0)
 	{
 		boost::format msg_start("NewGene k-ad generation");
 		messager.AppendKadStatusText(msg_start.str(), nullptr);
