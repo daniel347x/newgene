@@ -285,6 +285,20 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText("", nullptr); // This will clear the pane
 	}
 
+	if (!timeRangeOnly)
+	{
+		// Only populate variables that were NOT already populated from the cache in Prepare
+		if (pMetadata)
+		{
+			childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 = pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
+			K = pMetadata->K;
+			has_non_primary_top_level_groups = pMetadata->has_non_primary_top_level_groups;
+			has_child_groups = pMetadata->has_child_groups;
+			top_level_variable_groups_schema = pMetadata->top_level_variable_groups_schema;
+			secondary_variable_groups_schema = pMetadata->secondary_variable_groups_schema;
+		}
+	}
+
 	boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
 	std::string time_start_formatted = boost::posix_time::to_simple_string(now);
 
@@ -489,6 +503,27 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		//delete allWeightings_;
 	} BOOST_SCOPE_EXIT_END
 
+	if (!timeRangeOnly)
+	{
+		// Only populate variables that were NOT already populated from the cache in Prepare
+		if (pMetadata)
+		{
+			allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.swap(fast_short_to_short_map<hits_tag>());
+
+			for (auto it = pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.cbegin();
+				 it != pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.cend(); ++it)
+			{
+				auto const & key = it->first;
+				auto const & val = it->second;
+				allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1[key] = val;
+			}
+
+			allWeightings.number_branch_columns = pMetadata->number_branch_columns;
+			allWeightings.number_primary_variable_group_single_leaf_columns = pMetadata->number_primary_variable_group_single_leaf_columns;
+			allWeightings.numberChildVariableGroups = pMetadata->numberChildVariableGroups;
+		}
+	}
+
 	// ********************************************************************************************************************************************************* //
 	// The main body of the k-ad generation routine follows
 	// ********************************************************************************************************************************************************* //
@@ -597,33 +632,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			}
 
 			return;
-		}
-		else
-		{
-			// Only populate variables that were NOT already populated from the cache in Prepare
-			if (pMetadata)
-			{
-				childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 = pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
-
-				allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.swap(fast_short_to_short_map<hits_tag>());
-
-				for (auto it = pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.cbegin();
-					 it != pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.cend(); ++it)
-				{
-					auto const & key = it->first;
-					auto const & val = it->second;
-					allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1[key] = val;
-				}
-
-				allWeightings.number_branch_columns = pMetadata->number_branch_columns;
-				allWeightings.number_primary_variable_group_single_leaf_columns = pMetadata->number_primary_variable_group_single_leaf_columns;
-				allWeightings.numberChildVariableGroups = pMetadata->numberChildVariableGroups;
-				K = pMetadata->K;
-				has_non_primary_top_level_groups = pMetadata->has_non_primary_top_level_groups;
-				has_child_groups = pMetadata->has_child_groups;
-				top_level_variable_groups_schema = pMetadata->top_level_variable_groups_schema;
-				secondary_variable_groups_schema = pMetadata->secondary_variable_groups_schema;
-			}
 		}
 
 		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
