@@ -26,16 +26,7 @@ enum OutputGeneratorMode
 	TAIL_RUN = 0x08 // tail run in sequence
 };
 
-struct RunMetadata
-{
-	int runIndex;
-	TIME_GRANULARITY time_granularity;
-	std::int64_t timerange_start;
-	std::int64_t timerange_end;
-	bool isRandomSampling;
-	bool isConsolidateRows;
-	int primaryGroupIndex;
-};
+struct RunMetadata;
 
 class PrimaryKeySequence
 {
@@ -620,11 +611,14 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
 				std::string CheckOutputFileExists(RunMetadata *);
 
+			public:
 				inline static bool CheckCancelled()
 				{
 					// No lock - not necessary for a boolean checked multiple times by back end and that will not cause an error if it is messed up in extraordinarily rare circumstances
 					return cancelled; // opportunity for further checking here
 				}
+
+			private:
 
 				// Save the SQL and column sets corresponding to each primary and child variable group in global data structures
 				//
@@ -805,7 +799,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::int64_t timerange_end;
 				bool at_least_one_variable_group_has_timerange;
 
+			public:
 				bool failed;
+
+			private:
 
 				bool debug_ordering;
 				bool delete_tables;
@@ -1242,5 +1239,43 @@ void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current
 	});
 
 }
+
+struct RunMetadata
+{
+	// Input to run
+	bool isGranular;
+	int runIndex;
+
+	// Saved metadata to be used in runs
+	TIME_GRANULARITY time_granularity;
+	std::int64_t timerange_start;
+	std::int64_t timerange_end;
+	bool isRandomSampling;
+	std::int64_t randomSamplingNumberRows;
+	bool isConsolidateRows;
+	bool display_absolute_time_columns;
+	int primaryGroupIndex;
+	sqlite3 * db;
+	std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> UOAs;
+	std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
+	std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> child_counts;
+	std::map<WidgetInstanceIdentifier, std::pair<WidgetInstanceIdentifier, int>> child_uoas__which_multiplicity_is_greater_than_1;
+	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector top_level_variable_groups_vector;
+	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector child_variable_groups_vector;
+	WidgetInstanceIdentifier top_level_vg;
+	PrimaryKeySequence sequence;
+	int overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf;
+	std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1; // set the same in allWeightings
+	std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings;
+	std::vector<NewGeneSchema> top_level_variable_groups_schema;
+	std::vector<NewGeneSchema> secondary_variable_groups_schema;
+	int number_branch_columns; // in allWeightings
+	int number_primary_variable_group_single_leaf_columns; // in allWeightings
+	int numberChildVariableGroups; // in allWeightings
+	int K;
+	bool has_non_primary_top_level_groups;
+	bool has_child_groups;
+	std::int64_t rows;
+};
 
 #endif

@@ -268,53 +268,34 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	cancelled = false;
 	done = false;
 
-	{
-		std::lock_guard<std::recursive_mutex> guard(is_generating_output_mutex);
-
-		// Only test if we're already generating output when in GATHER_TIME_RANGE mode - to support multiple calls, one per time unit, for a single run
-		if (is_generating_output && ((mode & OutputGeneratorMode::GATHER_TIME_RANGE) != 0))
-		{
-			messager.ShowMessageBox("Another k-ad output generation operation is in progress.  Please wait for that operation to complete first.");
-			return;
-		}
-
-		is_generating_output = true;
-
-		// 'done' is NOT set, so this works EVEN for the mode in which this function is called once per time unit - no race conditions with other operations are possible, I think,
-		// even though is_generating_output flips back and forth over the course of these calls
-	}
-
-	messager.SetRunStatus(RUN_STATUS__RUNNING);
-	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager, &mode, &failed)
-	{
-		if ((mode & OutputGeneratorMode::TAIL_RUN) || failed)
-		{
-			is_generating_output = false;
-		}
-
-		messager.SetPerformanceLabel("");
-		messager.SetRunStatus(RUN_STATUS__NOT_RUNNING);
-	} BOOST_SCOPE_EXIT_END
-
 	bool timeRangeOnly = ((mode & OutputGeneratorMode::GATHER_TIME_RANGE) > 0);
 
 	if (timeRangeOnly)
 	{
-		messager.disableOutput = true;
+		//messager.disableOutput = true;
+		messager.disableOutput = false;
 	}
 	else
 	{
 		messager.disableOutput = false;
 	}
 
-	messager.AppendKadStatusText("", nullptr); // This will clear the pane
+	if (pMetadata && pMetadata->runIndex == 0)
+	{
+		messager.AppendKadStatusText("", nullptr); // This will clear the pane
+	}
+
 	boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
 	std::string time_start_formatted = boost::posix_time::to_simple_string(now);
-	boost::format msg_start("NewGene k-ad generation");
-	messager.AppendKadStatusText(msg_start.str(), nullptr);
-	boost::format msg_starttime("Starting run at %1%");
-	msg_starttime % time_start_formatted;
-	messager.AppendKadStatusText(msg_starttime.str(), nullptr);
+
+	if (pMetadata == nullptr || !pMetadata->isGranular || pMetadata->runIndex == 0)
+	{
+		boost::format msg_start("NewGene k-ad generation");
+		messager.AppendKadStatusText(msg_start.str(), nullptr);
+		boost::format msg_starttime("Starting run at %1%");
+		msg_starttime % time_start_formatted;
+		messager.AppendKadStatusText(msg_starttime.str(), nullptr);
+	}
 
 	input_model = &model->getInputModel();
 
@@ -412,7 +393,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	debug_sql_path = setting_path_to_kad_output;
 	debug_sql_path.replace_extension(".debugsql.txt");
 
-	messager.AppendKadStatusText("Validating database...", nullptr);
+	//messager.AppendKadStatusText("Validating database...", nullptr);
 	input_model->ClearRemnantTemporaryTables();
 
 	BOOST_SCOPE_EXIT(this_)
@@ -518,7 +499,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Initialize all metadata about the selected variables and variable groups,
 		// multiplicities, units of analysis, primary keys, output column names, etc.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("Populating k-ad metadata...")).str().c_str(), this);
 		create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
 		Prepare(allWeightings, pMetadata);
 
@@ -562,6 +542,16 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		if (timeRangeOnly)
 		{
+			// ********************************************************************************************************************************************************* //
+			// Build a schema object, one per variable group with selected data,
+			// intended for internal use by the k-ad algorithm (i.e., converted from the raw format used in the database
+			// into a handy set of schema instances)
+			// ********************************************************************************************************************************************************* //
+			// Also, determine, and set, the value of K for this run
+			// (note: there is only a single DMU for which K can be greater than 1, currently)
+			// ********************************************************************************************************************************************************* //
+			PopulateSchemaForRawDataTables_And_SetK(allWeightings);
+
 			// We have all data we need!
 			if (pMetadata)
 			{
@@ -570,22 +560,78 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 				metadata.timerange_start = timerange_start;
 				metadata.timerange_end = timerange_end;
 				metadata.isRandomSampling = random_sampling;
+				metadata.randomSamplingNumberRows = random_sampling_number_rows;
 				metadata.isConsolidateRows = consolidate_rows;
+				metadata.display_absolute_time_columns = display_absolute_time_columns;
 				metadata.primaryGroupIndex = primary_vg_index__in__top_level_vg_vector;
+				metadata.db = executor.db;
+				metadata.UOAs = UOAs;
+				metadata.biggest_counts = biggest_counts;
+				metadata.child_counts = child_counts;
+				metadata.child_uoas__which_multiplicity_is_greater_than_1 = child_uoas__which_multiplicity_is_greater_than_1;
+				metadata.top_level_variable_groups_vector = top_level_variable_groups_vector;
+				metadata.child_variable_groups_vector = child_variable_groups_vector;
+				metadata.top_level_vg = top_level_vg;
+				metadata.sequence = sequence;
+				metadata.overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf =
+					overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf;
+				metadata.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 = childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
+				metadata.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.swap(std::map<int, int>());
+
+				for (auto it = allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cbegin();
+					 it != allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cend(); ++it)
+				{
+					auto const & key = it->first;
+					auto const & val = it->second;
+					metadata.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings[key] = val;
+				}
+
+				metadata.number_branch_columns = allWeightings.number_branch_columns;
+				metadata.number_primary_variable_group_single_leaf_columns = allWeightings.number_primary_variable_group_single_leaf_columns;
+				metadata.numberChildVariableGroups = allWeightings.numberChildVariableGroups;
+				metadata.K = K;
+				metadata.has_non_primary_top_level_groups = has_non_primary_top_level_groups;
+				metadata.has_child_groups = has_child_groups;
+				metadata.top_level_variable_groups_schema = top_level_variable_groups_schema;
+				metadata.secondary_variable_groups_schema = secondary_variable_groups_schema;
 			}
 
 			return;
 		}
+		else
+		{
+			// Only populate variables that were NOT already populated from the cache in Prepare
+			if (pMetadata)
+			{
+				childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 = pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 
-		// ********************************************************************************************************************************************************* //
-		// Build a schema object, one per variable group with selected data,
-		// intended for internal use by the k-ad algorithm (i.e., converted from the raw format used in the database
-		// into a handy set of schema instances)
-		// ********************************************************************************************************************************************************* //
-		// Also, determine, and set, the value of K for this run
-		// (note: there is only a single DMU for which K can be greater than 1, currently)
-		// ********************************************************************************************************************************************************* //
-		PopulateSchemaForRawDataTables_And_SetK(allWeightings);
+				allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.swap(fast_short_to_short_map<hits_tag>());
+
+				for (auto it = pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.cbegin();
+					 it != pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.cend(); ++it)
+				{
+					auto const & key = it->first;
+					auto const & val = it->second;
+					allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1[key] = val;
+				}
+
+				allWeightings.number_branch_columns = pMetadata->number_branch_columns;
+				allWeightings.number_primary_variable_group_single_leaf_columns = pMetadata->number_primary_variable_group_single_leaf_columns;
+				allWeightings.numberChildVariableGroups = pMetadata->numberChildVariableGroups;
+				K = pMetadata->K;
+				has_non_primary_top_level_groups = pMetadata->has_non_primary_top_level_groups;
+				has_child_groups = pMetadata->has_child_groups;
+				top_level_variable_groups_schema = pMetadata->top_level_variable_groups_schema;
+				secondary_variable_groups_schema = pMetadata->secondary_variable_groups_schema;
+			}
+		}
+
+		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
+
+		if (pMetadata && pMetadata->isGranular)
+		{
+			messager.AppendKadStatusText((boost::format("Generating output for %1%") % GetTimeUnitValue(pMetadata->time_granularity, pMetadata->timerange_start)).str().c_str(), nullptr);
+		}
 
 		if (failed || CheckCancelled()) { return; }
 
@@ -598,27 +644,33 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// This function both creates the table, and loads it with raw data,
 		// but just for the desired columns (and time range), from the permanent raw data tables.
 		// ********************************************************************************************************************************************************* //
-		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(top_level_variable_groups_schema[primary_vg_index__in__top_level_vg_vector],
+		messager.AppendKadStatusText((boost::format("Load raw data for primary variable group \"%1%\" over the selected time range...") % Table_VG_CATEGORY::GetVgDisplayTextShort(
+										  top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first)).str().c_str(), this);
+		SqlAndColumnSet selected_raw_data_table_over_time_range = CreateTableOfSelectedVariablesFromRawData(top_level_variable_groups_schema[primary_vg_index__in__top_level_vg_vector],
 				primary_vg_index__in__top_level_vg_vector);
 
 		if (failed || CheckCancelled()) { return; }
 
-		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
-		ExecuteSQL(selected_raw_data_table_schema);
+		selected_raw_data_table_over_time_range.second.most_recent_sql_statement_executed__index = -1;
+		ExecuteSQL(selected_raw_data_table_over_time_range);
 
 		if (failed || CheckCancelled()) { return; }
 
-		primary_group_column_sets.push_back(selected_raw_data_table_schema);
+		primary_group_column_sets.push_back(selected_raw_data_table_over_time_range);
 
-		N_grand_total = ObtainCount(selected_raw_data_table_schema.second);
+		N_grand_total = ObtainCount(selected_raw_data_table_over_time_range.second);
 
 		if (K > N_grand_total)
 		{
-			SetFailureErrorMessage((
-									   boost::format("The chosen value of K (%1%) exceeds the total number of rows of raw data (%2%) for the primary variable group \"%3%\" over the desired time range.  Please decrease the value of K.")
-									   % boost::lexical_cast<std::string>(K) % boost::lexical_cast<std::string>(N_grand_total) % selected_raw_data_table_schema.second.variable_group_longhand_names[0]).str().c_str());
-			failed = true;
-			return;
+			if (pMetadata == nullptr || !pMetadata->isGranular)
+			{
+				SetFailureErrorMessage((
+										   boost::format("The chosen value of K (%1%) exceeds the total number of rows of raw data (%2%) for the primary variable group \"%3%\" over the desired time range.  Please decrease the value of K.")
+										   % boost::lexical_cast<std::string>(K) % boost::lexical_cast<std::string>(N_grand_total) %
+										   selected_raw_data_table_over_time_range.second.variable_group_longhand_names[0]).str().c_str());
+				failed = true;
+				return;
+			}
 		}
 
 		// ********************************************************************************************************************************************************* //
@@ -630,12 +682,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		//
 		// Later steps will load the other top-level, and the child, variable groups.
 		// ********************************************************************************************************************************************************* //
-		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
-		messager.AppendKadStatusText((boost::format("Load raw data for primary variable group \"%1%\" over the selected time range...") % Table_VG_CATEGORY::GetVgDisplayTextShort(
-										  top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first)).str().c_str(), this);
 		std::vector<std::string> errorMessages;
-		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, primary_vg_index__in__top_level_vg_vector, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY,
+		KadSampler_ReadData_AddToTimeSlices(selected_raw_data_table_over_time_range.second, primary_vg_index__in__top_level_vg_vector, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY,
 											errorMessages);
 
 		if (failed || CheckCancelled())
@@ -769,7 +817,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Give text feedback that the sampler is entering full sampling mode
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
+			if (pMetadata == nullptr || !pMetadata->isGranular)
+			{
+				messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
+			}
 
 			if (consolidate_rows)
 			{
@@ -830,7 +881,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Populate (merge) *BOTH* child variable groups *AND* non-primary top-level variable groups
 			// ********************************************************************************************************************************************************* //
-			messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
+			if (pMetadata == nullptr || !pMetadata->isGranular)
+			{
+				messager.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), this);
+			}
+
 			messager.AppendKadStatusText((
 											 boost::format("Note: Merging of additional variable groups could increase the number of output rows beyond the numbers indicated above.")).str().c_str(), this);
 			KadSamplerFillDataForNonPrimaryGroups(allWeightings);
@@ -938,6 +993,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.SetPerformanceLabel("Writing results to disk...");
 		KadSamplerWriteResultsToFileOrScreen(allWeightings, pMetadata);
 		messager.AppendKadStatusText((boost::format("Wrote %1% rows to output file \"%2%\"") % allWeightings.rowsWritten % setting_path_to_kad_output.c_str()).str(), this);
+
+		if (pMetadata)
+		{
+			pMetadata->rows = allWeightings.rowsWritten;
+		}
 
 		if (failed || CheckCancelled()) { return; }
 
@@ -2349,23 +2409,47 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings, RunMetadata * pMetadata)
 {
 
+	bool noCache = (pMetadata == nullptr || ((mode & OutputGeneratorMode::GATHER_TIME_RANGE) != 0));
+
+	if (noCache)
+	{
+		messager.AppendKadStatusText((boost::format("Populating k-ad metadata...")).str().c_str(), this);
+	}
+
 	// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
 	//temp_dot = "temp.";
 	temp_dot = "";
 
 	db = input_model->getDb();
 
-	executor.db = db;
+	if (noCache)
+	{
+		executor.db = db;
+	}
+	else
+	{
+		executor.db = pMetadata->db;
+	}
 
 	tables_deleted.clear();
 
 	initialized = true;
 
-	std::tuple<bool, std::int64_t, bool, bool> general_info = model->t_general_options.getKadSamplerInfo(model->getDb());
-	random_sampling = std::get<0>(general_info);
-	random_sampling_number_rows = std::get<1>(general_info);
-	consolidate_rows = std::get<2>(general_info);
-	display_absolute_time_columns = std::get<3>(general_info);
+	if (noCache)
+	{
+		std::tuple<bool, std::int64_t, bool, bool> general_info = model->t_general_options.getKadSamplerInfo(model->getDb());
+		random_sampling = std::get<0>(general_info);
+		random_sampling_number_rows = std::get<1>(general_info);
+		consolidate_rows = std::get<2>(general_info);
+		display_absolute_time_columns = std::get<3>(general_info);
+	}
+	else
+	{
+		random_sampling = pMetadata->isRandomSampling;
+		random_sampling_number_rows = pMetadata->randomSamplingNumberRows;
+		consolidate_rows = pMetadata->isConsolidateRows;
+		display_absolute_time_columns = pMetadata->display_absolute_time_columns;
+	}
 
 	if (random_sampling && (random_sampling_number_rows <= 0))
 	{
@@ -2374,14 +2458,29 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings, RunMetada
 		failed = true;
 	}
 
-	PopulateUOAs();
+	if (noCache)
+	{
+		PopulateUOAs(); // UOAs
+	}
+	else
+	{
+		UOAs = pMetadata->UOAs;
+	}
 
 	if (failed || CheckCancelled())
 	{
 		return;
 	}
 
-	PopulateDMUCounts();
+	if (noCache)
+	{
+		PopulateDMUCounts(); // biggest_counts, child_counts
+	}
+	else
+	{
+		biggest_counts = pMetadata->biggest_counts;
+		child_counts = pMetadata->child_counts;
+	}
 
 	if (failed || CheckCancelled())
 	{
@@ -2395,21 +2494,36 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings, RunMetada
 		return;
 	}
 
-	DetermineChildMultiplicitiesGreaterThanOne();
+	if (noCache)
+	{
+		DetermineChildMultiplicitiesGreaterThanOne(); // child_uoas__which_multiplicity_is_greater_than_1
+	}
+	else
+	{
+		child_uoas__which_multiplicity_is_greater_than_1 = pMetadata->child_uoas__which_multiplicity_is_greater_than_1;
+	}
 
 	if (failed || CheckCancelled())
 	{
 		return;
 	}
 
-	PopulateVariableGroups();
+	if (noCache)
+	{
+		PopulateVariableGroups(); // top_level_variable_groups_vector & child_variable_groups_vector
+	}
+	else
+	{
+		top_level_variable_groups_vector = pMetadata->top_level_variable_groups_vector;
+		child_variable_groups_vector = pMetadata->child_variable_groups_vector;
+	}
 
 	if (failed || CheckCancelled())
 	{
 		return;
 	}
 
-	if (pMetadata == nullptr || ((mode & OutputGeneratorMode::GATHER_TIME_RANGE) != 0))
+	if (noCache)
 	{
 		primary_vg_index__in__top_level_vg_vector = 0;
 
@@ -2438,17 +2552,33 @@ void OutputModel::OutputGenerator::Prepare(KadSampler & allWeightings, RunMetada
 	}
 	else
 	{
-		pMetadata->primaryGroupIndex = primary_vg_index__in__top_level_vg_vector;
+		primary_vg_index__in__top_level_vg_vector = pMetadata->primaryGroupIndex;
 	}
 
-	top_level_vg = top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first;
+	if (noCache)
+	{
+		top_level_vg = top_level_variable_groups_vector[primary_vg_index__in__top_level_vg_vector].first;
+	}
+	else
+	{
+		top_level_vg = pMetadata->top_level_vg;
+	}
 
 	if (failed || CheckCancelled())
 	{
 		return;
 	}
 
-	PopulatePrimaryKeySequenceInfo();
+	if (noCache)
+	{
+		PopulatePrimaryKeySequenceInfo(); // sequence & overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf
+	}
+	else
+	{
+		sequence = pMetadata->sequence;
+		overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf =
+			pMetadata->overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf;
+	}
 
 	if (failed || CheckCancelled())
 	{
@@ -3726,7 +3856,6 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 			if (multiplicity == 0)
 			{
 				// User's k-ad selection is too small in this DMU category to support the variables they have selected
-				// Todo: Error message
 				if (the_dmu_category_identifier.longhand)
 				{
 					if (uoa_identifier.longhand)
@@ -3781,9 +3910,12 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 			}
 
 			// Note: Validation code has already validated that there is only 1 DMU category for which the multiplicity is greater than 1.
-			// Always add at least one entry, even if multiplicity is 1.
+			// Always add at least one entry per UOA, even if multiplicity is 1.
 			// This is to support the way things are currently designed, which requires
 			// that there be an entry here in the special case that all multiplicities are 1.
+			// In the case that all multiplicities are 1 for the given UOA, it does not matter which DMU within the UOA is set in the following vector,
+			// so we take the first.  Because only 1 DMU can have multiplicity>1 for a given UOA, the 'multiplicity>1' condition is bound to match
+			// when it's necessary and will overwrite or correspond to the value set in the 'first' pass.
 			if (first || multiplicity > 1)
 			{
 				child_uoas__which_multiplicity_is_greater_than_1[uoa_identifier] = std::make_pair(the_dmu_category_identifier, multiplicity);
@@ -3877,7 +4009,6 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 
 				if (!the_variable_group.first.code)
 				{
-					// Todo: error message
 					boost::format msg("Unknown variable group identifier while populating primary key sequence metadata.");
 					SetFailureErrorMessage(msg.str());
 					failed = true;
@@ -3886,7 +4017,6 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 
 				if (!the_variable_group.first.identifier_parent)
 				{
-					// Todo: error message
 					boost::format msg("Unknown unit of analysis identifier while populating primary key sequence metadata.");
 					SetFailureErrorMessage(msg.str());
 					failed = true;
@@ -4327,6 +4457,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 
 	});
 
+	// All of that - the entire function preceding this line - just to set two variables:
+	// 'sequence', and the variable below.
 	overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf = overall_primary_key_sequence_number;
 
 }
@@ -4400,9 +4532,7 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists(RunMetadata * pM
 		{
 			if (!append_if_output_file_already_exists)
 			{
-				bool firstRun = (pMetadata->runIndex == 0 && (mode & OutputGeneratorMode::GATHER_TIME_RANGE) != 0);
-
-				if (pMetadata == nullptr || firstRun)
+				if (pMetadata == nullptr || pMetadata->runIndex == 0)
 				{
 					boost::format overwrite_msg("The file %1% already exists.  Overwrite this file?");
 					overwrite_msg % setting_path_to_kad_output->ToString();

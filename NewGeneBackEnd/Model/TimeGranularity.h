@@ -27,4 +27,6 @@ enum TIME_GRANULARITY
 
 std::string GetTimeGranularityText(TIME_GRANULARITY const time_granularity);
 
+std::string GetTimeUnitValue(TIME_GRANULARITY const time_granularity, std::int64_t timestamp);
+
 #endif

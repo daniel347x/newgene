@@ -42,21 +42,6 @@ bool SingleGeneratorRun(OutputModel::OutputGenerator & generator, RunMetadata * 
 		retVal = false;
 	}
 
-	if (!generator.done)
-	{
-		if (generator.mode & OutputGeneratorMode::TAIL_RUN)
-		{
-			generator.messager.UpdateStatusBarText("", &generator);
-
-			if (OutputModel::OutputGenerator::cancelled)
-			{
-				generator.messager.AppendKadStatusText("Operation cancelled.", &generator);
-			}
-
-			retVal = false;
-		}
-	}
-
 	return retVal;
 }
 
@@ -125,107 +110,167 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 					// Generate output
 					// ***************************************** //
 
-					bool granular_mode { true };
-
-					if (granular_mode)
 					{
-						// Perform multiple runs, once per time unit, closing the file and clearing all memory between runs
-						// ... to optimize, so that memory does not run out for long stretches of time (i.e., many days, months, years, etc.)
+						std::lock_guard<std::recursive_mutex> guard(OutputModel::OutputGenerator::is_generating_output_mutex);
 
-						// First - a run in 'gather time range' mode
-
-						// You must modify the generator code to support this.  Return both the time range, the time granularity,
-						// AND whether random sampling or consolidate rows is selected..  If so, switch to full mode.
-
-						// Second - split the time range into units
-
-						// Third - run a loop over the time range units
-
-						// No need to modify the generator code for this
-
-						// In this loop the first received 'head', the last receives 'tail', and any that are not first and not last receive 'middle';
-						// set the time range values temporarily to those in the single time range, and then call the generator
-
-						// Fourth, go through the generator code and modify text spit out to file/screen to match the mode being run
-
-						// Also add new log/screen comments identifying whether 'time granular optimized' mode is being run, or regular mode
-
-						bool doContinue = false;
-						RunMetadata metadata;
-						metadata.runIndex = 0;
+						if (OutputModel::OutputGenerator::is_generating_output)
 						{
-							OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::GATHER_TIME_RANGE);
-							doContinue = SingleGeneratorRun(output_generator, &metadata);
+							messager__.ShowMessageBox("Another k-ad output generation operation is in progress.  Please wait for that operation to complete first.");
+							return;
 						}
 
-						if (doContinue)
+						OutputModel::OutputGenerator::is_generating_output = true;
+					}
+
+					messager__.SetRunStatus(RUN_STATUS__RUNNING);
+
+					bool cancelled { false };
+					bool failed { false };
+					bool markedAsDone { false };
+
+					RunMetadata metadata;
+					metadata.runIndex = 0;
+					metadata.isGranular = true;
+					metadata.rows = 0;
+					bool doContinue { false };
+					{
+						OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::GATHER_TIME_RANGE);
+						doContinue = SingleGeneratorRun(output_generator, &metadata);
+					}
+
+					if (metadata.isConsolidateRows || metadata.isRandomSampling || metadata.time_granularity == TIME_GRANULARITY::TIME_GRANULARITY__NONE)
+					{
+						// time-unit by time-unit runs are disabled for random sampling and consolidate rows mode
+						metadata.isGranular = false;
+					}
+
+					std::int64_t rows = 0;
+
+					if (doContinue)
+					{
+						if (metadata.isGranular)
 						{
-							if (metadata.isConsolidateRows || metadata.isRandomSampling || metadata.time_granularity == TIME_GRANULARITY::TIME_GRANULARITY__NONE)
+							// Loop through time units, performing one full run for that given time unit for each time unit
+							TimeSlice fullTimeRange(metadata.timerange_start, metadata.timerange_end);
+							int loopCount = 0;
+							int highestLoopCount = 0;
+							fullTimeRange.loop_through_time_units(metadata.time_granularity, boost::function<void(int64_t, int64_t)>([&highestLoopCount](std::int64_t, std::int64_t)
 							{
-								// time-unit by time-unit runs are disabled for random sampling and consolidate rows mode
-								granular_mode = false;
-							}
-							else
+								++highestLoopCount;
+							}));
+
+							fullTimeRange.loop_through_time_units(metadata.time_granularity, boost::function<void(int64_t, int64_t)>([&doContinue, &messager__, &output_model, &project, &metadata, &loopCount,
+																  &highestLoopCount, &markedAsDone, &cancelled, &failed](std::int64_t start, std::int64_t end)
 							{
-								// Loop through time units, performing one full run for that given time unit for each time unit
-								RunMetadata origMetadata = metadata;
-								TimeSlice fullTimeRange(metadata.timerange_start, metadata.timerange_end);
-								int loopCount = 0;
-								int highestLoopCount = 0;
-								fullTimeRange.loop_through_time_units(metadata.time_granularity, boost::function<void(int64_t, int64_t)>([&highestLoopCount](std::int64_t, std::int64_t)
-								{
-									++highestLoopCount;
-								}));
+								++loopCount;
+								++metadata.runIndex;
 
-								fullTimeRange.loop_through_time_units(metadata.time_granularity, boost::function<void(int64_t, int64_t)>([&doContinue, &messager__, &output_model, &project, &metadata, &loopCount,
-																	  &highestLoopCount](std::int64_t start, std::int64_t end)
+								if (doContinue)
 								{
-									++loopCount;
-									++metadata.runIndex;
+									metadata.timerange_start = start;
+									metadata.timerange_end = end;
+									metadata.rows = 0;
 
-									if (doContinue)
+									OutputModel::OutputGenerator output_generator(messager__, output_model, project, 0 /* mode - will be set below */);
+									output_generator.mode = 0;
+
+									if (loopCount == 1)
 									{
-										metadata.timerange_start = start;
-										metadata.timerange_end = end;
-
-										OutputModel::OutputGenerator output_generator(messager__, output_model, project, 0);
-										output_generator.mode = 0;
-
-										if (loopCount == 1)
-										{
-											output_generator.mode |= OutputGeneratorMode::HEADER_RUN;
-										}
-
-										if (loopCount == highestLoopCount)
-										{
-											output_generator.mode |= OutputGeneratorMode::TAIL_RUN;
-										}
-
-										if (output_generator.mode == 0)
-										{
-											output_generator.mode = OutputGeneratorMode::MIDDLE_RUN;
-										}
-
-										doContinue = SingleGeneratorRun(output_generator, &metadata);
+										output_generator.mode |= OutputGeneratorMode::HEADER_RUN;
 									}
-								}));
+
+									if (loopCount == highestLoopCount)
+									{
+										output_generator.mode |= OutputGeneratorMode::TAIL_RUN;
+									}
+
+									if (output_generator.mode == 0)
+									{
+										output_generator.mode = OutputGeneratorMode::MIDDLE_RUN;
+									}
+
+									doContinue = SingleGeneratorRun(output_generator, &metadata);
+									rows += metadata.rows;
+
+									if (output_generator.failed)
+									{
+										failed = true;
+										doContinue = false;
+									}
+
+									if (output_generator.CheckCancelled())
+									{
+										cancelled = true;
+										doContinue = false;
+									}
+
+									if (output_generator.done && (output_generator.mode & OutputGeneratorMode::TAIL_RUN))
+									{
+										markedAsDone = true;
+									}
+								}
+							}));
+
+							if (!markedAsDone)
+							{
+								messager__.UpdateStatusBarText("", nullptr);
+							}
+						}
+						else
+						{
+							// All data (i.e., over all days, months, years, etc.) is processed in a single run - all data, intermediate internal data, and results
+							// must fit in RAM
+							++metadata.runIndex; // unused, but if it is ever used in the future, this is a reminder to increment runIndex
+							metadata.rows = 0;
+
+							OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN);
+							SingleGeneratorRun(output_generator);
+							rows += metadata.rows;
+
+							if (output_generator.failed)
+							{
+								failed = true;
+							}
+
+							if (output_generator.CheckCancelled())
+							{
+								cancelled = true;
+							}
+
+							if (output_generator.done && (output_generator.mode & OutputGeneratorMode::TAIL_RUN))
+							{
+								markedAsDone = true;
 							}
 						}
 					}
 
-					if (!granular_mode)
+					messager__.AppendKadStatusText((boost::format("Wrote %1% total rows") % rows, nullptr));
+
+					if (failed)
 					{
-
-						// Ignore metadata!  This is just a test run to make certain is_generating_output is not set!
-						RunMetadata metadata;
-						OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::GATHER_TIME_RANGE);
-						bool doContinue = SingleGeneratorRun(output_generator, &metadata);
-
-						if (doContinue)
+						messager__.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), nullptr);
+						messager__.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), nullptr);
+						messager__.AppendKadStatusText("Operation failed.", nullptr);
+					}
+					else if (cancelled)
+					{
+						messager__.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), nullptr);
+						messager__.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), nullptr);
+						messager__.AppendKadStatusText("Operation cancelled.", nullptr);
+					}
+					else if (!markedAsDone)
+					{
+						messager__.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), nullptr);
+						messager__.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), nullptr);
+						messager__.AppendKadStatusText("Operation did not complete.", nullptr);
+					}
+					else
+					{
+						if (metadata.isGranular)
 						{
-							// All data (i.e., over all days, months, years, etc.) is processed in a single run - all data, intermediate internal data, and results
-							// must fit in RAM
-							SingleGeneratorRun(OutputModel::OutputGenerator(messager__, output_model, project, OutputGeneratorMode::HEADER_RUN | OutputGeneratorMode::TAIL_RUN));
+							messager__.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), nullptr);
+							messager__.AppendKadStatusText((boost::format("*****************************************************")).str().c_str(), nullptr);
+							messager__.AppendKadStatusText("k-ad routine is complete.", nullptr);
 						}
 					}
 
@@ -245,6 +290,9 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 					messager.AppendKadStatusText(msg4.str());
 					#				endif
 
+					OutputModel::OutputGenerator::is_generating_output = false;
+					messager__.SetPerformanceLabel("");
+					messager__.SetRunStatus(RUN_STATUS__NOT_RUNNING);
 				});
 
 				messager__.EmitChangeMessage(change_response);
