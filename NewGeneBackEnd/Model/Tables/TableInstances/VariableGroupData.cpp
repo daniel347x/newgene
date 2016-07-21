@@ -345,7 +345,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		{
 			data_file.close();
 			boost::format msg("Cannot open data file \"%1%\"");
-			msg % definition.input_file.c_str();
+			msg % definition.input_file;
 			errorMsg = msg.str();
 			return false;
 		}
@@ -379,7 +379,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 			{
 				data_file.close();
 				boost::format msg("Cannot read column names from the data file \"%1%\"");
-				msg % definition.input_file.c_str();
+				msg % definition.input_file;
 				errorMsg = msg.str();
 				return false;
 			}
@@ -418,7 +418,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 			{
 				data_file.close();
 				boost::format msg("Cannot read column descriptions from the data file \"%1%\"");
-				msg % definition.input_file.c_str();
+				msg % definition.input_file;
 				errorMsg = msg.str();
 				return false;
 			}
@@ -498,7 +498,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 			{
 				data_file.close();
 				boost::format msg("Cannot read column data types from the data file \"%1%\"");
-				msg % definition.input_file.c_str();
+				msg % definition.input_file;
 				errorMsg = msg.str();
 				return false;
 			}
