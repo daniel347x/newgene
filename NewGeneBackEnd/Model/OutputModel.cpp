@@ -174,7 +174,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, project(project_)
 	, messager(messager_)
 	, failed(false)
-	, append_if_output_file_already_exists(false)
+	, append_overwrite_if_output_file_already_exists(AppendOverwriteMode::NOT_SELECTED)
 	, delete_tables(true)
 	, debug_ordering(false)
 	, consolidate_rows(true)
@@ -272,7 +272,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (timeRangeOnly)
 	{
-		//messager.disableOutput = true;
 		messager.disableOutput = false;
 	}
 	else
@@ -390,6 +389,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	// pMetadata->appendOrOverwrite is set by the below function,
+	// as is our own append_overwrite_if_output_file_already_exists to match
 	setting_path_to_kad_output = CheckOutputFileExists(pMetadata);
 
 	if (failed || CheckCancelled())
@@ -407,7 +408,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	debug_sql_path = setting_path_to_kad_output;
 	debug_sql_path.replace_extension(".debugsql.txt");
 
-	//messager.AppendKadStatusText("Validating database...", nullptr);
 	input_model->ClearRemnantTemporaryTables();
 
 	BOOST_SCOPE_EXIT(this_)
@@ -629,6 +629,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 				metadata.has_child_groups = has_child_groups;
 				metadata.top_level_variable_groups_schema = top_level_variable_groups_schema;
 				metadata.secondary_variable_groups_schema = secondary_variable_groups_schema;
+
+				metadata.appendOrOverwrite; // Skip!
 			}
 
 			return;
@@ -4538,29 +4540,42 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists(RunMetadata * pM
 
 		if (output_file_exists)
 		{
-			if (!append_if_output_file_already_exists)
+			if (append_overwrite_if_output_file_already_exists == AppendOverwriteMode::NOT_SELECTED)
 			{
 				if (pMetadata == nullptr || pMetadata->runIndex == 0)
 				{
-					boost::format overwrite_msg("The file %1% already exists.  Append to this file?");
+					boost::format overwrite_msg("The file %1% already exists.  Would you like to append to this file, or overwrite this file?");
 					overwrite_msg % setting_path_to_kad_output->ToString();
-					bool overwrite_file = messager.ShowQuestionMessageBox("Append to file?", overwrite_msg.str());
+					std::vector<std::string> options;
+					options.push_back("Overwrite this file");
+					options.push_back("Append to this file");
+					int result = messager.ShowOptionMessageBox("Append or overwrite file?", overwrite_msg.str(), options);
 
-					if (!overwrite_file)
+					if (result == -1)
 					{
+						pMetadata->appendOrOverwrite = AppendOverwriteMode::NOT_SELECTED;
 						return std::string();
+					}
+
+					if (result == 0)
+					{
+						pMetadata->appendOrOverwrite = AppendOverwriteMode::OVERWRITE;
+					}
+					else
+					{
+						pMetadata->appendOrOverwrite = AppendOverwriteMode::APPEND;
 					}
 
 				}
 
-				append_if_output_file_already_exists = true;
+				append_overwrite_if_output_file_already_exists = pMetadata->appendOrOverwrite;
 			}
 		}
 
 		return setting_path_to_kad_output->ToString();
 	}
 
-	return "";
+	return std::string();
 }
 
 void OutputModel::OutputGenerator::SetFailureErrorMessage(std::string const & failure_message_)
@@ -6315,7 +6330,15 @@ void OutputModel::OutputGenerator::KadSamplerWriteResultsToFileOrScreen(KadSampl
 	}
 
 	std::fstream output_file;
-	output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::app);
+
+	if (append_overwrite_if_output_file_already_exists == AppendOverwriteMode::APPEND)
+	{
+		output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::app);
+	}
+	else
+	{
+		output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::trunc);
+	}
 
 	if (!output_file.good())
 	{

@@ -69,7 +69,7 @@ QCheckBox {padding-bottom: 3px; border-bottom: 2px solid #BCBCBC;}</string>
       <item>
        <widget class="QCheckBox" name="checkBoxHideBars">
         <property name="text">
-         <string>Expand current variable group to fill the entire pane </string>
+         <string>Expand current variable group to fill the entire panel </string>
         </property>
        </widget>
       </item>

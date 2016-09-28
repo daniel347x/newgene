@@ -1136,14 +1136,14 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 			}
 		}
 
-		QRadioButton * YButton = radioButtonsTimeRange[0];
-		QRadioButton * YMDButton = radioButtonsTimeRange[1];
-		QRadioButton * YMButton = radioButtonsTimeRange[2];
-
 		if (valid)
 		{
 			if (warnEmptyEndingTimeCols)
 			{
+				QRadioButton * YButton = radioButtonsTimeRange[0];
+				QRadioButton * YMDButton = radioButtonsTimeRange[1];
+				QRadioButton * YMButton = radioButtonsTimeRange[2];
+
 				QString ymd;
 				QString fin;
 				QString colOrCols;
@@ -1447,16 +1447,20 @@ void NewGeneManageVGs::on_pushButton_rename_vg_clicked()
 	std::string vg_description;
 
 	bool ok {false};
+
 	while (!ok)
 	{
 		boost::format msg("Set a new description for variable group \"%1%\":");
 		msg % *vg.code;
 		std::string longhand;
+
 		if (vg.longhand)
 		{
 			longhand = *vg.longhand;
 		}
+
 		QString vg_description_ = QInputDialog::getText(this, "Variable group description", QString(msg.str().c_str()), QLineEdit::Normal, QString(longhand.c_str()), &ok);
+
 		if (!ok)
 		{
 			return;
@@ -1466,10 +1470,12 @@ void NewGeneManageVGs::on_pushButton_rename_vg_clicked()
 		boost::trim(vg_description);
 		bool valid = true;
 		std::string errorMsg;
+
 		if (valid)
 		{
 			valid = Validation::ValidateVgDescription(vg_description, errorMsg);
 		}
+
 		if (!valid)
 		{
 			boost::format msg("%1%");

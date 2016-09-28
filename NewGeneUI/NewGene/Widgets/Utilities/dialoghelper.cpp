@@ -1236,3 +1236,73 @@ void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormL
 	}
 
 }
+
+// This and the above function could be templatized.  If a third is added, perhaps I will.
+void DialogHelper::AddStringChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall,
+		QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, std::string const & dlgQuestion, std::vector<std::string> const & string_list)
+{
+
+	QString labelQuestion = QString(dlgQuestion.c_str());
+	QLabel * question = new QLabel(labelQuestion, &dialog);
+
+	// The parent of the list view is a widget, not a layout
+	listpane = new QListView(&VgConstructionPanes);
+	listpane->setMinimumWidth(400);
+	listpane->setMinimumHeight(400);
+	listpane->setAlternatingRowColors(true);
+	listpane->setSelectionBehavior(QAbstractItemView::SelectRows);
+	listpane->setResizeMode(QListView::Adjust);
+	listpane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+	listpane->setSpacing(5);
+	listpane->setStyleSheet("QListView {selection-color: black;}");
+
+	// But the list view gets added to the layout, not to its parent widget
+	formConstructionPane.addWidget(listpane);
+
+	// Now we set the layout of the parent widget
+	VgConstructionPanes.setLayout(&formConstructionPane);
+
+	// Now we start adding elements to the overall (high-level) form layout
+	formOverall.addWidget(question);
+
+	// ... this includes adding the parent widget of the list view that has the layout (with the list view already added) as its layout
+	formOverall.addWidget(&VgConstructionPanes);
+
+	// The high-level form layout must be the layout of some widget, which is the high-level widget
+	VgConstructionWidget.setLayout(&formOverall);
+
+	// The entire dialog has a single form layout as its layout.  Add the high-level widget to the dialog's form layout.
+	form.addRow(&VgConstructionWidget);
+
+	{
+
+		QStandardItemModel * model = new QStandardItemModel(listpane);
+
+		int index = 0;
+		std::for_each(string_list.cbegin(), string_list.cend(), [&](std::string const & st)
+		{
+
+			QStandardItem * item = new QStandardItem();
+			std::string text = st;
+			item->setText(text.c_str());
+			item->setEditable(false);
+			item->setCheckable(false);
+			QVariant v;
+			v.setValue(st);
+			item->setData(v);
+			model->setItem(index, item);
+
+			++index;
+
+		});
+
+		model->sort(0);
+
+		listpane->setModel(model);
+		listpane->setItemDelegate(new HtmlDelegate{});
+
+		listpane->clearSelection();
+
+	}
+
+}

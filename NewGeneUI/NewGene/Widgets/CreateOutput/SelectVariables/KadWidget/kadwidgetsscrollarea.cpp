@@ -14,6 +14,9 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
+#include "../Variables/newgenevariablestoolboxwrapper.h"
+#include "../Variables/newgenevariablestoolbox.h"
+
 KadWidgetsScrollArea::KadWidgetsScrollArea(QWidget * parent) :
 	QWidget(parent),
 	NewGeneWidget(WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, KAD_SPIN_CONTROLS_AREA,
@@ -169,7 +172,14 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 							{
 								if (change.parent_identifier.code && change.parent_identifier.uuid)
 								{
-									AddKadSpinWidget(change.parent_identifier, change.child_identifiers);
+									/* From the server arrives a list of DMU INSTANCES (USA, Russia, etc.), not DMUs (COUNTRY, etc.) -
+									this is NOT what the function AddKadSpinWidget expects, so send empty for the second argument.
+									HOWEVER, this line is only reached when the user has added a NEW DMU so the list is empty anyways;
+									note that when this function is called, the new DMU is HIDDEN, which is as it should be,
+									because it should only be shown when there are variables selected corresponding to VGs
+									corresponding to UOAs corresponding to this new DMU, and there can't be when the DMU was just created,
+									so the new DMU's Kad spin box should certainly always be hidden in this scenario */
+									AddKadSpinWidget(change.parent_identifier, WidgetInstanceIdentifiers());
 								}
 							}
 							break;
@@ -221,6 +231,8 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 										layoutItemToRemove = nullptr;
 
 										EmptyTextCheck();
+
+										Resequence();
 									}
 
 								}
@@ -258,6 +270,9 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 
 void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & identifier, WidgetInstanceIdentifiers const & active_dmus)
 {
+
+	// Only called when an actual DMU is being ADDED to the input dataset!!
+	// (or on full refresh)
 
 	// Remove the stretch at the end
 	QLayoutItem * stretcher {};
@@ -302,6 +317,9 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 		}
 	});
 
+	// DMUs for ALL UOAs corresponding to ALL variable groups EXIST in the 'kad spin box' area,
+	// but only those corresponding to UOAs corresponding to variable groups with SELECTED variables
+	// are VISIBLE.
 	if (not_me)
 	{
 		newSpinBox->doSetVisible(false);
@@ -328,6 +346,7 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 
 	EmptyTextCheck();
 
+	Resequence();
 }
 
 void KadWidgetsScrollArea::ShowLoading(bool const loading_)
@@ -349,14 +368,17 @@ void KadWidgetsScrollArea::EmptyTextCheck()
 		{
 			emptySpinsLabel->setVisible(false);
 		}
+
 		if (noOutputProjectLabel)
 		{
 			noOutputProjectLabel->setVisible(false);
 		}
+
 		if (frameLoadingDataset)
 		{
 			frameLoadingDataset->setVisible(true);
 		}
+
 		return;
 	}
 
@@ -406,6 +428,7 @@ void KadWidgetsScrollArea::EmptyTextCheck()
 				emptySpinsLabel->setVisible(false);
 			}
 		}
+
 		if (noOutputProjectLabel)
 		{
 			noOutputProjectLabel->setVisible(false);
@@ -417,6 +440,7 @@ void KadWidgetsScrollArea::EmptyTextCheck()
 		{
 			emptySpinsLabel->setVisible(false);
 		}
+
 		if (noOutputProjectLabel)
 		{
 			noOutputProjectLabel->setVisible(true);
@@ -463,4 +487,133 @@ void KadWidgetsScrollArea::paintEvent(QPaintEvent *)
 	opt.init(this);
 	QPainter p(this);
 	style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+void KadWidgetsScrollArea::Resequence()
+{
+	NewGeneVariablesToolboxWrapper * toolbox = this->parentWidget()->parentWidget()->parentWidget()->parentWidget()->findChild<NewGeneVariablesToolboxWrapper *>("toolbox");
+
+	if (toolbox)
+	{
+		WidgetInstanceIdentifiers orderedDmus = toolbox->getDmuSequence();
+		bool misordered = false;
+
+		{
+			int order = 0;
+
+			for (auto orderedDmu : orderedDmus)
+			{
+				int current_number = layout()->count();
+
+				for (int i = 0; i < current_number; ++i)
+				{
+					QLayoutItem * testLayoutItem = layout()->itemAt(i);
+					QWidget * testWidget(testLayoutItem->widget());
+
+					try
+					{
+						KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox *>(testWidget);
+
+						if (testSpinBox)
+						{
+							if (orderedDmu.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, testSpinBox->data_instance))
+							{
+								if (order != i)
+								{
+									misordered = true;
+									break;
+								}
+							}
+						}
+					}
+					catch (std::bad_cast &)
+					{
+						// this will catch throws for the "stretch" layout items, but who cares - it's infrequent
+					}
+				}
+
+				if (misordered)
+				{
+					break;
+				}
+
+				++order;
+			}
+		}
+
+		if (misordered)
+		{
+			// Remove the stretch at the end
+			QLayoutItem * stretcher {};
+
+			if (layout()->count() && (stretcher = layout()->takeAt(layout()->count() - 1)) != 0)
+			{
+				try
+				{
+					QSpacerItem * spacer { dynamic_cast<QSpacerItem *>(stretcher) };
+
+					if (spacer)
+					{
+						delete stretcher->widget();
+						delete stretcher;
+					}
+				}
+				catch (std::bad_cast &)
+				{
+
+				}
+			}
+
+			std::vector<KadSpinBox *> cache;
+
+			for (auto orderedDmu : orderedDmus)
+			{
+				int current_number = layout()->count();
+
+				for (int i = 0; i < current_number; ++i)
+				{
+					QLayoutItem * testLayoutItem = layout()->itemAt(i);
+					QWidget * testWidget(testLayoutItem->widget());
+
+					try
+					{
+						KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox *>(testWidget);
+
+						if (testSpinBox)
+						{
+							if (orderedDmu.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, testSpinBox->data_instance))
+							{
+								cache.push_back(testSpinBox);
+								layout()->removeWidget(testSpinBox);
+								break;
+							}
+						}
+					}
+					catch (std::bad_cast &)
+					{
+						// this will catch throws for the "stretch" layout items, but who cares - it's infrequent
+					}
+				}
+			}
+
+
+			for (auto cachedWidget : cache)
+			{
+				layout()->addWidget(cachedWidget);
+			}
+
+			try
+			{
+				QBoxLayout * boxLayout = dynamic_cast<QBoxLayout *>(layout());
+
+				if (boxLayout)
+				{
+					boxLayout->addStretch();
+				}
+			}
+			catch (std::bad_cast &)
+			{
+			}
+		}
+	}
 }

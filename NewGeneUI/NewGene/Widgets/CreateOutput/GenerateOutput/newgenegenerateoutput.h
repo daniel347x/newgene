@@ -48,7 +48,9 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 		void on_lineEditFilePathToKadOutput_editingFinished();
 		void on_pushButton_cancel_clicked();
 
-	protected:
+		void on_pushButtonClearPane_clicked();
+
+protected:
 
 		void setGenerateOutputPushbuttonClass(std::string const &);
 

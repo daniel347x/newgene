@@ -24,7 +24,12 @@ void InputModel::LoadTables()
 		t_dmu_setmembers.Sort();
 
 		t_uoa_setmemberlookup.Load(db, this);
-		t_uoa_setmemberlookup.Sort();
+
+		if (false)
+		{
+			// Special-case: The table's 'Load' function sorts already, by DMU sequence number in the UOA
+			t_uoa_setmemberlookup.Sort();
+		}
 
 		t_uoa_category.Load(db, this);
 		t_uoa_category.Sort();

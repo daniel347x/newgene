@@ -386,3 +386,63 @@ void NewGeneVariablesToolbox::showInactiveVariableGroups(bool const visible)
 	}
 
 }
+
+WidgetInstanceIdentifiers NewGeneVariablesToolbox::getDmuSequence()
+{
+	int nItems = count();
+
+	// Ordered according to the sequence these DMUs appear in the UOA
+	// as set by the user when the UOA was defined.
+	// Preference given to the first VGs with selected variables.
+	WidgetInstanceIdentifiers orderedDmus;
+
+	for (int n = 0; n < nItems; ++n)
+	{
+		QWidget * testWidget = widget(n);
+
+		try
+		{
+			NewGeneVariableGroup * testVG = dynamic_cast<NewGeneVariableGroup *>(testWidget);
+
+			if (testVG)
+			{
+
+				if (testVG->hasChecked())
+				{
+					WidgetInstanceIdentifier vg = testVG->data_instance;
+					if (vg.identifier_parent)
+					{
+						WidgetInstanceIdentifier uoa = *vg.identifier_parent;
+						if (uoa.foreign_key_identifiers)
+						{
+							WidgetInstanceIdentifiers dmus = *uoa.foreign_key_identifiers;
+							for (auto dmu : dmus)
+							{
+								bool found = false;
+								for (auto existingDmu: orderedDmus)
+								{
+									if (dmu.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, existingDmu))
+									{
+										found = true;
+									}
+								}
+								if (!found)
+								{
+									orderedDmus.push_back(dmu);
+								}
+							}
+						}
+					}
+				}
+
+			}
+		}
+		catch (std::bad_cast &)
+		{
+			// guess not
+		}
+
+	}
+
+	return orderedDmus;
+}

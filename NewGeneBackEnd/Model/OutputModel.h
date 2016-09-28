@@ -26,6 +26,13 @@ enum OutputGeneratorMode
 	TAIL_RUN = 0x08 // tail run in sequence
 };
 
+enum AppendOverwriteMode
+{
+	NOT_SELECTED = 0,
+	OVERWRITE = 1,
+	APPEND = 2
+};
+
 struct RunMetadata;
 
 class PrimaryKeySequence
@@ -808,7 +815,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool delete_tables;
 
 				bool initialized;
-				bool append_if_output_file_already_exists;
+				AppendOverwriteMode append_overwrite_if_output_file_already_exists;
 
 			public:
 
@@ -1276,6 +1283,8 @@ struct RunMetadata
 	bool has_non_primary_top_level_groups;
 	bool has_child_groups;
 	std::int64_t rows;
+
+	AppendOverwriteMode appendOrOverwrite;
 };
 
 #endif

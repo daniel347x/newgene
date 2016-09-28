@@ -285,4 +285,23 @@ void KadSpinBox::doSetVisible(bool const visible_)
 {
 	visible = visible_;
 	this->setVisible(visible);
+	QWidget * parent_ = this->parentWidget();
+
+	if (parent_)
+	{
+		try
+		{
+			KadWidgetsScrollArea * scrollArea { dynamic_cast<KadWidgetsScrollArea *>(parent_) };
+
+			if (scrollArea == nullptr)
+			{
+				return;
+			}
+
+			scrollArea->Resequence();
+		}
+		catch (std::bad_cast &)
+		{
+		}
+	}
 }

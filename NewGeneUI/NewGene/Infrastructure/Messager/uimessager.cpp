@@ -318,6 +318,14 @@ int UIMessagerOutputProject::ShowOptionMessageBox(std::string msg_title, std::st
 	return selection;
 }
 
+int UIMessagerOutputProject::ShowOptionMessageBox(std::string msg_title, std::string msg_question, std::vector<std::string> option_list)
+{
+	int selection = -1;
+	QMetaObject::invokeMethod(get(), "StringOptionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG(int, selection), Q_ARG(STD_STRING, msg_title), Q_ARG(STD_STRING, msg_question),
+							  Q_ARG(STD_VECTOR_STRING, option_list));
+	return selection;
+}
+
 void UIMessagerOutputProject::SetRunStatus(RUN_STATUS_ENUM const & runStatus)
 {
 	emit SignalSetRunStatus(current_messager_id, runStatus);

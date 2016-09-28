@@ -430,7 +430,8 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 
 }
 
-std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories, bool const simple, bool const formatted)
+std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories, bool const simple,
+		bool const formatted)
 {
 
 	if (!uoa_category.uuid || uoa_category.uuid->empty())
@@ -477,6 +478,7 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		else
 		{
 			displayText += *uoa_category.longhand;
+
 			if (!simple)
 			{
 				displayText += " (";
@@ -592,7 +594,10 @@ void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 			the_dmu_identifier.sequence_number_or_count = sequence_number;
 			identifiers_map[uuid].push_back(the_dmu_identifier);
 
-			// Todo: Add sort by sequence number
+			std::sort(identifiers_map[uuid].begin(), identifiers_map[uuid].end(), [](WidgetInstanceIdentifier const & lhs, WidgetInstanceIdentifier const & rhs)
+			{
+				return lhs.sequence_number_or_count < rhs.sequence_number_or_count;
+			});
 		}
 	}
 

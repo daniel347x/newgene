@@ -167,11 +167,28 @@ QPushButton:default {
    <item>
     <layout class="QVBoxLayout" name="verticalLayoutStatus">
      <item>
-      <widget class="QLabel" name="labelStatus">
-       <property name="text">
-        <string>Status:</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="layoutClearPane">
+       <item>
+        <widget class="QLabel" name="labelStatus">
+         <property name="text">
+          <string>Status:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonClearPane">
+         <property name="maximumSize">
+          <size>
+           <width>150</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Clear Status Pane</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QPlainTextEdit" name="plainTextEdit_KadStatus">
@@ -184,7 +201,7 @@ QPushButton:default {
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <layout class="QHBoxLayout" name="layoutProgressCancel">
        <item>
         <widget class="QLabel" name="labelOngoingPerformance">
          <property name="sizePolicy">

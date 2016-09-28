@@ -106,7 +106,7 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 
 			if (listpane_selectionModel == nullptr)
 			{
-				boost::format msg("Invalid selection in Selct Variable Group popup.");
+				boost::format msg("Invalid selection in Select Variable Group popup.");
 				QMessageBox msgBox;
 				msgBox.setText(msg.str().c_str());
 				msgBox.exec();
@@ -162,6 +162,146 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 	if (found == option_list.cend())
 	{
 		boost::format msg("Selected variable group cannot be found.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return -1;
+	}
+
+	return found - option_list.cbegin();
+
+}
+
+// Note: The following function, and the preceding function, are very similar
+// and COULD be templatized, but there are various steps required for the template functionality
+// to work with Qt - specifically, the function 'AddTopLevelVariableGroupChooserBlock'
+// in the above function (and equivalently in the following function)
+// would need to correspond to a template argument, in turn requiring both a typedef
+// and registering the type in the Qt system to work with Qt;
+// it would be a function receiving all 9 arguments (because the dialog elements
+// must remain in scope after that function returns) which is just fine,
+// but a tad irritating to track through a function with 9 arguments passed
+// as a template argument.
+// Additionally, the equality check that occurs at the end would need to be
+// a template function argument because a simple requirement that it have operator==
+// is insufficient because WidgetInstanceIdentifier cannot have a comparison operator
+// that simple due to the need for the first argument.
+// Again, adding an additional template parameter is just fine,
+// but the number of small and slightly irritating details just isn't worth the time
+// for only a second instance of the following function,
+// especially given that any future, third uses of the function might require yet more changes.
+int UIOutputProject::StringOptionMessageBox(STD_STRING msg_title, STD_STRING msg_question, STD_VECTOR_STRING option_list)
+{
+
+	QDialog dialog;
+	dialog.setWindowTitle(msg_title.c_str());
+	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
+	QFormLayout form(&dialog);
+
+	QWidget VgConstructionWidget;
+	QVBoxLayout formOverall;
+	QWidget VgConstructionPanes;
+	QHBoxLayout formConstructionPane;
+	QListView * listpane = nullptr;
+	DialogHelper::AddStringChooserBlock(dialog, form, VgConstructionWidget, formOverall, VgConstructionPanes, formConstructionPane, listpane, msg_question, option_list);
+
+	if (!listpane)
+	{
+		boost::format msg("Unable to create multiple choice dialog.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return -1;
+	}
+
+	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+	form.addRow(&buttonBox);
+
+	std::string string_result;
+
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
+	{
+
+		std::string errorMsg;
+
+		bool valid = true;
+
+		if (valid)
+		{
+
+			QStandardItemModel * listpaneModel = static_cast<QStandardItemModel *>(listpane->model());
+
+			if (listpaneModel == nullptr)
+			{
+				boost::format msg("Invalid list view items in multiple selection popup.");
+				QMessageBox msgBox;
+				msgBox.setText(msg.str().c_str());
+				msgBox.exec();
+				return false;
+			}
+
+			QItemSelectionModel * listpane_selectionModel = listpane->selectionModel();
+
+			if (listpane_selectionModel == nullptr)
+			{
+				boost::format msg("Invalid selection in multiple selection popup.");
+				QMessageBox msgBox;
+				msgBox.setText(msg.str().c_str());
+				msgBox.exec();
+				return false;
+			}
+
+			QModelIndexList selectedIndexes = listpane_selectionModel->selectedIndexes();
+
+			if (selectedIndexes.empty())
+			{
+				// No selection
+				return false;
+			}
+
+			if (selectedIndexes.size() > 1)
+			{
+				boost::format msg("Simultaneous selections not allowed.");
+				QMessageBox msgBox;
+				msgBox.setText(msg.str().c_str());
+				msgBox.exec();
+				return false;
+			}
+
+			QModelIndex selectedIndex = selectedIndexes[0];
+
+			if (!selectedIndex.isValid())
+			{
+				boost::format msg("An option must be selected.");
+				QMessageBox msgBox;
+				msgBox.setText(msg.str().c_str());
+				msgBox.exec();
+				return false;
+			}
+
+			QVariant vg_variant = listpaneModel->item(selectedIndex.row())->data();
+			string_result = vg_variant.value<std::string>();
+
+			dialog.accept();
+		}
+
+	});
+
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return -1;
+	}
+
+	auto const found = std::find_if(option_list.cbegin(), option_list.cend(), [&](std::string const & test)
+	{
+		return string_result == test;
+	});
+
+	if (found == option_list.cend())
+	{
+		boost::format msg("Selected option cannot be found.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();

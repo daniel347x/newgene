@@ -94,7 +94,8 @@ namespace DialogHelper
 							QHBoxLayout & formConstructionPane, QListView *& listpane, WidgetInstanceIdentifiers const & uoas);
 	void AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes,
 			QHBoxLayout & formConstructionPane, QListView *& listpane, std::string const & dlgQuestion, std::vector<WidgetInstanceIdentifier> const & vg_list);
-
+	void AddStringChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes,
+			QHBoxLayout & formConstructionPane, QListView *& listpane, std::string const & dlgQuestion, std::vector<std::string> const & string_list);
 }
 
 #endif // IMPORTDIALOGHELPER_H

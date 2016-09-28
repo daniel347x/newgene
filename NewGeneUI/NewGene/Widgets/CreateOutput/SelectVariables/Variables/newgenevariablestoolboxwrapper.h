@@ -18,6 +18,14 @@ class NewGeneVariablesToolboxWrapper : public QWidget, public NewGeneWidget // d
 	public:
 		explicit NewGeneVariablesToolboxWrapper(QWidget * parent = 0);
 		~NewGeneVariablesToolboxWrapper();
+		WidgetInstanceIdentifiers getDmuSequence()
+		{
+			if (newgeneToolBox)
+			{
+				return newgeneToolBox->getDmuSequence();
+			}
+			return WidgetInstanceIdentifiers();
+		}
 
 	public:
 		void showInactiveVariableGroups(bool const visible);

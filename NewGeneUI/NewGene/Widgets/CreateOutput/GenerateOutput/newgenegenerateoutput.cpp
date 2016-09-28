@@ -191,3 +191,13 @@ void NewGeneGenerateOutput::setGenerateOutputPushbuttonClass(std::string const &
 	ui->pushButtonGenerateOutput->update();
 
 }
+
+void NewGeneGenerateOutput::on_pushButtonClearPane_clicked()
+{
+	QPlainTextEdit * edit_pane = findChild<QPlainTextEdit *>("plainTextEdit_KadStatus");
+
+	if (edit_pane)
+	{
+		edit_pane->clear();
+	}
+}

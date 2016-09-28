@@ -16,6 +16,7 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 		void HandleChanges(DataChangeMessage const &);
 		void EmptyTextCheck();
 		void ShowLoading(bool const loading_ = true);
+		void Resequence();
 
 	signals:
 

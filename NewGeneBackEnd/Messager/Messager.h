@@ -183,6 +183,7 @@ class Messager
 		virtual void ShowMessageBox(std::string, bool block = true) {}
 		virtual bool ShowQuestionMessageBox(std::string, std::string) { return false; } // title, question text
 		virtual int  ShowOptionMessageBox(std::string, std::string, std::vector<WidgetInstanceIdentifier>) { return 0; } // title, question, option list
+		virtual int  ShowOptionMessageBox(std::string, std::string, std::vector<std::string>) { return 0; } // title, question, option list
 		virtual void StartProgressBar(std::int64_t const, std::int64_t const) {}
 		virtual void EndProgressBar() {}
 		virtual void UpdateProgressBarValue(std::int64_t const) {}
