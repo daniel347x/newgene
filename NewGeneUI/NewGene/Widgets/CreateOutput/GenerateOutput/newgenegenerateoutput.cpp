@@ -97,6 +97,7 @@ void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int /* progress_bar
 		if (kad_status_update.length())
 		{
 			edit_pane->appendPlainText(kad_status_update.c_str());
+			edit_pane->ensureCursorVisible();
 		}
 		else
 		{

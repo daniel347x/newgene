@@ -393,55 +393,111 @@ WidgetInstanceIdentifiers NewGeneVariablesToolbox::getDmuSequence()
 
 	// Ordered according to the sequence these DMUs appear in the UOA
 	// as set by the user when the UOA was defined.
-	// Preference given to the first VGs with selected variables.
+	// Preference given to the first of the VGs with selected variables
+	// of those with the largest number of DMUs (in case there are
+	// multiple top-level variable groups).
 	WidgetInstanceIdentifiers orderedDmus;
 
-	for (int n = 0; n < nItems; ++n)
+	// VGs with the highest number of DMUs go first -
+	// store their indexes
+	std::vector<int> vgOrder;
+
+	int highestCount = 0;
+
+	std::function<void(std::function<void(int const, WidgetInstanceIdentifiers&)>)> vgLoop {[&, this](std::function<void(int const, WidgetInstanceIdentifiers&)> f)
 	{
-		QWidget * testWidget = widget(n);
-
-		try
+		for (int n = 0; n < nItems; ++n)
 		{
-			NewGeneVariableGroup * testVG = dynamic_cast<NewGeneVariableGroup *>(testWidget);
-
-			if (testVG)
+			QWidget * testWidget = widget(n);
+			try
 			{
-
-				if (testVG->hasChecked())
+				NewGeneVariableGroup * testVG = dynamic_cast<NewGeneVariableGroup *>(testWidget);
+				if (testVG)
 				{
-					WidgetInstanceIdentifier vg = testVG->data_instance;
-					if (vg.identifier_parent)
+					if (testVG->hasChecked())
 					{
-						WidgetInstanceIdentifier uoa = *vg.identifier_parent;
-						if (uoa.foreign_key_identifiers)
+						WidgetInstanceIdentifier vg = testVG->data_instance;
+						if (vg.identifier_parent)
 						{
-							WidgetInstanceIdentifiers dmus = *uoa.foreign_key_identifiers;
-							for (auto dmu : dmus)
+							WidgetInstanceIdentifier uoa = *vg.identifier_parent;
+							if (uoa.foreign_key_identifiers)
 							{
-								bool found = false;
-								for (auto existingDmu: orderedDmus)
-								{
-									if (dmu.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, existingDmu))
-									{
-										found = true;
-									}
-								}
-								if (!found)
-								{
-									orderedDmus.push_back(dmu);
-								}
+								WidgetInstanceIdentifiers dmus = *uoa.foreign_key_identifiers;
+								f(n, dmus);
 							}
 						}
 					}
 				}
+			}
+			catch (std::bad_cast &)
+			{
+				// guess not
+			}
+		}
+	}};
 
+	vgLoop([&, this](int const n, WidgetInstanceIdentifiers & dmus)
+	{
+		if (dmus.size() > highestCount)
+		{
+			highestCount = dmus.size();
+		}
+	});
+
+	vgLoop([&, this](int const n, WidgetInstanceIdentifiers & dmus)
+	{
+		if (dmus.size() == highestCount)
+		{
+			vgOrder.push_back(n);
+		}
+	});
+
+	vgLoop([&, this](int const n, WidgetInstanceIdentifiers & dmus)
+	{
+		if (dmus.size() != highestCount)
+		{
+			vgOrder.push_back(n);
+		}
+	});
+
+	for (auto const i : vgOrder)
+	{
+		QWidget * testWidget = widget(i);
+		try
+		{
+			NewGeneVariableGroup * testVG = dynamic_cast<NewGeneVariableGroup *>(testWidget);
+			if (testVG)
+			{
+				WidgetInstanceIdentifier vg = testVG->data_instance;
+				if (vg.identifier_parent)
+				{
+					WidgetInstanceIdentifier uoa = *vg.identifier_parent;
+					if (uoa.foreign_key_identifiers)
+					{
+						WidgetInstanceIdentifiers dmus = *uoa.foreign_key_identifiers;
+						for (auto dmu : dmus)
+						{
+							bool found = false;
+							for (auto existingDmu: orderedDmus)
+							{
+								if (dmu.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, existingDmu))
+								{
+									found = true;
+								}
+							}
+							if (!found)
+							{
+								orderedDmus.push_back(dmu);
+							}
+						}
+					}
+				}
 			}
 		}
 		catch (std::bad_cast &)
 		{
 			// guess not
 		}
-
 	}
 
 	return orderedDmus;
