@@ -36,6 +36,11 @@ NewGeneVariableGroup::NewGeneVariableGroup(NewGeneVariablesToolbox * toolbox_, Q
 
 	PrepareOutputWidget();
 
+	if (data_instance.notes.notes1)
+	{
+		ui->variableGroupNotes->setText(data_instance.notes.notes1->c_str());
+	}
+
 	if (data_instance.uuid && project)
 	{
 
@@ -116,7 +121,7 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 	}
 
 	auto vg_members_and_bools = widget_data.identifiers;
-	bool success = ResetAll(vg_members_and_bools);
+	bool success = ResetAll(*widget_data.identifier, vg_members_and_bools);
 
 }
 
@@ -174,18 +179,21 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
+								WidgetInstanceIdentifier vg = change.parent_identifier;
 								WidgetInstanceIdentifiers vg_members = change.child_identifiers;
 								std::vector<std::pair<WidgetInstanceIdentifier, bool>> vg_members_and_bools;
 								std::for_each(vg_members.cbegin(), vg_members.cend(), [&](WidgetInstanceIdentifier const & identifier)
 								{
 									vg_members_and_bools.push_back(std::make_pair(identifier, false));
 								});
-								bool success = ResetAll(vg_members_and_bools);
+								bool success = ResetAll(vg, vg_members_and_bools);
 							}
 							break;
 
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
+								// Will be handled, instead, by a 'refresh all widgets' command,
+								// although full infrastructure is in place to support, send, and receive here this more granular message
 							}
 							break;
 
@@ -314,7 +322,7 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 
 }
 
-bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifier, bool>> const & vg_members_and_bools)
+bool NewGeneVariableGroup::ResetAll(WidgetInstanceIdentifier const & vg, std::vector<std::pair<WidgetInstanceIdentifier, bool>> const & vg_members_and_bools)
 {
 
 	if (!ui->listView)
@@ -324,6 +332,15 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
+	}
+
+	if (vg.notes.notes1)
+	{
+		ui->variableGroupNotes->setText(vg.notes.notes1->c_str());
+	}
+	else
+	{
+		ui->variableGroupNotes->setText("");
 	}
 
 	QStandardItemModel * oldModel = static_cast<QStandardItemModel *>(ui->listView->model());

@@ -27,6 +27,13 @@
     <number>20</number>
    </property>
    <item>
+    <widget class="QLabel" name="variableGroupNotes">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QListView" name="listView"/>
    </item>
    <item>

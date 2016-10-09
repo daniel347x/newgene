@@ -44,7 +44,7 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 
 	protected:
 		void changeEvent(QEvent * e);
-		bool ResetAll(std::vector<std::pair<WidgetInstanceIdentifier, bool>> const & vg_members_and_bools);
+		bool ResetAll(WidgetInstanceIdentifier const & vg, std::vector<std::pair<WidgetInstanceIdentifier, bool>> const & vg_members_and_bools);
 		void SetEnabledStateSelectAllButtons(QStandardItemModel *);
 
 	private slots:
