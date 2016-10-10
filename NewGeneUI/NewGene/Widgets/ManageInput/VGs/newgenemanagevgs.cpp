@@ -538,7 +538,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 
 	QPlainTextEdit * longDescription = new QPlainTextEdit(&dialog);
 	QString labelLongDescription = QString("Enter an optional longer description for the new variable group:");
-	form.addRow(labelDescription, longDescription);
+	form.addRow(labelLongDescription, longDescription);
 	longdescriptionEdit = longDescription;
 
 	QWidget VgConstructionWidget;
