@@ -35,6 +35,8 @@ class Table_KAD_COUNT : public Table<TABLE__KAD_COUNT, TABLE_INSTANCE_IDENTIFIER
 		void Remove(sqlite3 * db, std::string const & dmu_category_code);
 		void Modify(sqlite3 * db, std::string const & dmu_category_code, int const value_);
 
+		int GetMinimumSpinCountGivenCurrentVariableSelections(WidgetInstanceIdentifier dmu, OutputModel & output_model);
+
 };
 
 #endif

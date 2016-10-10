@@ -3495,11 +3495,13 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	any_primary_dmu_has_multiplicity_greater_than_1 = false;
 	which_primary_index_has_multiplicity_greater_than_1 = -1;
 
+	std::vector<int> greaters;
+
 	int current_index = 0;
 	std::for_each(
 		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cbegin(),
 		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cend(), [this,
-				&current_index](
+				&current_index, &greaters](
 			int const & test_multiplicity)
 	{
 		if (failed || CheckCancelled())
@@ -3509,40 +3511,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 		if (test_multiplicity > 1)
 		{
-			if (any_primary_dmu_has_multiplicity_greater_than_1)
-			{
-				// ********************************************************************************************************************** //
-				// A second DMU category's multiplicity is greater than 1 - for now, not allowed.  This can be implemented in the future.
-				// ********************************************************************************************************************** //
-				failed = true;
-				std::string theMsg("Only a single DMU category may have its K value in the spin control set to larger than that DMU category's minimum (e.g. ");
-				Table_UOA_Identifier::DMU_Counts const & counts = biggest_counts[0].second;
-
-				bool first = true;
-
-				for (auto const & count : counts)
-				{
-					if (!first)
-					{
-						theMsg += "; ";
-					}
-
-					WidgetInstanceIdentifier const & id = count.first;
-					int const thisCount = count.second;
-					std::string idText = Table_DMU_Identifier::GetDmuCategoryDisplayText(id);
-					theMsg += idText;
-					theMsg += " has a minimum K of ";
-					theMsg += std::to_string(thisCount);
-					first = false;
-				}
-
-				theMsg += ").";
-
-				boost::format msg(theMsg);
-				SetFailureErrorMessage(msg.str());
-				return; // from lambda
-			}
-
+			greaters.push_back(current_index);
 			any_primary_dmu_has_multiplicity_greater_than_1 = true;
 			which_primary_index_has_multiplicity_greater_than_1 = current_index;
 		}
@@ -3554,6 +3523,101 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	{
 		// Todo: Error message
 		return;
+	}
+
+	if (greaters.size() > 1)
+	{
+		// ********************************************************************************************************************** //
+		// A second or following DMU category's multiplicity is greater than 1 - for now, not allowed.
+		// This is a k-j-ad (or k-j-n-ad, etc.).
+		// Currently, NewGene only supports k-ads.
+		// ********************************************************************************************************************** //
+		failed = true;
+		std::string theMsg("This version of NewGene does not support k-j-ads (or k-j-n-ads, etc), where k>[k-min] AND j>[j-min] (e.g. ");
+		Table_UOA_Identifier::DMU_Counts const & counts = biggest_counts[0].second;
+
+		bool first = true;
+		int x = 0;
+
+		for (auto const & whichGreater : greaters)
+		{
+			if (!first)
+			{
+				if (x + 1 == greaters.size())
+				{
+					theMsg += ", and \"";
+				}
+				else
+				{
+					theMsg += ", \"";
+				}
+			}
+			else
+			{
+				theMsg += "\"";
+			}
+
+			WidgetInstanceIdentifier_Int_Pair const & idAndCount = counts[whichGreater];
+			WidgetInstanceIdentifier const & id = idAndCount.first;
+			int const thisCount = idAndCount.second;
+			std::string idText = Table_DMU_Identifier::GetDmuCategoryDisplayText(id);
+			theMsg += idText;
+
+			if (first)
+			{
+				theMsg += "\" is set to  ";
+			}
+			else
+			{
+				theMsg += "\" is also set to  ";
+			}
+
+			theMsg += std::to_string(thisCount);
+
+			first = false;
+			++x;
+		}
+
+		theMsg += "); please select columns to generate a k-ad only (e.g. only one value of k may exceed the minimums given by ";
+
+		first = true;
+		x = 0;
+
+		for (auto const & count : counts)
+		{
+			if (!first)
+			{
+				if (x + 1 == counts.size())
+				{
+					theMsg += ", and \"";
+				}
+				else
+				{
+					theMsg += ", \"";
+				}
+			}
+			else
+			{
+				theMsg += "\"";
+			}
+
+			WidgetInstanceIdentifier const & id = count.first;
+			int const thisCount = count.second;
+			std::string idText = Table_DMU_Identifier::GetDmuCategoryDisplayText(id);
+			theMsg += idText;
+			theMsg += "\"";
+			theMsg += "=";
+			theMsg += std::to_string(thisCount);
+
+			first = false;
+			++x;
+		}
+
+		theMsg += ").";
+
+		boost::format msg(theMsg);
+		SetFailureErrorMessage(msg.str());
+		return; // from lambda
 	}
 
 	// Validate child UOA's

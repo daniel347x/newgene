@@ -185,7 +185,7 @@
         <string notr="true">#label_version {font-family: Verdana; font-size: 11px; color: #000000; font-weight: bold;}</string>
        </property>
        <property name="text">
-        <string>Version 1.0 - May 2016</string>
+        <string>Version 2.0 - Jan 2017</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_newgenewebsite">

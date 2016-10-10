@@ -28,10 +28,13 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	InputModel & input_model = project.model().getInputModel();
 	WidgetDataItem_VARIABLE_GROUPS_TOOLBOX variable_groups(widget_request);
 	WidgetInstanceIdentifiers identifiers { input_model.t_vgp_identifiers.getIdentifiers() };
+
 	for (auto const & identifier : identifiers)
 	{
-		variable_groups.identifiers.push_back(std::make_pair(identifier, Table_UOA_Identifier::GetUoaCategoryDisplayText(*identifier.identifier_parent, WidgetInstanceIdentifiers {}, true, false)));
+		variable_groups.identifiers.push_back(std::make_pair(identifier, Table_UOA_Identifier::GetUoaCategoryDisplayText(*identifier.identifier_parent, WidgetInstanceIdentifiers {}, true,
+											  false)));
 	}
+
 	messager.EmitOutputWidgetDataRefresh(variable_groups);
 }
 
@@ -123,12 +126,23 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 {
 	OutputModel & output_model = project.model();
 	WidgetDataItem_KAD_SPIN_CONTROL_WIDGET kad_spincontrol(widget_request);
+	int theKadCount = 1;
 
 	if (widget_request.identifier && widget_request.identifier->uuid)
 	{
 		WidgetInstanceIdentifier_Int_Pair spinControlData = output_model.t_kad_count.getIdentifier(*widget_request.identifier->uuid);
-		kad_spincontrol.count = spinControlData.second;
+		theKadCount = spinControlData.second; // The current saved value of the Kad spin control, or 0
+
+		int minKadCount = output_model.t_kad_count.GetMinimumSpinCountGivenCurrentVariableSelections(*widget_request.identifier, output_model);
+
+		if (minKadCount > theKadCount)
+		{
+			theKadCount = minKadCount;
+
+		}
 	}
+
+	kad_spincontrol.count = theKadCount;
 
 	messager.EmitOutputWidgetDataRefresh(kad_spincontrol);
 }

@@ -54,7 +54,7 @@ KadSpinBox::~KadSpinBox()
 
 void KadSpinBox::RefreshAllWidgets()
 {
-	WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(value(), WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(value(), WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
 	emit RefreshWidget(request);
 }
 
@@ -90,6 +90,17 @@ void KadSpinBox::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET
 	if (value() != widget_data.count)
 	{
 		setValue(widget_data.count);
+
+		// Special-case - SECOND trigger that will call us AGAIN -
+		// in place to support custom logic on the back end in which
+		// we issued a refresh widget command in the 'doSetVisible' function
+		// JUST to make sure that selecting the first variable in a VG
+		// causes the spin control to increase to the minimum required for its UOA/DMUs.
+		// If it does, the back end sends us the updated spin value but does NOT update the database
+		// OR trigger the event that a Kad spin control changed.
+		// So we pick up this scenario here, and (harmlessly)
+		// issue a command here to do that.
+		ReceiveVariableItemChanged(widget_data.count);
 	}
 
 }
@@ -283,6 +294,8 @@ void KadSpinBox::ShowHideFromActiveDMUs(DataChange const & change)
 
 void KadSpinBox::doSetVisible(bool const visible_)
 {
+	bool wasVisible = this->isVisible();
+
 	visible = visible_;
 	this->setVisible(visible);
 	QWidget * parent_ = this->parentWidget();
@@ -303,5 +316,19 @@ void KadSpinBox::doSetVisible(bool const visible_)
 		catch (std::bad_cast &)
 		{
 		}
+	}
+
+	if (visible && wasVisible != visible)
+	{
+		// Do this for one reason:
+		// Upon clicking any variable, it could be the first variable selected
+		// for a given VG, or the last variable unselected.
+		// In the former case (but we don't check which case it is - no big deal)
+		// the MINIMUM required spin control setting (corresponding to the DMU count
+		// for the UOA of the newly-active VG) might be higher than the current spin control setting,
+		// so increase it to the minimum.
+		// A refresh of the widget accomplishes this automatically,
+		// because the back end does this calculation in its refresh routine.
+		RefreshAllWidgets();
 	}
 }

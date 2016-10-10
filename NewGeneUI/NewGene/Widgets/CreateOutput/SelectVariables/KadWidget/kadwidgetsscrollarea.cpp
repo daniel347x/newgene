@@ -317,7 +317,7 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 		}
 	});
 
-	// DMUs for ALL UOAs corresponding to ALL variable groups EXIST in the 'kad spin box' area,
+	// DMUs for ALL UOAs corresponding to ALL variable groups EXIST,
 	// but only those corresponding to UOAs corresponding to variable groups with SELECTED variables
 	// are VISIBLE.
 	if (not_me)

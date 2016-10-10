@@ -279,3 +279,51 @@ void Table_KAD_COUNT::Modify(sqlite3 * db, std::string const & dmu_category_code
 	}
 
 }
+
+int Table_KAD_COUNT::GetMinimumSpinCountGivenCurrentVariableSelections(WidgetInstanceIdentifier dmu, OutputModel & output_model)
+{
+	// Test if the spin count for this DMU should be higher, given the currently selected variables and their corresponding UOAs
+	InputModel & input_model = output_model.getInputModel();
+
+	int theKadCount = 0;
+
+	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map = output_model.t_variables_selected_identifiers.GetSelectedVariablesByUOA(output_model.getDb(), &output_model,
+			&input_model);
+	std::for_each(the_map.cbegin(), the_map.cend(), [&](std::pair<WidgetInstanceIdentifier, Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map> const & map_entry)
+	{
+		WidgetInstanceIdentifier uoa = map_entry.first;
+		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & theVGs = map_entry.second;
+
+		for (auto const & vgAndSelections : theVGs)
+		{
+			WidgetInstanceIdentifier const & vg = vgAndSelections.first;
+			WidgetInstanceIdentifiers const & vgSelections = vgAndSelections.second;
+
+			if (vgSelections.size() > 0)
+			{
+				if (uoa.uuid)
+				{
+					Table_UOA_Identifier::DMU_Counts dmuCounts = input_model.t_uoa_category.RetrieveDMUCounts(input_model.getDb(), &input_model, *uoa.uuid);
+
+					// One of the DMUs should be us - loop to find it
+					for (auto const & dmuIntPair : dmuCounts)
+					{
+						if (dmuIntPair.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE::EQUALITY_CHECK_TYPE__STRING_CODE, dmu))
+						{
+							if (dmuIntPair.second > theKadCount)
+							{
+								theKadCount = dmuIntPair.second;
+							}
+
+							// Note: In case you were thinking of it, do NOT *DECREASE* the spin control in this function.
+							// The user might WANT to have multiplicity > 1
+
+						}
+					}
+				}
+			}
+		}
+	});
+
+	return theKadCount;
+}
