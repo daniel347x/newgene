@@ -70,7 +70,7 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 		void AddUOA(WidgetActionItemRequest_ACTION_ADD_UOA);
 		void DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA);
 		void CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG);
-		void RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG);
+		void SetVGDescriptions(WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS);
 		void DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG);
 		void RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG);
 

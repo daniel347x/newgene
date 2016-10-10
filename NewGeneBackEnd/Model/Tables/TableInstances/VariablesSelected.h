@@ -44,7 +44,7 @@ class Table_VARIABLES_SELECTED : public Table<TABLE__VG_SET_MEMBER_SELECTED, TAB
 		void Add(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code);
 		void Remove(sqlite3 * db, std::string const & vg_set_member_code, WidgetInstanceIdentifier const & vg);
 		void RemoveAllfromVG(sqlite3 * db, WidgetInstanceIdentifier const & vg);
-		void RenameAllInVG(sqlite3 * db, WidgetInstanceIdentifier const & vg, std::string const vg_new_description);
+		void SetDescriptionsAllInVG(sqlite3 * db, WidgetInstanceIdentifier const & vg, std::string const vg_new_description, std::string const vg_new_longdescription);
 
 };
 

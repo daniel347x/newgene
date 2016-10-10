@@ -340,7 +340,8 @@ void Table_VARIABLES_SELECTED::RemoveAllfromVG(sqlite3 * db, WidgetInstanceIdent
 
 }
 
-void Table_VARIABLES_SELECTED::RenameAllInVG(sqlite3 * db, WidgetInstanceIdentifier const & vg, std::string const vg_new_description)
+void Table_VARIABLES_SELECTED::SetDescriptionsAllInVG(sqlite3 * db, WidgetInstanceIdentifier const & vg, std::string const vg_new_description,
+		std::string const vg_new_longdescription)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);

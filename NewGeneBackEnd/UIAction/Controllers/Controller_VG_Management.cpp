@@ -13,7 +13,7 @@
 /************************************************************************/
 // ACTION_CREATE_VG
 // ACTION_DELETE_VG
-// ACTION_RENAME_VG
+// ACTION_SET_VG_DESCRIPTIONS
 // ACTION_REFRESH_VG
 /************************************************************************/
 
@@ -74,15 +74,17 @@ void UIActionManager::CreateVG(Messager & messager__, WidgetActionItemRequest_AC
 					WidgetActionItem__StringVector const & actionItemStrings = static_cast<WidgetActionItem__StringVector const &>(actionItem);
 					std::vector<std::string> const & vg_strings = actionItemStrings.getValue();
 
-					if (vg_strings.size() == 0)
+					if (vg_strings.size() < 3)
 					{
 						boost::format msg("Incorrect internal data format for VG creation.");
 						messager__.ShowMessageBox(msg.str());
 						return;
 					}
 
-					std::string const & new_vg_code = vg_strings[0];
-					std::string const & vg_description = vg_strings[1];
+					size_t i = 0;
+					std::string const & new_vg_code = vg_strings[i++];
+					std::string const & vg_description = vg_strings[i++];
+					std::string const & vg_longdescription = vg_strings[i++];
 
 					bool vg_already_exists = input_model.t_vgp_identifiers.ExistsByCode(input_model.getDb(), input_model, new_vg_code);
 
@@ -94,7 +96,7 @@ void UIActionManager::CreateVG(Messager & messager__, WidgetActionItemRequest_AC
 						return;
 					}
 
-					bool vg_successfully_created = input_model.t_vgp_identifiers.CreateNewVG(input_model.getDb(), input_model, new_vg_code, vg_description, uoa_to_use);
+					bool vg_successfully_created = input_model.t_vgp_identifiers.CreateNewVG(input_model.getDb(), input_model, new_vg_code, vg_description, vg_longdescription, uoa_to_use);
 
 					if (!vg_successfully_created)
 					{
@@ -244,7 +246,7 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 }
 
-void UIActionManager::RenameVG(Messager & messager, WidgetActionItemRequest_ACTION_RENAME_VG const & action_request, InputProject & project)
+void UIActionManager::SetVGDescriptions(Messager & messager, WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS const & action_request, InputProject & project)
 {
 
 	if (!action_request.items)
@@ -267,7 +269,7 @@ void UIActionManager::RenameVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 					ProjectManager & project_manager = projectManager();
 					std::string errorMsg;
-					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("rename_vg"), errorMsg);
+					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("set_descriptions_for_vg"), errorMsg);
 
 					if (!proceed)
 					{
@@ -279,7 +281,7 @@ void UIActionManager::RenameVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
-						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("rename_vg"), errorMsg);
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("set_descriptions_for_vg"), errorMsg);
 
 						if (!success)
 						{
@@ -305,7 +307,7 @@ void UIActionManager::RenameVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 					if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
 					{
-						boost::format msg("Missing the VG to rename.");
+						boost::format msg("Missing the VG whose descriptions are to be changed.");
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
@@ -313,24 +315,34 @@ void UIActionManager::RenameVG(Messager & messager, WidgetActionItemRequest_ACTI
 					// ************************************* //
 					// Retrieve data sent by user interface
 					// ************************************* //
-					std::string vg_to_rename_display_text = Table_VG_CATEGORY::GetVgDisplayText(vg);
-					std::string vg_new_description = (static_cast<WidgetActionItem__String const &>(*instanceActionItem.second)).getValue();
+					std::string vg_to_set_descriptions_display_text = Table_VG_CATEGORY::GetVgDisplayText(vg);
+					std::vector<std::string> vgNewMetadata = (static_cast<WidgetActionItem__StringVector const &>(*instanceActionItem.second)).getValue();
+
+					if (vgNewMetadata.size() < 2)
+					{
+						boost::format msg("Insufficient number of parameters for the VG metadata update operation.");
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
+					std::string vg_new_description = vgNewMetadata[0];
+					std::string vg_new_longdescription = vgNewMetadata[1];
 
 					bool vg_already_exists = input_model.t_vgp_identifiers.Exists(input_model.getDb(), input_model, vg);
 
 					if (!vg_already_exists)
 					{
 						boost::format msg("The VG '%1%' does not exist.");
-						msg % boost::to_upper_copy(vg_to_rename_display_text);
+						msg % boost::to_upper_copy(vg_to_set_descriptions_display_text);
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
 
-					bool vg_successfully_renamed = input_model.t_vgp_identifiers.RenameVG(input_model.getDb(), &input_model, vg, vg_new_description, change_response);
+					bool vg_successfully_set = input_model.t_vgp_identifiers.SetVGDescriptions(input_model.getDb(), &input_model, vg, vg_new_description, vg_new_longdescription, change_response);
 
-					if (!vg_successfully_renamed)
+					if (!vg_successfully_set)
 					{
-						boost::format msg("Unable to rename the VG.");
+						boost::format msg("Unable to set descriptions for the VG.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
@@ -452,7 +464,7 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 
 }
 
-void UIActionManager::RenameVGOutput(Messager & messager, WidgetActionItemRequest_ACTION_RENAME_VG const & action_request, OutputProject & project)
+void UIActionManager::SetVGDescriptionsOutput(Messager & messager, WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS const & action_request, OutputProject & project)
 {
 
 	if (!action_request.items)
@@ -477,7 +489,7 @@ void UIActionManager::RenameVGOutput(Messager & messager, WidgetActionItemReques
 
 					ProjectManager & project_manager = projectManager();
 					std::string errorMsg;
-					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("rename_vg"), errorMsg);
+					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("set_descriptions_for_vg"), errorMsg);
 
 					if (!proceed)
 					{
@@ -489,7 +501,7 @@ void UIActionManager::RenameVGOutput(Messager & messager, WidgetActionItemReques
 
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
-						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("rename_vg"), errorMsg);
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("set_descriptions_for_vg"), errorMsg);
 
 						if (!success)
 						{
@@ -512,7 +524,15 @@ void UIActionManager::RenameVGOutput(Messager & messager, WidgetActionItemReques
 					Executor executor(input_model.getDb());
 
 					WidgetInstanceIdentifier vg = instanceActionItem.first;
-					std::string vg_new_description = (static_cast<WidgetActionItem__String const &>(*instanceActionItem.second)).getValue();
+					std::vector<std::string> vgDescriptions = (static_cast<WidgetActionItem__StringVector const &>(*instanceActionItem.second)).getValue();
+
+					if (vgDescriptions.size() < 2)
+					{
+						return;
+					}
+
+					std::string vg_new_description = vgDescriptions[0];
+					std::string vg_new_longdescription = vgDescriptions[1];
 
 					if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
 					{
@@ -520,7 +540,7 @@ void UIActionManager::RenameVGOutput(Messager & messager, WidgetActionItemReques
 						return;
 					}
 
-					output_model.t_variables_selected_identifiers.RenameAllInVG(output_model.getDb(), vg, vg_new_description);
+					output_model.t_variables_selected_identifiers.SetDescriptionsAllInVG(output_model.getDb(), vg, vg_new_description, vg_new_longdescription);
 
 					executor.success();
 

@@ -253,9 +253,9 @@ void OutputProjectWorkQueue::DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG a
 }
 
 /************************************************************************/
-// ACTION_RENAME_VG
+// ACTION_SET_VG_DESCRIPTIONS
 /************************************************************************/
-void OutputProjectWorkQueue::RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG action_request)
+void OutputProjectWorkQueue::SetVGDescriptions(WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS action_request)
 {
-	get()->getWorkService().post(RenameVG_Output(action_request, this));
+	get()->getWorkService().post(SetVGDescriptions_Output(action_request, this));
 }

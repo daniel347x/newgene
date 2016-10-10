@@ -138,7 +138,7 @@ class WorkQueueManagerBase : public QObject
 		virtual void DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA) {}
 		virtual void CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG) {}
 		virtual void DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG) {}
-		virtual void RenameVG(WidgetActionItemRequest_ACTION_RENAME_VG) {}
+		virtual void SetVGDescriptions(WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS) {}
 		virtual void RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG) {}
 
 	public:

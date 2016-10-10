@@ -885,7 +885,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				"delete_dmu"
 				, "delete_uoa"
 				, "delete_vg"
-				, "rename_vg"
+				, "set_descriptions_for_vg"
 				// WARNING! Must be same number of entries in task_orders[], all the same
 			};
 

@@ -18,6 +18,7 @@ namespace Validation
 
 	bool ValidateVgCode(std::string & proposed_vg_code, std::string & errorMsg);
 	bool ValidateVgDescription(std::string & proposed_vg_description, std::string & errorMsg);
+	bool ValidateVgNotes(std::string & proposed_vg_notes, std::string & errorMsg);
 
 	bool ValidateColumnName(std::string & proposed_column_name, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);
 	bool ValidateColumnDescription(std::string & proposed_column_description, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);

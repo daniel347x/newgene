@@ -49,13 +49,13 @@ class DeleteVG_ : public DoInputAction<ACTION_DELETE_VG>
 
 };
 
-class RenameVG_ : public DoInputAction<ACTION_RENAME_VG>
+class SetVGDescriptions_ : public DoInputAction<ACTION_SET_VG_DESCRIPTIONS>
 {
 
 	public:
 
-		RenameVG_(WidgetActionItemRequest_ACTION_RENAME_VG & action_request_, InputProjectWorkQueue * queue_)
-			: DoInputAction<ACTION_RENAME_VG>(static_cast<WidgetActionItemRequest_ACTION_RENAME_VG>(action_request_), queue_)
+		SetVGDescriptions_(WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS & action_request_, InputProjectWorkQueue * queue_)
+			: DoInputAction<ACTION_SET_VG_DESCRIPTIONS>(static_cast<WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS>(action_request_), queue_)
 		{
 
 		}
@@ -63,7 +63,7 @@ class RenameVG_ : public DoInputAction<ACTION_RENAME_VG>
 		void operator()()
 		{
 			UIMessagerSingleShot messager(queue->get()->messager);
-			uiactionManagerUI().getBackendManager().RenameVG(messager.get(), action_request, queue->get()->backend());
+			uiactionManagerUI().getBackendManager().SetVGDescriptions(messager.get(), action_request, queue->get()->backend());
 		}
 
 };
@@ -106,13 +106,13 @@ class DeleteVG_Output : public DoOutputAction<ACTION_DELETE_VG>
 
 };
 
-class RenameVG_Output : public DoOutputAction<ACTION_RENAME_VG>
+class SetVGDescriptions_Output : public DoOutputAction<ACTION_SET_VG_DESCRIPTIONS>
 {
 
 	public:
 
-		RenameVG_Output(WidgetActionItemRequest_ACTION_RENAME_VG & action_request_, OutputProjectWorkQueue * queue_)
-			: DoOutputAction<ACTION_RENAME_VG>(static_cast<WidgetActionItemRequest_ACTION_RENAME_VG>(action_request_), queue_)
+		SetVGDescriptions_Output(WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS & action_request_, OutputProjectWorkQueue * queue_)
+			: DoOutputAction<ACTION_SET_VG_DESCRIPTIONS>(static_cast<WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS>(action_request_), queue_)
 		{
 
 		}
@@ -120,7 +120,7 @@ class RenameVG_Output : public DoOutputAction<ACTION_RENAME_VG>
 		void operator()()
 		{
 			UIMessagerSingleShot messager(queue->get()->messager);
-			uiactionManagerUI().getBackendManager().RenameVGOutput(messager.get(), action_request, queue->get()->backend());
+			uiactionManagerUI().getBackendManager().SetVGDescriptionsOutput(messager.get(), action_request, queue->get()->backend());
 		}
 
 };

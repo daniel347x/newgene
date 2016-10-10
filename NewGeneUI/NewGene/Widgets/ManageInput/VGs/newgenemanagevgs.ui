@@ -101,9 +101,9 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_rename_vg">
+             <widget class="QPushButton" name="pushButton_set_descriptions_for_vg">
               <property name="text">
-               <string> Set description for selected Variable Group </string>
+               <string> Short/long description for selected Variable Group </string>
               </property>
              </widget>
             </item>

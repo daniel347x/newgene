@@ -609,9 +609,29 @@ bool Validation::ValidateVgDescription(std::string & proposed_vg_description, st
 		}
 	}
 
-	if (proposed_vg_description.size() > 4096)
+	if (proposed_vg_description.size() > 256)
 	{
-		boost::format msg("The variable group description is too long (maximum length: 4096).");
+		boost::format msg("The variable group description is too long (maximum length: 256).");
+		errorMsg = msg.str();
+		valid = false;
+	}
+
+	return valid;
+
+}
+
+bool Validation::ValidateVgNotes(std::string & proposed_vg_notes, std::string & errorMsg)
+{
+
+	errorMsg.clear();
+
+	boost::trim(proposed_vg_notes);
+
+	bool valid = true;
+
+	if (proposed_vg_notes.size() > 16384)
+	{
+		boost::format msg("The variable group long description is too long (maximum length: 16384).");
 		errorMsg = msg.str();
 		valid = false;
 	}

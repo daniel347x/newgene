@@ -39,6 +39,19 @@ NewGeneVariableGroup::NewGeneVariableGroup(NewGeneVariablesToolbox * toolbox_, Q
 	if (data_instance.notes.notes1)
 	{
 		ui->variableGroupNotes->setText(data_instance.notes.notes1->c_str());
+		if (data_instance.notes.notes1->empty())
+		{
+			ui->variableGroupNotes->setVisible(false);
+		}
+		else
+		{
+			ui->variableGroupNotes->setVisible(true);
+		}
+	}
+	else
+	{
+		ui->variableGroupNotes->setText("");
+		ui->variableGroupNotes->setVisible(false);
 	}
 
 	if (data_instance.uuid && project)
@@ -337,10 +350,19 @@ bool NewGeneVariableGroup::ResetAll(WidgetInstanceIdentifier const & vg, std::ve
 	if (vg.notes.notes1)
 	{
 		ui->variableGroupNotes->setText(vg.notes.notes1->c_str());
+		if (vg.notes.notes1->empty())
+		{
+			ui->variableGroupNotes->setVisible(false);
+		}
+		else
+		{
+			ui->variableGroupNotes->setVisible(true);
+		}
 	}
 	else
 	{
 		ui->variableGroupNotes->setText("");
+		ui->variableGroupNotes->setVisible(false);
 	}
 
 	QStandardItemModel * oldModel = static_cast<QStandardItemModel *>(ui->listView->model());
