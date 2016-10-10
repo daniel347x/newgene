@@ -18,7 +18,7 @@ KadSpinBox::KadSpinBox(QWidget * parent, WidgetInstanceIdentifier data_instance_
 					  data_instance_
 				  )
 				 ),
-	visible (false)
+	visible(false)
 
 {
 
@@ -318,7 +318,8 @@ void KadSpinBox::doSetVisible(bool const visible_)
 		}
 	}
 
-	if (visible && wasVisible != visible)
+	if (visible
+		/* && wasVisible != visible // No - nice idea - but OTHER VGs can be selected that cause the spinner to show, even if this is the first variable being selected for a different VG */)
 	{
 		// Do this for one reason:
 		// Upon clicking any variable, it could be the first variable selected
