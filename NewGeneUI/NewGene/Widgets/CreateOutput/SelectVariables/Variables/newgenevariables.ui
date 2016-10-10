@@ -56,7 +56,7 @@ QCheckBox {padding-bottom: 3px; border-bottom: 2px solid #BCBCBC;}</string>
 }</string>
         </property>
         <property name="text">
-         <string> Variables </string>
+         <string> Variable Groups</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

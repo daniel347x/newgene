@@ -92,7 +92,7 @@
         <string notr="true">#emptyKadsLabel {font-weight: bold; color: #454545;}</string>
        </property>
        <property name="text">
-        <string>&lt;b&gt;&lt;big&gt;Select some variables to see &lt;i&gt;k&lt;/i&gt;-ad options here&lt;br&gt;
+        <string>&lt;b&gt;&lt;big&gt;Select variables from the below variable groups to see &lt;i&gt;k&lt;/i&gt;-ad options here&lt;br&gt;
 (i.e. where &lt;i&gt;k&lt;/i&gt;&amp;nbsp;&amp;nbsp;can be set to 2 (for dyads), 3 (for triads), or higher).&lt;/big&gt;&lt;/b&gt;</string>
        </property>
        <property name="alignment">

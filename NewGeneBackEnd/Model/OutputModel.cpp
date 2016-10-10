@@ -3533,7 +3533,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		// Currently, NewGene only supports k-ads.
 		// ********************************************************************************************************************** //
 		failed = true;
-		std::string theMsg("This version of NewGene does not support k-j-ads (or k-j-n-ads, etc), where k>[k-min] AND j>[j-min] (e.g. ");
+		std::string theMsg("This version of NewGene does not support k-j-ads (or k-j-n-ads, etc), where k > k-min AND j > j-min (e.g. ");
 		Table_UOA_Identifier::DMU_Counts const & counts = biggest_counts[0].second;
 
 		bool first = true;
@@ -3558,18 +3558,25 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			}
 
 			WidgetInstanceIdentifier_Int_Pair const & idAndCount = counts[whichGreater];
-			WidgetInstanceIdentifier const & id = idAndCount.first;
-			int const thisCount = idAndCount.second;
-			std::string idText = Table_DMU_Identifier::GetDmuCategoryDisplayText(id);
+			WidgetInstanceIdentifier const & dmu = idAndCount.first;
+			std::string idText = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu);
+			int thisCount = 0;
+
+			if (dmu.uuid)
+			{
+				WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->model->t_kad_count.getIdentifier(*dmu.uuid);
+				thisCount = kad_count_pair.second;
+			}
+
 			theMsg += idText;
 
 			if (first)
 			{
-				theMsg += "\" is set to  ";
+				theMsg += "\" is set to ";
 			}
 			else
 			{
-				theMsg += "\" is also set to  ";
+				theMsg += "\" is also set to ";
 			}
 
 			theMsg += std::to_string(thisCount);
