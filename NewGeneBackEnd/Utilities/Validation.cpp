@@ -629,9 +629,9 @@ bool Validation::ValidateVgNotes(std::string & proposed_vg_notes, std::string & 
 
 	bool valid = true;
 
-	if (proposed_vg_notes.size() > 16384)
+	if (proposed_vg_notes.size() > 1024)
 	{
-		boost::format msg("The variable group long description is too long (maximum length: 16384).");
+		boost::format msg("The variable group long description is too long (maximum length: 1024).");
 		errorMsg = msg.str();
 		valid = false;
 	}

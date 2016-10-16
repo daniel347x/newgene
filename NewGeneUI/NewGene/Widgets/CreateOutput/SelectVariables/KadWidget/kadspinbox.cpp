@@ -142,10 +142,6 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
-								// This is the OUTPUT model changing.
-								// "Add" means to simply add an item that is CHECKED (previously unchecked) -
-								// NOT to add a new variable.  That would be input model change type.
-
 								if (change.child_identifiers.size() == 0)
 								{
 									return; // from lambda
@@ -271,7 +267,7 @@ void KadSpinBox::ShowHideFromActiveDMUs(DataChange const & change)
 		this->doSetVisible(true);
 	}
 
-	QWidget * parent_ = this->parentWidget();
+	QWidget * parent_ = this->parentWidget()->parentWidget();
 
 	if (parent_)
 	{
@@ -298,7 +294,7 @@ void KadSpinBox::doSetVisible(bool const visible_)
 
 	visible = visible_;
 	this->setVisible(visible);
-	QWidget * parent_ = this->parentWidget();
+	QWidget * parent_ = this->parentWidget()->parentWidget();
 
 	if (parent_)
 	{

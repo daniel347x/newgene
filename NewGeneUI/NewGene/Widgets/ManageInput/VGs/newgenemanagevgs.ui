@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>893</width>
+    <width>982</width>
     <height>657</height>
    </rect>
   </property>
@@ -101,9 +101,16 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_set_descriptions_for_vg">
+             <widget class="QPushButton" name="pushButton_set_description_for_vg">
               <property name="text">
-               <string> Short/long description for selected Variable Group </string>
+               <string> Short description for selected Variable Group </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_set_warning_for_vg">
+              <property name="text">
+               <string> Add/modify a warning for selected Variable Group </string>
               </property>
              </widget>
             </item>

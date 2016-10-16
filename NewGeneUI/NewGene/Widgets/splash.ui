@@ -201,7 +201,7 @@
         <string notr="true">#label_newgenewebsite {font-size: 16px; font-weight: bold;}</string>
        </property>
        <property name="text">
-        <string>&lt;a href=&quot;http://www.newgenesoftware.org/&quot;&gt;Click here to go to the NewGene website&lt;/a&gt;</string>
+        <string>&lt;a href=&quot;http://www.newgenesoftware.org&quot;&gt;Click here to go to the NewGene website&lt;/a&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::RichText</enum>
@@ -218,18 +218,18 @@
         <rect>
          <x>10</x>
          <y>320</y>
-         <width>311</width>
+         <width>336</width>
          <height>291</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayoutWeb">
         <item>
-         <widget class="QLabel" name="labelLatest">
+         <widget class="QLabel" name="label_ClickForYouTubeVideo">
           <property name="styleSheet">
-           <string notr="true">#labelLatest {color: blue;}</string>
+           <string notr="true">#label_ClickForYouTubeVideo {font-size: 16px; font-weight: bold;}</string>
           </property>
           <property name="text">
-           <string>&lt;br&gt;Loading the latest news from the NewGene team...</string>
+           <string>&lt;a href=&quot;https://www.youtube.com/watch?v=eKk1nu66-No&quot;&gt;Why NewGene?&lt;/a&gt;</string>
           </property>
           <property name="textFormat">
            <enum>Qt::RichText</enum>
@@ -237,21 +237,8 @@
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
           <property name="openExternalLinks">
            <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="labelSpinner">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>

@@ -1,4 +1,5 @@
 #include "newgeneapplication.h"
+#include <QFont>
 
 QEvent::Type QEVENT_NONE = QEvent::None;
 QEvent::Type QEVENT_PROMPT_FOR_VG_REFRESH = QEvent::None;
@@ -9,6 +10,11 @@ QEvent::Type QEVENT_CLICK_DMU_REFRESH = QEvent::None;
 NewGeneApplication::NewGeneApplication(int argc, char * argv[]) :
 	QApplication(argc, argv)
 {
+
+	QApplication::setAttribute(Qt::AA_Use96Dpi);
+	QFont font_ = font();
+	font_.setPixelSize(11);
+	setFont(font_);
 
 	qRegisterMetaType<STD_STRING>("STD_STRING");
 	qRegisterMetaType<STD_INT64>("STD_INT64");

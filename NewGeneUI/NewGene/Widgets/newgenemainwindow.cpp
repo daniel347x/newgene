@@ -37,6 +37,8 @@
 #include "ui_newgenevariablegroupsscrollarea.h"
 #include "newgenevariablesummary.h"
 #include "ui_newgenevariablesummary.h"
+#include "kadcolumnselectionbox.h"
+#include "ui_kadcolumnselectionbox.h"
 #include "newgenevariablesummaryscrollarea.h"
 #include "ui_newgenevariablesummaryscrollarea.h"
 #include "splash.h"
@@ -688,10 +690,19 @@ void NewGeneMainWindow::SetTitle()
 
 void NewGeneMainWindow::PrepareGlobalConnections()
 {
-	QWidget * source =
-	    ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSelections->ui->scrollAreaWidgetContents->ui->toolbox->newgeneToolBox;
-	QWidget * target = ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSummary->ui->scrollAreaWidgetContents;
-	connect(source, SIGNAL(DoTabChange(WidgetInstanceIdentifier)), target, SLOT(DoTabChange(WidgetInstanceIdentifier)));
+	{
+		QWidget * source =
+			ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSelections->ui->scrollAreaWidgetContents->ui->toolbox->newgeneToolBox;
+		QWidget * target = ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSummary->ui->scrollAreaWidgetContents;
+		connect(source, SIGNAL(DoTabChange(WidgetInstanceIdentifier)), target, SLOT(DoTabChange(WidgetInstanceIdentifier)));
+	}
+
+	{
+		QWidget * source =
+			ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->CreateOutputDataset_VariablesSplitter_VariableSelections->ui->scrollAreaWidgetContents->ui->toolbox->newgeneToolBox;
+		QWidget * target = ui->CreateOutputPane->ui->widgetSelectVariablesPane->ui->frameKAdSelectionArea->ui->scrollAreaWidgetContents;
+		connect(source, SIGNAL(DoTabChange(WidgetInstanceIdentifier)), target, SLOT(DoTabChange(WidgetInstanceIdentifier)));
+	}
 }
 
 void NewGeneMainWindow::doDisable()

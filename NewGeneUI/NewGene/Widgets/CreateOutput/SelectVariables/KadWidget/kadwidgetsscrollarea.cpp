@@ -23,9 +23,15 @@ KadWidgetsScrollArea::KadWidgetsScrollArea(QWidget * parent) :
 									 true))   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
 
-	QBoxLayout * layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
-	layout->addStretch();
-	layout->addStretch();
+	QBoxLayout * layout = new QBoxLayout(QBoxLayout::BottomToTop, this);
+	layout->addSpacing(20);
+	QBoxLayout * layoutInner = new QBoxLayout(QBoxLayout::LeftToRight, this);
+	layoutInner->setMargin(0);
+	layoutInner->addStretch();
+	layoutInner->addStretch();
+	QFrame * frameInner = new QFrame();
+	frameInner->setLayout(layoutInner);
+	layout->addWidget(frameInner);
 	setLayout(layout);
 
 	loading = false;
@@ -52,6 +58,7 @@ void KadWidgetsScrollArea::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECT
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 
+		cached_active_vg = WidgetInstanceIdentifier{};
 		project->UnregisterInterestInChanges(this);
 		Empty();
 
@@ -102,6 +109,11 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 			WidgetInstanceIdentifiers active_dmus(widget_data.active_dmus.cbegin(), widget_data.active_dmus.cend());
 			AddKadSpinWidget(identifier, active_dmus);
 		}
+
+		if (identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+		{
+			DoTabChange(identifier); // pick up any metadata changes?
+		}
 	});
 
 	EmptyTextCheck();
@@ -123,9 +135,14 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 
 void KadWidgetsScrollArea::Empty()
 {
+	//cached_active_vg = WidgetInstanceIdentifier{}; // No - this is sometimes called after the variable selection widget has loaded, but before this widget has begun loading - we need to save the cached value
+	DoTabChange(cached_active_vg);
+
 	QLayoutItem * child;
 
-	while ((child = layout()->takeAt(0)) != 0)
+	QLayout * spinnerLayout = layout()->itemAt(1)->widget()->layout();
+
+	while ((child = spinnerLayout->takeAt(0)) != 0)
 	{
 		delete child->widget();
 		delete child;
@@ -133,7 +150,7 @@ void KadWidgetsScrollArea::Empty()
 
 	try
 	{
-		QBoxLayout * boxLayout = dynamic_cast<QBoxLayout *>(layout());
+		QBoxLayout * boxLayout = dynamic_cast<QBoxLayout *>(spinnerLayout);
 
 		if (boxLayout)
 		{
@@ -164,6 +181,51 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 	{
 		switch (change.change_type)
 		{
+			case DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE:
+				{
+
+					switch (change.change_intention)
+					{
+
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+
+								if (change.parent_identifier.code && change.parent_identifier.uuid)
+								{
+
+									WidgetInstanceIdentifier vg_to_remove(change.parent_identifier);
+									if (vg_to_remove.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+									{
+										DoTabChange(WidgetInstanceIdentifier());
+									}
+								}
+
+							}
+							break;
+
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								WidgetInstanceIdentifier vg = change.parent_identifier;
+							}
+							break;
+
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+								// Will be handled, instead, by a 'refresh all widgets' command,
+								// although full infrastructure is in place to support, send, and receive here this more granular message
+							}
+							break;
+
+						default:
+							{
+
+							}
+							break;
+
+					}
+				}
+				break;
+
 			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE:
 				{
 					switch (change.change_intention)
@@ -192,7 +254,9 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 
 									WidgetInstanceIdentifier uoa_to_remove(change.parent_identifier);
 
-									int current_number = layout()->count();
+									QLayout * spinnerLayout = layout()->itemAt(1)->widget()->layout();
+
+									int current_number = spinnerLayout->count();
 									bool found = false;
 									QWidget * widgetToRemove = nullptr;
 									QLayoutItem * layoutItemToRemove = nullptr;
@@ -200,7 +264,7 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 
 									for (i = 0; i < current_number; ++i)
 									{
-										QLayoutItem * testLayoutItem = layout()->itemAt(i);
+										QLayoutItem * testLayoutItem = spinnerLayout->itemAt(i);
 										QWidget * testWidget(testLayoutItem->widget());
 
 										try
@@ -224,7 +288,7 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 
 									if (found && widgetToRemove != nullptr)
 									{
-										layout()->takeAt(i);
+										spinnerLayout->takeAt(i);
 										delete widgetToRemove;
 										delete layoutItemToRemove;
 										widgetToRemove = nullptr;
@@ -277,7 +341,9 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 	// Remove the stretch at the end
 	QLayoutItem * stretcher {};
 
-	if (layout()->count() && (stretcher = layout()->takeAt(layout()->count() - 1)) != 0)
+	QLayout * spinnerLayout = layout()->itemAt(1)->widget()->layout();
+
+	if (spinnerLayout->count() && (stretcher = spinnerLayout->takeAt(spinnerLayout->count() - 1)) != 0)
 	{
 		try
 		{
@@ -329,11 +395,11 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 		newSpinBox->doSetVisible(true);
 	}
 
-	layout()->addWidget(newSpinBox);
+	spinnerLayout->addWidget(newSpinBox);
 
 	try
 	{
-		QBoxLayout * boxLayout = dynamic_cast<QBoxLayout *>(layout());
+		QBoxLayout * boxLayout = dynamic_cast<QBoxLayout *>(spinnerLayout);
 
 		if (boxLayout)
 		{
@@ -387,13 +453,15 @@ void KadWidgetsScrollArea::EmptyTextCheck()
 		frameLoadingDataset->setVisible(false);
 	}
 
-	int current_number = layout()->count();
+	QLayout * spinnerLayout = layout()->itemAt(1)->widget()->layout();
+
+	int current_number = spinnerLayout->count();
 	bool any_spincontrols_visible = false;
 	int i = 0;
 
 	for (i = 0; i < current_number; ++i)
 	{
-		QLayoutItem * testLayoutItem = layout()->itemAt(i);
+		QLayoutItem * testLayoutItem = spinnerLayout->itemAt(i);
 		QWidget * testWidget(testLayoutItem->widget());
 
 		try
@@ -457,7 +525,7 @@ void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
 	{
 		QSize mySize { size() };
 		QSize labelSize { emptySpinsLabel->size() };
-		emptySpinsLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 2 - labelSize.height() / 2);
+		emptySpinsLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 3 - labelSize.height() / 2);
 	}
 
 	QLabel * noOutputProjectLabel { findChild<QLabel *>("noOutputProjectLabel") };
@@ -466,7 +534,7 @@ void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
 	{
 		QSize mySize { size() };
 		QSize labelSize { noOutputProjectLabel->size() };
-		noOutputProjectLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 2 - labelSize.height() / 2);
+		noOutputProjectLabel->move(mySize.width() / 2 - labelSize.width() / 2, mySize.height() / 3 - labelSize.height() / 2);
 	}
 
 	QFrame * frameLoadingDataset { findChild<QFrame *>("frameLoadingDataset") };
@@ -476,6 +544,16 @@ void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
 		QSize mySize { size() };
 		QSize frameSize { frameLoadingDataset->size() };
 		frameLoadingDataset->move(mySize.width() / 2 - frameSize.width() / 2, mySize.height() / 2 - frameSize.height() / 2);
+	}
+
+	QLabel * vgWarningLabel { findChild<QLabel *>("labelVariableGroupWarning") };
+
+	if (vgWarningLabel)
+	{
+		QSize mySize { size() };
+		QSize labelSize { vgWarningLabel->size() };
+		vgWarningLabel->resize(mySize.width(), labelSize.height());
+		vgWarningLabel->move(0, mySize.height() - labelSize.height());
 	}
 
 	EmptyTextCheck();
@@ -498,6 +576,8 @@ void KadWidgetsScrollArea::Resequence()
 		WidgetInstanceIdentifiers orderedDmus = toolbox->getDmuSequence();
 		bool misordered = false;
 
+		QLayout * spinnerLayout = layout()->itemAt(1)->widget()->layout();
+
 		{
 			int order = 0;
 
@@ -507,7 +587,7 @@ void KadWidgetsScrollArea::Resequence()
 
 				for (int i = 0; i < current_number; ++i)
 				{
-					QLayoutItem * testLayoutItem = layout()->itemAt(i);
+					QLayoutItem * testLayoutItem = spinnerLayout->itemAt(i);
 					QWidget * testWidget(testLayoutItem->widget());
 
 					try
@@ -546,7 +626,7 @@ void KadWidgetsScrollArea::Resequence()
 			// Remove the stretch at the end
 			QLayoutItem * stretcher {};
 
-			if (layout()->count() && (stretcher = layout()->takeAt(layout()->count() - 1)) != 0)
+			if (spinnerLayout->count() && (stretcher = spinnerLayout->takeAt(spinnerLayout->count() - 1)) != 0)
 			{
 				try
 				{
@@ -568,11 +648,11 @@ void KadWidgetsScrollArea::Resequence()
 
 			for (auto orderedDmu : orderedDmus)
 			{
-				int current_number = layout()->count();
+				int current_number = spinnerLayout->count();
 
 				for (int i = 0; i < current_number; ++i)
 				{
-					QLayoutItem * testLayoutItem = layout()->itemAt(i);
+					QLayoutItem * testLayoutItem = spinnerLayout->itemAt(i);
 					QWidget * testWidget(testLayoutItem->widget());
 
 					try
@@ -584,7 +664,7 @@ void KadWidgetsScrollArea::Resequence()
 							if (orderedDmu.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, testSpinBox->data_instance))
 							{
 								cache.push_back(testSpinBox);
-								layout()->removeWidget(testSpinBox);
+								spinnerLayout->removeWidget(testSpinBox);
 								break;
 							}
 						}
@@ -599,12 +679,12 @@ void KadWidgetsScrollArea::Resequence()
 
 			for (auto cachedWidget : cache)
 			{
-				layout()->addWidget(cachedWidget);
+				spinnerLayout->addWidget(cachedWidget);
 			}
 
 			try
 			{
-				QBoxLayout * boxLayout = dynamic_cast<QBoxLayout *>(layout());
+				QBoxLayout * boxLayout = dynamic_cast<QBoxLayout *>(spinnerLayout);
 
 				if (boxLayout)
 				{
@@ -614,6 +694,51 @@ void KadWidgetsScrollArea::Resequence()
 			catch (std::bad_cast &)
 			{
 			}
+		}
+	}
+}
+
+QString KadWidgetsScrollArea::getFullWarningText(bool newline)
+{
+	QString vgWarningText;
+	if (!cached_active_vg.IsEmpty() && cached_active_vg.longhand && cached_active_vg.notes.notes1 && !cached_active_vg.notes.notes1->empty())
+	{
+		vgWarningText += "<b><FONT COLOR='#ff0000'>";
+		vgWarningText += "&nbsp;Warning for <FONT COLOR='#1f3eba'>\"";
+		vgWarningText += cached_active_vg.longhand->c_str();
+		vgWarningText += "\":</b>";
+		if (newline)
+		{
+			vgWarningText += "<br><br>";
+		}
+		else
+		{
+			vgWarningText += "&nbsp;&nbsp;";
+		}
+		vgWarningText += "<FONT COLOR='#000000'>";
+		vgWarningText += cached_active_vg.notes.notes1->c_str();
+	}
+	else
+	{
+		vgWarningText += "You may set a warning message to appear here!\n\nTo do so, go to the 'Input dataset' -> 'Manage Variable Groups' tab.";
+	}
+	return vgWarningText;
+}
+
+void KadWidgetsScrollArea::DoTabChange(WidgetInstanceIdentifier data)
+{
+	cached_active_vg = data;
+	QLabel * vgWarningLabel { findChild<QLabel *>("labelVariableGroupWarning") };
+	if (vgWarningLabel)
+	{
+		if (!data.IsEmpty() && data.longhand && data.notes.notes1 && !data.notes.notes1->empty())
+		{
+			QString vgWarningText = getFullWarningText(false);
+			vgWarningLabel->setText(vgWarningText);
+		}
+		else
+		{
+			vgWarningLabel->setText(QString());
 		}
 	}
 }

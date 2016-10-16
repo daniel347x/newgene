@@ -29,9 +29,13 @@ class KAdColumnSelectionBox : public QFrame, public NewGeneWidget // do not reor
 
 	public:
 
+		friend class NewGeneMainWindow;
+
 	signals:
 
 	public slots:
+
+		void popupWarning(QString const &);
 
 };
 

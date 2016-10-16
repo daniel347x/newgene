@@ -1,5 +1,6 @@
 #include "kadcolumnselectionbox.h"
 #include "ui_kadcolumnselectionbox.h"
+#include "../../Utilities/myclickablelabel.h"
 
 KAdColumnSelectionBox::KAdColumnSelectionBox(QWidget * parent) :
 	QFrame(parent),
@@ -8,6 +9,12 @@ KAdColumnSelectionBox::KAdColumnSelectionBox(QWidget * parent) :
 	ui(new Ui::KAdColumnSelectionBox)
 {
 	ui->setupUi(this);
+
+	MyClickableLabel * vgWarningLabel { findChild<MyClickableLabel *>("labelVariableGroupWarning") };
+	if (vgWarningLabel)
+	{
+		QObject::connect(vgWarningLabel, SIGNAL(clicked(QString const &)), this, SLOT(popupWarning(QString const &)));
+	}
 }
 
 KAdColumnSelectionBox::~KAdColumnSelectionBox()
@@ -29,3 +36,18 @@ void KAdColumnSelectionBox::changeEvent(QEvent * e)
 			break;
 	}
 }
+
+void KAdColumnSelectionBox::popupWarning(QString const & labelText)
+{
+	KadWidgetsScrollArea * spinnerScrollArea { findChild<KadWidgetsScrollArea *>("scrollAreaWidgetContents") };
+	if (spinnerScrollArea)
+	{
+		QString vgWarningText = spinnerScrollArea->getFullWarningText(true);
+		QMessageBox::information(this, "Variable Group Warning", vgWarningText);
+	}
+	else
+	{
+		QMessageBox::information(this, "Variable Group Warning", labelText);
+	}
+}
+

@@ -17,6 +17,7 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 		void EmptyTextCheck();
 		void ShowLoading(bool const loading_ = true);
 		void Resequence();
+		QString getFullWarningText(bool newline);
 
 	signals:
 
@@ -29,6 +30,7 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROLS_AREA); // us, parent
 		void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET); // child
+		void DoTabChange(WidgetInstanceIdentifier);
 
 	protected:
 
@@ -39,6 +41,7 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 
 	private:
 		bool loading;
+		WidgetInstanceIdentifier cached_active_vg;
 
 };
 

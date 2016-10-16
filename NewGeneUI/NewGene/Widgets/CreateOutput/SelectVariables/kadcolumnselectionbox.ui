@@ -221,6 +221,25 @@
         </item>
        </layout>
       </widget>
+      <widget class="MyClickableLabel" name="labelVariableGroupWarning">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>40</y>
+         <width>471</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {color: red;}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
+       </property>
+      </widget>
      </widget>
     </widget>
    </item>
@@ -232,6 +251,11 @@
    <extends>QWidget</extends>
    <header>kadwidgetsscrollarea.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MyClickableLabel</class>
+   <extends>QLabel</extends>
+   <header location="global">myclickablelabel.h</header>
   </customwidget>
  </customwidgets>
  <resources>

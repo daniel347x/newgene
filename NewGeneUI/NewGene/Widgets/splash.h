@@ -32,14 +32,14 @@ class Splash : public QDialog
 		void showMyself();
 		void execMyself();
 
-	private:
+private:
 		bool eventFilter(QObject * obj, QEvent * event);
 		void closeEvent(QCloseEvent * event);
 		void closeMyself();
 
 		Ui::Splash * ui;
 		NewGeneMainWindow * mainWindow;
-		QWebEngineView * webView;
+		//QWebEngineView * webView;
 };
 
 #endif // SPLASH_H

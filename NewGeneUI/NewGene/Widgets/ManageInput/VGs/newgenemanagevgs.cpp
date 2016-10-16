@@ -36,7 +36,8 @@ NewGeneManageVGs::NewGeneManageVGs(QWidget * parent) :
 	ui->pushButton_add_vg->setEnabled(false);
 	ui->pushButton_remove_vg->setEnabled(false);
 	ui->pushButton_refresh_vg->setEnabled(false);
-	ui->pushButton_set_descriptions_for_vg->setEnabled(false);
+	ui->pushButton_set_description_for_vg->setEnabled(false);
+	ui->pushButton_set_warning_for_vg->setEnabled(false);
 
 	refresh_vg_called_after_create = false;
 }
@@ -84,7 +85,8 @@ void NewGeneManageVGs::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_
 		ui->pushButton_add_vg->setEnabled(true);
 		ui->pushButton_remove_vg->setEnabled(false);
 		ui->pushButton_refresh_vg->setEnabled(false);
-		ui->pushButton_set_descriptions_for_vg->setEnabled(false);
+		ui->pushButton_set_description_for_vg->setEnabled(false);
+		ui->pushButton_set_warning_for_vg->setEnabled(false);
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
@@ -201,7 +203,8 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 	ui->pushButton_add_vg->setEnabled(true);
 	ui->pushButton_remove_vg->setEnabled(false);
 	ui->pushButton_refresh_vg->setEnabled(false);
-	ui->pushButton_set_descriptions_for_vg->setEnabled(false);
+	ui->pushButton_set_description_for_vg->setEnabled(false);
+	ui->pushButton_set_warning_for_vg->setEnabled(false);
 
 }
 
@@ -247,7 +250,8 @@ void NewGeneManageVGs::Empty()
 	ui->pushButton_add_vg->setEnabled(false);
 	ui->pushButton_remove_vg->setEnabled(false);
 	ui->pushButton_refresh_vg->setEnabled(false);
-	ui->pushButton_set_descriptions_for_vg->setEnabled(false);
+	ui->pushButton_set_description_for_vg->setEnabled(false);
+	ui->pushButton_set_warning_for_vg->setEnabled(false);
 
 }
 
@@ -524,7 +528,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	dialog.setWindowFlags(dialog.windowFlags() & ~(Qt::WindowContextHelpButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint));
 	QFormLayout form(&dialog);
 	QList<QLineEdit *> fields;
-	QPlainTextEdit * longdescriptionEdit = nullptr;
+	QLineEdit * warningEdit = nullptr;
 
 	QLineEdit * lineEditCode = new QLineEdit(&dialog);
 	QString labelCode = QString("Enter a brief identifying code for the new variable group:");
@@ -536,10 +540,10 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
 
-	QPlainTextEdit * longDescription = new QPlainTextEdit(&dialog);
-	QString labelLongDescription = QString("Enter an optional longer description for the new variable group:");
-	form.addRow(labelLongDescription, longDescription);
-	longdescriptionEdit = longDescription;
+	QLineEdit * lineEditWarning = new QLineEdit(&dialog);
+	QString labelWarning = QString("Enter an optional warning for the new variable group:");
+	form.addRow(labelWarning, lineEditWarning);
+	warningEdit = lineEditWarning;
 
 	QWidget VgConstructionWidget;
 	QVBoxLayout formOverall;
@@ -564,7 +568,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 
 	std::string proposed_vg_code;
 	std::string vg_description;
-	std::string vg_longdescription;
+	std::string vg_warning;
 
 	WidgetInstanceIdentifier uoa_to_use;
 
@@ -574,13 +578,13 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 
 		proposed_vg_code.clear();
 		vg_description.clear();
-		vg_longdescription.clear();
+		vg_warning.clear();
 
 		std::string errorMsg;
 
 		QLineEdit * proposed_vg_code_field = fields[0];
 		QLineEdit * vg_description_field = fields[1];
-		QPlainTextEdit * vg_longdescription_field = longdescriptionEdit;
+		QLineEdit * vg_warning_field = warningEdit;
 
 		if (proposed_vg_code_field && vg_description_field)
 		{
@@ -614,11 +618,11 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 			return false;
 		}
 
-		vg_longdescription = vg_longdescription_field->toPlainText().toStdString();
+		vg_warning = vg_warning_field->text().toStdString();
 
 		boost::trim(proposed_vg_code);
 		boost::trim(vg_description);
-		boost::trim(vg_longdescription);
+		boost::trim(vg_warning);
 
 		bool valid = true;
 
@@ -650,7 +654,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 		if (valid)
 		{
 			std::string newErrMsg;
-			valid = Validation::ValidateVgNotes(vg_longdescription, newErrMsg);
+			valid = Validation::ValidateVgNotes(vg_warning, newErrMsg);
 			if (hasErrors)
 			{
 				errorMsg += "\n";
@@ -747,7 +751,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	std::string new_vg_code(proposed_vg_code);
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(uoa_to_use, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__StringVector(std::vector<std::string> {new_vg_code, vg_description, vg_longdescription})))));
+	actionItems.push_back(std::make_pair(uoa_to_use, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__StringVector(std::vector<std::string> {new_vg_code, vg_description, vg_warning})))));
 	WidgetActionItemRequest_ACTION_CREATE_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit CreateVG(action_request);
@@ -1438,19 +1442,155 @@ void NewGeneManageVGs::ReceiveVGSelectionChanged(const QItemSelection & selected
 		ui->pushButton_add_vg->setEnabled(true);
 		ui->pushButton_remove_vg->setEnabled(true);
 		ui->pushButton_refresh_vg->setEnabled(true);
-		ui->pushButton_set_descriptions_for_vg->setEnabled(true);
+		ui->pushButton_set_description_for_vg->setEnabled(true);
+		ui->pushButton_set_warning_for_vg->setEnabled(true);
 	}
 	else
 	{
 		ui->pushButton_add_vg->setEnabled(true);
 		ui->pushButton_remove_vg->setEnabled(false);
 		ui->pushButton_refresh_vg->setEnabled(false);
-		ui->pushButton_set_descriptions_for_vg->setEnabled(false);
+		ui->pushButton_set_description_for_vg->setEnabled(false);
+		ui->pushButton_set_warning_for_vg->setEnabled(false);
 	}
 
 }
 
-void NewGeneManageVGs::on_pushButton_set_descriptions_for_vg_clicked()
+void NewGeneManageVGs::on_pushButton_set_description_for_vg_clicked()
+{
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	if (!ui->listViewManageVGs)
+	{
+		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
+
+	WidgetInstanceIdentifier vg;
+	WidgetInstanceIdentifier uoa;
+	bool is_selected = GetSelectedVG(vg, uoa);
+
+	if (!is_selected)
+	{
+		return;
+	}
+
+	if (!vg.code || vg.code->empty())
+	{
+		boost::format msg("Invalid variable group.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
+
+	std::string vg_description;
+	std::string vg_warning;
+	if (vg.notes.notes1)
+	{
+		vg_warning = *vg.notes.notes1;
+	}
+
+	bool ok {false};
+
+	while (!ok)
+	{
+		boost::format msg("Set a short description for variable group \"%1%\"");
+		msg % *vg.code;
+		std::string longhand;
+
+		if (vg.longhand)
+		{
+			longhand = *vg.longhand;
+		}
+
+		QDialog dialog(this);
+		QFormLayout form(&dialog);
+		form.addRow(new QLabel(QString(msg.str().c_str())));
+		QLineEdit * longhandEdit = nullptr;
+		QLineEdit * warningEdit = nullptr;
+
+		int i = 0;
+		{
+			QLineEdit *lineEdit = new QLineEdit(&dialog);
+			QString label = QString("Short description:").arg(++i);
+			form.addRow(label, lineEdit);
+			lineEdit->setText(longhand.c_str());
+			longhandEdit = lineEdit;
+		}
+
+		// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+		QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+		form.addRow(&buttonBox);
+
+		QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+		QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+
+		dialog.setMinimumWidth(640);
+
+		if (dialog.exec() != QDialog::Accepted)
+		{
+			return;
+		}
+
+		longhand = longhandEdit->text().toStdString();
+		boost::trim(longhand);
+		bool validDescription = true;
+		std::string errorMsgDescription;
+
+		if (validDescription)
+		{
+			validDescription = Validation::ValidateVgDescription(longhand, errorMsgDescription);
+		}
+
+		if (!validDescription)
+		{
+			std::string errors;
+			if (!validDescription)
+			{
+				errors += errorMsgDescription;
+			}
+			boost::format msg("%1%");
+			msg % errors;
+			QMessageBox msgBox;
+			msgBox.setText(msg.str().c_str());
+			msgBox.exec();
+			ok = false;
+		}
+		else
+		{
+			if (vg.longhand)
+			{
+				*vg.longhand = longhand;
+				vg_description = longhand;
+			}
+
+			ok = true;
+		}
+	}
+
+	InstanceActionItems actionItems;
+	std::vector<std::string> descriptions;
+	descriptions.push_back(vg_description);
+	descriptions.push_back(vg_warning);
+	actionItems.push_back(std::make_pair(vg, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__StringVector(descriptions)))));
+	WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
+	emit SetVGDescriptions(action_request);
+
+}
+
+void NewGeneManageVGs::on_pushButton_set_warning_for_vg_clicked()
 {
 
 	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
@@ -1490,21 +1630,20 @@ void NewGeneManageVGs::on_pushButton_set_descriptions_for_vg_clicked()
 	}
 
 	std::string vg_description;
-	std::string vg_longdescription;
+	std::string vg_warning;
+	if (vg.longhand)
+	{
+		vg_description = *vg.longhand;
+	}
 
 	bool ok {false};
 
 	while (!ok)
 	{
-		boost::format msg("Set a new short and long description for variable group \"%1%\".\n\nNote: The short description must be very short.");
+		boost::format msg("Set a warning message for variable group \"%1%\".");
 		msg % *vg.code;
 		std::string longhand;
 		std::string notes;
-
-		if (vg.longhand)
-		{
-			longhand = *vg.longhand;
-		}
 
 		if (vg.notes.notes1)
 		{
@@ -1515,23 +1654,14 @@ void NewGeneManageVGs::on_pushButton_set_descriptions_for_vg_clicked()
 		QFormLayout form(&dialog);
 		form.addRow(new QLabel(QString(msg.str().c_str())));
 		QLineEdit * longhandEdit = nullptr;
-		QPlainTextEdit * descriptionEdit = nullptr;
+		QLineEdit * warningEdit = nullptr;
 
 		int i = 0;
 		{
-			QLineEdit *lineEdit = new QLineEdit(&dialog);
-			QString label = QString("Short description:").arg(++i);
-			form.addRow(label, lineEdit);
-			lineEdit->setText(longhand.c_str());
-			longhandEdit = lineEdit;
-		}
-
-		{
-			QPlainTextEdit *plainTextEdit = new QPlainTextEdit(&dialog);
-			QString label = QString("Long description").arg(++i);
-			form.addRow(label, plainTextEdit);
-			plainTextEdit->setPlainText(notes.c_str());
-			descriptionEdit = plainTextEdit;
+			warningEdit = new QLineEdit(&dialog);
+			QString label = QString("Warning message:").arg(++i);
+			form.addRow(label, warningEdit);
+			warningEdit->setText(notes.c_str());
 		}
 
 		// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
@@ -1548,42 +1678,23 @@ void NewGeneManageVGs::on_pushButton_set_descriptions_for_vg_clicked()
 			return;
 		}
 
-		longhand = longhandEdit->text().toStdString();
-		notes = descriptionEdit->toPlainText().toStdString();
+		notes = warningEdit->text().toStdString();
 
-		boost::trim(longhand);
 		boost::trim(notes);
 
-		bool validDescription = true;
 		bool validNotes = true;
 		std::string errorMsgDescription;
 		std::string errorMsgNotes;
-
-		if (validDescription)
-		{
-			validDescription = Validation::ValidateVgDescription(longhand, errorMsgDescription);
-		}
 
 		if (validNotes)
 		{
 			validNotes = Validation::ValidateVgNotes(notes, errorMsgNotes);
 		}
 
-		if (!validDescription || !validNotes)
+		if (!validNotes)
 		{
 			std::string errors;
-			if (!validDescription && !validNotes)
-			{
-				errors += "Errors:\n";
-				errors += errorMsgDescription;
-				errors += "\n";
-				errors += errorMsgNotes;
-			}
-			else if (!validDescription)
-			{
-				errors += errorMsgDescription;
-			}
-			else
+			if (!validNotes)
 			{
 				errors += errorMsgNotes;
 			}
@@ -1596,16 +1707,10 @@ void NewGeneManageVGs::on_pushButton_set_descriptions_for_vg_clicked()
 		}
 		else
 		{
-			if (vg.longhand)
-			{
-				*vg.longhand = longhand;
-				vg_description = longhand;
-			}
-
 			if (vg.notes.notes1)
 			{
 				*vg.notes.notes1 = notes;
-				vg_longdescription = notes;
+				vg_warning = notes;
 			}
 
 			ok = true;
@@ -1615,7 +1720,7 @@ void NewGeneManageVGs::on_pushButton_set_descriptions_for_vg_clicked()
 	InstanceActionItems actionItems;
 	std::vector<std::string> descriptions;
 	descriptions.push_back(vg_description);
-	descriptions.push_back(vg_longdescription);
+	descriptions.push_back(vg_warning);
 	actionItems.push_back(std::make_pair(vg, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem *>(new WidgetActionItem__StringVector(descriptions)))));
 	WidgetActionItemRequest_ACTION_SET_VG_DESCRIPTIONS action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 	emit SetVGDescriptions(action_request);

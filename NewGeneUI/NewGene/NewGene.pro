@@ -158,7 +158,8 @@ SOURCES += main.cpp\
     Widgets/Utilities/htmldelegate.cpp \
     Widgets/splash.cpp \
     Widgets/newgenewebengineview.cpp \
-    Widgets/vacuumdialog.cpp
+    Widgets/vacuumdialog.cpp \
+    Widgets/Utilities/myclickablelabel.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -285,7 +286,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Widgets/Utilities/htmldelegate.h \
     Widgets/splash.h \
     Widgets/newgenewebengineview.h \
-    Widgets/vacuumdialog.h
+    Widgets/vacuumdialog.h \
+    Widgets/Utilities/myclickablelabel.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -336,6 +338,7 @@ INCLUDEPATH += $$PWD/Widgets/ManageInput/DMUs
 INCLUDEPATH += $$PWD/Widgets/ManageInput/UOAs
 INCLUDEPATH += $$PWD/Widgets/ManageInput/VGs
 INCLUDEPATH += $$PWD/Widgets/ManageInput/Data
+INCLUDEPATH += $$PWD/Widgets/Utilities
 INCLUDEPATH += $$PWD/Infrastructure/Model
 INCLUDEPATH += $$PWD/Infrastructure/Model/Base
 INCLUDEPATH += $$PWD/Infrastructure/Model/Indicator

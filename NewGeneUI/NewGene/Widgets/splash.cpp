@@ -11,7 +11,7 @@ Splash::Splash(QWidget * parent, NewGeneMainWindow * mainWindow_, bool const ope
 	mainWindow{mainWindow_},
 	closed_via_click{false},
 	opened_as_about_box{opened_as_about_box_},
-	webView{nullptr},
+	//webView{nullptr},
 	ui{new Ui::Splash}
 {
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
@@ -33,31 +33,36 @@ void Splash::execMyself()
 
 void Splash::showMyself()
 {
-	webView = new NewGeneWebEngineView(this);
-	ui->verticalLayoutWeb->addWidget(webView);
+	bool showWebLink = false;
 
-	webView->setVisible(false);
+	if (showWebLink)
+	{
+		//webView = new NewGeneWebEngineView(this);
+		//ui->verticalLayoutWeb->addWidget(webView);
 
-	QMovie * movie = new QMovie(":/ajax-loader.gif");
-	ui->labelSpinner->setMovie(movie);
-	movie->start();
+		//webView->setVisible(false);
 
-	// So that links that open external pages trigger the 'CreateWindow' function in our derived NewGeneWebEngineView class
-	webView->page()->settings()->setAttribute(QWebEngineSettings::JavascriptEnabled, true);
-	webView->page()->settings()->setAttribute(QWebEngineSettings::JavascriptCanOpenWindows, true);
-	webView->page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+		//QMovie * movie = new QMovie(":/ajax-loader.gif");
+		//ui->labelSpinner->setMovie(movie);
+		//movie->start();
 
-	connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(receiveLoadFinished(bool)));
-	webView->setUrl(QUrl("https://d1ce36c5f50a052d14358de742b69156b6345b37-www.googledrive.com/host/0B0q-yvic3PFIfjBBUUxObVIwSmMtdE9EaDR5YS03cXRHem5KQXZHNTFncHdjNU4tdWVTd3c/splash.html"));
-	webView->show();
+		// So that links that open external pages trigger the 'CreateWindow' function in our derived NewGeneWebEngineView class
+		//webView->page()->settings()->setAttribute(QWebEngineSettings::JavascriptEnabled, true);
+		//webView->page()->settings()->setAttribute(QWebEngineSettings::JavascriptCanOpenWindows, true);
+		//webView->page()->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+
+		//connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(receiveLoadFinished(bool)));
+		//webView->setUrl(QUrl("https://d1ce36c5f50a052d14358de742b69156b6345b37-www.googledrive.com/host/0B0q-yvic3PFIfjBBUUxObVIwSmMtdE9EaDR5YS03cXRHem5KQXZHNTFncHdjNU4tdWVTd3c/splash.html"));
+		//webView->show();
+	}
 }
 
 void Splash::receiveLoadFinished(bool)
 {
-	ui->labelSpinner->setVisible(false);
-	ui->labelLatest->setVisible(false);
-	webView->setVisible(true);
-	webView->setEnabled(true);
+	//ui->labelSpinner->setVisible(false);
+	//ui->labelLatest->setVisible(false);
+	//webView->setVisible(true);
+	//webView->setEnabled(true);
 }
 
 bool Splash::eventFilter(QObject * obj, QEvent * event)
