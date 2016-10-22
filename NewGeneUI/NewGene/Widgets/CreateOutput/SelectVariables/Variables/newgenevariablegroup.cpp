@@ -205,7 +205,7 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
-								// Will be handled, instead, by a 'refresh all widgets' command,
+								// Will be handled, instead, by a 'refresh all widgets' command issued by our parent widget,
 								// although full infrastructure is in place to support, send, and receive here this more granular message
 							}
 							break;

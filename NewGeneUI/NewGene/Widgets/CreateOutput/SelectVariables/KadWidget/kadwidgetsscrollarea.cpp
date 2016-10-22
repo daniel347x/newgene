@@ -77,6 +77,7 @@ void KadWidgetsScrollArea::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTI
 	{
 		if (project)
 		{
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE, false, "");
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
 		}
 	}
@@ -209,6 +210,7 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 									if (false)
 									{
 										WidgetInstanceIdentifier vg_to_remove(change.parent_identifier);
+
 										if (vg_to_remove.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
 										{
 											DoTabChange(WidgetInstanceIdentifier());
@@ -233,8 +235,7 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
-								// Will be handled, instead, by a 'refresh all widgets' command,
-								// although full infrastructure is in place to support, send, and receive here this more granular message
+								DoVariableSelectionChange();
 							}
 							break;
 
@@ -771,6 +772,7 @@ QString KadWidgetsScrollArea::getFullWarningTextSingleVG(bool newline, WidgetIns
 			vgWarningText += "&nbsp;Warning for <FONT COLOR='#1f3eba'>\"";
 			vgWarningText += cached_active_vg.longhand->c_str();
 			vgWarningText += "\":</b>";
+
 			if (newline)
 			{
 				vgWarningText += "<br><br>";
@@ -779,6 +781,7 @@ QString KadWidgetsScrollArea::getFullWarningTextSingleVG(bool newline, WidgetIns
 			{
 				vgWarningText += "&nbsp;&nbsp;";
 			}
+
 			vgWarningText += "<FONT COLOR='#000000'>";
 			vgWarningText += cached_active_vg.notes.notes1->c_str();
 		}
@@ -796,6 +799,7 @@ QString KadWidgetsScrollArea::getFullWarningTextSingleVG(bool newline, WidgetIns
 			vgWarningText += "&nbsp;Warning for <FONT COLOR='#1f3eba'>\"";
 			vgWarningText += vg.longhand->c_str();
 			vgWarningText += "\":</b>";
+
 			if (newline)
 			{
 				vgWarningText += "<br><br>";
@@ -804,6 +808,7 @@ QString KadWidgetsScrollArea::getFullWarningTextSingleVG(bool newline, WidgetIns
 			{
 				vgWarningText += "&nbsp;&nbsp;";
 			}
+
 			vgWarningText += "<FONT COLOR='#000000'>";
 			vgWarningText += vg.notes.notes1->c_str();
 		}
@@ -814,7 +819,7 @@ QString KadWidgetsScrollArea::getFullWarningTextSingleVG(bool newline, WidgetIns
 
 QString KadWidgetsScrollArea::getFullWarningTextAllVGs()
 {
-	QString vgWarningTextDefault = "You may set a warning message to appear here for selected variable groups!\n\nTo do so, go to the 'Input dataset' -> 'Manage Variable Groups' tab.";
+	QString vgWarningTextDefault = "You may set a warning message for different variable groups - it will appear here when variables are selected.\n\nTo create a warning message, go to the 'Input dataset' -> 'Manage Variable Groups' tab.";
 
 	std::set<WidgetInstanceIdentifier> activeVGs;
 
@@ -836,19 +841,23 @@ QString KadWidgetsScrollArea::getFullWarningTextAllVGs()
 		for (auto & vg : activeVGs)
 		{
 			QString vgWarningText = this->getFullWarningTextSingleVG(true, vg);
+
 			if (vgWarningText.size() == 0)
 			{
 				return vgWarningTextDefault;
 			}
+
 			return vgWarningText;
 		}
 	}
 
 	// More than 1 VG - how many actually have a warning?
 	int howManyHaveWarnings {0};
+
 	for (auto & vg : activeVGs)
 	{
 		QString vgWarningText = this->getFullWarningTextSingleVG(true, vg);
+
 		if (vgWarningText.size() > 0)
 		{
 			++howManyHaveWarnings;
@@ -865,6 +874,7 @@ QString KadWidgetsScrollArea::getFullWarningTextAllVGs()
 		for (auto & vg : activeVGs)
 		{
 			QString vgWarningText = this->getFullWarningTextSingleVG(true, vg);
+
 			if (vgWarningText.size() > 0)
 			{
 				return vgWarningText;
@@ -875,15 +885,18 @@ QString KadWidgetsScrollArea::getFullWarningTextAllVGs()
 	// More than 1 VG has a warning
 	QString allWarnings;
 	int numberAdded {0};
+
 	for (auto & vg : activeVGs)
 	{
 		QString vgWarningText = this->getFullWarningTextSingleVG(true, vg);
+
 		if (vgWarningText.size() > 0)
 		{
 			if (numberAdded > 0)
 			{
 				allWarnings += "<br><br>";
 			}
+
 			++numberAdded;
 			allWarnings += vgWarningText;
 		}
@@ -907,6 +920,7 @@ void KadWidgetsScrollArea::DoTabChange(WidgetInstanceIdentifier data)
 	{
 		cached_active_vg = data;
 		QLabel * vgWarningLabel { findChild<QLabel *>("labelVariableGroupWarning") };
+
 		if (vgWarningLabel)
 		{
 			if (!data.IsEmpty() && data.longhand && data.notes.notes1 && !data.notes.notes1->empty())
@@ -925,6 +939,7 @@ void KadWidgetsScrollArea::DoTabChange(WidgetInstanceIdentifier data)
 void KadWidgetsScrollArea::DoVariableSelectionChange()
 {
 	QLabel * vgWarningLabel { findChild<QLabel *>("labelVariableGroupWarning") };
+
 	if (vgWarningLabel == nullptr)
 	{
 		return;
@@ -953,14 +968,17 @@ void KadWidgetsScrollArea::DoVariableSelectionChange()
 			QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
 			vgWarningLabel->setText(vgWarningText);
 		}
+
 		return;
 	}
 
 	// More than 1 VG - how many actually have a warning?
 	int howManyHaveWarnings {0};
+
 	for (auto & vg : activeVGs)
 	{
 		QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+
 		if (vgWarningText.size() > 0)
 		{
 			++howManyHaveWarnings;
@@ -978,15 +996,17 @@ void KadWidgetsScrollArea::DoVariableSelectionChange()
 		for (auto & vg : activeVGs)
 		{
 			QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+
 			if (vgWarningText.size() > 0)
 			{
 				vgWarningLabel->setText(vgWarningText);
 			}
 		}
+
 		return;
 	}
 
 	// More than 1 VG has a warning
-	QString vgWarningText = "<b><FONT COLOR='#ff0000'>Warnings for selected variable groups!  Click here</b>";
+	QString vgWarningText = "<b><FONT COLOR='#ff0000'>Warnings for selected variable groups!</b>&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR='#000000'>Click here to view";
 	vgWarningLabel->setText(vgWarningText);
 }
