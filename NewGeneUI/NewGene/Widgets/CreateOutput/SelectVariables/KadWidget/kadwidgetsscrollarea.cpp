@@ -802,7 +802,7 @@ QString KadWidgetsScrollArea::getFullWarningTextSingleVG(bool newline, WidgetIns
 
 			if (newline)
 			{
-				vgWarningText += "<br><br>";
+				vgWarningText += "<br><br>&nbsp;&nbsp;&nbsp;&nbsp;";
 			}
 			else
 			{
