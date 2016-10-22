@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets quickwidgets webengine webenginewidgets qml quick
+QT       += core gui widgets
 
 TARGET = NewGene
 TEMPLATE = app
@@ -157,7 +157,6 @@ SOURCES += main.cpp\
     Infrastructure/UIAction/limitdmus.cpp \
     Widgets/Utilities/htmldelegate.cpp \
     Widgets/splash.cpp \
-    Widgets/newgenewebengineview.cpp \
     Widgets/vacuumdialog.cpp \
     Widgets/Utilities/myclickablelabel.cpp
 
@@ -285,7 +284,6 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Infrastructure/UIAction/limitdmus.h \
     Widgets/Utilities/htmldelegate.h \
     Widgets/splash.h \
-    Widgets/newgenewebengineview.h \
     Widgets/vacuumdialog.h \
     Widgets/Utilities/myclickablelabel.h
 

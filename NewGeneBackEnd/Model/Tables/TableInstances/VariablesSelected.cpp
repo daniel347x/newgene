@@ -422,6 +422,45 @@ Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSele
 
 }
 
+std::set<WidgetInstanceIdentifier> Table_VARIABLES_SELECTED::GetActiveVGs(OutputModel * output_model_, InputModel * input_model_)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	if (output_model_ == nullptr || input_model_ == nullptr)
+	{
+		return std::set<WidgetInstanceIdentifier>();
+	}
+
+	std::set<WidgetInstanceIdentifier> active_vgs;
+	bool failed { false };
+	// Iterate through variable group => variables selected map
+	std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [this, &input_model_, &failed,
+				  &active_vgs](std::pair<NewGeneUUID, WidgetInstanceIdentifiers> const & variable_group__variables__pair)
+	{
+
+		if (failed)
+		{
+			return; // from lambda
+		}
+
+		if (variable_group__variables__pair.second.size() == 0)
+		{
+			// no variables selected
+			return; // from lambda
+		}
+
+		// Get the UOA corresponding to the variable group.
+		// This is the *parent* WidgetInstanceIdentifier of the variable group's WidgetInstanceIdentifier
+		WidgetInstanceIdentifier variable_group = input_model_->t_vgp_identifiers.getIdentifier(variable_group__variables__pair.first);
+
+		active_vgs.insert(variable_group);
+
+	});
+	return active_vgs;
+
+}
+
 std::set<WidgetInstanceIdentifier> Table_VARIABLES_SELECTED::GetActiveDMUs(OutputModel * output_model_, InputModel * input_model_)
 {
 

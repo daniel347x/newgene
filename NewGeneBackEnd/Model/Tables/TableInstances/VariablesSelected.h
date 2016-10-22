@@ -39,6 +39,7 @@ class Table_VARIABLES_SELECTED : public Table<TABLE__VG_SET_MEMBER_SELECTED, TAB
 		bool Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
 
 		UOA_To_Variables_Map GetSelectedVariablesByUOA(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
+		std::set<WidgetInstanceIdentifier> GetActiveVGs(OutputModel * output_model_, InputModel * input_model_);
 		std::set<WidgetInstanceIdentifier> GetActiveDMUs(OutputModel * output_model_, InputModel * input_model_);
 
 		void Add(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code);

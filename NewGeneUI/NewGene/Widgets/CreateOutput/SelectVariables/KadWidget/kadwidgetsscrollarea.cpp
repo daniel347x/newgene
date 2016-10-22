@@ -758,9 +758,9 @@ void KadWidgetsScrollArea::Resequence()
 	}
 }
 
-QString KadWidgetsScrollArea::getFullWarningText(bool newline)
+QString KadWidgetsScrollArea::getFullWarningTextSingleVG(bool newline, WidgetInstanceIdentifier vg)
 {
-	QString vgWarningText ("Warning!");
+	QString vgWarningText;
 
 	// See comments in the 'DoTabChange' function
 	if (false)
@@ -788,7 +788,113 @@ QString KadWidgetsScrollArea::getFullWarningText(bool newline)
 		}
 	}
 
+	if (true)
+	{
+		if (!vg.IsEmpty() && vg.longhand && vg.notes.notes1 && !vg.notes.notes1->empty())
+		{
+			vgWarningText += "<b><FONT COLOR='#ff0000'>";
+			vgWarningText += "&nbsp;Warning for <FONT COLOR='#1f3eba'>\"";
+			vgWarningText += vg.longhand->c_str();
+			vgWarningText += "\":</b>";
+			if (newline)
+			{
+				vgWarningText += "<br><br>";
+			}
+			else
+			{
+				vgWarningText += "&nbsp;&nbsp;";
+			}
+			vgWarningText += "<FONT COLOR='#000000'>";
+			vgWarningText += vg.notes.notes1->c_str();
+		}
+	}
+
 	return vgWarningText;
+}
+
+QString KadWidgetsScrollArea::getFullWarningTextAllVGs()
+{
+	QString vgWarningTextDefault = "You may set a warning message to appear here for selected variable groups!\n\nTo do so, go to the 'Input dataset' -> 'Manage Variable Groups' tab.";
+
+	std::set<WidgetInstanceIdentifier> activeVGs;
+
+	if (this->outp)
+	{
+		UIOutputProject * ui_output_project = this->outp;
+		OutputModel & backendOutputModel = ui_output_project->model().backend();
+		InputModel & backendInputModel = backendOutputModel.getInputModel();
+		activeVGs = backendOutputModel.t_variables_selected_identifiers.GetActiveVGs(&backendOutputModel, &backendInputModel);
+	}
+
+	if (activeVGs.empty())
+	{
+		return vgWarningTextDefault;
+	}
+
+	if (activeVGs.size() == 1)
+	{
+		for (auto & vg : activeVGs)
+		{
+			QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+			if (vgWarningText.size() == 0)
+			{
+				return vgWarningTextDefault;
+			}
+			return vgWarningText;
+		}
+	}
+
+	// More than 1 VG - how many actually have a warning?
+	int howManyHaveWarnings {0};
+	for (auto & vg : activeVGs)
+	{
+		QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+		if (vgWarningText.size() > 0)
+		{
+			++howManyHaveWarnings;
+		}
+	}
+
+	if (howManyHaveWarnings == 0)
+	{
+		return vgWarningTextDefault;
+	}
+
+	if (howManyHaveWarnings == 1)
+	{
+		for (auto & vg : activeVGs)
+		{
+			QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+			if (vgWarningText.size() > 0)
+			{
+				return vgWarningText;
+			}
+		}
+	}
+
+	// More than 1 VG has a warning
+	QString allWarnings;
+	int numberAdded {0};
+	for (auto & vg : activeVGs)
+	{
+		QString vgWarningText = this->getFullWarningTextSingleVG(true, vg);
+		if (vgWarningText.size() > 0)
+		{
+			if (numberAdded > 0)
+			{
+				allWarnings += "<br><br>";
+			}
+			++numberAdded;
+			allWarnings += vgWarningText;
+		}
+	}
+
+	if (allWarnings.size() == 0)
+	{
+		return vgWarningTextDefault;
+	}
+
+	return allWarnings;
 }
 
 void KadWidgetsScrollArea::DoTabChange(WidgetInstanceIdentifier data)
@@ -805,8 +911,8 @@ void KadWidgetsScrollArea::DoTabChange(WidgetInstanceIdentifier data)
 		{
 			if (!data.IsEmpty() && data.longhand && data.notes.notes1 && !data.notes.notes1->empty())
 			{
-				QString vgWarningText = getFullWarningText(false);
-				vgWarningLabel->setText(vgWarningText);
+				//QString vgWarningText = getFullWarningText(false);
+				//vgWarningLabel->setText(vgWarningText);
 			}
 			else
 			{
@@ -818,5 +924,69 @@ void KadWidgetsScrollArea::DoTabChange(WidgetInstanceIdentifier data)
 
 void KadWidgetsScrollArea::DoVariableSelectionChange()
 {
+	QLabel * vgWarningLabel { findChild<QLabel *>("labelVariableGroupWarning") };
+	if (vgWarningLabel == nullptr)
+	{
+		return;
+	}
 
+	std::set<WidgetInstanceIdentifier> activeVGs;
+
+	if (this->outp)
+	{
+		UIOutputProject * ui_output_project = this->outp;
+		OutputModel & backendOutputModel = ui_output_project->model().backend();
+		InputModel & backendInputModel = backendOutputModel.getInputModel();
+		activeVGs = backendOutputModel.t_variables_selected_identifiers.GetActiveVGs(&backendOutputModel, &backendInputModel);
+	}
+
+	if (activeVGs.empty())
+	{
+		vgWarningLabel->setText(QString());
+		return;
+	}
+
+	if (activeVGs.size() == 1)
+	{
+		for (auto & vg : activeVGs)
+		{
+			QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+			vgWarningLabel->setText(vgWarningText);
+		}
+		return;
+	}
+
+	// More than 1 VG - how many actually have a warning?
+	int howManyHaveWarnings {0};
+	for (auto & vg : activeVGs)
+	{
+		QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+		if (vgWarningText.size() > 0)
+		{
+			++howManyHaveWarnings;
+		}
+	}
+
+	if (howManyHaveWarnings == 0)
+	{
+		vgWarningLabel->setText(QString());
+		return;
+	}
+
+	if (howManyHaveWarnings == 1)
+	{
+		for (auto & vg : activeVGs)
+		{
+			QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+			if (vgWarningText.size() > 0)
+			{
+				vgWarningLabel->setText(vgWarningText);
+			}
+		}
+		return;
+	}
+
+	// More than 1 VG has a warning
+	QString vgWarningText = "<b><FONT COLOR='#ff0000'>Warnings for selected variable groups!  Click here</b>";
+	vgWarningLabel->setText(vgWarningText);
 }

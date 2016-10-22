@@ -17,7 +17,8 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 		void EmptyTextCheck();
 		void ShowLoading(bool const loading_ = true);
 		void Resequence();
-		QString getFullWarningText(bool newline);
+		QString getFullWarningTextSingleVG(bool newline, WidgetInstanceIdentifier);
+		QString getFullWarningTextAllVGs();
 
 	signals:
 

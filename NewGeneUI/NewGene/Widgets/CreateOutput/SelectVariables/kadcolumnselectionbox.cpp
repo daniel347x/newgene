@@ -42,12 +42,12 @@ void KAdColumnSelectionBox::popupWarning(QString const & labelText)
 	KadWidgetsScrollArea * spinnerScrollArea { findChild<KadWidgetsScrollArea *>("scrollAreaWidgetContents") };
 	if (spinnerScrollArea)
 	{
-		QString vgWarningText = spinnerScrollArea->getFullWarningText(true);
-		QMessageBox::information(this, "Variable Group Warning", vgWarningText);
+		QString vgWarningText = spinnerScrollArea->getFullWarningTextAllVGs();
+		QMessageBox::information(this, "Variable Group Warning/s", vgWarningText);
 	}
 	else
 	{
-		QMessageBox::information(this, "Variable Group Warning", labelText);
+		QMessageBox::information(this, "Variable Group Warning/s", labelText);
 	}
 }
 

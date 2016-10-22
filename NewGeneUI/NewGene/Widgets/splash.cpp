@@ -3,8 +3,6 @@
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QMovie>
-#include <QWebEngineSettings>
-#include "newgenewebengineview.h"
 
 Splash::Splash(QWidget * parent, NewGeneMainWindow * mainWindow_, bool const opened_as_about_box_) :
 	QDialog{parent},
