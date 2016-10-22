@@ -835,7 +835,7 @@ QString KadWidgetsScrollArea::getFullWarningTextAllVGs()
 	{
 		for (auto & vg : activeVGs)
 		{
-			QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+			QString vgWarningText = this->getFullWarningTextSingleVG(true, vg);
 			if (vgWarningText.size() == 0)
 			{
 				return vgWarningTextDefault;
@@ -848,7 +848,7 @@ QString KadWidgetsScrollArea::getFullWarningTextAllVGs()
 	int howManyHaveWarnings {0};
 	for (auto & vg : activeVGs)
 	{
-		QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+		QString vgWarningText = this->getFullWarningTextSingleVG(true, vg);
 		if (vgWarningText.size() > 0)
 		{
 			++howManyHaveWarnings;
@@ -864,7 +864,7 @@ QString KadWidgetsScrollArea::getFullWarningTextAllVGs()
 	{
 		for (auto & vg : activeVGs)
 		{
-			QString vgWarningText = this->getFullWarningTextSingleVG(false, vg);
+			QString vgWarningText = this->getFullWarningTextSingleVG(true, vg);
 			if (vgWarningText.size() > 0)
 			{
 				return vgWarningText;
