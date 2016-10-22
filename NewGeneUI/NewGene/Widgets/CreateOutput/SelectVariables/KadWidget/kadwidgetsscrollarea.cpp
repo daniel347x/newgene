@@ -796,7 +796,7 @@ QString KadWidgetsScrollArea::getFullWarningTextSingleVG(bool newline, WidgetIns
 		if (!vg.IsEmpty() && vg.longhand && vg.notes.notes1 && !vg.notes.notes1->empty())
 		{
 			vgWarningText += "<b><FONT COLOR='#ff0000'>";
-			vgWarningText += "&nbsp;Warning for <FONT COLOR='#1f3eba'>\"";
+			vgWarningText += "&nbsp;&nbsp;Warning for <FONT COLOR='#1f3eba'>\"";
 			vgWarningText += vg.longhand->c_str();
 			vgWarningText += "\":</b>";
 
