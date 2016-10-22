@@ -31,6 +31,7 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 		void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROLS_AREA); // us, parent
 		void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET); // child
 		void DoTabChange(WidgetInstanceIdentifier);
+		void DoVariableSelectionChange();
 
 	protected:
 

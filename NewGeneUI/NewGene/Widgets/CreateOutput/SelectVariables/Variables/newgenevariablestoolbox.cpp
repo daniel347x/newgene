@@ -173,13 +173,6 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 					{
 						case DATA_CHANGE_INTENTION__ADD:
 							{
-								//if (change.parent_identifier.code && change.parent_identifier.uuid && change.parent_identifier.longhand)
-								//{
-								//	WidgetInstanceIdentifier new_identifier = change.parent_identifier;
-								//	NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup(this, this, new_identifier, outp);
-								//	addItem(tmpGrp, new_identifier.longhand->c_str());
-								//}
-
 								RefreshAllWidgets(); // this triggers a resort by loading everything in the pane again
 							}
 							break;

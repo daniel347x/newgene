@@ -485,6 +485,8 @@ void NewGeneVariableGroup::deselectAll()
 	for (int row = 0; row < rows; ++row)
 	{
 		QStandardItem * item = model->item(row);
+
+		// Will trigger callback
 		item->setCheckState(Qt::Unchecked);
 	}
 

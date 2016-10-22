@@ -54,6 +54,10 @@ void KadWidgetsScrollArea::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECT
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET)));
 
+		if (project)
+		{
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, false, "");
+		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
@@ -113,6 +117,7 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 		if (identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
 		{
 			DoTabChange(identifier); // pick up any metadata changes?
+			DoVariableSelectionChange();
 		}
 	});
 
@@ -163,6 +168,7 @@ void KadWidgetsScrollArea::Empty()
 	}
 
 	EmptyTextCheck();
+	DoVariableSelectionChange();
 }
 
 void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_message)
@@ -187,25 +193,41 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 					switch (change.change_intention)
 					{
 
+						case DATA_CHANGE_INTENTION__ADD:
+							{
+								// no-op
+							}
+							break;
+
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
 								if (change.parent_identifier.code && change.parent_identifier.uuid)
 								{
 
-									WidgetInstanceIdentifier vg_to_remove(change.parent_identifier);
-									if (vg_to_remove.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+									// See comments in the 'DoTabChange' function
+									if (false)
 									{
-										DoTabChange(WidgetInstanceIdentifier());
+										WidgetInstanceIdentifier vg_to_remove(change.parent_identifier);
+										if (vg_to_remove.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, cached_active_vg))
+										{
+											DoTabChange(WidgetInstanceIdentifier());
+										}
 									}
 								}
+
+								DoVariableSelectionChange();
 
 							}
 							break;
 
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
+								// leave this line of code here so you know how to obtain the vg that was updated
+								// in case you ever do need it
 								WidgetInstanceIdentifier vg = change.parent_identifier;
+
+								DoVariableSelectionChange();
 							}
 							break;
 
@@ -297,6 +319,8 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 										EmptyTextCheck();
 
 										Resequence();
+
+										DoVariableSelectionChange();
 									}
 
 								}
@@ -319,6 +343,42 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 							{
 							}
 							break;
+					}
+				}
+				break;
+
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION:
+				{
+					switch (change.change_intention)
+					{
+
+						case DATA_CHANGE_INTENTION__ADD:
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+								// This is the OUTPUT model changing.
+								// "Add" means to simply add an item that is CHECKED (previously unchecked) -
+								// NOT to add a new variable.  That would be input model change type.
+								DoVariableSelectionChange();
+							}
+							break;
+
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								// Should never receive this.
+							}
+							break;
+
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+								DoVariableSelectionChange();
+							}
+							break;
+
+						default:
+							{
+							}
+							break;
+
 					}
 				}
 				break;
@@ -700,45 +760,63 @@ void KadWidgetsScrollArea::Resequence()
 
 QString KadWidgetsScrollArea::getFullWarningText(bool newline)
 {
-	QString vgWarningText;
-	if (!cached_active_vg.IsEmpty() && cached_active_vg.longhand && cached_active_vg.notes.notes1 && !cached_active_vg.notes.notes1->empty())
+	QString vgWarningText ("Warning!");
+
+	// See comments in the 'DoTabChange' function
+	if (false)
 	{
-		vgWarningText += "<b><FONT COLOR='#ff0000'>";
-		vgWarningText += "&nbsp;Warning for <FONT COLOR='#1f3eba'>\"";
-		vgWarningText += cached_active_vg.longhand->c_str();
-		vgWarningText += "\":</b>";
-		if (newline)
+		if (!cached_active_vg.IsEmpty() && cached_active_vg.longhand && cached_active_vg.notes.notes1 && !cached_active_vg.notes.notes1->empty())
 		{
-			vgWarningText += "<br><br>";
+			vgWarningText += "<b><FONT COLOR='#ff0000'>";
+			vgWarningText += "&nbsp;Warning for <FONT COLOR='#1f3eba'>\"";
+			vgWarningText += cached_active_vg.longhand->c_str();
+			vgWarningText += "\":</b>";
+			if (newline)
+			{
+				vgWarningText += "<br><br>";
+			}
+			else
+			{
+				vgWarningText += "&nbsp;&nbsp;";
+			}
+			vgWarningText += "<FONT COLOR='#000000'>";
+			vgWarningText += cached_active_vg.notes.notes1->c_str();
 		}
 		else
 		{
-			vgWarningText += "&nbsp;&nbsp;";
+			vgWarningText += "You may set a warning message to appear here!\n\nTo do so, go to the 'Input dataset' -> 'Manage Variable Groups' tab.";
 		}
-		vgWarningText += "<FONT COLOR='#000000'>";
-		vgWarningText += cached_active_vg.notes.notes1->c_str();
 	}
-	else
-	{
-		vgWarningText += "You may set a warning message to appear here!\n\nTo do so, go to the 'Input dataset' -> 'Manage Variable Groups' tab.";
-	}
+
 	return vgWarningText;
 }
 
 void KadWidgetsScrollArea::DoTabChange(WidgetInstanceIdentifier data)
 {
-	cached_active_vg = data;
-	QLabel * vgWarningLabel { findChild<QLabel *>("labelVariableGroupWarning") };
-	if (vgWarningLabel)
+	// The following code was in place for a brief time when the variable group warning
+	// that appears in the blue box corresponded to the one and only variable group
+	// currently EXPANDED in the left pane (the Select Variables pane).
+	// Leave the code in place for future reference and in case we ever return to this GUI behavior.
+	if (false)
 	{
-		if (!data.IsEmpty() && data.longhand && data.notes.notes1 && !data.notes.notes1->empty())
+		cached_active_vg = data;
+		QLabel * vgWarningLabel { findChild<QLabel *>("labelVariableGroupWarning") };
+		if (vgWarningLabel)
 		{
-			QString vgWarningText = getFullWarningText(false);
-			vgWarningLabel->setText(vgWarningText);
-		}
-		else
-		{
-			vgWarningLabel->setText(QString());
+			if (!data.IsEmpty() && data.longhand && data.notes.notes1 && !data.notes.notes1->empty())
+			{
+				QString vgWarningText = getFullWarningText(false);
+				vgWarningLabel->setText(vgWarningText);
+			}
+			else
+			{
+				vgWarningLabel->setText(QString());
+			}
 		}
 	}
+}
+
+void KadWidgetsScrollArea::DoVariableSelectionChange()
+{
+
 }
