@@ -1007,6 +1007,6 @@ void KadWidgetsScrollArea::DoVariableSelectionChange()
 	}
 
 	// More than 1 VG has a warning
-	QString vgWarningText = "<b><FONT COLOR='#ff0000'>Warnings for selected variable groups!</b>&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR='#000000'>Click here to view";
+	QString vgWarningText = "<b>&nbsp;&nbsp;<FONT COLOR='#ff0000'>Warnings for selected variable groups!</b>&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR='#000000'>Click here to view";
 	vgWarningLabel->setText(vgWarningText);
 }
