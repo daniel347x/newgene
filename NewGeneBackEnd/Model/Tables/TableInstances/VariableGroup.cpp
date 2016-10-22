@@ -258,13 +258,7 @@ bool Table_VG_CATEGORY::SetVGDescriptions(sqlite3 * db, InputModel * input_model
 	}
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("UPDATE VG_CATEGORY SET VG_CATEGORY_STRING_LONGHAND = \"");
-	sql += vg_new_description;
-	sql += "\", VG_CATEGORY_NOTES1 = \"";
-	sql += vg_new_longdescription;
-	sql += "\" WHERE VG_CATEGORY_UUID = '";
-	sql += *vg.uuid;
-	sql += "'";
+	std::string sql("UPDATE VG_CATEGORY SET VG_CATEGORY_STRING_LONGHAND = ?, VG_CATEGORY_NOTES1 = ? WHERE VG_CATEGORY_UUID = ?");
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 
 	if (stmt == NULL)
@@ -273,6 +267,9 @@ bool Table_VG_CATEGORY::SetVGDescriptions(sqlite3 * db, InputModel * input_model
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
+	sqlite3_bind_text(stmt, 1, vg_new_description.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 2, vg_new_longdescription.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 3, vg.uuid->c_str(), -1, SQLITE_TRANSIENT);
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
 
@@ -387,7 +384,8 @@ WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, In
 
 }
 
-bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std::string const & vg_code_, std::string const & vg_description, std::string const & vg_longdescription,
+bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std::string const & vg_code_, std::string const & vg_description,
+									std::string const & vg_longdescription,
 									WidgetInstanceIdentifier const & uoa_to_use)
 {
 
