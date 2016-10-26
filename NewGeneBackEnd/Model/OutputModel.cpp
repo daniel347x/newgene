@@ -548,31 +548,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			std::int64_t timerange_end_test_down = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
 			std::int64_t timerange_end_test_up = TimeRange::determineAligningTimestamp(timerange_end, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
 
-			if (timerange_start != timerange_start_test_down)
-			{
-				// round
-				if (timerange_start - timerange_start_test_down > timerange_start_test_up - timerange_start)
-				{
-					timerange_start = timerange_start_test_up;
-				}
-				else
-				{
-					timerange_start = timerange_start_test_down;
-				}
-			}
-
-			if (timerange_end != timerange_end_test_up)
-			{
-				// round
-				if (timerange_end - timerange_end_test_down >= timerange_end_test_up - timerange_end)
-				{
-					timerange_end = timerange_end_test_up;
-				}
-				else
-				{
-					timerange_end = timerange_end_test_down;
-				}
-			}
+			timerange_start = timerange_start_test_down;
+			timerange_end = timerange_end_test_up;
 		}
 
 		if (timeRangeOnly)

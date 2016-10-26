@@ -202,6 +202,9 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 
 									doContinue = SingleGeneratorRun(output_generator, &metadata, failed, cancelled, markedAsDone);
 									rows += metadata.rows;
+
+									// For following iterations, always enter append mode
+									metadata.appendOrOverwrite = AppendOverwriteMode::APPEND;
 								}
 							}));
 
