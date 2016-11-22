@@ -56,7 +56,7 @@ template <typename MEMORY_TAG>
 using InstanceDataVector = FastVectorMemoryTag<InstanceData, MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
-using DMUInstanceDataVector  = InstanceDataVector<MEMORY_TAG>;
+using DMUInstanceDataVector = InstanceDataVector<MEMORY_TAG>;
 
 template <typename MEMORY_TAG>
 using ChildDMUInstanceDataVector = InstanceDataVector<MEMORY_TAG>;
@@ -102,7 +102,7 @@ typedef boost::singleton_pool<newgene_randomset_tag, sizeof(FastSetCppInt)>
 RandomSetPool;
 
 template <typename TOPLEVEL_POOL_TAG>
-using TopLevelObjectsPool = boost::singleton_pool<TOPLEVEL_POOL_TAG, sizeof(TOPLEVEL_POOL_TAG::type)>;
+using TopLevelObjectsPool = boost::singleton_pool<TOPLEVEL_POOL_TAG, sizeof(typename TOPLEVEL_POOL_TAG::type)>;
 
 
 
@@ -402,7 +402,7 @@ class TimeSlice
 			return getEnd() - getStart();
 		}
 
-		void loop_through_time_units(TIME_GRANULARITY const & time_granularity, boost::function<void(std::int64_t const, std::int64_t const)> & misc_function) const
+		void loop_through_time_units(TIME_GRANULARITY const & time_granularity, boost::function<void(std::int64_t const, std::int64_t const)> const & misc_function) const
 		{
 			// ************************************************************************** //
 			// This function is called in the case where ALL we need to do is
@@ -570,8 +570,8 @@ class TimeSlice
 
 			if (time_start < rhs.time_start) { return true; }
 			else if (time_start > rhs.time_start) { return false; }
-			else if (time_end < rhs.time_end)     { return true; }
-			else if (time_end > rhs.time_end)     { return false; }
+			else if (time_end < rhs.time_end) { return true; }
+			else if (time_end > rhs.time_end) { return false; }
 
 			return false;
 
@@ -1133,7 +1133,9 @@ struct ChildToPrimaryMapping
 {
 	ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING const mapping_, int const index_, int const leaf_number_ = -1)
 		: mapping(mapping_), index_of_column_within_top_level_branch_or_single_leaf(index_),
-		  leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf(leaf_number_) {}
+		  leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf(leaf_number_)
+	{
+	}
 
 	CHILD_TO_PRIMARY_MAPPING mapping;
 	int index_of_column_within_top_level_branch_or_single_leaf;
@@ -1191,11 +1193,13 @@ class PrimaryKeysGrouping
 
 		PrimaryKeysGrouping(DMUInstanceDataVector<hits_tag> const & dmuInstanceDataVector)
 			: primary_keys(dmuInstanceDataVector)
-		{}
+		{
+		}
 
 		PrimaryKeysGrouping(PrimaryKeysGrouping const & rhs)
 			: primary_keys(rhs.primary_keys)
-		{}
+		{
+		}
 
 		PrimaryKeysGrouping & operator=(PrimaryKeysGrouping const & rhs)
 		{
@@ -1311,8 +1315,8 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne()
 			: PrimaryKeysGrouping { DMUInstanceDataVector<hits_tag>() }
-			, index_into_raw_data{ 0 }
-			, has_excluded_dmu_member{false}
+			, index_into_raw_data { 0 }
+			, has_excluded_dmu_member { false }
 		{
 		}
 
@@ -1320,7 +1324,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 				bool const has_excluded_dmu_member_ = false)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data { index_into_raw_data_ }
-			, has_excluded_dmu_member{ has_excluded_dmu_member_ }
+			, has_excluded_dmu_member { has_excluded_dmu_member_ }
 		{
 		}
 
@@ -1426,6 +1430,18 @@ class BranchOutputRow
 		//}
 
 		// specialize for own type
+		BranchOutputRow(BranchOutputRow<MEMORY_TAG> const & rhs)
+			: primary_leaves(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend())
+		{
+			for (auto & rhs_map : rhs.child_indices_into_raw_data)
+			{
+				child_indices_into_raw_data[rhs_map.first].insert(rhs_map.second.cbegin(), rhs_map.second.cend());
+			}
+
+			SaveCache();
+		}
+
+		// specialize for own type
 		BranchOutputRow(BranchOutputRow<MEMORY_TAG> && rhs)
 
 		// No need to use a move iterator - these are just ints, and the move syntax is tedious because of the need for const_cast and move_iterator, resulting in no benefit because these are just int's
@@ -1452,6 +1468,28 @@ class BranchOutputRow
 			primary_leaves.insert(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend());
 			child_indices_into_raw_data.clear();
 			std::copy(rhs.child_indices_into_raw_data.cbegin(), rhs.child_indices_into_raw_data.cend(), child_indices_into_raw_data.begin());
+			SaveCache();
+			return *this;
+		}
+
+		// Specialize for own type
+		BranchOutputRow & operator=(BranchOutputRow<MEMORY_TAG> const & rhs)
+		{
+			if (this == &rhs)
+			{
+				return *this;
+			}
+
+			primary_leaves.clear();
+			primary_leaves.insert(rhs.primary_leaves.cbegin(), rhs.primary_leaves.cend());
+			child_indices_into_raw_data.clear();
+
+			for (auto const & el : rhs.child_indices_into_raw_data)
+			{
+				child_indices_into_raw_data[el.first] = el.second;
+			}
+
+			//std::copy(rhs.child_indices_into_raw_data.cbegin(), rhs.child_indices_into_raw_data.cend(), child_indices_into_raw_data.begin());
 			SaveCache();
 			return *this;
 		}
@@ -1739,6 +1777,26 @@ bool operator<(ChildDMUInstanceDataVector<MEMORY_TAG_LHS> const & lhs,
 	return false;
 }
 
+template <typename MEMORY_TAG>
+void SpitKeys(std::string & sdata, DMUInstanceDataVector<MEMORY_TAG> const & dmu_keys)
+{
+	int index = 0;
+	sdata += "<DATA_VALUES>";
+	std::for_each(dmu_keys.cbegin(), dmu_keys.cend(), [&](DMUInstanceData const & data)
+	{
+		sdata += "<DATA_VALUE>";
+		sdata += "<DATA_VALUE_INDEX>";
+		sdata += boost::lexical_cast<std::string>(index);
+		sdata += "</DATA_VALUE_INDEX>";
+		sdata += "<DATA>";
+		sdata += boost::lexical_cast<std::string>(data);
+		sdata += "</DATA>";
+		++index;
+		sdata += "</DATA_VALUE>";
+	});
+	sdata += "</DATA_VALUES>";
+}
+
 template<typename MEMORY_TAG>
 void SpitLeaf(std::string & sdata, Leaf const & leaf)
 {
@@ -1751,7 +1809,7 @@ void SpitLeaf(std::string & sdata, Leaf const & leaf)
 	sdata += "</LEAF_DMU_DATALIST>";
 	sdata += "<OTHER_NON_PRIMARY_TOP_LEVEL_INDICES__ONE_PER_LEAF__POINTING_INTO_DATA_CACHE>";
 	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(),
-				  leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & leafindicesintorawdata)
+				  leaf.other_top_level_indices_into_raw_data.cend(), [&](typename fast_short_to_int_map<MEMORY_TAG>::value_type const & leafindicesintorawdata)
 	{
 		sdata += "<VARIABLE_GROUP>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
@@ -1849,26 +1907,6 @@ void SpitAllWeightings(KadSampler const & allWeightings, std::string const & fil
 // ******************************************************************************************************************************************************************** //
 
 template <typename MEMORY_TAG>
-void SpitKeys(std::string & sdata, DMUInstanceDataVector<MEMORY_TAG> const & dmu_keys)
-{
-	int index = 0;
-	sdata += "<DATA_VALUES>";
-	std::for_each(dmu_keys.cbegin(), dmu_keys.cend(), [&](DMUInstanceData const & data)
-	{
-		sdata += "<DATA_VALUE>";
-		sdata += "<DATA_VALUE_INDEX>";
-		sdata += boost::lexical_cast<std::string>(index);
-		sdata += "</DATA_VALUE_INDEX>";
-		sdata += "<DATA>";
-		sdata += boost::lexical_cast<std::string>(data);
-		sdata += "</DATA>";
-		++index;
-		sdata += "</DATA_VALUE>";
-	});
-	sdata += "</DATA_VALUES>";
-}
-
-template <typename MEMORY_TAG>
 void SpitDataCache(std::string & sdata, DataCache<MEMORY_TAG> const & dataCache)
 {
 	sdata += "<DATA_CACHE>";
@@ -1890,7 +1928,7 @@ template <typename MEMORY_TAG>
 void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map<MEMORY_TAG> const & dataCaches)
 {
 	sdata += "<DATA_CACHES>";
-	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](fast_short_to_data_cache_map<MEMORY_TAG>::value_type const & dataEntry)
+	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](typename fast_short_to_data_cache_map<MEMORY_TAG>::value_type const & dataEntry)
 	{
 		sdata += "<DATA_CACHE_NUMBER>";
 		sdata += boost::lexical_cast<std::string>(dataEntry.first);
@@ -1909,7 +1947,7 @@ void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set<M
 	sdata += boost::lexical_cast<std::string>(sizeof(hits));
 	sdata += "</TIME_UNITS_MAP_ITSELF>";
 
-	std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set<MEMORY_TAG>::value_type const & hitsEntry)
+	std::for_each(hits.cbegin(), hits.cend(), [&](typename fast__int64__to__fast_branch_output_row_set<MEMORY_TAG>::value_type const & hitsEntry)
 	{
 		SpitHit<decltype(hitsEntry.second), MEMORY_TAG>(sdata, hitsEntry.first, hitsEntry.second);
 	});
@@ -1940,7 +1978,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow<MEMORY_TAG> const & row)
 	sdata += boost::lexical_cast<std::string>(sizeof(row.child_indices_into_raw_data));
 	sdata += "</CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
 	std::for_each(row.child_indices_into_raw_data.cbegin(),
-				  row.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map__loaded<MEMORY_TAG>::value_type const & childindices)
+				  row.child_indices_into_raw_data.cend(), [&](typename fast__short__to__fast_short_to_int_map__loaded<MEMORY_TAG>::value_type const & childindices)
 	{
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA>";
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA_OBJECT_ITSELF>";
@@ -1949,7 +1987,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow<MEMORY_TAG> const & row)
 		sdata += "<VARIABLE_GROUP_NUMBER>";
 		sdata += boost::lexical_cast<std::string>(childindices.first);
 		sdata += "</VARIABLE_GROUP_NUMBER>";
-		std::for_each(childindices.second.cbegin(), childindices.second.cend(), [&](fast_short_to_int_map<MEMORY_TAG>::value_type const & childleaves)
+		std::for_each(childindices.second.cbegin(), childindices.second.cend(), [&](typename fast_short_to_int_map<MEMORY_TAG>::value_type const & childleaves)
 		{
 			sdata += "<SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW>";
 			sdata += "<SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW_OBJECT_ITSELF>";
@@ -1974,7 +2012,7 @@ template <typename MEMORY_TAG>
 void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__output_rows<MEMORY_TAG> const & helperLookup)
 {
 	sdata += "<LIST_OF_CHILD_KEYLISTS_THAT_MATCH_SOMETHING_IN_THIS_BRANCH>";
-	std::for_each(helperLookup.cbegin(), helperLookup.cend(), [&](fast__lookup__from_child_dmu_set__to__output_rows<MEMORY_TAG>::value_type const & helper)
+	std::for_each(helperLookup.cbegin(), helperLookup.cend(), [&](typename fast__lookup__from_child_dmu_set__to__output_rows<MEMORY_TAG>::value_type const & helper)
 	{
 		sdata += "<CHILD_KEYLIST_THAT_MATCHES_SOMETHING_IN_THIS_BRANCH>";
 
@@ -1983,7 +2021,7 @@ void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__
 		sdata += "</CHILD_DMU_KEYS>";
 
 		sdata += "<ROWS_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
-		std::for_each(helper.second.cbegin(), helper.second.cend(), [&](fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>::value_type const & helperrow)
+		std::for_each(helper.second.cbegin(), helper.second.cend(), [&](typename fast_branch_output_row_ptr__to__fast_short_vector<MEMORY_TAG>::value_type const & helperrow)
 		{
 			sdata += "<ROW_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
 
@@ -2048,7 +2086,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 	public:
 
 		PrimaryKeysGroupingMultiplicityOne()
-			: PrimaryKeysGrouping{ DMUInstanceDataVector<hits_tag>() }
+			: PrimaryKeysGrouping { DMUInstanceDataVector<hits_tag>() }
 			, remaining_(InstantiateUsingTopLevelObjectsPool<tag__fast__int64__to__fast_branch_output_row_list<remaining_tag>>())
 			, remaining(*remaining_)
 			, helper_lookup__from_child_key_set__to_matching_output_rows(nullptr)
@@ -2106,12 +2144,33 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 			PrimaryKeysGrouping::operator=(rhs);
 			weighting = rhs.weighting;
-			hits = rhs.hits;
+			hits.clear();
+
+			for (auto const & hit : rhs.hits)
+			{
+				auto & hitsEntry = hits[hit.first];
+
+				for (auto const & hitEntry : hit.second)
+				{
+					hitsEntry.insert(hitEntry);
+				}
+
+				//hits[hit.first] = hit.second;
+			}
+
+			//hits = rhs.hits;
 			//remaining = rhs.remaining; // NO! Do not copy!  Branches are NEVER copied while "remaining" is in use, and the memory is guaranteed to have been invalidated by the memory pool manager at any point a branch is copied
 			number_branch_combinations = rhs.number_branch_combinations;
 			leaves = rhs.leaves;
 			leaves_cache = rhs.leaves_cache;
-			hits_consolidated = rhs.hits_consolidated;
+			hits_consolidated.clear();
+
+			for (auto const & hit : rhs.hits_consolidated)
+			{
+				hits_consolidated.push_back(hit);
+			}
+
+			//hits_consolidated = rhs.hits_consolidated;
 			helper_lookup__from_child_key_set__to_matching_output_rows = nullptr;
 			has_excluded_leaves = rhs.has_excluded_leaves;
 			return *this;
@@ -2191,7 +2250,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		// Used for optimization purposes only during random sampling construction of output rows
 		mutable fast__int64__to__fast_branch_output_row_list<remaining_tag> * remaining_; // Let the Boost pool manage this
-		mutable fast__int64__to__fast_branch_output_row_list<remaining_tag> & remaining;
+		fast__int64__to__fast_branch_output_row_list<remaining_tag> & remaining;
 
 		// **************************************************************************************** //
 		// **************************************************************************************** //
@@ -2443,7 +2502,8 @@ class VariableGroupBranchesAndLeaves
 
 		VariableGroupBranchesAndLeaves(int const & variable_group_number_)
 			: variable_group_number(variable_group_number_)
-		{}
+		{
+		}
 
 		int variable_group_number; // unused: Always the single primary top-level variable group identifier
 		Branches<hits_tag> branches;
@@ -2477,12 +2537,12 @@ class VariableGroupTimeSliceData
 	public:
 
 		VariableGroupTimeSliceData()
-			: branches_and_leaves{ InstantiateUsingTopLevelObjectsPool<tag__branches_and_leaves<hits_tag>>() }
+			: branches_and_leaves { InstantiateUsingTopLevelObjectsPool<tag__branches_and_leaves<hits_tag>>() }
 		{
 		}
 
 		VariableGroupTimeSliceData(VariableGroupTimeSliceData const & rhs)
-			: branches_and_leaves{ InstantiateUsingTopLevelObjectsPool<tag__branches_and_leaves<hits_tag>>() }
+			: branches_and_leaves { InstantiateUsingTopLevelObjectsPool<tag__branches_and_leaves<hits_tag>>() }
 			, weighting(rhs.weighting)
 		{
 			*branches_and_leaves = *rhs.branches_and_leaves;
@@ -2559,7 +2619,8 @@ class bind_visitor : public boost::static_visitor<>
 		bind_visitor(sqlite3_stmt * stmt_, int const bindIndex_)
 			: stmt(stmt_)
 			, bindIndex(bindIndex_)
-		{}
+		{
+		}
 
 		void operator()(std::int32_t const & data)
 		{
@@ -2617,7 +2678,8 @@ class create_output_row_visitor : public boost::static_visitor<>
 
 		create_output_row_visitor(bool & first_)
 			: first(first_)
-		{}
+		{
+		}
 
 		template <typename T>
 		void operator()(const T & data_value) const
@@ -2727,7 +2789,8 @@ class MergedTimeSliceRow
 
 		MergedTimeSliceRow()
 			: empty(true)
-		{}
+		{
+		}
 
 		template <typename MEMORY_TAG_RHS>
 		MergedTimeSliceRow(TimeSlice const & ts, InstanceDataVector<MEMORY_TAG_RHS> const & row)
@@ -2940,6 +3003,110 @@ class SortMergedRowsByTimeThenKeys
 template <typename MEMORY_TAG>
 using fast__mergedtimeslicerow_set = FastSetMemoryTag<MergedTimeSliceRow<MEMORY_TAG>, MEMORY_TAG, SortMergedRowsByTimeThenKeys<MEMORY_TAG>>;
 
+template <typename TAG, int SIZE>
+void purge_pool()
+{
+	// The Pool allocator is subtle.
+	// We provide the type T to the standard containers as the template parameter;
+	// viz. std::set<int, std::less<int>, boost::fast_pool_allocator<int>>
+	// (T here being 'int'),
+	// but that does ***NOT*** mean that the memory allocated by the underlying pool
+	// will be sizeof(T).
+	// Instead, the type T is available to the standard containers as the 'value_type'
+	// of the allocator that is passed as a template argument.
+	// The standard containers may then adjust the ACTUAL number of bytes they allocate
+	// per item in the container to be more than this - and they do.
+	// Therefore, the ACTUAL underlying pool - boost::singleton_pool<> -
+	// will NOT be a pool corresponding to sizeof(T).
+	// It will be a pool corresponding to a larger value.
+	//
+	// Unfortunately, the standard does not specify what the actual size of allocation is
+	// for items in the container.
+	//
+	// However, it is quite safe to assume that it will be 4, 8, or perhaps no more than 12 or 16
+	// bytes in excess of sizeof(T).
+	//
+	// Therefore, we simply loop through all reasonable possibilities for the size of a node.
+	// This is a negligible operation if there is no pool at the given size.
+
+	// Smallest possible size of the internal node in bytes, followed by additional byte guesses up to 48 additional bytes
+
+
+	// Put an ifdef OSX here
+	//boost::singleton_pool < TAG, SIZE - 20, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 19, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 18, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 17, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 16, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 15, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 14, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 13, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 12, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 11, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 10, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 9, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+
+	//boost::singleton_pool < TAG, SIZE - 8, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 7, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 6, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 5, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 4, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 3, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	//boost::singleton_pool < TAG, SIZE - 2, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+
+	boost::singleton_pool < TAG, SIZE - 1, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 0, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 1, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 2, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 3, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 4, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 5, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 6, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 7, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 8, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 9, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 10, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 11, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 12, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 13, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 14, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 15, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 16, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 17, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 18, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 19, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 20, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 21, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 22, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 23, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 24, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 25, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 26, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 27, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 28, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 29, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 30, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 31, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 32, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 33, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 34, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 35, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 36, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 37, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 38, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 39, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 40, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 41, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 42, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 43, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 44, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 45, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 46, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 47, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 48, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
+
+}
+
 class KadSampler
 {
 
@@ -2972,7 +3139,8 @@ class KadSampler
 				, sizeConsolidatedRows { 0 }
 				, sizeRandomNumbers { 0 }
 				, totalSize { 0 }
-			{}
+			{
+			}
 
 			size_t numberMapNodes;
 			size_t sizePod;
@@ -3154,46 +3322,46 @@ class KadSampler
 		template <typename TAG>
 		void PurgeTags()
 		{
-			purge_pool<TAG, sizeof(fast_short_to_int_map__loaded<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(std::pair<fast__short__to__fast_short_to_int_map__loaded<TAG>::key_type, fast__short__to__fast_short_to_int_map__loaded<TAG>::mapped_type> const)>();
-			purge_pool<TAG, sizeof(fast__int64__to__fast_branch_output_row_vector<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast__int64__to__fast_branch_output_row_list<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_branch_output_row_ptr__to__fast_short_vector<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast__lookup__from_child_dmu_set__to__output_rows<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_int_set<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_branch_output_row_vector_huge<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_short_to_int_map__loaded<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(std::pair<typename fast__short__to__fast_short_to_int_map__loaded<TAG>::key_type, typename fast__short__to__fast_short_to_int_map__loaded<TAG>::mapped_type> const)>();
+			purge_pool<TAG, sizeof(typename fast__int64__to__fast_branch_output_row_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast__int64__to__fast_branch_output_row_list<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_branch_output_row_ptr__to__fast_short_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast__lookup__from_child_dmu_set__to__output_rows<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_int_set<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_branch_output_row_vector_huge<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_branch_output_row_vector_____currently_only_used_for_Branch_remaining<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(BranchOutputRow<TAG>)>();
-			purge_pool<TAG, sizeof(fast_int_vector<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast__int64__to__fast_branch_output_row_set<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_branch_output_row_set<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_short_to_short_map<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(InstanceDataVector<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(DMUInstanceDataVector<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(ChildDMUInstanceDataVector<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(SecondaryInstanceDataVector<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(DataCache<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_short_to_data_cache_map<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_int_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast__int64__to__fast_branch_output_row_set<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_branch_output_row_set<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_short_to_short_map<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename InstanceDataVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename DMUInstanceDataVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename ChildDMUInstanceDataVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename SecondaryInstanceDataVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename DataCache<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_short_to_data_cache_map<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(InstanceData)>();
-			purge_pool<TAG, sizeof(fast_short_vector<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_vector_childtoprimarymapping<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_short_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_vector_childtoprimarymapping<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(int)>();
 			purge_pool<TAG, sizeof(char)>();
-			purge_pool<TAG, sizeof(fast_leaf_vector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_leaf_vector<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(Leaf)>();
 			purge_pool<TAG, sizeof(ChildToPrimaryMapping)>();
 			purge_pool<TAG, sizeof(MergedTimeSliceRow<TAG>)>();
 			purge_pool<TAG, sizeof(VariableGroupBranchesAndLeaves)>();
-			purge_pool<TAG, sizeof(VariableGroupBranchesAndLeavesVector<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast__mergedtimeslicerow_set<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(fast_short_to_int_map<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(Leaves<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename VariableGroupBranchesAndLeavesVector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast__mergedtimeslicerow_set<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_short_to_int_map<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename Leaves<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(Leaf)>();
-			purge_pool<TAG, sizeof(fast_int_to_childtoprimarymappingvector<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename fast_int_to_childtoprimarymappingvector<TAG>::value_type const)>();
 			purge_pool<TAG, sizeof(Branch)>();
-			purge_pool<TAG, sizeof(Branches<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(TimeSlices<TAG>::value_type const)>();
-			purge_pool<TAG, sizeof(DataCache<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename Branches<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename TimeSlices<TAG>::value_type const)>();
+			purge_pool<TAG, sizeof(typename DataCache<TAG>::value_type const)>();
 		}
 
 		template <template <typename MEMORY_TAG> class TOP_LEVEL_TAG_STRUCT>
@@ -3282,104 +3450,5 @@ class KadSampler
 		}
 
 };
-
-template <typename TAG, int SIZE>
-void purge_pool()
-{
-	// The Pool allocator is subtle.
-	// We provide the type T to the standard containers as the template parameter;
-	// viz. std::set<int, std::less<int>, boost::fast_pool_allocator<int>>
-	// (T here being 'int'),
-	// but that does ***NOT*** mean that the memory allocated by the underlying pool
-	// will be sizeof(T).
-	// Instead, the type T is available to the standard containers as the 'value_type'
-	// of the allocator that is passed as a template argument.
-	// The standard containers may then adjust the ACTUAL number of bytes they allocate
-	// per item in the container to be more than this - and they do.
-	// Therefore, the ACTUAL underlying pool - boost::singleton_pool<> -
-	// will NOT be a pool corresponding to sizeof(T).
-	// It will be a pool corresponding to a larger value.
-	//
-	// Unfortunately, the standard does not specify what the actual size of allocation is
-	// for items in the container.
-	//
-	// However, it is quite safe to assume that it will be 4, 8, or perhaps no more than 12 or 16
-	// bytes in excess of sizeof(T).
-	//
-	// Therefore, we simply loop through all reasonable possibilities for the size of a node.
-	// This is a negligible operation if there is no pool at the given size.
-
-	// Smallest possible size of the internal node in bytes, followed by additional byte guesses up to 48 additional bytes
-	boost::singleton_pool < TAG, SIZE - 20, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 19, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 18, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 17, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 16, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 15, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 14, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 13, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 12, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 11, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 10, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 9, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 8, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 7, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 6, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 5, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 4, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 3, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 2, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE - 1, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 0, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 1, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 2, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 3, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 4, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 5, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 6, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 7, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 8, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 9, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 10, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 11, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 12, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 13, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 14, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 15, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 16, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 17, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 18, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 19, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 20, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 21, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 22, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 23, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 24, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 25, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 26, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 27, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 28, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 29, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 30, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 31, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 32, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 33, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 34, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 35, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 36, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 37, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 38, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 39, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 40, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 41, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 42, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 43, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 44, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 45, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 46, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 47, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 48, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex >::purge_memory();
-
-}
 
 #endif

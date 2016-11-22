@@ -226,8 +226,8 @@ class NewGenePool
 			}
 		}
 
-		char * NewGenePool::CheckReturnFreeSlot();
-		char * NewGenePool::CheckReturnFreeSlotCurrent();
+		char * CheckReturnFreeSlot();
+		char * CheckReturnFreeSlotCurrent();
 
 		std::int32_t mySize;
 		char * blocks[MAX_NUMBER_BLOCKS]; // space for "end" block pointer which is always NULL
@@ -259,7 +259,11 @@ class NewGeneMemoryPoolAllocator
 		typedef const value_type * const_pointer;
 		typedef value_type & reference;
 		typedef const value_type & const_reference;
-		typedef typename size_t size_type;
+
+		// OS X requires no 'typename' here
+		//typedef typename size_t size_type;
+		typedef size_t size_type;
+
 		typedef typename std::int64_t difference_type;
 
 	public:

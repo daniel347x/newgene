@@ -1367,7 +1367,7 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 
 			std::random_shuffle(remaining.begin(), remaining.end(), [&](size_t max_random)
 			{
-				std::uniform_int_distribution<size_t> remaining_distribution(0, max_random - 1);
+				boost::random::uniform_int_distribution<size_t> remaining_distribution(0, max_random - 1);
 				size_t which_remaining_random_number = remaining_distribution(engine);
 				return which_remaining_random_number;
 			});
@@ -1394,7 +1394,7 @@ void KadSampler::PrepareRandomNumbers(std::int64_t how_many)
 	{
 		std::random_shuffle(random_numbers.begin(), random_numbers.end(), [&](size_t max_random)
 		{
-			std::uniform_int_distribution<size_t> remaining_distribution(0, max_random - 1);
+			boost::random::uniform_int_distribution<size_t> remaining_distribution(0, max_random - 1);
 			size_t which_remaining_random_number = remaining_distribution(engine);
 			return which_remaining_random_number;
 		});
@@ -1557,7 +1557,7 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 					PopulateAllLeafCombinations(which_time_unit, K, branch);
 				}
 
-				std::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_time_unit].size() - 1);
+				boost::random::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_time_unit].size() - 1);
 				size_t which_remaining_leaf_combination = distribution(engine);
 
 				// Forced to use std::list, rather than std::vector,
@@ -1611,7 +1611,7 @@ void KadSampler::GenerateRandomKad(newgene_cpp_int random_number, int const K, B
 					// and the number of leaves is just a little larger than K
 					// ************************************************************************ //
 
-					std::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
+					boost::random::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
 					size_t index_of_index = distribution(engine);
 					int index_of_leaf = remaining_leaves[index_of_index];
 					auto remainingPtr = remaining_leaves.begin() + index_of_index;

@@ -186,8 +186,9 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, N_grand_total(0)
 	, overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf(0)
 	, has_non_primary_top_level_groups { 0 }
-	, has_child_groups{ 0 }
-{}
+	, has_child_groups { 0 }
+{
+}
 
 OutputModel::OutputGenerator::~OutputGenerator()
 {
@@ -508,7 +509,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// Only populate variables that were NOT already populated from the cache in Prepare
 		if (pMetadata)
 		{
-			allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.swap(fast_short_to_short_map<hits_tag>());
+			auto tmp_ = fast_short_to_short_map<hits_tag>();
+			allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.swap(tmp_);
 
 			for (auto it = pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.cbegin();
 				 it != pMetadata->childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.cend(); ++it)
@@ -588,7 +590,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 				metadata.overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf =
 					overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf;
 				metadata.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 = childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
-				metadata.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.swap(std::map<int, int>());
+				auto tmp_ = std::map<int, int>();
+				metadata.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1_allWeightings.swap(tmp_);
 
 				for (auto it = allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cbegin();
 					 it != allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cend(); ++it)
@@ -1228,7 +1231,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_excluded_dmu_category)
 					{
-						is_excluded_dmu_set_member = ! model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier,
+						is_excluded_dmu_set_member = !model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier,
 													 data_int64);
 					}
 
@@ -1324,7 +1327,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_excluded_dmu_category)
 					{
-						is_excluded_dmu_set_member = ! model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier,
+						is_excluded_dmu_set_member = !model.t_limit_dmus_set_members.ExistsInCache(model.getDb(), model, model.getInputModel(), one_column.primary_key_dmu_category_identifier,
 													 data_string.c_str());
 					}
 
@@ -2938,7 +2941,8 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 		// Is this a primary key field?
 		bool primary_key_field = false;
 		std::for_each(variables_in_group_primary_keys_metadata.cbegin(),
-					  variables_in_group_primary_keys_metadata.cend(), [&column_in_variable_group_data_table, &primary_key_field](WidgetInstanceIdentifier const & primary_key_in_variable_group_metadata)
+					  variables_in_group_primary_keys_metadata.cend(), [&column_in_variable_group_data_table,
+							  &primary_key_field](WidgetInstanceIdentifier const & primary_key_in_variable_group_metadata)
 		{
 			if (boost::iequals(column_in_variable_group_data_table.column_name_in_original_data_table, *primary_key_in_variable_group_metadata.longhand))
 			{
@@ -3267,7 +3271,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 		else if (current_is_bigger && current_is_smaller)
 		{
 			// overlapping UOA's: not yet implemented
-			std::string erroneousDmuList {"("};
+			std::string erroneousDmuList { "(" };
 			int countErroneous = erroneousDmus.size();
 			int currentErroneous = 0;
 			std::for_each(erroneousDmus.cbegin(), erroneousDmus.cend(), [&](WidgetInstanceIdentifier const & erroneousDmu)
@@ -3746,7 +3750,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					// and therefore this is an acceptable condition - the child has 1 column in this DMU, and the primary has more than 1
 					// (but a primary multiplicity of 1),
 					// so drop through.
-					else if (! boost::iequals(*current_child_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code))
+					else if (!boost::iequals(*current_child_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code))
 					{
 
 						// ... But the current DMU category is not the one with multiplicity greater than 1
@@ -5960,7 +5964,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 			// See equivalent loop, below, for some comments
 			if (previousTimeSlice.DoesOverlap(the_slice))
 			{
-				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(),
+							  variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
 					if (failed || CheckCancelled()) { return; }
 
@@ -5992,7 +5997,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 			}
 			else
 			{
-				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(),
+							  variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
 					if (failed || CheckCancelled()) { return; }
 
@@ -6061,7 +6067,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 					InstantiateUsingTopLevelObjectsPool<tag__ongoing_consolidation<ongoing_consolidation_tag>>();
 				FastSetMemoryTag<MergedTimeSliceRow<ongoing_consolidation_tag>, ongoing_consolidation_tag> & incoming = *incoming_;
 
-				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(),
+							  variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
 
 					if (failed || CheckCancelled()) { return; }
@@ -6254,7 +6261,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, K
 
 				ongoing_merged_rows.clear();
 
-				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+				std::for_each(variableGroupBranchesAndLeavesVector.cbegin(),
+							  variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 				{
 
 					if (failed || CheckCancelled()) { return; }

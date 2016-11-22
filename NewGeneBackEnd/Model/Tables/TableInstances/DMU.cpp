@@ -108,7 +108,9 @@ bool Table_DMU_Identifier::Exists(sqlite3 * db, InputModel & input_model_, std::
 	{
 
 		// Safety check: Cache should match database
-		if (getIdentifierFromStringCode(dmu_to_check, WidgetInstanceIdentifier()) != exists)
+		WidgetInstanceIdentifier tmp_;
+
+		if (getIdentifierFromStringCode(dmu_to_check, tmp_) != exists)
 		{
 			boost::format msg("Cache of DMU categories is out-of-sync.");
 			throw NewGeneException() << newgene_error_description(msg.str());

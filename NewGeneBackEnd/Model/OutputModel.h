@@ -871,7 +871,8 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 	// First, the branch primary keys
 	std::for_each(branch.primary_keys.cbegin(), branch.primary_keys.cend(), [&](DMUInstanceData const & data)
 	{
-		boost::apply_visitor(create_output_row_visitor(first), data);
+		auto visitor = create_output_row_visitor(first);
+		boost::apply_visitor(visitor, data);
 	});
 
 	// Then, the leaf primary keys - for multiple leaves
@@ -893,7 +894,8 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 		// see the following code block after this std::for_each() exits.
 		std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
 		{
-			boost::apply_visitor(create_output_row_visitor(first), data);
+			auto visitor = create_output_row_visitor(first);
+			boost::apply_visitor(visitor, data);
 		});
 		++numberLeavesHandled;
 	});
@@ -912,7 +914,9 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 		{
 			for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++nk)
 			{
-				boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
+				auto visitor = create_output_row_visitor(first);
+				auto variant = InstanceData(fast_string());
+				boost::apply_visitor(visitor, variant);
 			}
 		}
 	}
@@ -935,7 +939,8 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 			SecondaryInstanceDataVector<hits_tag> const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
 			std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 			{
-				boost::apply_visitor(create_output_row_visitor(first), data);
+				auto visitor = create_output_row_visitor(first);
+				boost::apply_visitor(visitor, data);
 			});
 		}
 		else
@@ -958,7 +963,9 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 		{
 			for (int nk = 0; nk < numberSecondaryColumns; ++nk)
 			{
-				boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
+				auto visitor = create_output_row_visitor(first);
+				auto variant = InstanceData(fast_string());
+				boost::apply_visitor(visitor, variant);
 			}
 		}
 	}
@@ -1035,7 +1042,8 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 						SecondaryInstanceDataVector<hits_tag> const & secondary_data_vector = data_cache[data_index];
 						std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 						{
-							boost::apply_visitor(create_output_row_visitor(first), data);
+							auto visitor = create_output_row_visitor(first);
+							boost::apply_visitor(visitor, data);
 						});
 
 					}
@@ -1061,7 +1069,9 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 
 						for (int n = 0; n < numberSecondaries; ++n)
 						{
-							boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
+							auto visitor = create_output_row_visitor(first);
+							auto variant = InstanceData(fast_string());
+							boost::apply_visitor(visitor, variant);
 						}
 					}
 				}
@@ -1082,7 +1092,9 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 
 					for (int n = 0; n < numberSecondaries; ++n)
 					{
-						boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
+						auto visitor = create_output_row_visitor(first);
+						auto variant = InstanceData(fast_string());
+						boost::apply_visitor(visitor, variant);
 					}
 				}
 			}
@@ -1145,7 +1157,8 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 
 					std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 					{
-						boost::apply_visitor(create_output_row_visitor(first), data);
+						auto visitor = create_output_row_visitor(first);
+						boost::apply_visitor(visitor, data);
 					});
 
 				});
@@ -1177,7 +1190,9 @@ bool OutputModel::OutputGenerator::CreateOutputRow(Branch const & branch, Branch
 
 				for (int n = 0; n < numberSecondaries; ++n)
 				{
-					boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
+					auto visitor = create_output_row_visitor(first);
+					auto variant = InstanceData(fast_string());
+					boost::apply_visitor(visitor, variant);
 				}
 			}
 		}

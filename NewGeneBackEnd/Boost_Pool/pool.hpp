@@ -44,6 +44,8 @@
 #include <valgrind/memcheck.h>
 #endif
 
+#include <boost/exception/all.hpp>
+
 typedef boost::error_info<struct tag_newgenememory_internal, int> newgene_internal_memory_error_tag;
 
 #ifdef BOOST_NO_STDC_NAMESPACE
