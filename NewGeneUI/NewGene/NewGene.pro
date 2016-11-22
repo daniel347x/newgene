@@ -34,7 +34,7 @@ macx: QMAKE_LFLAGS += -arch x86_64 -std=gnu++11 -stdlib=libc++
 macx: QMAKE_CFLAGS += -gdwarf-2
 macx: QMAKE_CXXFLAGS += -gdwarf-2
 macx: ICON = ../Resources/earth.icns
-macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
+macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
 
 SOURCES += main.cpp\
 	Widgets/newgenemainwindow.cpp \
