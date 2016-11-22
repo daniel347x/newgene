@@ -29,12 +29,12 @@ QMAKE_CFLAGS_RELEASE -= -O2
 # add the desired -O3 if not present
 QMAKE_CFLAGS_RELEASE += -O3
 
-macx: QMAKE_CXXFLAGS += -x c++ -arch x86_64 -std=gnu++11 -stdlib=libc++
-macx: QMAKE_LFLAGS += -arch x86_64 -std=gnu++11 -stdlib=libc++
+macx: QMAKE_CXXFLAGS += -x c++ -std=gnu++11 -stdlib=libc++
+macx: QMAKE_LFLAGS += -std=gnu++11 -stdlib=libc++
 macx: QMAKE_CFLAGS += -gdwarf-2
 macx: QMAKE_CXXFLAGS += -gdwarf-2
 macx: ICON = ../Resources/earth.icns
-macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
+macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.11
 
 SOURCES += main.cpp\
 	Widgets/newgenemainwindow.cpp \
@@ -311,8 +311,8 @@ FORMS    += Widgets/newgenemainwindow.ui \
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/debug/ -lNewGeneBackEnd
-else:macx:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/OSX/NewGene/DerivedData/NewGene/Build/Products/Release -lNewGene
-else:macx:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/OSX/NewGene/DerivedData/NewGene/Build/Products/Debug -lNewGene
+else:macx:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/OSX/NewGene/Release -lNewGene
+else:macx:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/OSX/NewGene/Debug -lNewGene
 else:unix: LIBS += -L$$PWD/../../NewGeneBackEnd/ -lNewGeneBackEnd
 
 win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB_MSVC12_X86) -llibboost_filesystem-vc120-mt-1_59
