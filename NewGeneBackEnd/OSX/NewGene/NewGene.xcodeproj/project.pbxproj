@@ -7,6 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2C3B26771DDF37CF005176F2 /* InputModelDdlSql.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B26731DDF37CF005176F2 /* InputModelDdlSql.cpp */; };
+		2C3B26781DDF37CF005176F2 /* InputModelDdlSql.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B26741DDF37CF005176F2 /* InputModelDdlSql.h */; };
+		2C3B26791DDF37CF005176F2 /* OutputModelDdlSql.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B26751DDF37CF005176F2 /* OutputModelDdlSql.cpp */; };
+		2C3B267A1DDF37CF005176F2 /* OutputModelDdlSql.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B26761DDF37CF005176F2 /* OutputModelDdlSql.h */; };
+		2C3B267E1DDF37F3005176F2 /* KadSampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B267C1DDF37F3005176F2 /* KadSampler.cpp */; };
+		2C3B267F1DDF37F3005176F2 /* KadSampler.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B267D1DDF37F3005176F2 /* KadSampler.h */; };
+		2C3B26821DDF3813005176F2 /* Fields.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B26801DDF3813005176F2 /* Fields.cpp */; };
+		2C3B26831DDF3813005176F2 /* Table.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B26811DDF3813005176F2 /* Table.cpp */; };
+		2C3B26871DDF3838005176F2 /* GeneralOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B26841DDF3838005176F2 /* GeneralOptions.h */; };
+		2C3B26881DDF3838005176F2 /* Limit_DMUs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B26851DDF3838005176F2 /* Limit_DMUs.cpp */; };
+		2C3B26891DDF3838005176F2 /* Limit_DMUs.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B26861DDF3838005176F2 /* Limit_DMUs.h */; };
+		2C3B268E1DDF38E8005176F2 /* Controller_DMU_Management.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B268A1DDF38E8005176F2 /* Controller_DMU_Management.cpp */; };
+		2C3B268F1DDF38E8005176F2 /* Controller_LimitDmus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B268B1DDF38E8005176F2 /* Controller_LimitDmus.cpp */; };
+		2C3B26901DDF38E8005176F2 /* Controller_UOA_Management.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B268C1DDF38E8005176F2 /* Controller_UOA_Management.cpp */; };
+		2C3B26911DDF38E8005176F2 /* Controller_VG_Management.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B268D1DDF38E8005176F2 /* Controller_VG_Management.cpp */; };
+		2C3B269B1DDF3926005176F2 /* FastMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B26921DDF3926005176F2 /* FastMap.cpp */; };
+		2C3B269C1DDF3926005176F2 /* FastMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B26931DDF3926005176F2 /* FastMap.h */; };
+		2C3B269D1DDF3926005176F2 /* NewGeneMemoryPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B26941DDF3926005176F2 /* NewGeneMemoryPool.cpp */; };
+		2C3B269E1DDF3926005176F2 /* NewGeneMemoryPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B26951DDF3926005176F2 /* NewGeneMemoryPool.h */; };
+		2C3B269F1DDF3926005176F2 /* Semaphore.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B26961DDF3926005176F2 /* Semaphore.h */; };
+		2C3B26A01DDF3926005176F2 /* TimeRangeHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B26971DDF3926005176F2 /* TimeRangeHelper.cpp */; };
+		2C3B26A11DDF3926005176F2 /* TimeRangeHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B26981DDF3926005176F2 /* TimeRangeHelper.h */; };
+		2C3B26A21DDF3926005176F2 /* Validation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3B26991DDF3926005176F2 /* Validation.cpp */; };
+		2C3B26A31DDF3926005176F2 /* Validation.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C3B269A1DDF3926005176F2 /* Validation.h */; };
 		C39061B1185E3920005C6306 /* GeneralOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C39061B0185E3920005C6306 /* GeneralOptions.cpp */; };
 		C3933A79185E37FF00CB2D68 /* Controller_GeneralOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3933A78185E37FF00CB2D68 /* Controller_GeneralOptions.cpp */; };
 		C3DAD0FF17DB47AD00F1E066 /* DocumentManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD05F17DB47AD00F1E066 /* DocumentManager.cpp */; };
@@ -145,6 +169,30 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2C3B26731DDF37CF005176F2 /* InputModelDdlSql.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputModelDdlSql.cpp; sourceTree = "<group>"; };
+		2C3B26741DDF37CF005176F2 /* InputModelDdlSql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputModelDdlSql.h; sourceTree = "<group>"; };
+		2C3B26751DDF37CF005176F2 /* OutputModelDdlSql.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OutputModelDdlSql.cpp; sourceTree = "<group>"; };
+		2C3B26761DDF37CF005176F2 /* OutputModelDdlSql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutputModelDdlSql.h; sourceTree = "<group>"; };
+		2C3B267C1DDF37F3005176F2 /* KadSampler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = KadSampler.cpp; path = KadSampler/KadSampler.cpp; sourceTree = "<group>"; };
+		2C3B267D1DDF37F3005176F2 /* KadSampler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KadSampler.h; path = KadSampler/KadSampler.h; sourceTree = "<group>"; };
+		2C3B26801DDF3813005176F2 /* Fields.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Fields.cpp; sourceTree = "<group>"; };
+		2C3B26811DDF3813005176F2 /* Table.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Table.cpp; sourceTree = "<group>"; };
+		2C3B26841DDF3838005176F2 /* GeneralOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralOptions.h; sourceTree = "<group>"; };
+		2C3B26851DDF3838005176F2 /* Limit_DMUs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Limit_DMUs.cpp; sourceTree = "<group>"; };
+		2C3B26861DDF3838005176F2 /* Limit_DMUs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Limit_DMUs.h; sourceTree = "<group>"; };
+		2C3B268A1DDF38E8005176F2 /* Controller_DMU_Management.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_DMU_Management.cpp; sourceTree = "<group>"; };
+		2C3B268B1DDF38E8005176F2 /* Controller_LimitDmus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_LimitDmus.cpp; sourceTree = "<group>"; };
+		2C3B268C1DDF38E8005176F2 /* Controller_UOA_Management.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_UOA_Management.cpp; sourceTree = "<group>"; };
+		2C3B268D1DDF38E8005176F2 /* Controller_VG_Management.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_VG_Management.cpp; sourceTree = "<group>"; };
+		2C3B26921DDF3926005176F2 /* FastMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FastMap.cpp; sourceTree = "<group>"; };
+		2C3B26931DDF3926005176F2 /* FastMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastMap.h; sourceTree = "<group>"; };
+		2C3B26941DDF3926005176F2 /* NewGeneMemoryPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NewGeneMemoryPool.cpp; sourceTree = "<group>"; };
+		2C3B26951DDF3926005176F2 /* NewGeneMemoryPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewGeneMemoryPool.h; sourceTree = "<group>"; };
+		2C3B26961DDF3926005176F2 /* Semaphore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Semaphore.h; sourceTree = "<group>"; };
+		2C3B26971DDF3926005176F2 /* TimeRangeHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimeRangeHelper.cpp; sourceTree = "<group>"; };
+		2C3B26981DDF3926005176F2 /* TimeRangeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TimeRangeHelper.h; sourceTree = "<group>"; };
+		2C3B26991DDF3926005176F2 /* Validation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Validation.cpp; sourceTree = "<group>"; };
+		2C3B269A1DDF3926005176F2 /* Validation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Validation.h; sourceTree = "<group>"; };
 		C39061B0185E3920005C6306 /* GeneralOptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GeneralOptions.cpp; sourceTree = "<group>"; };
 		C3933A78185E37FF00CB2D68 /* Controller_GeneralOptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_GeneralOptions.cpp; sourceTree = "<group>"; };
 		C3DAD05517DB457000F1E066 /* libNewGene.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNewGene.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -300,6 +348,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2C3B267B1DDF37DC005176F2 /* KadSampler */ = {
+			isa = PBXGroup;
+			children = (
+				2C3B267C1DDF37F3005176F2 /* KadSampler.cpp */,
+				2C3B267D1DDF37F3005176F2 /* KadSampler.h */,
+			);
+			name = KadSampler;
+			sourceTree = "<group>";
+		};
 		C3DAD04C17DB457000F1E066 = {
 			isa = PBXGroup;
 			children = (
@@ -307,6 +364,8 @@
 				C3DAD05617DB457000F1E066 /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 1;
+			wrapsLines = 0;
 		};
 		C3DAD05617DB457000F1E066 /* Products */ = {
 			isa = PBXGroup;
@@ -380,6 +439,11 @@
 		C3DAD06B17DB47AD00F1E066 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				2C3B267B1DDF37DC005176F2 /* KadSampler */,
+				2C3B26731DDF37CF005176F2 /* InputModelDdlSql.cpp */,
+				2C3B26741DDF37CF005176F2 /* InputModelDdlSql.h */,
+				2C3B26751DDF37CF005176F2 /* OutputModelDdlSql.cpp */,
+				2C3B26761DDF37CF005176F2 /* OutputModelDdlSql.h */,
 				C3DAD06C17DB47AD00F1E066 /* InputModel.cpp */,
 				C3DAD06D17DB47AD00F1E066 /* InputModel.h */,
 				C3DAD06E17DB47AD00F1E066 /* Model.cpp */,
@@ -398,6 +462,8 @@
 		C3DAD07417DB47AD00F1E066 /* Tables */ = {
 			isa = PBXGroup;
 			children = (
+				2C3B26801DDF3813005176F2 /* Fields.cpp */,
+				2C3B26811DDF3813005176F2 /* Table.cpp */,
 				C3DAD07517DB47AD00F1E066 /* Executor.h */,
 				C3DAD07617DB47AD00F1E066 /* Fields.h */,
 				C3DAD07717DB47AD00F1E066 /* FieldTypes.cpp */,
@@ -429,6 +495,9 @@
 		C3DAD08117DB47AD00F1E066 /* TableInstances */ = {
 			isa = PBXGroup;
 			children = (
+				2C3B26841DDF3838005176F2 /* GeneralOptions.h */,
+				2C3B26851DDF3838005176F2 /* Limit_DMUs.cpp */,
+				2C3B26861DDF3838005176F2 /* Limit_DMUs.h */,
 				C39061B0185E3920005C6306 /* GeneralOptions.cpp */,
 				C3DAD08217DB47AD00F1E066 /* CMU.cpp */,
 				C3DAD08317DB47AD00F1E066 /* CMU.h */,
@@ -603,6 +672,10 @@
 		C3DAD0EA17DB47AD00F1E066 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				2C3B268A1DDF38E8005176F2 /* Controller_DMU_Management.cpp */,
+				2C3B268B1DDF38E8005176F2 /* Controller_LimitDmus.cpp */,
+				2C3B268C1DDF38E8005176F2 /* Controller_UOA_Management.cpp */,
+				2C3B268D1DDF38E8005176F2 /* Controller_VG_Management.cpp */,
 				C3933A78185E37FF00CB2D68 /* Controller_GeneralOptions.cpp */,
 				C3DAD0EB17DB47AD00F1E066 /* Controller_GenerateOutput.cpp */,
 				C3DAD0EC17DB47AD00F1E066 /* Controller_KAdCountChange.cpp */,
@@ -628,6 +701,15 @@
 		C3DAD0F817DB47AD00F1E066 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				2C3B26921DDF3926005176F2 /* FastMap.cpp */,
+				2C3B26931DDF3926005176F2 /* FastMap.h */,
+				2C3B26941DDF3926005176F2 /* NewGeneMemoryPool.cpp */,
+				2C3B26951DDF3926005176F2 /* NewGeneMemoryPool.h */,
+				2C3B26961DDF3926005176F2 /* Semaphore.h */,
+				2C3B26971DDF3926005176F2 /* TimeRangeHelper.cpp */,
+				2C3B26981DDF3926005176F2 /* TimeRangeHelper.h */,
+				2C3B26991DDF3926005176F2 /* Validation.cpp */,
+				2C3B269A1DDF3926005176F2 /* Validation.h */,
 				C3DAD0F917DB47AD00F1E066 /* NewGeneException.cpp */,
 				C3DAD0FA17DB47AD00F1E066 /* NewGeneException.h */,
 				C3DAD0FB17DB47AD00F1E066 /* NewGeneUUID.cpp */,
@@ -653,6 +735,7 @@
 				C3DAD10A17DB47AD00F1E066 /* InputModel.h in Headers */,
 				C3DAD10C17DB47AD00F1E066 /* Model.h in Headers */,
 				C3DAD10E17DB47AD00F1E066 /* ModelManager.h in Headers */,
+				2C3B26871DDF3838005176F2 /* GeneralOptions.h in Headers */,
 				C3DAD11017DB47AD00F1E066 /* OutputModel.h in Headers */,
 				C3DAD11117DB47AD00F1E066 /* Executor.h in Headers */,
 				C3DAD11217DB47AD00F1E066 /* Fields.h in Headers */,
@@ -661,8 +744,10 @@
 				C3DAD11817DB47AD00F1E066 /* ImportDefinitions.h in Headers */,
 				C3DAD11A17DB47AD00F1E066 /* Schema.h in Headers */,
 				C3DAD11B17DB47AD00F1E066 /* Table.h in Headers */,
+				2C3B26A31DDF3926005176F2 /* Validation.h in Headers */,
 				C3DAD11D17DB47AD00F1E066 /* CMU.h in Headers */,
 				C3DAD11F17DB47AD00F1E066 /* DMU.h in Headers */,
+				2C3B269C1DDF3926005176F2 /* FastMap.h in Headers */,
 				C3DAD12117DB47AD00F1E066 /* KAdCount.h in Headers */,
 				C3DAD12317DB47AD00F1E066 /* TimeRange.h in Headers */,
 				C3DAD12517DB47AD00F1E066 /* UOA.h in Headers */,
@@ -673,6 +758,8 @@
 				C3DAD12F17DB47AD00F1E066 /* TableTypes.h in Headers */,
 				C3DAD13117DB47AD00F1E066 /* TimeGranularity.h in Headers */,
 				C3DAD13317DB47AD00F1E066 /* ModelActionManager.h in Headers */,
+				2C3B26A11DDF3926005176F2 /* TimeRangeHelper.h in Headers */,
+				2C3B26781DDF37CF005176F2 /* InputModelDdlSql.h in Headers */,
 				C3DAD13517DB47AD00F1E066 /* InputProject.h in Headers */,
 				C3DAD13717DB47AD00F1E066 /* OutputProject.h in Headers */,
 				C3DAD13917DB47AD00F1E066 /* Project.h in Headers */,
@@ -680,6 +767,7 @@
 				C3DAD13D17DB47AD00F1E066 /* GlobalSettings.h in Headers */,
 				C3DAD13F17DB47AD00F1E066 /* GlobalSettings_list.h in Headers */,
 				C3DAD14117DB47AD00F1E066 /* InputModelSettings.h in Headers */,
+				2C3B26891DDF3838005176F2 /* Limit_DMUs.h in Headers */,
 				C3DAD14317DB47AD00F1E066 /* InputModelSettings_list.h in Headers */,
 				C3DAD14517DB47AD00F1E066 /* InputProjectSettings.h in Headers */,
 				C3DAD14717DB47AD00F1E066 /* InputProjectSettings_list.h in Headers */,
@@ -689,13 +777,16 @@
 				C3DAD14F17DB47AD00F1E066 /* OutputProjectSettings.h in Headers */,
 				C3DAD15117DB47AD00F1E066 /* OutputProjectSettings_list.h in Headers */,
 				C3DAD15317DB47AD00F1E066 /* ProjectSettings.h in Headers */,
+				2C3B269E1DDF3926005176F2 /* NewGeneMemoryPool.h in Headers */,
 				C3DAD15517DB47AD00F1E066 /* Setting.h in Headers */,
 				C3DAD15717DB47AD00F1E066 /* Settings.h in Headers */,
+				2C3B267A1DDF37CF005176F2 /* OutputModelDdlSql.h in Headers */,
 				C3DAD15917DB47AD00F1E066 /* SettingsManager.h in Headers */,
 				C3DAD15B17DB47AD00F1E066 /* SettingsRepository.h in Headers */,
 				C3DAD15E17DB47AD00F1E066 /* sqlite3.h in Headers */,
 				C3DAD15F17DB47AD00F1E066 /* sqlite3ext.h in Headers */,
 				C3DAD16117DB47AD00F1E066 /* StatusManager.h in Headers */,
+				2C3B269F1DDF3926005176F2 /* Semaphore.h in Headers */,
 				C3DAD16317DB47AD00F1E066 /* test.h in Headers */,
 				C3DAD16517DB47AD00F1E066 /* ThreadManager.h in Headers */,
 				C3DAD16717DB47AD00F1E066 /* ThreadPool.h in Headers */,
@@ -707,6 +798,7 @@
 				C3DAD17717DB47AD00F1E066 /* UIActionManager.h in Headers */,
 				C3DAD17917DB47AD00F1E066 /* DataChanges.h in Headers */,
 				C3DAD17B17DB47AD00F1E066 /* DataWidgets.h in Headers */,
+				2C3B267F1DDF37F3005176F2 /* KadSampler.h in Headers */,
 				C3DAD17D17DB47AD00F1E066 /* UIDataManager.h in Headers */,
 				C3DAD17F17DB47AD00F1E066 /* NewGeneException.h in Headers */,
 				C3DAD18117DB47AD00F1E066 /* NewGeneUUID.h in Headers */,
@@ -740,7 +832,7 @@
 		C3DAD04D17DB457000F1E066 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = NewGene;
 			};
 			buildConfigurationList = C3DAD05017DB457000F1E066 /* Build configuration list for PBXProject "NewGene" */;
@@ -771,6 +863,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C3B26831DDF3813005176F2 /* Table.cpp in Sources */,
 				C3DAD0FF17DB47AD00F1E066 /* DocumentManager.cpp in Sources */,
 				C3DAD10117DB47AD00F1E066 /* globals.cpp in Sources */,
 				C3DAD10317DB47AD00F1E066 /* LoggingManager.cpp in Sources */,
@@ -778,6 +871,8 @@
 				C3DAD10517DB47AD00F1E066 /* Manager.cpp in Sources */,
 				C3DAD10717DB47AD00F1E066 /* Messager.cpp in Sources */,
 				C3DAD10917DB47AD00F1E066 /* InputModel.cpp in Sources */,
+				2C3B26A21DDF3926005176F2 /* Validation.cpp in Sources */,
+				2C3B269B1DDF3926005176F2 /* FastMap.cpp in Sources */,
 				C3DAD10B17DB47AD00F1E066 /* Model.cpp in Sources */,
 				C3DAD10D17DB47AD00F1E066 /* ModelManager.cpp in Sources */,
 				C3DAD10F17DB47AD00F1E066 /* OutputModel.cpp in Sources */,
@@ -787,6 +882,8 @@
 				C3DAD11917DB47AD00F1E066 /* Schema.cpp in Sources */,
 				C3DAD11C17DB47AD00F1E066 /* CMU.cpp in Sources */,
 				C3DAD11E17DB47AD00F1E066 /* DMU.cpp in Sources */,
+				2C3B26821DDF3813005176F2 /* Fields.cpp in Sources */,
+				2C3B268F1DDF38E8005176F2 /* Controller_LimitDmus.cpp in Sources */,
 				C3DAD12017DB47AD00F1E066 /* KAdCount.cpp in Sources */,
 				C3DAD12217DB47AD00F1E066 /* TimeRange.cpp in Sources */,
 				C3DAD12417DB47AD00F1E066 /* UOA.cpp in Sources */,
@@ -795,6 +892,7 @@
 				C3DAD12A17DB47AD00F1E066 /* VariablesSelected.cpp in Sources */,
 				C3DAD12C17DB47AD00F1E066 /* TableManager.cpp in Sources */,
 				C3DAD12E17DB47AD00F1E066 /* TableTypes.cpp in Sources */,
+				2C3B26A01DDF3926005176F2 /* TimeRangeHelper.cpp in Sources */,
 				C3DAD13017DB47AD00F1E066 /* TimeGranularity.cpp in Sources */,
 				C3DAD13217DB47AD00F1E066 /* ModelActionManager.cpp in Sources */,
 				C3DAD13417DB47AD00F1E066 /* InputProject.cpp in Sources */,
@@ -804,6 +902,7 @@
 				C3DAD13C17DB47AD00F1E066 /* GlobalSettings.cpp in Sources */,
 				C3DAD13E17DB47AD00F1E066 /* GlobalSettings_list.cpp in Sources */,
 				C3DAD14017DB47AD00F1E066 /* InputModelSettings.cpp in Sources */,
+				2C3B26881DDF3838005176F2 /* Limit_DMUs.cpp in Sources */,
 				C3DAD14217DB47AD00F1E066 /* InputModelSettings_list.cpp in Sources */,
 				C3DAD14417DB47AD00F1E066 /* InputProjectSettings.cpp in Sources */,
 				C3DAD14617DB47AD00F1E066 /* InputProjectSettings_list.cpp in Sources */,
@@ -813,6 +912,7 @@
 				C3DAD14E17DB47AD00F1E066 /* OutputProjectSettings.cpp in Sources */,
 				C3DAD15017DB47AD00F1E066 /* OutputProjectSettings_list.cpp in Sources */,
 				C3DAD15217DB47AD00F1E066 /* ProjectSettings.cpp in Sources */,
+				2C3B269D1DDF3926005176F2 /* NewGeneMemoryPool.cpp in Sources */,
 				C3DAD15417DB47AD00F1E066 /* Setting.cpp in Sources */,
 				C3DAD15617DB47AD00F1E066 /* Settings.cpp in Sources */,
 				C3DAD15817DB47AD00F1E066 /* SettingsManager.cpp in Sources */,
@@ -821,11 +921,15 @@
 				C3DAD15D17DB47AD00F1E066 /* sqlite3.c in Sources */,
 				C3DAD16017DB47AD00F1E066 /* StatusManager.cpp in Sources */,
 				C3DAD16217DB47AD00F1E066 /* test.cpp in Sources */,
+				2C3B26901DDF38E8005176F2 /* Controller_UOA_Management.cpp in Sources */,
 				C3DAD16417DB47AD00F1E066 /* ThreadManager.cpp in Sources */,
+				2C3B26911DDF38E8005176F2 /* Controller_VG_Management.cpp in Sources */,
+				2C3B267E1DDF37F3005176F2 /* KadSampler.cpp in Sources */,
 				C3DAD16617DB47AD00F1E066 /* ThreadPool.cpp in Sources */,
 				C3DAD16817DB47AD00F1E066 /* WorkerThread.cpp in Sources */,
 				C3DAD16A17DB47AD00F1E066 /* WorkItem.cpp in Sources */,
 				C3DAD16C17DB47AD00F1E066 /* TriggerManager.cpp in Sources */,
+				2C3B268E1DDF38E8005176F2 /* Controller_DMU_Management.cpp in Sources */,
 				C3DAD16E17DB47AD00F1E066 /* ActionChanges.cpp in Sources */,
 				C3DAD17017DB47AD00F1E066 /* ActionWidgets.cpp in Sources */,
 				C3DAD17217DB47AD00F1E066 /* Controller_GenerateOutput.cpp in Sources */,
@@ -837,6 +941,8 @@
 				C3DAD17817DB47AD00F1E066 /* DataChanges.cpp in Sources */,
 				C3DAD17A17DB47AD00F1E066 /* DataWidgets.cpp in Sources */,
 				C3DAD17C17DB47AD00F1E066 /* UIDataManager.cpp in Sources */,
+				2C3B26791DDF37CF005176F2 /* OutputModelDdlSql.cpp in Sources */,
+				2C3B26771DDF37CF005176F2 /* InputModelDdlSql.cpp in Sources */,
 				C3DAD17E17DB47AD00F1E066 /* NewGeneException.cpp in Sources */,
 				C3DAD18017DB47AD00F1E066 /* NewGeneUUID.cpp in Sources */,
 				C3DAD18217DB47AD00F1E066 /* WidgetIdentifier.cpp in Sources */,
@@ -859,6 +965,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -872,7 +979,8 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				HEADER_SEARCH_PATHS = /Users/daniel347x/boost_1_62_0;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -898,7 +1006,8 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				HEADER_SEARCH_PATHS = /Users/daniel347x/boost_1_62_0;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -906,11 +1015,18 @@
 		C3DAD05A17DB457000F1E066 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
 				HEADER_SEARCH_PATHS = (
 					"${SOURCE_ROOT}",
 					"${SOURCE_ROOT}",
 					"$(BOOST_ROOT)",
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"${SOURCE_ROOT}",
+					"${SOURCE_ROOT}",
+					/Users/daniel347x/boost_1_62_0,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -919,11 +1035,18 @@
 		C3DAD05B17DB457000F1E066 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
 				HEADER_SEARCH_PATHS = (
 					"${SOURCE_ROOT}",
 					"${SOURCE_ROOT}",
 					"$(BOOST_ROOT)",
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"${SOURCE_ROOT}",
+					"${SOURCE_ROOT}",
+					/Users/daniel347x/boost_1_62_0,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
