@@ -19,7 +19,7 @@ win32: QMAKE_LFLAGS_RELEASE   += /INCREMENTAL:NO /DEBUG
 # macx: QMAKE_LFLAGS    += -stack_size 2000000 # in hex
 win32: QMAKE_CXXFLAGS += /F 4000000 # doesn't work
 win32: QMAKE_LFLAGS   += /STACK:4000000
-macx: QMAKE_LFLAGS    += -stack_size 400000 # in hex
+#macx: QMAKE_LFLAGS    += -stack_size 400000 # in hex
 
 win32: DEFINES += _WIN32_WINNT=_WIN32_WINNT_WIN7
 
