@@ -71,7 +71,7 @@ void VacuumDialog::on_pushButtonVacuum_clicked()
 
 	try
 	{
-		std::async(std::launch::async, [ =, this]()
+        std::async(std::launch::async, [ &, this]()
 		{
 			if (inputModel)
 			{
