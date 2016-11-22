@@ -78,28 +78,28 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_INT32>
 {
 	typedef std::int32_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_INT64>
 {
 	typedef std::int64_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_UINT32>
 {
 	typedef std::uint32_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_UINT64>
 {
 	typedef std::uint64_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
@@ -128,7 +128,7 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_TIMESTAMP>
 {
 	typedef std::int64_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
@@ -163,7 +163,7 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_TIME_RANGE>
 {
 	typedef std::uint64_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
@@ -205,7 +205,7 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC>
 {
 	typedef std::int32_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
@@ -240,35 +240,35 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME>
 {
 	typedef std::int64_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME>
 {
 	typedef std::int64_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_DAY>
 {
 	typedef std::int32_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_MONTH>
 {
 	typedef std::int32_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_YEAR>
 {
 	typedef std::int32_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
@@ -282,21 +282,21 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY>
 {
 	typedef std::int32_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH>
 {
 	typedef std::int32_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR>
 {
 	typedef std::int32_t type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>

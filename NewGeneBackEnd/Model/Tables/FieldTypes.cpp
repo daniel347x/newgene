@@ -25,6 +25,24 @@ FieldTypeTraits<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID>::type const FieldTypeTraits<
 FieldTypeTraits<FIELD_TYPE_DATETIME_STRING>::type const FieldTypeTraits<FIELD_TYPE_DATETIME_STRING>::default_;
 FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING>::type const FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING>::default_;
 
+// Handle int default initialization
+// Clang on OS X can't handle in-declaration defaults, thanks much
+FieldTypeTraits<FIELD_TYPE_INT32>::type const FieldTypeTraits<FIELD_TYPE_INT32>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_INT64>::type const FieldTypeTraits<FIELD_TYPE_INT64>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_UINT32>::type const FieldTypeTraits<FIELD_TYPE_UINT32>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_UINT64>::type const FieldTypeTraits<FIELD_TYPE_UINT64>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_TIMESTAMP>::type const FieldTypeTraits<FIELD_TYPE_TIMESTAMP>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type const FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC>::type const FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME>::type const FieldTypeTraits<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME>::type const FieldTypeTraits<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_DAY>::type const FieldTypeTraits<FIELD_TYPE_DAY>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_MONTH>::type const FieldTypeTraits<FIELD_TYPE_MONTH>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_YEAR>::type const FieldTypeTraits<FIELD_TYPE_YEAR>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY>::type const FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH>::type const FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH>::default_ = 0;
+FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR>::type const FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR>::default_ = 0;
+
 bool IsFieldTypeInt32(FIELD_TYPE const & field_type)
 {
 
