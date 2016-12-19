@@ -87,7 +87,7 @@ void setLineEditWidth(QLineEdit * lineEdit, int const nChars)
 	}
 
 	// get max character width of the line edit's font
-	int characterWidth = QFontMetrics(lineEdit->font()).maxWidth();
+	int characterWidth = QFontMetrics(lineEdit->font()).width("A"); // use a sample letter to obtain its width
 
 	// set the character limit on the line edit
 	lineEdit->setMinimumWidth(characterWidth * nChars);
