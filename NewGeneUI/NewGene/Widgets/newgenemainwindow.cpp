@@ -587,6 +587,7 @@ void NewGeneMainWindow::on_actionDisplay_input_dataset_path_triggered()
 		QFormLayout form(&dialog);
 		form.addRow(new QLabel("Input dataset path:"));
 		QLineEdit * lineEdit = new QLineEdit(&dialog);
+		setLineEditWidth(lineEdit);
 		lineEdit->setText(input.c_str());
 		lineEdit->setReadOnly(true);
 		lineEdit->setMinimumWidth(600);
@@ -619,6 +620,7 @@ void NewGeneMainWindow::on_actionDisplay_output_dataset_path_triggered()
 		QFormLayout form(&dialog);
 		form.addRow(new QLabel("Output dataset path:"));
 		QLineEdit * lineEdit = new QLineEdit(&dialog);
+		setLineEditWidth(lineEdit);
 		lineEdit->setText(output.c_str());
 		lineEdit->setReadOnly(true);
 		lineEdit->setMinimumWidth(600);

@@ -33,10 +33,13 @@ class EventLoopThreadManager
 				work_queue_manager_2.reset(InstantiateWorkQueue(me, true));
 			}
 
+#			ifdef Q_OS_WIN
+			// Barfs on OSX - won't run the thread
 			if (stackSize > 0)
 			{
 				work_queue_manager_thread.setStackSize(static_cast<uint>(stackSize));
 			}
+#			endif
 
 			work_queue_manager_thread.start();
 

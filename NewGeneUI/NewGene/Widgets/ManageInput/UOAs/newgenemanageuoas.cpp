@@ -302,11 +302,13 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	QFormLayout form(&dialog);
 	QList<QLineEdit *> fields;
 	QLineEdit * lineEditCode = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditCode, 12);
 	QString labelCode = QString("Enter a brief identifying code for the new unit of analysis:");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
 
 	QLineEdit * lineEditDescription = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditDescription, 20);
 	QString labelDescription = QString("Enter a short description for the new unit of analysis:");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;

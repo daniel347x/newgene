@@ -531,16 +531,19 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	QLineEdit * warningEdit = nullptr;
 
 	QLineEdit * lineEditCode = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditCode, 12);
 	QString labelCode = QString("Enter a brief identifying code for the new variable group:");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
 
 	QLineEdit * lineEditDescription = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditDescription, 20);
 	QString labelDescription = QString("Enter a short description for the new variable group:");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
 
 	QLineEdit * lineEditWarning = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditWarning);
 	QString labelWarning = QString("Enter an optional warning for the new variable group:");
 	form.addRow(labelWarning, lineEditWarning);
 	warningEdit = lineEditWarning;
@@ -926,6 +929,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		msg % dmu_description;
 		QString labelDmu = QString(msg.str().c_str());
 		QLineEdit * lineEditDMU = new QLineEdit(&dialog);
+		setLineEditWidth(lineEditDMU, 20);
 		form.addRow(labelDmu, lineEditDMU);
 		fieldsDMU << lineEditDMU;
 
@@ -1524,6 +1528,7 @@ void NewGeneManageVGs::on_pushButton_set_description_for_vg_clicked()
 		int i = 0;
 		{
 			QLineEdit *lineEdit = new QLineEdit(&dialog);
+			setLineEditWidth(lineEdit, 20);
 			QString label = QString("Short description:").arg(++i);
 			form.addRow(label, lineEdit);
 			lineEdit->setText(longhand.c_str());
@@ -1659,6 +1664,7 @@ void NewGeneManageVGs::on_pushButton_set_warning_for_vg_clicked()
 		int i = 0;
 		{
 			warningEdit = new QLineEdit(&dialog);
+			setLineEditWidth(warningEdit);
 			QString label = QString("Warning message:").arg(++i);
 			form.addRow(label, warningEdit);
 			warningEdit->setText(notes.c_str());

@@ -296,10 +296,12 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 	QFormLayout form(&dialog);
 	QList<QLineEdit *> fields;
 	QLineEdit * lineEditName = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditName, 12);
 	QString labelName = QString("Enter Decision Making Unit (DMU) category name:");
 	form.addRow(labelName, lineEditName);
 	fields << lineEditName;
 	QLineEdit * lineEditDescription = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditDescription, 20);
 	QString labelDescription = QString("Short description (max 20 characters):");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
@@ -521,16 +523,19 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	QString labelColumnNameUuid = QString("Enter 'id' column heading (uniquely identifies each DMU member):");
 	QLineEdit * lineEditColumnNameUuid = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditColumnNameUuid, 20);
 	form.addRow(labelColumnNameUuid, lineEditColumnNameUuid);
 	fields << lineEditColumnNameUuid;
 
 	QString labelColumnNameCode = QString("Enter 'abbreviation' column heading (if present):");
 	QLineEdit * lineEditColumnNameCode = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditColumnNameCode, 20);
 	form.addRow(labelColumnNameCode, lineEditColumnNameCode);
 	fields << lineEditColumnNameCode;
 
 	QString labelColumnNameDescription = QString("Enter 'description' column heading (if present):");
 	QLineEdit * lineEditColumnNameDescription = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditColumnNameDescription, 20);
 	form.addRow(labelColumnNameDescription, lineEditColumnNameDescription);
 	fields << lineEditColumnNameDescription;
 
@@ -672,14 +677,17 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 	form.addRow(new QLabel(title.str().c_str()));
 	QList<QLineEdit *> fields;
 	QLineEdit * lineEditCode = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditCode, 12);
 	QString labelCode = QString("Enter uniquely identifying DMU member code:");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
 	QLineEdit * lineEditName = new QLineEdit(&dialog);
+	setLineEditWidth(lineEditName, 20);
 	QString labelName = QString("(Optional) Enter a short abbreviation:");
 	form.addRow(labelName, lineEditName);
 	fields << lineEditName;
 	QLineEdit * lineEditDescription = new QLineEdit(&dialog);
+	lineEditDescription(lineEditDescription);
 	QString labelDescription = QString("(Optional) Enter full descriptive text:");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;

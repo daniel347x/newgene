@@ -28,6 +28,7 @@ namespace std
 #include <cstdint>
 
 #include <QtGlobal>
+#include <QLineEdit>
 
 #include "../../NewGeneBackEnd/UIAction/ActionChanges.h"
 
@@ -102,5 +103,7 @@ UIThreadManager & threadManagerUI(UIMessager * messager = nullptr);
 UIUIDataManager & uidataManagerUI(UIMessager * messager = nullptr);
 UIUIActionManager & uiactionManagerUI(UIMessager * messager = nullptr);
 UIModelActionManager & modelactionManagerUI(UIMessager * messager = nullptr);
+
+void setLineEditWidth(QLineEdit * lineEdit, int const nChars = 65);
 
 #endif // GLOBALS_H

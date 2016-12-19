@@ -11,6 +11,7 @@
 #include "uiuidatamanager.h"
 #include "uiuiactionmanager.h"
 #include "uimodelactionmanager.h"
+#include <QFontMetrics>
 
 NewGeneMainWindow * theMainWindow = NULL;
 
@@ -76,4 +77,18 @@ UIUIActionManager & uiactionManagerUI(UIMessager * messager)
 UIModelActionManager & modelactionManagerUI(UIMessager * messager)
 {
 	return get_a_ui_manager<UIModelActionManager>(messager);
+}
+
+void setLineEditWidth(QLineEdit * lineEdit, int const nChars)
+{
+	if (lineEdit == nullptr)
+	{
+		return;
+	}
+
+	// get max character width of the line edit's font
+	int characterWidth = QFontMetrics(lineEdit->font()).maxWidth();
+
+	// set the character limit on the line edit
+	lineEdit->setMinimumWidth(characterWidth * nChars);
 }

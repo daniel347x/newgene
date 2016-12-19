@@ -34,6 +34,7 @@ void DialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBo
 	labelFilePathName += ":";
 
 	QLineEdit * lineEditFilePathName = new QLineEdit(&FileChooserWidget);
+	setLineEditWidth(lineEditFilePathName);
 	QPushButton * buttonFilePathName = new QPushButton("Browse...", &FileChooserWidget);
 	buttonFilePathName->setMaximumWidth(100);
 	fieldsFileChooser.append(lineEditFilePathName);
