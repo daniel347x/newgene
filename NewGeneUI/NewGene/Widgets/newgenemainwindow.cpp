@@ -362,7 +362,7 @@ void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
 	QString the_file = QFileDialog::getOpenFileName(this, "Choose input dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene input settings file (*.newgene.in.xml)");
+	                   "NewGene input settings file (*.xml)");
 
 	if (the_file.size())
 	{
@@ -396,7 +396,7 @@ void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
 	QString the_file = QFileDialog::getOpenFileName(this, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene output settings file (*.newgene.out.xml)");
+	                   "NewGene output settings file (*.xml)");
 
 	if (the_file.size())
 	{
@@ -481,7 +481,7 @@ void NewGeneMainWindow::on_actionNew_Input_Dataset_triggered()
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the new input dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene input settings file (*.newgene.in.xml)");
+	                   "NewGene input settings file (*.xml)");
 
 	if (the_file.size())
 	{
@@ -504,7 +504,7 @@ void NewGeneMainWindow::on_actionNew_Output_Dataset_triggered()
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the new output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene output settings file (*.newgene.out.xml)");
+	                   "NewGene output settings file (*.xml)");
 
 	if (the_file.size())
 	{
@@ -533,7 +533,7 @@ void NewGeneMainWindow::on_actionSave_Input_Dataset_As_triggered()
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied input dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene input settings file (*.newgene.in.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
+	                   "NewGene input settings file (*.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
 
 	if (the_file.size())
 	{
@@ -557,7 +557,7 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene output settings file (*.newgene.out.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
+	                   "NewGene output settings file (*.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
 
 	if (the_file.size())
 	{

@@ -447,7 +447,7 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 			if (mainWindow)
 			{
 				QString the_file = QFileDialog::getOpenFileName(mainWindow, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-								   "NewGene output settings file (*.newgene.out.xml)");
+								   "NewGene output settings file (*.xml)");
 
 				if (the_file.size())
 				{
