@@ -687,7 +687,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 	form.addRow(labelName, lineEditName);
 	fields << lineEditName;
 	QLineEdit * lineEditDescription = new QLineEdit(&dialog);
-	lineEditDescription(lineEditDescription);
+	setLineEditWidth(lineEditDescription);
 	QString labelDescription = QString("(Optional) Enter full descriptive text:");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
