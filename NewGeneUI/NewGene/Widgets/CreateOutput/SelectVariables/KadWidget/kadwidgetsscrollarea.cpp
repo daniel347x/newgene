@@ -27,6 +27,7 @@ KadWidgetsScrollArea::KadWidgetsScrollArea(QWidget * parent) :
 	layout->addSpacing(20);
 	QBoxLayout * layoutInner = new QBoxLayout(QBoxLayout::LeftToRight, this);
 	layoutInner->setMargin(0);
+	layoutInner->setSpacing(20);
 	layoutInner->addStretch();
 	layoutInner->addStretch();
 	QFrame * frameInner = new QFrame();
