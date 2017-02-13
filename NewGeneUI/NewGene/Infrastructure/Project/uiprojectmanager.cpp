@@ -451,7 +451,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 
 				if (the_file.size())
 				{
-					if (checkValidProjectFilenameExtension(false, the_file.toStdString()))
+					std::string the_file_str = the_file.toStdString();
+					if (checkValidProjectFilenameExtension(false, the_file_str))
 					{
 						if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
 						{

@@ -371,7 +371,8 @@ void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 
 	if (the_file.size())
 	{
-		if (checkValidProjectFilenameExtension(true, the_file.toStdString()))
+		std::string the_file_str = the_file.toStdString();
+		if (checkValidProjectFilenameExtension(true, the_file_str))
 		{
 			if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
 			{
@@ -408,7 +409,8 @@ void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 
 	if (the_file.size())
 	{
-		if (checkValidProjectFilenameExtension(false, the_file.toStdString()))
+		std::string the_file_str = the_file.toStdString();
+		if (checkValidProjectFilenameExtension(false, the_file_str))
 		{
 			if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
 			{
