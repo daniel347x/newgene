@@ -451,12 +451,15 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 
 				if (the_file.size())
 				{
-					if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+					if (checkValidProjectFilenameExtension(false, the_file.toStdString()))
 					{
-						boost::filesystem::path file_path(the_file.toStdString());
-						settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager.get(),
-								file_path.parent_path()));
-						OpenOutputDataset(file_path.string(), mainWindowObject);
+						if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+						{
+							boost::filesystem::path file_path(the_file.toStdString());
+							settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager.get(),
+									file_path.parent_path()));
+							OpenOutputDataset(file_path.string(), mainWindowObject);
+						}
 					}
 				}
 			}

@@ -1,6 +1,7 @@
 #ifndef Q_MOC_RUN
-#include <boost/thread/thread.hpp>
-#include <boost/filesystem.hpp>
+#	include <boost/thread/thread.hpp>
+#	include <boost/filesystem.hpp>
+#	include <boost/algorithm/string.hpp>
 #endif
 #include "newgenemainwindow.h"
 #include "./CreateOutput/newgenecreateoutput.h"
@@ -370,13 +371,16 @@ void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 
 	if (the_file.size())
 	{
-		if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+		if (checkValidProjectFilenameExtension(true, the_file.toStdString()))
 		{
-			boost::filesystem::path file_path(the_file.toStdString());
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
-			        file_path.parent_path()));
+			if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+			{
+				boost::filesystem::path file_path(the_file.toStdString());
+				settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
+						file_path.parent_path()));
 
-			emit SignalOpenInputDataset(the_file.toStdString(), this);
+				emit SignalOpenInputDataset(the_file.toStdString(), this);
+			}
 		}
 	}
 
@@ -404,13 +408,16 @@ void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 
 	if (the_file.size())
 	{
-		if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+		if (checkValidProjectFilenameExtension(false, the_file.toStdString()))
 		{
-			boost::filesystem::path file_path(the_file.toStdString());
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
-			        file_path.parent_path()));
+			if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+			{
+				boost::filesystem::path file_path(the_file.toStdString());
+				settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
+						file_path.parent_path()));
 
-			emit SignalOpenOutputDataset(the_file.toStdString(), this);
+				emit SignalOpenOutputDataset(the_file.toStdString(), this);
+			}
 		}
 	}
 
@@ -489,6 +496,10 @@ void NewGeneMainWindow::on_actionNew_Input_Dataset_triggered()
 
 	if (the_file.size())
 	{
+		std::string the_file_str = the_file.toStdString();
+		checkValidProjectFilenameExtension(true, the_file_str, true);
+		the_file = the_file_str;
+
 		if (!boost::filesystem::exists(the_file.toStdString()))
 		{
 			boost::filesystem::path file_path(the_file.toStdString());
@@ -512,6 +523,10 @@ void NewGeneMainWindow::on_actionNew_Output_Dataset_triggered()
 
 	if (the_file.size())
 	{
+		std::string the_file_str = the_file.toStdString();
+		checkValidProjectFilenameExtension(false, the_file_str, true);
+		the_file = the_file_str;
+
 		if (!boost::filesystem::exists(the_file.toStdString()))
 		{
 			boost::filesystem::path file_path(the_file.toStdString());
@@ -541,6 +556,10 @@ void NewGeneMainWindow::on_actionSave_Input_Dataset_As_triggered()
 
 	if (the_file.size())
 	{
+		std::string the_file_str = the_file.toStdString();
+		checkValidProjectFilenameExtension(true, the_file_str, true);
+		the_file = the_file_str;
+
 		boost::filesystem::path file_path(the_file.toStdString());
 		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
 		        file_path.parent_path()));
@@ -565,6 +584,10 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 
 	if (the_file.size())
 	{
+		std::string the_file_str = the_file.toStdString();
+		checkValidProjectFilenameExtension(false, the_file_str, true);
+		the_file = the_file_str;
+
 		boost::filesystem::path file_path(the_file.toStdString());
 		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
 		        file_path.parent_path()));

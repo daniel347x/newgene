@@ -14,4 +14,6 @@ struct NewGeneFileNames
 	static QString preLoadedOutputProjectFileName;
 };
 
+bool checkValidProjectFilenameExtension(bool const isInputProject /* true = input project, false = output project */, std::string & filename, bool const appendIfMissing = false);
+
 #endif // NEWGENEFILENAMES_H

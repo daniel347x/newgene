@@ -424,7 +424,7 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 
 	WidgetInstanceIdentifier new_identifier(identifier);
 	KadSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
-	newSpinBox->setFixedHeight(20);
+	newSpinBox->setFixedHeight(30);
 	newSpinBox->setFixedWidth(200);
 	QFont currFont = newSpinBox->font();
 	currFont.setPixelSize(11);

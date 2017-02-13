@@ -127,9 +127,9 @@
       <widget class="QLabel" name="label_cs">
        <property name="geometry">
         <rect>
-         <x>325</x>
+         <x>320</x>
          <y>140</y>
-         <width>371</width>
+         <width>391</width>
          <height>31</height>
         </rect>
        </property>
@@ -139,13 +139,16 @@
        <property name="text">
         <string>Cross Sectional Time Series Data Manager</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
       </widget>
       <widget class="QLabel" name="label_dm">
        <property name="geometry">
         <rect>
-         <x>350</x>
+         <x>320</x>
          <y>177</y>
-         <width>321</width>
+         <width>381</width>
          <height>31</height>
         </rect>
        </property>
@@ -154,6 +157,9 @@
        </property>
        <property name="text">
         <string>Data Management for the Social Sciences</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
       <widget class="QLabel" name="label_creds">
@@ -175,8 +181,8 @@
       <widget class="QLabel" name="label_version">
        <property name="geometry">
         <rect>
-         <x>540</x>
-         <y>577</y>
+         <x>360</x>
+         <y>580</y>
          <width>331</width>
          <height>21</height>
         </rect>
@@ -185,7 +191,10 @@
         <string notr="true">#label_version {font-family: Verdana; font-size: 11px; color: #000000; font-weight: bold;}</string>
        </property>
        <property name="text">
-        <string>Version 2.0 - Jan 2017</string>
+        <string>Version 2.0 - Mar 2017</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
       <widget class="QLabel" name="label_newgenewebsite">
@@ -279,17 +288,20 @@
       <widget class="QLabel" name="label_2">
        <property name="geometry">
         <rect>
-         <x>442</x>
+         <x>360</x>
          <y>596</y>
-         <width>260</width>
-         <height>16</height>
+         <width>331</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="text">
-        <string>NewGene is programmed in C++ by &lt;a href=&quot;https://www.upwork.com/fl/dannissenbaum&quot;&gt;Dan Nissenbaum&lt;/a&gt;</string>
+        <string>NewGene is programmed in C++ by &lt;a href=&quot;http://stackoverflow.com/users/368896/dan-nissenbaum&quot;&gt;Dan Nissenbaum&lt;/a&gt;</string>
        </property>
        <property name="textFormat">
         <enum>Qt::RichText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
        <property name="openExternalLinks">
         <bool>true</bool>

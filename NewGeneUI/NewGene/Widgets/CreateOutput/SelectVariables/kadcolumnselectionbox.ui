@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>491</width>
-    <height>80</height>
+    <height>100</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -63,8 +63,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>334</width>
-        <height>60</height>
+        <width>332</width>
+        <height>80</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -258,7 +258,7 @@
       <string notr="true"/>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Box</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
