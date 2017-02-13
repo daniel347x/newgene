@@ -424,7 +424,7 @@ void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & ide
 
 	WidgetInstanceIdentifier new_identifier(identifier);
 	KadSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
-	newSpinBox->setFixedHeight(30);
+	newSpinBox->setFixedHeight(40);
 	newSpinBox->setFixedWidth(200);
 	QFont currFont = newSpinBox->font();
 	currFont.setPixelSize(11);
@@ -614,7 +614,7 @@ void KadWidgetsScrollArea::resizeEvent(QResizeEvent *)
 		QSize mySize { size() };
 		QSize labelSize { vgWarningLabel->size() };
 		vgWarningLabel->resize(mySize.width(), labelSize.height());
-		vgWarningLabel->move(0, mySize.height() - labelSize.height());
+		vgWarningLabel->move(10, mySize.height() - labelSize.height() - 10);
 	}
 
 	EmptyTextCheck();

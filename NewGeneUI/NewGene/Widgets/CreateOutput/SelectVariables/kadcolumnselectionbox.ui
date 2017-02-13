@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>491</width>
-    <height>100</height>
+    <height>130</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>491</width>
-    <height>80</height>
+    <height>130</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -64,14 +64,20 @@
         <x>0</x>
         <y>0</y>
         <width>332</width>
-        <height>80</height>
+        <height>110</height>
        </rect>
       </property>
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
         <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
+        <verstretch>1</verstretch>
        </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>110</height>
+       </size>
       </property>
       <property name="styleSheet">
        <string notr="true">#scrollAreaWidgetContents {background-color: #AFD4F6;}</string>
@@ -228,7 +234,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>40</y>
+         <y>80</y>
          <width>471</width>
          <height>20</height>
         </rect>

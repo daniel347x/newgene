@@ -45,11 +45,11 @@ bool checkValidProjectFilenameExtension(bool const isInputProject /* true = inpu
 	{
 		if (isInputProject)
 		{
-			QMessageBox::information(nullptr, QString("Invalid project file"), warningInputFile);
+			QMessageBox::information(nullptr, QString("Invalid project file"), warningInputFile.c_str());
 		}
 		else
 		{
-			QMessageBox::information(nullptr, QString("Invalid project file"), warningOutputFile);
+			QMessageBox::information(nullptr, QString("Invalid project file"), warningOutputFile.c_str());
 		}
 	}
 	return false;

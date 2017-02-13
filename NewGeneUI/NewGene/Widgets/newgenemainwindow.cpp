@@ -498,7 +498,7 @@ void NewGeneMainWindow::on_actionNew_Input_Dataset_triggered()
 	{
 		std::string the_file_str = the_file.toStdString();
 		checkValidProjectFilenameExtension(true, the_file_str, true);
-		the_file = the_file_str;
+		the_file = the_file_str.c_str();
 
 		if (!boost::filesystem::exists(the_file.toStdString()))
 		{
@@ -525,7 +525,7 @@ void NewGeneMainWindow::on_actionNew_Output_Dataset_triggered()
 	{
 		std::string the_file_str = the_file.toStdString();
 		checkValidProjectFilenameExtension(false, the_file_str, true);
-		the_file = the_file_str;
+		the_file = the_file_str.c_str();
 
 		if (!boost::filesystem::exists(the_file.toStdString()))
 		{
@@ -558,7 +558,7 @@ void NewGeneMainWindow::on_actionSave_Input_Dataset_As_triggered()
 	{
 		std::string the_file_str = the_file.toStdString();
 		checkValidProjectFilenameExtension(true, the_file_str, true);
-		the_file = the_file_str;
+		the_file = the_file_str.c_str();
 
 		boost::filesystem::path file_path(the_file.toStdString());
 		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
@@ -586,7 +586,7 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 	{
 		std::string the_file_str = the_file.toStdString();
 		checkValidProjectFilenameExtension(false, the_file_str, true);
-		the_file = the_file_str;
+		the_file = the_file_str.c_str();
 
 		boost::filesystem::path file_path(the_file.toStdString());
 		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
