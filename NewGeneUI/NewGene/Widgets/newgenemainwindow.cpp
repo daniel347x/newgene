@@ -3,6 +3,9 @@
 #include <boost/filesystem.hpp>
 #endif
 #include "newgenemainwindow.h"
+#include "./CreateOutput/newgenecreateoutput.h"
+#include "./CreateOutput/SelectVariables/newgeneselectvariables.h"
+#include "./CreateOutput/SelectVariables/kadcolumnselectionbox.h"
 #include "ui_newgenemainwindow.h"
 #include <QLabel>
 #include <QMessageBox>
@@ -210,6 +213,7 @@ void NewGeneMainWindow::Run()
 void NewGeneMainWindow::doInitialize()
 {
 
+	ShowHideTabs(Qt::Checked);
 	QTimer::singleShot(500, this, SLOT(displaySplashOpening()));
 
 }
@@ -763,4 +767,82 @@ void NewGeneMainWindow::on_actionVacuum_output_database_triggered()
 {
 	VacuumDialog dlg(this, false);
 	dlg.exec();
+}
+
+void NewGeneMainWindow::ShowHideTabs(int const checkState)
+{
+	// From http://stackoverflow.com/a/31147349/368896 - there is no way to add/remove individual styles from a stylesheet,
+	// so we just build out the whole thing
+	// No availability of raw string literals in VS2013
+	QString tabStylesheetMain = "#tabWidgetMain pane {border-top: 2px solid #C2C7CB; position: absolute; top: -0.5em;} #tabWidgetMain QTabBar::tab {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E1E1E1, stop: 0.4 #DDDDDD, stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3); border: 2px solid #C4C4C3; border-bottom-color: #C2C7CB; border-top-left-radius: 4px; border-top-right-radius: 4px; min-width: 8ex; padding: 2px;} #tabWidgetMain QTabBar::tab:selected, QTabBar::tab:hover { background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fafafa, stop: 0.4 #f4f4f4, stop: 0.5 #e7e7e7, stop: 1.0 #fafafa); } #tabWidgetMain QTabBar::tab:selected { border-color: #9B9B9B; border-bottom-color: #C2C7CB; /* same as pane color */ } #tabWidgetMain > QTabBar { margin: 20px; } ";
+	QString tabStylesheetSub;
+	QString overallStylesheet;
+	QString frameSimpleModeStylesheet;
+	QString kadBoxStylesheet;
+	QString kadBoxInnerStylesheet;
+	QString checkboxSimpleModeStylesheet;
+
+	NewGeneTabWidget * highLevelTabWindow { findChild<NewGeneTabWidget *>("tabWidgetMain") };
+	NewGeneTabWidget * tabOutput { findChild<NewGeneTabWidget *>("tabWidgetOutput") };
+	QMenu * menuInput { findChild<QMenu *>("menuInput") };
+	QFrame * frameSimpleMode { findChild<QFrame *>("frameSimpleMode") };
+	QMenuBar * menuBar { findChild<QMenuBar *>("menuBar") };
+	NewGeneCreateOutput * CreateOutputPane { findChild<NewGeneCreateOutput *>("CreateOutputPane") };
+
+	// The following nesting is NOT NECESSARY to obtain pointers to the widgets.
+	// I did it to debug failure which turned out to be just using the class name as the ID in the 'findChild' function.
+	// (See 'frameSimpleMode' variable - for an example of how nesting is not required.)
+	// But I left the code in place for convenience in case I want to access the intermediate levels in the future.
+
+	if (highLevelTabWindow && tabOutput && menuInput && frameSimpleMode && menuBar && CreateOutputPane)
+	{
+		NewGeneSelectVariables * widgetSelectVariablesPane { CreateOutputPane->findChild<NewGeneSelectVariables *>("widgetSelectVariablesPane") };
+		if (widgetSelectVariablesPane)
+		{
+			KAdColumnSelectionBox * kadBox { widgetSelectVariablesPane->findChild<KAdColumnSelectionBox *>("frameKAdSelectionArea") };
+			if (kadBox)
+			{
+				QCheckBox * checkBoxSimpleMode { kadBox->findChild<QCheckBox *>("checkBoxSimpleMode") };
+				if (checkBoxSimpleMode /* && kadBoxInner */)
+				{
+					if (checkState == Qt::Checked)
+					{
+						highLevelTabWindow->setCurrentIndex(0);
+						tabOutput->setCurrentIndex(0);
+						tabOutput->setTabText(1, "");
+
+						overallStylesheet += "QTabBar {background-color: #FFFFE0;}";
+						setStyleSheet(overallStylesheet);
+
+						tabStylesheetMain += "#tabWidgetMain > pane { border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar::tab {margin: 0px; border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar::tab:selected, #tabWidgetMain > QTabBar::tab:hover { margin: 0px; border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar::tab:selected { margin: 0px; border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar { margin: 0px; border: 0px; padding: 0px; height: 0px; }";
+						tabStylesheetSub += "QTabBar::tab:middle {width: 0px; min-width: 0px; max-width: 0px; border: 0px; padding: 0px; margin: 0px;}";
+						highLevelTabWindow->setStyleSheet(tabStylesheetMain);
+						tabOutput->setStyleSheet(tabStylesheetSub);
+
+						frameSimpleModeStylesheet += "QFrame {background-color: #DDEEDD;}";
+						frameSimpleMode->setStyleSheet(frameSimpleModeStylesheet);
+
+						kadBoxStylesheet += "QFrame#frameKAdSelectionArea {background-color: #DDEEDD;}";
+						kadBox->setStyleSheet(kadBoxStylesheet);
+
+						checkboxSimpleModeStylesheet += "QCheckBox#checkBoxSimpleMode {font: bold 14px; color: blue;}";
+						checkBoxSimpleMode->setStyleSheet(checkboxSimpleModeStylesheet);
+
+						menuInput->menuAction()->setVisible(false);
+					}
+					else
+					{
+						highLevelTabWindow->setStyleSheet(tabStylesheetMain);
+						frameSimpleMode->setStyleSheet(frameSimpleModeStylesheet);
+						tabOutput->setStyleSheet(tabStylesheetSub);
+						tabOutput->setTabText(1, " Limit DMUs ");
+						setStyleSheet(overallStylesheet);
+						kadBox->setStyleSheet(kadBoxStylesheet);
+						checkBoxSimpleMode->setStyleSheet(checkboxSimpleModeStylesheet);
+						menuInput->menuAction()->setVisible(true);
+					}
+				}
+			}
+		}
+	}
 }

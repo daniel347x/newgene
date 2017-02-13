@@ -1,6 +1,8 @@
 #include "kadcolumnselectionbox.h"
 #include "ui_kadcolumnselectionbox.h"
 #include "../../Utilities/myclickablelabel.h"
+#include "../../newgenemainwindow.h"
+#include "../../newgenetabwidget.h"
 
 KAdColumnSelectionBox::KAdColumnSelectionBox(QWidget * parent) :
 	QFrame(parent),
@@ -51,3 +53,13 @@ void KAdColumnSelectionBox::popupWarning(QString const & labelText)
 	}
 }
 
+
+void KAdColumnSelectionBox::on_checkBoxSimpleMode_stateChanged(int state)
+{
+	NewGeneMainWindow * mainWindow = theMainWindow;
+	if (mainWindow == nullptr)
+	{
+		return;
+	}
+	mainWindow->ShowHideTabs(state);
+}

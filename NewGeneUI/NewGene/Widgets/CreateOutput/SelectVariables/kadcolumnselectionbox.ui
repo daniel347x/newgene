@@ -25,6 +25,9 @@
   <property name="windowTitle">
    <string>Frame</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <property name="frameShape">
    <enum>QFrame::StyledPanel</enum>
   </property>
@@ -36,7 +39,7 @@
     <widget class="QScrollArea" name="scrollArea">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
-       <horstretch>0</horstretch>
+       <horstretch>1</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
@@ -60,7 +63,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>471</width>
+        <width>334</width>
         <height>60</height>
        </rect>
       </property>
@@ -241,6 +244,40 @@
        </property>
       </widget>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frameSimpleMode">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QCheckBox" name="checkBoxSimpleMode">
+        <property name="styleSheet">
+         <string notr="true">QCheckBox#checkBoxSimpleMode {font: bold 14px; color: blue;}</string>
+        </property>
+        <property name="text">
+         <string>Simple mode</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

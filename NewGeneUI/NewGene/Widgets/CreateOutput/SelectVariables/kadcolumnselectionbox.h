@@ -37,6 +37,8 @@ class KAdColumnSelectionBox : public QFrame, public NewGeneWidget // do not reor
 
 		void popupWarning(QString const &);
 
+private slots:
+		void on_checkBoxSimpleMode_stateChanged(int arg1);
 };
 
 #endif // KADCOLUMNSELECTIONBOX_H
