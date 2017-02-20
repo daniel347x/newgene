@@ -1,7 +1,7 @@
-rm -f ~/installer/Applications/*
+rm -rf ~/installer/Applications/*
 cp -R /Users/daniel347x/newgene/NewGeneUI/build-NewGene-Desktop_Qt_5_7_0_clang_64bit-Release/NewGene.app ~/installer/Applications/
-rm -f ~/packages/input/*
-rm -f ~/packages/output/*
+rm -rf ~/packages/input/*
+rm -rf ~/packages/output/*
 cd ~/installer/Applications/
 dsymutil NewGene.app/Contents/MacOS/NewGene -o NewGene.app.dSYM
 /Users/daniel347x/Qt/5.7/clang_64/bin/macdeployqt NewGene.app
