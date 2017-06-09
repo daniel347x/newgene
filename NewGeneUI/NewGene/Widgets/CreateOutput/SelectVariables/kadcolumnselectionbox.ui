@@ -63,7 +63,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>332</width>
+        <width>471</width>
         <height>110</height>
        </rect>
       </property>
@@ -249,41 +249,26 @@
         <enum>Qt::RichText</enum>
        </property>
       </widget>
+      <widget class="QCheckBox" name="checkBoxSimpleMode">
+       <property name="geometry">
+        <rect>
+         <x>9</x>
+         <y>4</y>
+         <width>111</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QCheckBox#checkBoxSimpleMode {font: bold 11px; color: blue;}</string>
+       </property>
+       <property name="text">
+        <string>Simple mode</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
      </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QFrame" name="frameSimpleMode">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::Box</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <item>
-       <widget class="QCheckBox" name="checkBoxSimpleMode">
-        <property name="styleSheet">
-         <string notr="true">QCheckBox#checkBoxSimpleMode {font: bold 14px; color: blue;}</string>
-        </property>
-        <property name="text">
-         <string>Simple mode</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </widget>
    </item>
   </layout>

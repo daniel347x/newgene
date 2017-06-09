@@ -492,6 +492,17 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObje
 		return;
 	}
 
+#if __APPLE__
+	if (model_->backend().getInputModel().t_vgp_data_vector.size() == 0)
+	{
+		boost::format msg("Loading NewGene's data requires special steps for the Mac.  To load data, please go to the NewGene website at http://www.newgenesoftware.org/ for special Mac instructions.");
+		QMessageBox msgBox;
+		msgBox.setText(msg.str().c_str());
+		msgBox.exec();
+		return;
+	}
+#endif
+
 	UIOutputProject * output_project = getActiveUIOutputProject();
 
 	if (!output_project)

@@ -1,7 +1,7 @@
 #ifndef Q_MOC_RUN
-#	include <boost/thread/thread.hpp>
-#	include <boost/filesystem.hpp>
-#	include <boost/algorithm/string.hpp>
+	#include <boost/thread/thread.hpp>
+	#include <boost/filesystem.hpp>
+	#include <boost/algorithm/string.hpp>
 #endif
 #include "newgenemainwindow.h"
 #include "./CreateOutput/newgenecreateoutput.h"
@@ -59,7 +59,7 @@
 NewGeneMainWindow::NewGeneMainWindow(QWidget * parent) :
 	QMainWindow(parent),
 	NewGeneWidget(WidgetCreationInfo(this,
-	                                 WIDGET_NATURE_GENERAL)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+									 WIDGET_NATURE_GENERAL)),   // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui(new Ui::NewGeneMainWindow),
 	messager(parent),
 	theSplash(nullptr),
@@ -274,10 +274,12 @@ void NewGeneMainWindow::showLoading(bool const loading)
 	try
 	{
 		KadWidgetsScrollArea * scrollArea { findChild<KadWidgetsScrollArea *>("scrollAreaWidgetContents") };
+
 		if (scrollArea == nullptr)
 		{
 			return;
 		}
+
 		scrollArea->ShowLoading(loading);
 	}
 	catch (std::bad_cast &)
@@ -367,11 +369,12 @@ void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
 	QString the_file = QFileDialog::getOpenFileName(this, "Choose input dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene input settings file (*.xml)");
+					   "NewGene input settings file (*.xml)");
 
 	if (the_file.size())
 	{
 		std::string the_file_str = the_file.toStdString();
+
 		if (checkValidProjectFilenameExtension(true, the_file_str))
 		{
 			if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
@@ -405,11 +408,12 @@ void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
 	QString the_file = QFileDialog::getOpenFileName(this, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene output settings file (*.xml)");
+					   "NewGene output settings file (*.xml)");
 
 	if (the_file.size())
 	{
 		std::string the_file_str = the_file.toStdString();
+
 		if (checkValidProjectFilenameExtension(false, the_file_str))
 		{
 			if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
@@ -447,7 +451,7 @@ void NewGeneMainWindow::closeEvent(QCloseEvent * event)
 		{
 			QMessageBox::StandardButton reply;
 			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("A k-ad output set is being generated.  Are you sure you wish to exit?"),
-			                              QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+										  QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
 			if (reply == QMessageBox::Yes)
 			{
@@ -469,7 +473,7 @@ void NewGeneMainWindow::closeEvent(QCloseEvent * event)
 		{
 			QMessageBox::StandardButton reply;
 			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("An import is taking place.  Are you sure you wish to exit?"),
-			                              QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+										  QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 
 			if (reply == QMessageBox::Yes)
 			{
@@ -494,7 +498,7 @@ void NewGeneMainWindow::on_actionNew_Input_Dataset_triggered()
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the new input dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene input settings file (*.xml)");
+					   "NewGene input settings file (*.xml)");
 
 	if (the_file.size())
 	{
@@ -506,7 +510,7 @@ void NewGeneMainWindow::on_actionNew_Input_Dataset_triggered()
 		{
 			boost::filesystem::path file_path(the_file.toStdString());
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
-			        file_path.parent_path()));
+					file_path.parent_path()));
 
 			newInputDataset = true; // kluge; see header
 			emit SignalOpenInputDataset(the_file.toStdString(), this);
@@ -521,7 +525,7 @@ void NewGeneMainWindow::on_actionNew_Output_Dataset_triggered()
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the new output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene output settings file (*.xml)");
+					   "NewGene output settings file (*.xml)");
 
 	if (the_file.size())
 	{
@@ -533,7 +537,7 @@ void NewGeneMainWindow::on_actionNew_Output_Dataset_triggered()
 		{
 			boost::filesystem::path file_path(the_file.toStdString());
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
-			        file_path.parent_path()));
+					file_path.parent_path()));
 
 			newOutputDataset = true; // kluge; see header
 			emit SignalOpenOutputDataset(the_file.toStdString(), this);
@@ -554,7 +558,7 @@ void NewGeneMainWindow::on_actionSave_Input_Dataset_As_triggered()
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied input dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene input settings file (*.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
+					   "NewGene input settings file (*.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
 
 	if (the_file.size())
 	{
@@ -564,7 +568,7 @@ void NewGeneMainWindow::on_actionSave_Input_Dataset_As_triggered()
 
 		boost::filesystem::path file_path(the_file.toStdString());
 		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager,
-		        file_path.parent_path()));
+				file_path.parent_path()));
 		emit SignalSaveCurrentInputDatasetAs(the_file.toStdString(), this);
 	}
 
@@ -582,7 +586,7 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
 	QString the_file = QFileDialog::getSaveFileName(this, "Select a name and location for the copied output dataset", folder_path ? folder_path->getPath().string().c_str() : "",
-	                   "NewGene output settings file (*.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
+					   "NewGene output settings file (*.xml)", nullptr, QFileDialog::DontConfirmOverwrite);
 
 	if (the_file.size())
 	{
@@ -592,7 +596,7 @@ void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
 
 		boost::filesystem::path file_path(the_file.toStdString());
 		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager,
-		        file_path.parent_path()));
+				file_path.parent_path()));
 		emit SignalSaveCurrentOutputDatasetAs(the_file.toStdString(), this);
 	}
 
@@ -799,10 +803,10 @@ void NewGeneMainWindow::ShowHideTabs(int const checkState)
 	// From http://stackoverflow.com/a/31147349/368896 - there is no way to add/remove individual styles from a stylesheet,
 	// so we just build out the whole thing
 	// No availability of raw string literals in VS2013
-	QString tabStylesheetMain = "#tabWidgetMain pane {border-top: 2px solid #C2C7CB; position: absolute; top: -0.5em;} #tabWidgetMain QTabBar::tab {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E1E1E1, stop: 0.4 #DDDDDD, stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3); border: 2px solid #C4C4C3; border-bottom-color: #C2C7CB; border-top-left-radius: 4px; border-top-right-radius: 4px; min-width: 8ex; padding: 2px;} #tabWidgetMain QTabBar::tab:selected, QTabBar::tab:hover { background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fafafa, stop: 0.4 #f4f4f4, stop: 0.5 #e7e7e7, stop: 1.0 #fafafa); } #tabWidgetMain QTabBar::tab:selected { border-color: #9B9B9B; border-bottom-color: #C2C7CB; /* same as pane color */ } #tabWidgetMain > QTabBar { margin: 20px; } ";
+	QString tabStylesheetMain =
+		"#tabWidgetMain pane {border-top: 2px solid #C2C7CB; position: absolute; top: -0.5em;} #tabWidgetMain QTabBar::tab {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E1E1E1, stop: 0.4 #DDDDDD, stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3); border: 2px solid #C4C4C3; border-bottom-color: #C2C7CB; border-top-left-radius: 4px; border-top-right-radius: 4px; min-width: 8ex; padding: 2px;} #tabWidgetMain QTabBar::tab:selected, QTabBar::tab:hover { background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fafafa, stop: 0.4 #f4f4f4, stop: 0.5 #e7e7e7, stop: 1.0 #fafafa); } #tabWidgetMain QTabBar::tab:selected { border-color: #9B9B9B; border-bottom-color: #C2C7CB; /* same as pane color */ } #tabWidgetMain > QTabBar { margin: 20px; } ";
 	QString tabStylesheetSub;
 	QString overallStylesheet;
-	QString frameSimpleModeStylesheet;
 	QString kadBoxStylesheet;
 	QString kadBoxInnerStylesheet;
 	QString checkboxSimpleModeStylesheet;
@@ -810,24 +814,27 @@ void NewGeneMainWindow::ShowHideTabs(int const checkState)
 	NewGeneTabWidget * highLevelTabWindow { findChild<NewGeneTabWidget *>("tabWidgetMain") };
 	NewGeneTabWidget * tabOutput { findChild<NewGeneTabWidget *>("tabWidgetOutput") };
 	QMenu * menuInput { findChild<QMenu *>("menuInput") };
-	QFrame * frameSimpleMode { findChild<QFrame *>("frameSimpleMode") };
+	QMenu * menuOutput { findChild<QMenu *>("menuOutput") };
+	QMenu * menuAbout { findChild<QMenu *>("menuAbout") };
 	QMenuBar * menuBar { findChild<QMenuBar *>("menuBar") };
 	NewGeneCreateOutput * CreateOutputPane { findChild<NewGeneCreateOutput *>("CreateOutputPane") };
 
 	// The following nesting is NOT NECESSARY to obtain pointers to the widgets.
 	// I did it to debug failure which turned out to be just using the class name as the ID in the 'findChild' function.
-	// (See 'frameSimpleMode' variable - for an example of how nesting is not required.)
 	// But I left the code in place for convenience in case I want to access the intermediate levels in the future.
 
-	if (highLevelTabWindow && tabOutput && menuInput && frameSimpleMode && menuBar && CreateOutputPane)
+	if (highLevelTabWindow && tabOutput && menuInput && menuOutput && menuAbout && menuBar && CreateOutputPane)
 	{
 		NewGeneSelectVariables * widgetSelectVariablesPane { CreateOutputPane->findChild<NewGeneSelectVariables *>("widgetSelectVariablesPane") };
+
 		if (widgetSelectVariablesPane)
 		{
 			KAdColumnSelectionBox * kadBox { widgetSelectVariablesPane->findChild<KAdColumnSelectionBox *>("frameKAdSelectionArea") };
+
 			if (kadBox)
 			{
 				QCheckBox * checkBoxSimpleMode { kadBox->findChild<QCheckBox *>("checkBoxSimpleMode") };
+
 				if (checkBoxSimpleMode /* && kadBoxInner */)
 				{
 					if (checkState == Qt::Checked)
@@ -839,13 +846,11 @@ void NewGeneMainWindow::ShowHideTabs(int const checkState)
 						overallStylesheet += "QTabBar {background-color: #FFFFE0;}";
 						setStyleSheet(overallStylesheet);
 
-						tabStylesheetMain += "#tabWidgetMain > pane { border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar::tab {margin: 0px; border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar::tab:selected, #tabWidgetMain > QTabBar::tab:hover { margin: 0px; border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar::tab:selected { margin: 0px; border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar { margin: 0px; border: 0px; padding: 0px; height: 0px; }";
+						tabStylesheetMain +=
+							"#tabWidgetMain > pane { border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar::tab {margin: 0px; border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar::tab:selected, #tabWidgetMain > QTabBar::tab:hover { margin: 0px; border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar::tab:selected { margin: 0px; border: 0px; padding: 0px; height: 0px; } #tabWidgetMain > QTabBar { margin: 0px; border: 0px; padding: 0px; height: 0px; }";
 						tabStylesheetSub += "QTabBar::tab:middle {width: 0px; min-width: 0px; max-width: 0px; border: 0px; padding: 0px; margin: 0px;}";
 						highLevelTabWindow->setStyleSheet(tabStylesheetMain);
 						tabOutput->setStyleSheet(tabStylesheetSub);
-
-						frameSimpleModeStylesheet += "QFrame {background-color: #DDEEDD;}";
-						frameSimpleMode->setStyleSheet(frameSimpleModeStylesheet);
 
 						kadBoxStylesheet += "QFrame#frameKAdSelectionArea {background-color: #DDEEDD;}";
 						kadBox->setStyleSheet(kadBoxStylesheet);
@@ -854,16 +859,21 @@ void NewGeneMainWindow::ShowHideTabs(int const checkState)
 						checkBoxSimpleMode->setStyleSheet(checkboxSimpleModeStylesheet);
 
 						menuInput->menuAction()->setVisible(false);
+						menuOutput->menuAction()->setVisible(false);
+						menuAbout->menuAction()->setVisible(false);
+						menuBar->setVisible(false);
 					}
 					else
 					{
 						highLevelTabWindow->setStyleSheet(tabStylesheetMain);
-						frameSimpleMode->setStyleSheet(frameSimpleModeStylesheet);
 						tabOutput->setStyleSheet(tabStylesheetSub);
 						tabOutput->setTabText(1, " Limit DMUs ");
 						setStyleSheet(overallStylesheet);
 						kadBox->setStyleSheet(kadBoxStylesheet);
 						checkBoxSimpleMode->setStyleSheet(checkboxSimpleModeStylesheet);
+						menuBar->setVisible(true);
+						menuAbout->menuAction()->setVisible(true);
+						menuOutput->menuAction()->setVisible(true);
 						menuInput->menuAction()->setVisible(true);
 					}
 				}
