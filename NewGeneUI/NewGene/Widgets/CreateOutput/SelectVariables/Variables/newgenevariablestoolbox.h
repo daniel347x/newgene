@@ -18,6 +18,7 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 		void SetBarColor(bool active, std::string const & name);
 		void showInactiveVariableGroups(bool const visible);
 		WidgetInstanceIdentifiers getDmuSequence();
+		void resetAllBarColors();
 
 	signals:
 

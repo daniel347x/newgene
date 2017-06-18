@@ -6,6 +6,7 @@
 #include "newgenemainwindow.h"
 #include "./CreateOutput/newgenecreateoutput.h"
 #include "./CreateOutput/SelectVariables/newgeneselectvariables.h"
+#include "./CreateOutput/SelectVariables/Variables/newgenevariablestoolboxwrapper.h"
 #include "./CreateOutput/SelectVariables/kadcolumnselectionbox.h"
 #include "ui_newgenemainwindow.h"
 #include <QLabel>
@@ -879,5 +880,11 @@ void NewGeneMainWindow::ShowHideTabs(int const checkState)
 				}
 			}
 		}
+	}
+
+	NewGeneVariablesToolboxWrapper * vgToolboxPane { CreateOutputPane->findChild<NewGeneVariablesToolboxWrapper *>("toolbox") };
+	if (vgToolboxPane && vgToolboxPane->newgeneToolBox)
+	{
+		vgToolboxPane->newgeneToolBox->resetAllBarColors();
 	}
 }

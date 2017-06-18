@@ -495,3 +495,21 @@ WidgetInstanceIdentifiers NewGeneVariablesToolbox::getDmuSequence()
 
 	return orderedDmus;
 }
+
+void NewGeneVariablesToolbox::resetAllBarColors()
+{
+	int nItems = count();
+	for (int n = 0; n < nItems; ++n)
+	{
+		NewGeneVariableGroup * child = static_cast<NewGeneVariableGroup*>(widget(n));
+		if (child)
+		{
+			bool hasChecked {false};
+			if (child->hasChecked())
+			{
+				hasChecked = true;
+			}
+			SetBarColor(hasChecked, child->objectName().toStdString());
+		}
+	}
+}

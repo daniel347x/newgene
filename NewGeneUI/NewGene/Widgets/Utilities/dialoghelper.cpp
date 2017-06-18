@@ -1164,7 +1164,6 @@ void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWid
 
 		listpane->setModel(model);
 		listpane->setItemDelegate(new HtmlDelegate{});
-
 	}
 
 }
@@ -1243,17 +1242,36 @@ void DialogHelper::AddStringChooserBlock(QDialog & dialog, QFormLayout & form, Q
 		QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, std::string const & dlgQuestion, std::vector<std::string> const & string_list)
 {
 
+	// For now - while the only usage is for the 'append or overwrite output file' prompt -
+	// in a later version we can add an enum for the sizing mode
+	bool hardCodeForAppendOverwriteDlg = true;
+
 	QString labelQuestion = QString(dlgQuestion.c_str());
 	QLabel * question = new QLabel(labelQuestion, &dialog);
 
+	if (hardCodeForAppendOverwriteDlg)
+	{
+		question->setMaximumWidth(300);
+		question->setWordWrap(true);
+	}
+
 	// The parent of the list view is a widget, not a layout
 	listpane = new QListView(&VgConstructionPanes);
-	listpane->setMinimumWidth(400);
-	listpane->setMinimumHeight(400);
+	listpane->setMinimumWidth(300);
+	listpane->setMinimumHeight(150);
+
+	if (hardCodeForAppendOverwriteDlg)
+	{
+		listpane->setMaximumWidth(300);
+		listpane->setMaximumHeight(150);
+	}
+
 	listpane->setAlternatingRowColors(true);
 	listpane->setSelectionBehavior(QAbstractItemView::SelectRows);
+
 	listpane->setResizeMode(QListView::Adjust);
 	listpane->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
 	listpane->setSpacing(5);
 	listpane->setStyleSheet("QListView {selection-color: black;}");
 
@@ -1300,9 +1318,16 @@ void DialogHelper::AddStringChooserBlock(QDialog & dialog, QFormLayout & form, Q
 		model->sort(0);
 
 		listpane->setModel(model);
-		listpane->setItemDelegate(new HtmlDelegate{});
+		listpane->setItemDelegate(new HtmlDelegate{true});
 
 		listpane->clearSelection();
+
+		if (hardCodeForAppendOverwriteDlg)
+		{
+			// Select first option ('append')
+			QModelIndex itemIndex = model->index(0,0);
+			listpane->setCurrentIndex(itemIndex);
+		}
 
 	}
 

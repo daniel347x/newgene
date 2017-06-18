@@ -12,7 +12,11 @@ void HtmlDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option
 	QStyle * style = optionV4.widget ? optionV4.widget->style() : QApplication::style();
 
 	QTextDocument doc;
-	doc.setDocumentMargin(0);
+
+	if (modifiedMargin)
+	{
+		doc.setDocumentMargin(10);
+	}
 	doc.setDefaultFont(optionV4.font);
 	doc.setHtml(optionV4.text);
 	doc.setTextWidth(optionV4.rect.width());
@@ -51,5 +55,12 @@ QSize HtmlDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIn
 	doc.setDefaultFont(optionV4.font);
 	doc.setHtml(optionV4.text);
 	doc.setTextWidth(optionV4.rect.width());
-	return QSize(doc.idealWidth(), doc.size().height());
+
+	double heightFactor = 1.0;
+	if (modifiedMargin)
+	{
+		heightFactor = 3.0;
+	}
+
+	return QSize(doc.idealWidth(), heightFactor * doc.size().height());
 }

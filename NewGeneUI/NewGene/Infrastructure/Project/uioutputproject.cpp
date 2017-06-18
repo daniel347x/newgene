@@ -66,7 +66,7 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 
 	if (!listpane)
 	{
-		boost::format msg("Unable to create \"Choose top-level variable group\" dialog.");
+		boost::format msg("Unable to create options dialog.");
 		QMessageBox msgBox;
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
