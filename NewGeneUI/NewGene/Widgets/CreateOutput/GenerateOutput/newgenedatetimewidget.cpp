@@ -237,10 +237,10 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 													QDateTime datetime_newvalue = datetime_1970;
 													datetime_newvalue.addMSecs(packet->getValue());
 
-													if (dateTime() != datetime_newvalue)
-													{
+													//if (dateTime() != datetime_newvalue)
+													//{
 														setDateTime(datetime_newvalue);
-													}
+													//}
 												}
 
 											}
