@@ -231,7 +231,7 @@
         <item>
          <widget class="QCheckBox" name="mergeIdenticalRows">
           <property name="text">
-           <string>Consolidate output (recommended)</string>
+           <string>Consolidate output</string>
           </property>
          </widget>
         </item>

@@ -828,7 +828,15 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// ********************************************************************************************************************************************************* //
 			// Generate all k-ad combinations now
 			// ********************************************************************************************************************************************************* //
-			allWeightings.PrepareFullSamples(K);
+			try
+			{
+				allWeightings.PrepareFullSamples(K);
+			}
+			catch (std::runtime_error &)
+			{
+				SetFailureErrorMessage("Exception thrown: OUT OF MEMORY!  Exiting run.  This memory error occurred during the FULL SAMPLING phase.  There is an overload of rows that exceeds available memory.");
+				failed = true;
+			}
 
 			if (failed || CheckCancelled()) { return; }
 
@@ -4897,6 +4905,12 @@ void OutputModel::OutputGenerator::KadSampler_ReadData_AddToTimeSlices(NewGeneSc
 				case SQLExecutor::STRING:
 					{
 						secondary_data__for_the_current_vg.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+					}
+					break;
+
+				case SQLExecutor::NULL_BINDING:
+					{
+						secondary_data__for_the_current_vg.push_back("");
 					}
 					break;
 
