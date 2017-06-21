@@ -34,7 +34,7 @@ macx: QMAKE_LFLAGS += -std=gnu++11 -stdlib=libc++
 macx: QMAKE_CFLAGS += -gdwarf-2
 macx: QMAKE_CXXFLAGS += -gdwarf-2
 macx: ICON = ../Resources/earth.icns
-macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.11
+macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
 
 SOURCES += main.cpp\
 	Widgets/newgenemainwindow.cpp \
@@ -317,8 +317,8 @@ else:unix: LIBS += -L$$PWD/../../NewGeneBackEnd/ -lNewGeneBackEnd
 
 win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB_MSVC12_X86) -llibboost_filesystem-vc120-mt-1_59
 else:win32:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB_MSVC12_X86) -llibboost_filesystem-vc120-mt-gd-1_59
-else:macx:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time
-else:macx:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time
+else:macx:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time -lboost_locale
+else:macx:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time -lboost_locale
 
 INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Release
 DEPENDPATH += $$PWD/../../NewGeneBackEnd/Release

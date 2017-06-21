@@ -269,6 +269,8 @@ void NewGeneVariablesToolbox::SetBarColor(bool active, std::string const & name)
 		}
 	}
 
+    //setStyleSheet("QToolBox::tab {background-color:green;}");
+
 	if (index >= 0)
 	{
 		int i {};
@@ -280,20 +282,37 @@ void NewGeneVariablesToolbox::SetBarColor(bool active, std::string const & name)
 			{
 				if (i == index)
 				{
+
+                    //QString ss = button->styleSheet();
+
 					// found correct button
-					QPalette p = button->palette();
+                    //QPalette p = button->palette();
+
+                    QString activeStyleSheet;
 
 					if (active)
 					{
-						p.setColor(QPalette::Button, NewGeneVariableGroup::activeTabColor.c_str());
+                        activeStyleSheet = "QToolBox::tab { color: red; background-color: green; }";
+                        //activeStyleSheet += NewGeneVariableGroup::activeTabColor.c_str();
+                        //activeStyleSheet += "; border: none; }";
+                        //p.setColor(QPalette::Button, NewGeneVariableGroup::activeTabColor.c_str());
 					}
 					else
 					{
-						p.setColor(QPalette::Button, NewGeneVariableGroup::inactiveTabColor.c_str());
+                        activeStyleSheet = "QToolBox::tab { background-color: ";
+                        activeStyleSheet += NewGeneVariableGroup::inactiveTabColor.c_str();
+                        activeStyleSheet += "; border: none; }";
+                        //p.setColor(QPalette::Button, NewGeneVariableGroup::inactiveTabColor.c_str());
 					}
 
-					button->setPalette(p);
-					break;
+                    //button->setAutoFillBackground(false);
+                    //button->setPalette(p);
+                    //button->update();
+
+                    button->setStyleSheet(activeStyleSheet);
+                    //button->parentWidget()->setStyleSheet(activeStyleSheet);
+                    //button->parentWidget()->parentWidget()->setStyleSheet(activeStyleSheet);
+                    break;
 				}
 
 				i++;
