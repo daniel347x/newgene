@@ -408,6 +408,8 @@ void NewGeneVariablesToolbox::showInactiveVariableGroups(bool const visible)
 		}
 	}
 
+	resetAllBarColors();
+
 }
 
 WidgetInstanceIdentifiers NewGeneVariablesToolbox::getDmuSequence()
