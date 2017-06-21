@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>491</width>
+    <width>634</width>
     <height>130</height>
    </rect>
   </property>
@@ -63,8 +63,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>471</width>
-        <height>110</height>
+        <width>608</width>
+        <height>100</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -76,7 +76,7 @@
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>110</height>
+        <height>100</height>
        </size>
       </property>
       <property name="styleSheet">
@@ -87,13 +87,13 @@
         <rect>
          <x>9</x>
          <y>9</y>
-         <width>440</width>
+         <width>571</width>
          <height>42</height>
         </rect>
        </property>
        <property name="minimumSize">
         <size>
-         <width>440</width>
+         <width>480</width>
          <height>42</height>
         </size>
        </property>
@@ -105,7 +105,7 @@
 (i.e. where &lt;i&gt;k&lt;/i&gt;&amp;nbsp;&amp;nbsp;can be set to 2 (for dyads), 3 (for triads), or higher).&lt;/big&gt;&lt;/b&gt;</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
        </property>
       </widget>
       <widget class="QLabel" name="noOutputProjectLabel">
@@ -113,7 +113,7 @@
         <rect>
          <x>9</x>
          <y>9</y>
-         <width>449</width>
+         <width>591</width>
          <height>42</height>
         </rect>
        </property>
@@ -138,7 +138,7 @@
         <rect>
          <x>40</x>
          <y>-1</y>
-         <width>391</width>
+         <width>541</width>
          <height>61</height>
         </rect>
        </property>
@@ -235,7 +235,7 @@
         <rect>
          <x>0</x>
          <y>80</y>
-         <width>471</width>
+         <width>601</width>
          <height>20</height>
         </rect>
        </property>
@@ -253,10 +253,19 @@
        <property name="geometry">
         <rect>
          <x>9</x>
-         <y>4</y>
+         <y>2</y>
          <width>111</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>.SF NS Text</family>
+         <pointsize>-1</pointsize>
+         <weight>75</weight>
+         <italic>false</italic>
+         <bold>true</bold>
+        </font>
        </property>
        <property name="styleSheet">
         <string notr="true">QCheckBox#checkBoxSimpleMode {font: bold 11px; color: blue;}</string>
