@@ -551,7 +551,10 @@ void KadWidgetsScrollArea::EmptyTextCheck()
 		{
 			if (!any_spincontrols_visible)
 			{
-				emptySpinsLabel->setVisible(true);
+				if (!loading)
+				{
+					emptySpinsLabel->setVisible(true);
+				}
 			}
 			else
 			{
