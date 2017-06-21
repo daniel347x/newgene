@@ -856,7 +856,7 @@ void NewGeneMainWindow::ShowHideTabs(int const checkState)
 						kadBoxStylesheet += "QFrame#frameKAdSelectionArea {background-color: #DDEEDD;}";
 						kadBox->setStyleSheet(kadBoxStylesheet);
 
-						checkboxSimpleModeStylesheet += "QCheckBox#checkBoxSimpleMode {font: bold 14px; color: blue;}";
+						checkboxSimpleModeStylesheet += "QCheckBox#checkBoxSimpleMode {font: bold 11px; color: blue;}";
 						checkBoxSimpleMode->setStyleSheet(checkboxSimpleModeStylesheet);
 
 						menuInput->menuAction()->setVisible(false);
