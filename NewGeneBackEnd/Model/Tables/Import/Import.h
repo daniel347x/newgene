@@ -504,7 +504,7 @@ class Importer
 		typedef bool(*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block,
 											 int const number_rows, long & linenum, long & badwritelines, long & goodwritelines, long & goodupdatelines, std::vector<std::string> & errors);
 
-		#if __APPLE__
+		#ifndef _WIN32
 		// Fucking bullshit
 		// On Mac the stack per thread is limited to 512 Kb no matter what you fucking do.  Period.  Dead.
 		// SQLite is too fucking stupid to perform bulk inserts using tail recursion so it fills the stack and overshoots the 512 Kb limit, crashing the fucking program.
