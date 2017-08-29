@@ -477,7 +477,7 @@ class ImportDefinition
 
 };
 
-#define MAX_LINE_SIZE 1048576
+#define MAX_LINE_SIZE 262144
 class Table_basemost;
 class Model_basemost;
 class Importer
