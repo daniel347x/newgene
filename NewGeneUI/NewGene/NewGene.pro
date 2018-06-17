@@ -315,8 +315,8 @@ else:macx:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/O
 else:macx:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/OSX/NewGene/Debug -lNewGene
 else:unix: LIBS += -L$$PWD/../../NewGeneBackEnd/ -lNewGeneBackEnd
 
-win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB_MSVC12_X86) -llibboost_filesystem-vc120-mt-1_59
-else:win32:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB_MSVC12_X86) -llibboost_filesystem-vc120-mt-gd-1_59
+win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB_MSVC12_X86) -llibboost_filesystem-vc141-mt-x32-1_66
+else:win32:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB_MSVC12_X86) -llibboost_filesystem-vc141-mt-gd-x32-1_66
 else:macx:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time -lboost_locale
 else:macx:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time -lboost_locale
 
