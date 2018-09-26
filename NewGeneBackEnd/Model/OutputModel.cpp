@@ -390,6 +390,15 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	bool dg = DifferentGranularities(pMetadata);
+
+	if (!dg)
+	{
+		SetFailureErrorMessage(boost::format("Cancelled.").str().c_str());
+		failed = true;
+		return;
+	}
+
 	// pMetadata->appendOrOverwrite is set by the below function,
 	// as is our own append_overwrite_if_output_file_already_exists to match
 	setting_path_to_kad_output = CheckOutputFileExists(pMetadata);
@@ -4569,6 +4578,45 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 			}
 		}
 	}
+}
+
+bool OutputModel::OutputGenerator::DifferentGranularities(RunMetadata * pMetadata)
+{
+	if (!pMetadata->different_granularities)
+	{
+		std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> uoa_vector = pMetadata->UOAs;
+
+		for (auto t = uoa_vector.begin(); t != uoa_vector.end(); ++t)
+		{
+			WidgetInstanceIdentifier uoa = t->first;
+			TIME_GRANULARITY tg = uoa.time_granularity;
+			if (tg != pMetadata->time_granularity)
+			{
+				boost::format overwrite_msg("WARNING: you are attempting to create a dataset using variable groups with different time granularity (e.g. one dataset is monthly and the other is yearly). Variables with less granularity (e.g. yearly) will be repeated for each value of the variable with higher granularity (e.g. monthly). Do you wish to proceed?");
+				std::vector<std::string> options;
+				options.push_back("Yes, I wish to proceed");
+				options.push_back("No, I do not wish to proceed");
+				int result = messager.ShowOptionMessageBox("WARNING", overwrite_msg.str(), options);
+
+				if (result == -1)
+				{
+					return false;
+				}
+
+				if (result == 0)
+				{
+					pMetadata->different_granularities = true;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			pMetadata->different_granularities = true;
+		}
+	}
+	return true;
 }
 
 std::string OutputModel::OutputGenerator::CheckOutputFileExists(RunMetadata * pMetadata)

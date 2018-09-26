@@ -143,6 +143,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager__, WidgetActionItemRe
 					metadata.runIndex = 0;
 					metadata.isGranular = true;
 					metadata.rows = 0;
+					metadata.different_granularities = false;
 					bool doContinue { false };
 					{
 						OutputModel::OutputGenerator output_generator(messager__, output_model, project, OutputGeneratorMode::GATHER_TIME_RANGE);

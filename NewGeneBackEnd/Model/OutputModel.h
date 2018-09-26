@@ -617,6 +617,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ClearTables(SqlAndColumnSets const & tables_to_clear);
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
 				std::string CheckOutputFileExists(RunMetadata *);
+				bool DifferentGranularities(RunMetadata *);
 
 			public:
 				inline static bool CheckCancelled()
@@ -1300,6 +1301,8 @@ struct RunMetadata
 	std::int64_t rows;
 
 	AppendOverwriteMode appendOrOverwrite;
+
+	bool different_granularities;
 };
 
 #endif
