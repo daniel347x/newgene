@@ -15,13 +15,15 @@ Part 1: Building NewGeneBackEnd.lib in Visual Studio 2017
 
 5) Add the following environment variables to your Operating System (in Windows 10 go to Control Panel -> System and Security -> System -> Advanced System Settings -> Environment Variables): BOOST_ROOT and BOOST_LIB_MSVC12_X86. BOOST_ROOT should be set to the root Boost directory, and BOOST_LIB_MSVC12_X86 should be set to the directory containing the built Boost libraries.
 
-6) Download the NewGene code from here: https://github.com/daniel347x/newgene.
+6) Download the NewGene code from here: https://github.com/daniel347x/newgene. Note: You will need to be added to the project in order to make any commits. This can be done upon request.
 
-7) In Visual Studio open NewGeneBackEnd.sln (located in newgene/NewGeneBackEnd).
+7) In newgene/NewGeneBackEnd/Boost_Pool, you will find 3 C++ header files. These files should replace the 3 correspondingly named files from your downloaded Boost directory. These custom files had to be created due to the specific memory management requirements of NewGene.
 
-8) Set the mode you wish to build from the top menu: either Debug or Release.
+8) In Visual Studio open NewGeneBackEnd.sln (located in newgene/NewGeneBackEnd).
 
-9) Click "Build -> Build Solution". This will build the file NewGeneBackEnd.lib.
+9) Set the mode you wish to build from the top menu: either Debug or Release.
+
+10) Click "Build -> Build Solution". This will build the file NewGeneBackEnd.lib.
 
 Part 2: Building NewGene.exe in Qt Creator
 
@@ -40,3 +42,11 @@ Part 2: Building NewGene.exe in Qt Creator
 7) Click the hammer in the lower-left corner to build NewGene.exe.
 
 Part 3: Building NewGeneSetup.exe in DeployMaster
+
+1) In order to build a Windows installer in the same fashion as is currently available on www.newgenesoftware.org, DeployMaster will be necessary. This software can be downloaded from www.deploymaster.com.
+
+2) As a template, the NewGene.deploy file that I used to build the latest version of NewGene is located in the root of this repository. However, it will need to be modified to each user's individual paths.
+
+3) The most difficult parts in this process are knowing which DLLs to include in the installer, and setting up the initial dataset to tie into the installer. However, if you already have a working installation of NewGene on your computer, the files that will need to be included in the installer are simply the files in your own installation folder. Similarly, you can use the files in the NewGene folder in your "Documents" folder (assuming this path wasn't modified after your installation of NewGene) as the input and output dataset files to tie to the installer.
+
+4) (Optional but recommended) It is a good idea to clean up the dataset files by vacuuming the .db file first using a SQLite IDE such as SQLite Expert Professional.
