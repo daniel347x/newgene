@@ -1,7 +1,6 @@
-newgene
-=======
+# newgene
 
-Build Instructions for Windows:
+## Build Instructions for Windows
 
 Part 1: Building NewGeneBackEnd.lib in Visual Studio 2017
 
@@ -50,3 +49,32 @@ Part 3: Building NewGeneSetup.exe in DeployMaster
 3) The most difficult parts in this process are knowing which DLLs to include in the installer, and setting up the initial dataset to tie into the installer. However, if you already have a working installation of NewGene on your computer, the files that will need to be included in the installer are simply the files in your own installation folder. Similarly, you can use the files in the NewGene folder in your "Documents" folder (assuming this path wasn't modified after your installation of NewGene) as the input and output dataset files to tie to the installer.
 
 4) (Optional but recommended) It is a good idea to clean up the dataset files by vacuuming the .db file first using a SQLite IDE such as SQLite Expert Professional.
+
+## Build Instructions for Mac
+
+Note: I wrote these instructions significantly after the last time I actually built NewGene on Mac. As such, they are less detailed than the Windows instructions and may be missing one or two steps. Please feel free to update this README with more details.
+
+1) Download Boost directory, as done for the Windows build. Don't forget to replace the three appropriate C++ header files with the corresponding files from newgene/NewGeneBackEnd/Boost_Pool 
+
+2) Add the following lines to your ~/.bash_profile file:
+
+- export BOOST_ROOT="local_boost_path"
+- export BOOST_LIB="local_boost_path/stage/lib" #(or whatever local path you have for Boost libraries)
+
+3) Download the latest versions of Xcode and Qt Creator for Mac. Install Xcode with the following compiler:
+
+- Apple LLVM version 7.0.0 (clang-700.0.57.2)
+- Target: x86_64-apple-darwin17.5.0
+- Thread model: posix
+
+4) Clone this repository on your Mac.
+
+5) Open NewGene.xcodeproj in Xcode.
+
+6) There are a number of hard-coded paths in the build settings that will need to be updated in order for the build to work on your computer. I may be missing some here, but I think there are a few places where you can define "HEADER_SEARCH_PATHS". Anywhere that says "/Users/daniel347x/boost_1_62_0" should be changed to you local Boost directory path.
+
+7) Build the solution in Xcode.
+
+8) Follow the instructions from the Windows portion of this manual to build the final solution in Qt Creator.
+
+9) Run the macinstaller.sh script from the command line in order to build the NewGene installer for Mac. Note that there are a number of hard-coded paths in this script which you will have to change appropriately. Also, this script uses the command line tools "pkgbuild" and "productbuild". I believe that these command line tools are installed automatically with Xcode.
