@@ -85,7 +85,7 @@ c/o Dan
 
 There are two main points about Qt and NewGene - one of which is related to just Qt itself, and the other of which is related to how I wrote the code to integrate Qt into the Visual Studio-centered code.
 
-Qt is based on a 'signal-slot' architecture.  I recommend reading up on some Qt documentation for a runthrough.
+1) Qt is based on a 'signal-slot' architecture.  I recommend reading up on some Qt documentation for a runthrough.
 
 The bottom line is that to do anything in Qt, you create 'signal handlers', called 'slots', in one place in the code, and elsewhere in the code, you 'send signals'.  You rarely call actual functions directly.  That's why you don't see 'ReceiveSignalSetRunStatus' called anywhere.  It's not.  (Well, actually, of course it is - but it's called from deep inside the Qt source code via a function pointer, never to be seen by mere mortals unless you have need to debug deep down into the Qt source code.)  The initialization routines for the objects in question set up the signal/slot connection (i.e., the above function acting as slot) to always be called whenever the given signal is sent.  And, a signal is sent from the NewGene source code somewhere that activates the slot.
 
@@ -93,7 +93,7 @@ The place to look, therefore, is for the initialization of the signals and slots
 
 (Side comment: To get the signal/slot architecture working, Qt Creator automates a preprocessing stage, called the 'MOC compiler', which automatically generates a bunch of almost-not-readable C++ code from the C++ code that you edit at the GUI layer in Qt Creator.  This preprocessing stage is pretty heavy-hitting and so to avoid confusion when you see random, odd-looking source code files lying around you should be aware of this.)
 
-The next tricky part is how I've tied together the Qt Creator GUI layer with the Visual Studio back-end algorithmic layer (a separate statically-linked library).
+2) The next tricky part is how I've tied together the Qt Creator GUI layer with the Visual Studio back-end algorithmic layer (a separate statically-linked library).
 
 For this, I almost have to apologize.  Although the code is rock-solid and tight, that came with a pretty hefty sacrifice that I made in order to save a pretty serious amount of time and yet ensure that I could use Visual Studio for the algorithmic programming and only use Qt Creator for the GUI programming: code readability.
 
@@ -158,22 +158,22 @@ Let's say that the output in the above example in fact has only the six rows not
 
 To recap, the way the algorithm works is as follows.
 
-Determine all branches that should appear in the output.
+1) Determine all branches that should appear in the output.
 
 (Example: Unicef-Sanders is one branch, Unicef-Cruz is another branch, WWF-Cruz is a third branch, etc.)
 
-For every branch, calculate the leaves available to construct output rows for the given time slice, given the dataset being used.
+2) For every branch, calculate the leaves available to construct output rows for the given time slice, given the dataset being used.
 
 (Example above: For the branch Unicef-Sanders, there are three available leaves - USA-USA USA-Canada, and France-Russia.)
 
-Determine all combinations of leaves given the outer multiplicity.
+3) Determine all combinations of leaves given the outer multiplicity.
 
 (Example above: For multiplicity 2, there are 6 combinations of 3 leaves, including 3 self-dyads, as seen above.)
 
-Construct the output rows for the branch.
+4) Construct the output rows for the branch.
 
 (Example above: There are 6 rows for this branch.  All 6 have Unicef-Sanders, and the 6 rows correspond to the 6 combinations of leaves noted.  For each row, the secondary fields must then be filled in from the so-called "leaf cache" (i.e., there are other columns of output besides the primary key columns)
 
-Move on to the next branch and proceed with Step 2.
+5) Move on to the next branch and proceed with Step 2.
 
 Note in point 4 an important part of the algorithm: the secondary columns - these require a leaf cache that you might see noted in the source code.
