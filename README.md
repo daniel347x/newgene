@@ -20,7 +20,7 @@ Part 1: Building NewGeneBackEnd.lib in Visual Studio 2017
 
 8) In Visual Studio open NewGeneBackEnd.sln (located in newgene/NewGeneBackEnd).
 
-9) Set the mode you wish to build from the top menu: either Debug or Release.
+9) Set the mode you wish to build from the top menu (most likely Release).
 
 10) Click "Build -> Build Solution". This will build the file NewGeneBackEnd.lib.
 
@@ -52,7 +52,7 @@ Part 3: Building NewGeneSetup.exe in DeployMaster
 
 ## Build Instructions for Mac
 
-Note: I wrote these instructions significantly after the last time I actually built NewGene on Mac. As such, they are less detailed than the Windows instructions and may be missing one or two steps. Please feel free to update this README with more details.
+NOTE: NewGene was built using Xcode 7, and cannot be built using newer versions of Xcode without tightening up the code to meet the standards of more modern compilers. Unfortunately, Xcode 7 does not work on newer versions of macOS (after 10.13 I believe). Therefore, the only way to build NewGene for Mac if you have the most up-to-date macOS would be to use a cloud hosting service such as MacStadium, or update the code to be compliant with newer versions of Xcode.
 
 1) Download Boost directory, as done for the Windows build. Don't forget to replace the three appropriate C++ header files with the corresponding files from newgene/NewGeneBackEnd/Boost_Pool 
 
@@ -61,23 +61,21 @@ Note: I wrote these instructions significantly after the last time I actually bu
 - export BOOST_ROOT="local_boost_path"
 - export BOOST_LIB="local_boost_path/stage/lib" #(or whatever local path you have for Boost libraries)
 
-3) Download the latest versions of Xcode and Qt Creator for Mac. Install Xcode with the following compiler:
-
-- Apple LLVM version 7.0.0 (clang-700.0.57.2)
-- Target: x86_64-apple-darwin17.5.0
-- Thread model: posix
+3) Download Xcode 7 and the latest version of Qt Creator for Mac that works on your operating system.
 
 4) Clone this repository on your Mac.
 
 5) Open NewGene.xcodeproj in Xcode.
 
-6) There are a number of hard-coded paths in the build settings that will need to be updated in order for the build to work on your computer. I may be missing some here, but I think there are a few places where you can define "HEADER_SEARCH_PATHS". Anywhere that says "/Users/daniel347x/boost_1_62_0" should be changed to you local Boost directory path.
+6) There are a number of hard-coded paths in the build settings that will need to be updated in order for the build to work on your computer. Anywhere that says "/Users/daniel347x/boost_1_62_0" should be changed to you local Boost directory path.
 
-7) Build the solution in Xcode.
+7) Build the solution in Xcode. Make sure you have configured the settings to build the Release version.
 
-8) Follow the instructions from the Windows portion of this manual to build the final solution in Qt Creator.
+8) Follow the instructions from the Windows portion of this manual to build the final solution in Qt Creator. Note that you may also have to add BOOST_ROOT and BOOST_LIB to the "Bulid Environment" (or "System Environment") portion of the project settings. The value for these variables should be the same as what was added to the bash_profile. Also make sure to build the Release version.
 
-9) Run the macinstaller.sh script from the command line in order to build the NewGene installer for Mac. Note that there are a number of hard-coded paths in this script which you will have to change appropriately. Also, this script uses the command line tools "pkgbuild" and "productbuild". I believe that these command line tools are installed automatically with Xcode.
+9) Navigate in Finder to the new build of NewGene.app, right-click on it and click "Show Package Contents". Now, download and install the latest version of NewGene from newgenesoftware.org and do the same. You will notice that the application that you built will be missing a number of dylibs and Frameworks from Qt. By navigating to the Qt directory on your computer, you will find these dylibs and Frameworks, which you should copy & paste into the package in the same manner that they are included in the build from the application of NewGene that you downloaded.
+
+10) Run the macinstaller.sh script from the command line in order to build the NewGene installer for Mac. Note that there are a number of hard-coded paths in this script which you will have to change appropriately. Also, this script uses the command line tools "pkgbuild" and "productbuild", which are installed automatically with Xcode.
 
 ## Rundown on Interaction between Backend and UI in NewGene
 
