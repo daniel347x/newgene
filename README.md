@@ -8,9 +8,10 @@ Part 1: Building NewGeneBackEnd.lib in Visual Studio 2017
 
 2) Download the Boost libraries from this web site: https://www.boost.org/users/download/. The boost_1_67_0.zip file should work.
 
-3) Right click the zip file and click "Extract All". Note that it may take awhile for all of the files to be extracted.
+3) Right click the zip file and click "Extract All". Note that it may take awhile for all of the files to be extracted. Make sure that the file path that these are extracted into does not have spaces (ex. of good file path: C:/NewGene/...).
 
 4) Follow the instructions to build the full set of Boost libraries from this web site: https://www.boost.org/doc/libs/1_67_0/more/getting_started/windows.html. Section 5.1 should be sufficient. Note: the Boost libraries are buggy. It is possible that a file may be missing. If this is the case, you can try manually adding that file to the folder, re-downloading the most up-to-date version of Boost, or downloading the previous version of Boost.
+  i. Check that the built Boost libraries have vc-141 in their names. You may need to uninstall later versions of Visual Studio.
 
 5) Add the following environment variables to your Operating System (in Windows 10 go to Control Panel -> System and Security -> System -> Advanced System Settings -> Environment Variables): BOOST_ROOT and BOOST_LIB_MSVC12_X86. BOOST_ROOT should be set to the root Boost directory, and BOOST_LIB_MSVC12_X86 should be set to the directory containing the built Boost libraries.
 
@@ -42,7 +43,7 @@ Part 2: Building NewGene.exe in Qt Creator
 
 Part 3: Building NewGeneSetup.exe in DeployMaster
 
-1) In order to build a Windows installer in the same fashion as is currently available on www.newgenesoftware.org, DeployMaster will be necessary. This software can be downloaded from www.deploymaster.com.
+1) In order to build a Windows installer in the same fashion as is currently available on www.newgenesoftware.org, DeployMaster will be necessary. This software can be downloaded from www.deploymaster.com. Note: the DeployMaster manual (https://www.deploymaster.com/manual/DeployMaster.pdf pg. 45-48) is very useful. You may need to download NewGene from the website to know which folders in the Files tab on DeployMaster the files should go.
 
 2) As a template, the NewGene.deploy file that I used to build the latest version of NewGene is located in the root of this repository. However, it will need to be modified to each user's individual paths.
 
